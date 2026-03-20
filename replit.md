@@ -1,96 +1,67 @@
-# Workspace
+# Westcars — Ghana's Car Marketplace
 
 ## Overview
+A full-featured React Native / Expo mobile app called **Westcars** — Ghana's trusted car marketplace. Built with Expo Router for navigation.
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+## Artifacts
 
-## Stack
+### westcars (Mobile App)
+- **Kind**: Expo / React Native
+- **Dir**: `artifacts/westcars`
+- **Preview**: Mobile Expo app
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+### api-server (Backend)
+- **Kind**: Express API server
+- **Dir**: `artifacts/api-server`
+- **Port**: 8080
 
-## Structure
+## Features
+- Car listings with Ghana Cedis (GHS/₵) pricing
+- Comfort, ergonomics, performance, safety, reliability rating bars
+- Auto-rotating ad carousel (3 sponsored ads)
+- Sponsored listings in the feed
+- Sell car screen with image upload (expo-image-picker)
+- Real-time-simulated messaging with auto-reply
+- User profiles with verified badges
+- Search/filter by brand, location, fuel type, transmission, condition, price range
+- Ghana-specific data: 20 cities, 28 brands, mobile money payment methods
+- Category chips: All, SUVs, Sedans, Tokunbo, Budget, Luxury, Pickups, Buses
 
-```text
-artifacts-monorepo/
-├── artifacts/              # Deployable applications
-│   └── api-server/         # Express API server
-├── lib/                    # Shared libraries
-│   ├── api-spec/           # OpenAPI spec + Orval codegen config
-│   ├── api-client-react/   # Generated React Query hooks
-│   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   └── db/                 # Drizzle ORM schema + DB connection
-├── scripts/                # Utility scripts (single workspace package)
-│   └── src/                # Individual .ts scripts, run via `pnpm --filter @workspace/scripts run <script>`
-├── pnpm-workspace.yaml     # pnpm workspace (artifacts/*, lib/*, lib/integrations/*, scripts)
-├── tsconfig.base.json      # Shared TS options (composite, bundler resolution, es2022)
-├── tsconfig.json           # Root TS project references
-└── package.json            # Root package with hoisted devDeps
-```
+## Screens
+1. **Splash** — animated logo with Ghana city rotation → navigates to Login after 3.2s
+2. **Login / Signup** — simulated auth with AsyncStorage persistence
+3. **Home (tab)** — greeting header, search bar, categories, ad carousel, 2-column car grid
+4. **Search (tab)** — live search + filter modal (brand, location, fuel, transmission, condition, price)
+5. **Sell (tab)** — photo upload, picker dropdowns for specs, price entry → adds to listings
+6. **Messages (tab)** — conversation list with unread badges
+7. **Profile (tab)** — listings/saved/settings tabs, stats, verification center
+8. **Car Detail** — image carousel, full specs, rating bars, seller card, payment methods, related cars, Call/WhatsApp/Message CTAs
+9. **Conversation** — chat bubbles, auto-reply simulation, car reference banner
+10. **User Profile** — seller's listings, follow button, stats
 
-## TypeScript & Composite Projects
+## Tech Stack
+- Expo 54 + Expo Router 6
+- React Native 0.81
+- TypeScript
+- Inter font (400/500/600/700) via @expo-google-fonts/inter
+- expo-linear-gradient, expo-blur, expo-image-picker, expo-symbols
+- @expo/vector-icons (Feather)
+- AsyncStorage for auth/favorites persistence
+- react-native-safe-area-context
+- react-native-keyboard-controller
+- @tanstack/react-query
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references. This means:
+## Theme
+- Primary: #FF6B00 (orange)
+- Charcoal dark backgrounds
+- Inter font family throughout
+- Ghana flag colors influence branding
 
-- **Always typecheck from the root** — run `pnpm run typecheck` (which runs `tsc --build --emitDeclarationOnly`). This builds the full dependency graph so that cross-package imports resolve correctly. Running `tsc` inside a single package will fail if its dependencies haven't been built yet.
-- **`emitDeclarationOnly`** — we only emit `.d.ts` files during typecheck; actual JS bundling is handled by esbuild/tsx/vite...etc, not `tsc`.
-- **Project references** — when package A depends on package B, A's `tsconfig.json` must list B in its `references` array. `tsc --build` uses this to determine build order and skip up-to-date packages.
-
-## Root Scripts
-
-- `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
-
-## Packages
-
-### `artifacts/api-server` (`@workspace/api-server`)
-
-Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` for request and response validation and `@workspace/db` for persistence.
-
-- Entry: `src/index.ts` — reads `PORT`, starts Express
-- App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
-- Depends on: `@workspace/db`, `@workspace/api-zod`
-- `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
-- Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
-
-### `lib/db` (`@workspace/db`)
-
-Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client instance and schema models.
-
-- `src/index.ts` — creates a `Pool` + Drizzle instance, exports schema
-- `src/schema/index.ts` — barrel re-export of all models
-- `src/schema/<modelname>.ts` — table definitions with `drizzle-zod` insert schemas (no models definitions exist right now)
-- `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
-- Exports: `.` (pool, db, schema), `./schema` (schema only)
-
-Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
-
-### `lib/api-spec` (`@workspace/api-spec`)
-
-Owns the OpenAPI 3.1 spec (`openapi.yaml`) and the Orval config (`orval.config.ts`). Running codegen produces output into two sibling packages:
-
-1. `lib/api-client-react/src/generated/` — React Query hooks + fetch client
-2. `lib/api-zod/src/generated/` — Zod schemas
-
-Run codegen: `pnpm --filter @workspace/api-spec run codegen`
-
-### `lib/api-zod` (`@workspace/api-zod`)
-
-Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used by `api-server` for response validation.
-
-### `lib/api-client-react` (`@workspace/api-client-react`)
-
-Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
-
-### `scripts` (`@workspace/scripts`)
-
-Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+## Key Files
+- `artifacts/westcars/app/_layout.tsx` — root layout with AppProvider, font loading
+- `artifacts/westcars/app/(tabs)/_layout.tsx` — tab navigation (BlurView on iOS)
+- `artifacts/westcars/context/AppContext.tsx` — global state, auth, favorites, messages
+- `artifacts/westcars/constants/colors.ts` — theme colors
+- `artifacts/westcars/utils/ghanaData.ts` — Ghana cities, brands, formatPrice()
+- `artifacts/westcars/utils/mockData.ts` — 8 mock cars, 3 users, 3 ads, 2 conversations
+- `artifacts/westcars/types/index.ts` — TypeScript interfaces

@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/"
+title = "Westcars - Ghana Car Marketplace"
+version = "1.0.0"
+id = "artifacts/westcars"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/" ]
+localPort = 22494
+
+[services.development]
+run = "pnpm --filter @workspace/westcars run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/westcars", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/westcars", "run", "serve" ]
+
+[services.env]
+PORT = "22494"
+BASE_PATH = "/"

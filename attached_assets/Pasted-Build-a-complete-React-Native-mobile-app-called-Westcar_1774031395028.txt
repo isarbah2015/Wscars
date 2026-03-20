@@ -1,0 +1,119 @@
+Build a complete React Native mobile app called "Westcars" – a car marketplace for Ghana, similar to auto.ru. All features must be fully functional. Use Firebase for backend (Authentication, Firestore, Storage). Modern UI with orange (#FF6B00) and white, plus attractive accents.
+
+---
+
+### 1. Splash Screen & Logo
+- Animated splash screen with fade + scale effect. Gradient: #FF6B00 to #FF8C42.
+- Custom car‑themed logo + "Westcars" and tagline: "Ghana's Trusted Car Marketplace".
+- Rotating list of Ghana cities at bottom.
+- After 3 seconds, navigate to authentication.
+
+### 2. Authentication (Firebase)
+- Sign up / login with Ghana phone number (+233) and password, or email.
+- Use Firebase Authentication (Email/Password + Phone). Provide `src/services/firebase.js` with placeholder config.
+- "Forgot Password" flow.
+
+### 3. User Verification & Badges
+- In‑app verification process accessible from profile:
+  - Verify phone (SMS code).
+  - Upload government ID + selfie (simulate admin review).
+- After approval, user receives a **"Verified Seller" badge** displayed on their profile and next to their name on car listings.
+
+### 4. Currency & Payments
+- All prices in **Ghana Cedis (GHS)**.
+- Payment options shown on car detail: Mobile Money (MTN, Vodafone, AirtelTigo), Bank Transfer, Cash.
+
+### 5. Home Screen (with Advertising)
+- Top search bar.
+- Horizontal category chips (SUVs, Sedans, Tokunbo, Budget, etc.).
+- **Advertising carousel** (3 banners).
+- **2‑Grid Car Listings** – each card shows:
+  - Car image.
+  - Brand + model, price (GHS), location, condition badge.
+  - Verified badge (if seller verified).
+  - Favorite icon.
+  - **Rating section at the bottom** (cool UI): display overall rating as stars (1‑5) plus small icons for comfort, ergonomics, performance, and safety. Use mini progress bars or icons to show scores (e.g., "Comfort ★★★★☆", "Ergonomics ★★★★☆", etc.) in a compact, attractive row.
+- Interstitial ads: every 4th listing is a sponsored card.
+- Bottom banner ad.
+
+### 6. Search Screen (with Filters)
+- Text search.
+- Filters: brand, price range (GHS), location (Ghana cities), fuel type, transmission, year.
+- Results in 2‑grid with same rating display on each card.
+
+### 7. Car Detail Screen
+- Image carousel.
+- Price (GHS) and details (year, mileage, fuel, transmission, condition).
+- **Seller Profile Card** with name, photo, member since, rating, verification badge, and "View Profile".
+- Contact buttons: Call, WhatsApp, In‑app Message.
+- **Ratings section** with detailed breakdown:
+  - Overall rating (stars) from buyers.
+  - Individual ratings: Comfort, Ergonomics, Performance, Safety, Reliability – each displayed as star rating or a horizontal bar with icon + label.
+  - Option for logged‑in users to leave a rating (after purchase/interaction).
+- "Save to Favorites".
+- Related sponsored cars (horizontal scroll).
+- Payment methods icons (Mobile Money, Bank, Cash).
+
+### 8. Seller / User Profiles
+- Profile screen for any user:
+  - Avatar, name, phone, location, member since, verification badge.
+  - Rating (stars) and total reviews.
+  - List of other cars by seller (2‑grid) – each card includes ratings summary.
+  - Follow / message buttons.
+- Own profile: edit, start verification, statistics.
+
+### 9. User Profile (logged‑in)
+- Avatar, name, phone, location, member since, verification status.
+- Verification Center button to start ID/phone verification.
+- Tabs: "My Listings", "Saved Cars", "Settings".
+- Settings: notifications, dark mode, default location, currency (GHS), language.
+- Logout.
+
+### 10. Sell Car Screen
+- Image upload (up to 10 photos).
+- Form: brand (picker), model, year, mileage, price, location, fuel type, transmission, condition, description, contact name, phone.
+- Optional: feature listing.
+- Submit stores in Firestore + Storage.
+
+### 11. Favorites Screen
+- List saved cars (2‑grid) with rating display on each card.
+- Remove from favorites.
+
+### 12. Messaging System
+- List of conversations.
+- Chat screen (text messages, timestamps) – store in Firestore.
+
+### 13. Ratings System (Detailed)
+- Ratings are stored per car and per seller.
+- Each rating includes: overall (1‑5), plus sub‑ratings for Comfort, Ergonomics, Performance, Safety, Reliability.
+- Display on car card: overall stars + small icons with scores (e.g., comfort: 4.2).
+- On detail screen: full breakdown with nice UI (e.g., horizontal bar for each category).
+- Only users who have interacted (e.g., messaged the seller or purchased) can leave a rating – simulate this by checking if there’s a chat or a "purchased" flag in the database.
+
+### 14. Advertising (Everywhere)
+- Home: carousel banner + bottom banner.
+- Search results: sponsored cards every 4 listings.
+- Car detail: related sponsored cars.
+- All ad data mock but structured for Firestore.
+
+### 15. Data & Utilities
+- Provide `src/utils/ghanaData.js` with:
+  - GHANA_CITIES, CAR_BRANDS, FUEL_TYPES, TRANSMISSIONS, CONDITIONS, CURRENCY = "GHS", COUNTRY_CODE = "+233".
+- Provide `src/services/firebase.js` with placeholder config.
+
+### 16. Technical Requirements
+- Expo (React Native), React Navigation (bottom tabs + stack).
+- Use react-native-vector-icons, expo-image-picker, expo-linear-gradient, AsyncStorage.
+- All screens responsive for iOS/Android.
+
+### 17. Project Structure
+- `src/screens/` – all screens.
+- `src/components/` – reusable components (CarCard, AdBanner, RatingStars, etc.).
+- `src/services/` – firebase.js, api.js.
+- `src/utils/` – ghanaData.js, helpers.js.
+- `src/assets/` – images, logo.
+
+**Deliverable:**
+Provide the complete code for every file needed to run the app. After replacing Firebase config, `npm start` must launch a fully functional app with all features, including the car ratings displayed on listings and detail pages. The UI should be modern, clean, and incorporate the cool rating design.
+
+Make the code well‑commented and production‑ready.
