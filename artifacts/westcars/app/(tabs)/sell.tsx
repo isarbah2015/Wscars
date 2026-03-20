@@ -111,7 +111,7 @@ export default function SellScreen() {
           onPress={() => router.push("/auth/login")}
         >
           <LinearGradient
-            colors={["#FF6B00", "#FF8C42"]}
+            colors={["#00873E", "#00A64C"]}
             style={styles.authBtnGradient}
           >
             <Text style={styles.authBtnText}>Sign In</Text>
@@ -351,7 +351,7 @@ export default function SellScreen() {
           disabled={submitting}
         >
           <LinearGradient
-            colors={["#FF6B00", "#FF8C42"]}
+            colors={["#00873E", "#00A64C"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.submitGradient}

@@ -17,22 +17,23 @@ import {
   ViewToken,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { RatingBar } from "@/components/RatingBar";
-import { RatingStars } from "@/components/RatingStars";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
-import { formatMileage, formatPrice, PAYMENT_METHODS, RATING_CATEGORIES } from "@/utils/ghanaData";
+import { formatMileage, formatPrice } from "@/utils/ghanaData";
 
 const { width } = Dimensions.get("window");
 
+function formatViews(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+}
+
 export default function CarDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { cars, toggleFavorite, isFavorite, startConversation, isAuthenticated, currentUser } = useApp();
+  const { cars, toggleFavorite, isFavorite, startConversation, isAuthenticated } = useApp();
   const insets = useSafeAreaInsets();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [showRating, setShowRating] = useState(false);
-  const [ratingSubmitted, setRatingSubmitted] = useState(false);
 
   const car = cars.find((c) => c.id === id);
   if (!car) {
@@ -71,32 +72,40 @@ export default function CarDetailScreen() {
 
   const handleCall = () => {
     const phone = car.seller?.phone || "+233000000000";
-    Linking.openURL(`tel:${phone.replace(/\s/g, "")}`);
-  };
-
-  const handleWhatsApp = () => {
-    const phone = car.seller?.phone?.replace(/[\s+]/g, "") || "233000000000";
-    Linking.openURL(
-      `whatsapp://send?phone=${phone}&text=Hello, I'm interested in your ${car.brand} ${car.model} listed on Westcars.`
+    Linking.openURL(`tel:${phone.replace(/\s/g, "")}`).catch(() =>
+      Alert.alert("Could not open phone dialler.")
     );
   };
 
-  const relatedCars = cars.filter(
-    (c) => c.id !== car.id && (c.brand === car.brand || c.category === car.category)
-  ).slice(0, 4);
+  const handleWhatsApp = () => {
+    const raw = car.seller?.phone?.replace(/[\s+\-()]/g, "") || "233000000000";
+    const phone = raw.startsWith("0") ? "233" + raw.slice(1) : raw;
+    const msg = encodeURIComponent(
+      `Hi ${car.seller?.name || "there"}, I'm interested in your ${car.year} ${car.brand} ${car.model} listed on Westcars. Is it still available?`
+    );
+    Linking.openURL(`whatsapp://send?phone=${phone}&text=${msg}`).catch(() =>
+      Linking.openURL(`https://wa.me/${phone}?text=${msg}`)
+    );
+  };
 
-  const ratingItems = RATING_CATEGORIES.map((cat) => ({
-    ...cat,
-    value: (car.rating as any)[cat.id] || 0,
-  }));
+  const relatedCars = cars
+    .filter((c) => c.id !== car.id && (c.brand === car.brand || c.category === car.category))
+    .slice(0, 4);
+
+  const specItems = [
+    { icon: "calendar", label: "Year", value: String(car.year) },
+    { icon: "activity", label: "Mileage", value: formatMileage(car.mileage) },
+    { icon: "zap", label: "Fuel", value: car.fuelType },
+    { icon: "settings", label: "Gearbox", value: car.transmission },
+    { icon: "shield", label: "Condition", value: car.condition },
+    { icon: "map-pin", label: "Location", value: car.location },
+  ];
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="automatic"
-      >
-        {/* Image Carousel */}
+      <ScrollView showsVerticalScrollIndicator={false} contentInsetAdjustmentBehavior="automatic">
+
+        {/* ── Image Carousel ── */}
         <View style={styles.carousel}>
           <FlatList
             data={car.images}
@@ -111,198 +120,168 @@ export default function CarDetailScreen() {
             )}
           />
 
-          {/* Back button */}
+          {/* Floating back */}
           <Pressable
-            style={[styles.backBtn, { top: (insets.top || (Platform.OS === "web" ? 67 : 0)) + 12 }]}
+            style={[
+              styles.floatBtn,
+              { top: (insets.top || (Platform.OS === "web" ? 67 : 0)) + 12, left: 14 },
+            ]}
             onPress={() => router.back()}
           >
-            <Feather name="arrow-left" size={20} color="#fff" />
+            <Feather name="arrow-left" size={19} color="#fff" />
           </Pressable>
 
-          {/* Favorite */}
+          {/* Floating favourite */}
           <Pressable
-            style={[styles.favBtn, { top: (insets.top || (Platform.OS === "web" ? 67 : 0)) + 12 }]}
+            style={[
+              styles.floatBtn,
+              { top: (insets.top || (Platform.OS === "web" ? 67 : 0)) + 12, right: 14 },
+              fav && styles.floatBtnFav,
+            ]}
             onPress={() => toggleFavorite(car.id)}
           >
-            <Feather
-              name="heart"
-              size={20}
-              color={fav ? Colors.danger : "#fff"}
-            />
+            <Feather name="heart" size={19} color={fav ? "#FF4444" : "#fff"} />
           </Pressable>
+
+          {/* Image counter */}
+          <View style={styles.imgCounter}>
+            <Feather name="image" size={11} color="rgba(255,255,255,0.9)" />
+            <Text style={styles.imgCounterText}>
+              {activeImageIndex + 1} / {car.images.length}
+            </Text>
+          </View>
 
           {/* Dots */}
           {car.images.length > 1 && (
-            <View style={styles.imageDots}>
+            <View style={styles.dots}>
               {car.images.map((_, i) => (
                 <View
                   key={i}
-                  style={[styles.imageDot, i === activeImageIndex && styles.imageDotActive]}
+                  style={[styles.dot, i === activeImageIndex && styles.dotActive]}
                 />
               ))}
             </View>
           )}
-
-          {/* Image count */}
-          <View style={styles.imageCount}>
-            <Feather name="image" size={12} color="#fff" />
-            <Text style={styles.imageCountText}>
-              {activeImageIndex + 1}/{car.images.length}
-            </Text>
-          </View>
         </View>
 
-        {/* Main Info */}
-        <View style={styles.mainInfo}>
+        {/* ── Main Info Card ── */}
+        <View style={styles.mainCard}>
           <View style={styles.titleRow}>
             <View style={{ flex: 1 }}>
               <Text style={styles.carTitle}>
-                {car.brand} {car.model}
+                {car.year} {car.brand} {car.model}
               </Text>
               <View style={styles.metaRow}>
-                <Text style={styles.meta}>{car.year}</Text>
-                <View style={styles.dot} />
-                <Text style={styles.meta}>{formatMileage(car.mileage)}</Text>
-                <View style={styles.dot} />
-                <Feather name="map-pin" size={11} color={Colors.light.textTertiary} />
-                <Text style={styles.meta}>{car.location}</Text>
+                <View
+                  style={[
+                    styles.conditionTag,
+                    {
+                      backgroundColor:
+                        car.condition === "Foreign Used"
+                          ? "#1D4ED820"
+                          : car.condition === "New"
+                          ? "#00873E20"
+                          : "#6D28D920",
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.conditionTagText,
+                      {
+                        color:
+                          car.condition === "Foreign Used"
+                            ? "#1D4ED8"
+                            : car.condition === "New"
+                            ? "#00873E"
+                            : "#6D28D9",
+                      },
+                    ]}
+                  >
+                    {car.condition}
+                  </Text>
+                </View>
+                <View style={styles.viewsChip}>
+                  <Feather name="eye" size={11} color={Colors.light.textTertiary} />
+                  <Text style={styles.viewsChipText}>{formatViews(car.views || 0)} views</Text>
+                </View>
               </View>
             </View>
-            <View style={[styles.conditionTag, car.condition === "New" ? styles.tagNew : styles.tagUsed]}>
-              <Text style={styles.conditionTagText}>{car.condition}</Text>
-            </View>
+            {car.isSponsored && (
+              <View style={styles.featuredPill}>
+                <Feather name="zap" size={12} color="#D97706" />
+                <Text style={styles.featuredText}>Featured</Text>
+              </View>
+            )}
           </View>
 
           <Text style={styles.price}>{formatPrice(car.price)}</Text>
-
-          {/* Quick specs */}
-          <View style={styles.specsGrid}>
-            <SpecItem icon="zap" label="Fuel" value={car.fuelType} />
-            <SpecItem icon="settings" label="Trans." value={car.transmission} />
-            <SpecItem icon="activity" label="Mileage" value={`${(car.mileage / 1000).toFixed(0)}k km`} />
-            <SpecItem icon="calendar" label="Year" value={String(car.year)} />
-          </View>
         </View>
 
-        {/* Rating Section */}
+        {/* ── Specs Grid ── */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Ratings</Text>
-            <View style={styles.overallRating}>
-              <RatingStars rating={car.rating.overall} size={14} />
-              <Text style={styles.ratingNum}>{car.rating.overall.toFixed(1)}</Text>
-              <Text style={styles.ratingCount}>({car.rating.totalRatings} reviews)</Text>
-            </View>
+          <Text style={styles.sectionTitle}>Specifications</Text>
+          <View style={styles.specsGrid}>
+            {specItems.map((s) => (
+              <View key={s.label} style={styles.specCell}>
+                <View style={styles.specIconWrap}>
+                  <Feather name={s.icon as any} size={16} color={Colors.primary} />
+                </View>
+                <Text style={styles.specLabel}>{s.label}</Text>
+                <Text style={styles.specValue}>{s.value}</Text>
+              </View>
+            ))}
           </View>
-          {ratingItems.map((r) => (
-            <RatingBar
-              key={r.id}
-              label={r.label}
-              icon={r.icon}
-              value={r.value}
-            />
-          ))}
-
-          {/* Rate this car */}
-          {isAuthenticated && !ratingSubmitted && (
-            <Pressable
-              style={styles.rateBtn}
-              onPress={() => {
-                Alert.alert(
-                  "Rate This Car",
-                  "How would you rate this car? (After purchase/interaction)",
-                  [
-                    {
-                      text: "Leave Rating",
-                      onPress: () => {
-                        setRatingSubmitted(true);
-                        Alert.alert("Thank you!", "Your rating has been submitted.");
-                      },
-                    },
-                    { text: "Cancel", style: "cancel" },
-                  ]
-                );
-              }}
-            >
-              <Feather name="star" size={16} color={Colors.star} />
-              <Text style={styles.rateBtnText}>Leave a Rating</Text>
-            </Pressable>
-          )}
-          {ratingSubmitted && (
-            <View style={styles.ratedBadge}>
-              <Feather name="check-circle" size={14} color={Colors.verified} />
-              <Text style={styles.ratedText}>Rating submitted</Text>
-            </View>
-          )}
         </View>
 
-        {/* Description */}
+        {/* ── Description ── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Description</Text>
           <Text style={styles.description}>{car.description}</Text>
         </View>
 
-        {/* Seller Card */}
+        {/* ── Seller Card ── */}
         {car.seller && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Seller</Text>
+            <Text style={styles.sectionTitle}>Seller Information</Text>
             <Pressable
               style={styles.sellerCard}
               onPress={() =>
-                router.push({
-                  pathname: "/user/[id]",
-                  params: { id: car.seller!.id },
-                })
+                router.push({ pathname: "/user/[id]", params: { id: car.seller!.id } })
               }
             >
-              {car.seller.avatar ? (
-                <Image source={{ uri: car.seller.avatar }} style={styles.sellerAvatar} />
-              ) : (
-                <View style={styles.sellerAvatarPlaceholder}>
-                  <Feather name="user" size={24} color={Colors.light.textTertiary} />
-                </View>
-              )}
+              <View style={styles.sellerLeft}>
+                {car.seller.avatar ? (
+                  <Image source={{ uri: car.seller.avatar }} style={styles.sellerAvatar} />
+                ) : (
+                  <View style={styles.sellerAvatarFallback}>
+                    <Feather name="user" size={22} color={Colors.light.textTertiary} />
+                  </View>
+                )}
+                <View style={styles.sellerOnlineDot} />
+              </View>
               <View style={{ flex: 1 }}>
                 <View style={styles.sellerNameRow}>
                   <Text style={styles.sellerName}>{car.seller.name}</Text>
                   {car.seller.isVerified && <VerifiedBadge size="small" />}
                 </View>
-                <View style={styles.sellerMeta}>
+                <View style={styles.sellerMetaRow}>
                   <Feather name="map-pin" size={11} color={Colors.light.textTertiary} />
                   <Text style={styles.sellerMetaText}>{car.seller.location}</Text>
-                  <View style={styles.dot} />
+                  <Text style={styles.sellerMetaDot}>·</Text>
                   <Feather name="calendar" size={11} color={Colors.light.textTertiary} />
                   <Text style={styles.sellerMetaText}>
                     Since {car.seller.memberSince.slice(0, 7)}
                   </Text>
                 </View>
-                <View style={styles.sellerRating}>
-                  <RatingStars rating={car.seller.rating} size={11} />
-                  <Text style={styles.sellerRatingNum}>{car.seller.rating.toFixed(1)}</Text>
-                  <Text style={styles.sellerRatingCount}>
-                    ({car.seller.totalReviews} reviews)
-                  </Text>
-                </View>
+                <Text style={styles.sellerPhone}>{car.seller.phone}</Text>
               </View>
               <Feather name="chevron-right" size={18} color={Colors.light.textTertiary} />
             </Pressable>
           </View>
         )}
 
-        {/* Payment Methods */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Payment Methods</Text>
-          <View style={styles.paymentGrid}>
-            {PAYMENT_METHODS.map((pm) => (
-              <View key={pm.id} style={styles.paymentItem}>
-                <Feather name={pm.icon as any} size={18} color={Colors.primary} />
-                <Text style={styles.paymentLabel}>{pm.label}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Related Cars */}
+        {/* ── Related Cars ── */}
         {relatedCars.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Similar Cars</Text>
@@ -316,17 +295,24 @@ export default function CarDetailScreen() {
                       router.push({ pathname: "/car/[id]", params: { id: rc.id } })
                     }
                   >
-                    <Image source={{ uri: rc.images[0] }} style={styles.relatedImage} />
+                    <Image
+                      source={{ uri: rc.images[0] }}
+                      style={styles.relatedImage}
+                      resizeMode="cover"
+                    />
+                    {rc.isSponsored && (
+                      <View style={styles.relatedFeaturedBadge}>
+                        <Text style={styles.relatedFeaturedText}>Featured</Text>
+                      </View>
+                    )}
                     <View style={styles.relatedInfo}>
                       <Text style={styles.relatedTitle} numberOfLines={1}>
-                        {rc.brand} {rc.model}
+                        {rc.year} {rc.brand} {rc.model}
                       </Text>
                       <Text style={styles.relatedPrice}>{formatPrice(rc.price)}</Text>
-                      {rc.isSponsored && (
-                        <View style={styles.sponsoredTag}>
-                          <Text style={styles.sponsoredTagText}>Sponsored</Text>
-                        </View>
-                      )}
+                      <Text style={styles.relatedKm}>
+                        {(rc.mileage / 1000).toFixed(0)}k km · {rc.location}
+                      </Text>
                     </View>
                   </Pressable>
                 ))}
@@ -335,35 +321,59 @@ export default function CarDetailScreen() {
           </View>
         )}
 
-        <View style={{ height: 120 + insets.bottom }} />
+        <View style={{ height: 130 + insets.bottom }} />
       </ScrollView>
 
-      {/* Action Bar */}
+      {/* ── Professional Action Bar ── */}
       <View
         style={[
           styles.actionBar,
-          {
-            paddingBottom: insets.bottom || (Platform.OS === "web" ? 34 : 16),
-          },
+          { paddingBottom: insets.bottom || (Platform.OS === "web" ? 28 : 16) },
         ]}
       >
-        <Pressable style={styles.callBtn} onPress={handleCall}>
-          <Feather name="phone" size={20} color={Colors.primary} />
-          <Text style={styles.callBtnText}>Call</Text>
+        {/* Call Button */}
+        <Pressable
+          style={({ pressed }) => [styles.callBtn, pressed && { opacity: 0.85 }]}
+          onPress={handleCall}
+        >
+          <View style={styles.callBtnIconWrap}>
+            <Feather name="phone" size={20} color="#fff" />
+          </View>
+          <View style={styles.callBtnText}>
+            <Text style={styles.callBtnLabel}>Call Seller</Text>
+            <Text style={styles.callBtnPhone} numberOfLines={1}>
+              {car.seller?.phone || "N/A"}
+            </Text>
+          </View>
         </Pressable>
-        <Pressable style={styles.whatsappBtn} onPress={handleWhatsApp}>
-          <Feather name="message-circle" size={20} color="#25D366" />
-          <Text style={styles.whatsappBtnText}>WhatsApp</Text>
+
+        {/* Divider */}
+        <View style={styles.actionDivider} />
+
+        {/* WhatsApp Button */}
+        <Pressable
+          style={({ pressed }) => [styles.whatsappBtn, pressed && { opacity: 0.85 }]}
+          onPress={handleWhatsApp}
+        >
+          <View style={styles.waIconWrap}>
+            <Feather name="message-circle" size={20} color="#fff" />
+          </View>
+          <Text style={styles.waBtnText}>WhatsApp</Text>
         </Pressable>
-        <Pressable style={styles.messageBtn} onPress={handleMessage}>
+
+        {/* Message Button */}
+        <Pressable
+          style={({ pressed }) => [styles.msgBtn, pressed && { opacity: 0.85 }]}
+          onPress={handleMessage}
+        >
           <LinearGradient
-            colors={["#FF6B00", "#FF8C42"]}
+            colors={["#005F2B", "#00873E"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
-            style={styles.messageBtnGradient}
+            style={styles.msgBtnGradient}
           >
-            <Feather name="mail" size={20} color="#fff" />
-            <Text style={styles.messageBtnText}>Message</Text>
+            <Feather name="mail" size={18} color="#fff" />
+            <Text style={styles.msgBtnText}>Message</Text>
           </LinearGradient>
         </Pressable>
       </View>
@@ -371,224 +381,145 @@ export default function CarDetailScreen() {
   );
 }
 
-function SpecItem({ icon, label, value }: { icon: string; label: string; value: string }) {
-  return (
-    <View style={specStyles.item}>
-      <Feather name={icon as any} size={18} color={Colors.primary} />
-      <Text style={specStyles.label}>{label}</Text>
-      <Text style={specStyles.value}>{value}</Text>
-    </View>
-  );
-}
-
-const specStyles = StyleSheet.create({
-  item: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 12,
-    gap: 4,
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderRadius: 12,
-  },
-  label: {
-    fontSize: 11,
-    fontFamily: "Inter_400Regular",
-    color: Colors.light.textTertiary,
-  },
-  value: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.light.text,
-  },
-});
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
-  carousel: {
-    height: 280,
-    position: "relative",
-  },
-  carImage: {
-    width,
-    height: 280,
-    resizeMode: "cover",
-  },
-  backBtn: {
+
+  // Carousel
+  carousel: { height: 290, position: "relative" },
+  carImage: { width, height: 290, resizeMode: "cover" },
+  floatBtn: {
     position: "absolute",
-    left: 16,
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: "rgba(0,0,0,0.48)",
     alignItems: "center",
     justifyContent: "center",
   },
-  favBtn: {
-    position: "absolute",
-    right: 16,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  imageDots: {
-    position: "absolute",
-    bottom: 12,
-    alignSelf: "center",
-    flexDirection: "row",
-    gap: 5,
-  },
-  imageDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "rgba(255,255,255,0.5)",
-  },
-  imageDotActive: {
-    backgroundColor: "#fff",
-    width: 16,
-  },
-  imageCount: {
+  floatBtnFav: { backgroundColor: "rgba(0,0,0,0.55)" },
+  imgCounter: {
     position: "absolute",
     bottom: 12,
     right: 12,
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 10,
   },
-  imageCountText: {
-    color: "#fff",
-    fontSize: 11,
-    fontFamily: "Inter_500Medium",
+  imgCounterText: { color: "#fff", fontSize: 12, fontFamily: "Inter_500Medium" },
+  dots: {
+    position: "absolute",
+    bottom: 14,
+    alignSelf: "center",
+    flexDirection: "row",
+    gap: 5,
   },
-  mainInfo: {
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.45)" },
+  dotActive: { backgroundColor: "#fff", width: 18 },
+
+  // Main info card
+  mainCard: {
     padding: 18,
-    gap: 10,
+    paddingBottom: 16,
     borderBottomWidth: 8,
     borderBottomColor: Colors.light.backgroundSecondary,
+    gap: 8,
   },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-  },
+  titleRow: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
   carTitle: {
     fontSize: 22,
     fontFamily: "Inter_700Bold",
     color: Colors.light.text,
+    letterSpacing: -0.4,
   },
-  metaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    flexWrap: "wrap",
-  },
-  meta: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    color: Colors.light.textSecondary,
-  },
-  dot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Colors.light.textTertiary,
-  },
+  metaRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 6 },
   conditionTag: {
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 4,
     borderRadius: 8,
-    marginTop: 2,
   },
-  tagNew: { backgroundColor: Colors.success + "20" },
-  tagUsed: { backgroundColor: Colors.info + "20" },
-  conditionTagText: {
+  conditionTagText: { fontSize: 12, fontFamily: "Inter_700Bold" },
+  viewsChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  viewsChipText: {
     fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.light.text,
+    color: Colors.light.textTertiary,
+    fontFamily: "Inter_400Regular",
   },
+  featuredPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#D9770618",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+  },
+  featuredText: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#D97706" },
   price: {
-    fontSize: 28,
+    fontSize: 30,
     fontFamily: "Inter_700Bold",
     color: Colors.primary,
+    letterSpacing: -0.8,
   },
-  specsGrid: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 4,
-  },
+
+  // Section
   section: {
     padding: 18,
     borderBottomWidth: 8,
     borderBottomColor: Colors.light.backgroundSecondary,
-    gap: 12,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-    gap: 8,
+    gap: 14,
   },
   sectionTitle: {
     fontSize: 17,
     fontFamily: "Inter_700Bold",
     color: Colors.light.text,
+    letterSpacing: -0.2,
   },
-  overallRating: {
+
+  // Specs grid
+  specsGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  specCell: {
+    width: "30%",
+    flex: 1,
     alignItems: "center",
+    paddingVertical: 14,
+    backgroundColor: Colors.light.backgroundSecondary,
+    borderRadius: 14,
     gap: 5,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
   },
-  ratingNum: {
-    fontSize: 14,
-    fontFamily: "Inter_700Bold",
-    color: Colors.light.text,
-  },
-  ratingCount: {
-    fontSize: 12,
-    color: Colors.light.textTertiary,
-    fontFamily: "Inter_400Regular",
-  },
-  rateBtn: {
-    flexDirection: "row",
+  specIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Colors.primary + "14",
     alignItems: "center",
-    gap: 8,
-    backgroundColor: Colors.star + "15",
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 12,
-    alignSelf: "flex-start",
-    marginTop: 4,
+    justifyContent: "center",
   },
-  rateBtnText: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.star,
-  },
-  ratedBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    alignSelf: "flex-start",
-  },
-  ratedText: {
-    fontSize: 13,
-    color: Colors.verified,
-    fontFamily: "Inter_500Medium",
-  },
+  specLabel: { fontSize: 10, fontFamily: "Inter_400Regular", color: Colors.light.textTertiary },
+  specValue: { fontSize: 12, fontFamily: "Inter_700Bold", color: Colors.light.text, textAlign: "center" },
+
+  // Description
   description: {
     fontSize: 14,
     fontFamily: "Inter_400Regular",
     color: Colors.light.textSecondary,
     lineHeight: 22,
   },
+
+  // Seller card
   sellerCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -596,13 +527,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.backgroundSecondary,
     borderRadius: 16,
     padding: 14,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
   },
-  sellerAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-  },
-  sellerAvatarPlaceholder: {
+  sellerLeft: { position: "relative" },
+  sellerAvatar: { width: 56, height: 56, borderRadius: 28 },
+  sellerAvatarFallback: {
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -610,184 +540,137 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  sellerNameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
+  sellerOnlineDot: {
+    position: "absolute",
+    bottom: 2,
+    right: 2,
+    width: 13,
+    height: 13,
+    borderRadius: 7,
+    backgroundColor: Colors.success,
+    borderWidth: 2,
+    borderColor: "#fff",
   },
-  sellerName: {
-    fontSize: 15,
+  sellerNameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  sellerName: { fontSize: 15, fontFamily: "Inter_700Bold", color: Colors.light.text },
+  sellerMetaRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 3 },
+  sellerMetaText: { fontSize: 12, color: Colors.light.textTertiary, fontFamily: "Inter_400Regular" },
+  sellerMetaDot: { fontSize: 12, color: Colors.light.textTertiary },
+  sellerPhone: {
+    fontSize: 13,
     fontFamily: "Inter_600SemiBold",
-    color: Colors.light.text,
-  },
-  sellerMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    marginTop: 2,
-  },
-  sellerMetaText: {
-    fontSize: 12,
-    color: Colors.light.textTertiary,
-    fontFamily: "Inter_400Regular",
-  },
-  sellerRating: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
+    color: Colors.primary,
     marginTop: 4,
   },
-  sellerRatingNum: {
-    fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.light.text,
-  },
-  sellerRatingCount: {
-    fontSize: 11,
-    color: Colors.light.textTertiary,
-    fontFamily: "Inter_400Regular",
-  },
-  paymentGrid: {
-    gap: 10,
-  },
-  paymentItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderRadius: 12,
-  },
-  paymentLabel: {
-    fontSize: 14,
-    fontFamily: "Inter_400Regular",
-    color: Colors.light.text,
-  },
-  relatedRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
+
+  // Related
+  relatedRow: { flexDirection: "row", gap: 12 },
   relatedCard: {
-    width: 160,
+    width: 170,
     borderRadius: 14,
     overflow: "hidden",
     backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.07,
-    shadowRadius: 6,
+    shadowRadius: 8,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
   },
-  relatedImage: {
-    width: "100%",
-    height: 100,
-    resizeMode: "cover",
+  relatedImage: { width: "100%", height: 105 },
+  relatedFeaturedBadge: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    backgroundColor: "rgba(217,119,6,0.88)",
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
-  relatedInfo: {
-    padding: 10,
-    gap: 2,
-  },
-  relatedTitle: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.light.text,
-  },
-  relatedPrice: {
-    fontSize: 13,
-    fontFamily: "Inter_700Bold",
-    color: Colors.primary,
-  },
-  sponsoredTag: {
-    backgroundColor: Colors.primary + "15",
-    alignSelf: "flex-start",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    marginTop: 2,
-  },
-  sponsoredTagText: {
-    fontSize: 10,
-    color: Colors.primary,
-    fontFamily: "Inter_500Medium",
-  },
+  relatedFeaturedText: { fontSize: 9, color: "#fff", fontFamily: "Inter_700Bold" },
+  relatedInfo: { padding: 10, gap: 3 },
+  relatedTitle: { fontSize: 13, fontFamily: "Inter_700Bold", color: Colors.light.text },
+  relatedPrice: { fontSize: 14, fontFamily: "Inter_700Bold", color: Colors.primary },
+  relatedKm: { fontSize: 11, color: Colors.light.textTertiary, fontFamily: "Inter_400Regular" },
+
+  // Action bar
   actionBar: {
     flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 16,
+    alignItems: "center",
+    gap: 0,
+    paddingHorizontal: 14,
     paddingTop: 12,
     backgroundColor: "#fff",
     borderTopWidth: 1,
     borderTopColor: Colors.light.border,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -3 },
+    shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 10,
+    shadowRadius: 12,
+    elevation: 14,
   },
   callBtn: {
-    flex: 1,
+    flex: 1.6,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 13,
+    gap: 10,
+    backgroundColor: Colors.light.backgroundSecondary,
     borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
   },
-  callBtnText: {
-    fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.primary,
+  callBtnIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#00873E",
+    alignItems: "center",
+    justifyContent: "center",
   },
+  callBtnText: { gap: 1 },
+  callBtnLabel: { fontSize: 11, fontFamily: "Inter_400Regular", color: Colors.light.textTertiary },
+  callBtnPhone: { fontSize: 12, fontFamily: "Inter_700Bold", color: Colors.light.text },
+  actionDivider: { width: 8 },
   whatsappBtn: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
     gap: 6,
-    paddingVertical: 13,
+    backgroundColor: "#25D36615",
     borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: "#25D366",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#25D36640",
   },
-  whatsappBtnText: {
-    fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
-    color: "#25D366",
+  waIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: "#25D366",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  messageBtn: {
-    flex: 1.5,
+  waBtnText: { fontSize: 13, fontFamily: "Inter_700Bold", color: "#25D366" },
+  msgBtn: {
+    flex: 1.2,
     borderRadius: 14,
     overflow: "hidden",
+    marginLeft: 8,
   },
-  messageBtnGradient: {
+  msgBtnGradient: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
     paddingVertical: 13,
   },
-  messageBtnText: {
-    fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
-    color: "#fff",
-  },
-  notFound: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  notFoundText: {
-    fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.light.textSecondary,
-  },
-  backLink: {
-    fontSize: 14,
-    color: Colors.primary,
-    fontFamily: "Inter_600SemiBold",
-  },
+  msgBtnText: { fontSize: 13, fontFamily: "Inter_700Bold", color: "#fff" },
+
+  // Not found
+  notFound: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
+  notFoundText: { fontSize: 18, fontFamily: "Inter_600SemiBold", color: Colors.light.textSecondary },
+  backLink: { fontSize: 14, color: Colors.primary, fontFamily: "Inter_600SemiBold" },
 });

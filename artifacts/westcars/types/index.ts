@@ -42,6 +42,7 @@ export interface Car {
   rating: CarRating;
   createdAt: string;
   category: string;
+  views?: number;
 }
 
 export interface Advertisement {
@@ -83,4 +84,16 @@ export interface SearchFilters {
   year: number;
   condition: string;
   category: string;
+}
+
+export interface AdPackage {
+  id: string;
+  type: "flyer" | "video";
+  duration?: number;
+  period: "days" | "weeks" | "months";
+  periodCount: number;
+  price: number;
+  label: string;
+  description: string;
+  popular?: boolean;
 }

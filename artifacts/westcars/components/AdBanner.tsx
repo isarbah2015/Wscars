@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#DDD",
   },
   dotActive: {
-    backgroundColor: "#FF6B00",
+    backgroundColor: "#00873E",
     width: 16,
   },
 });

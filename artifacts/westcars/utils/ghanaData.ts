@@ -63,13 +63,13 @@ export const TRANSMISSIONS = ["Automatic", "Manual"];
 export const CONDITIONS = ["New", "Foreign Used", "Ghana Used", "Tokunbo"];
 
 export const CAR_CATEGORIES = [
-  { id: "all", label: "All Cars", icon: "car" },
+  { id: "all", label: "All Cars", icon: "grid" },
   { id: "suv", label: "SUVs", icon: "truck" },
-  { id: "sedan", label: "Sedans", icon: "car" },
+  { id: "sedan", label: "Sedans", icon: "navigation" },
   { id: "tokunbo", label: "Tokunbo", icon: "star" },
   { id: "budget", label: "Budget", icon: "tag" },
   { id: "luxury", label: "Luxury", icon: "award" },
-  { id: "pickup", label: "Pickups", icon: "truck" },
+  { id: "pickup", label: "Pickups", icon: "package" },
   { id: "bus", label: "Buses", icon: "users" },
 ];
 

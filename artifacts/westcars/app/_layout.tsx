@@ -39,6 +39,10 @@ function RootLayoutNav() {
         name="user/[id]"
         options={{ headerShown: false, presentation: "card" }}
       />
+      <Stack.Screen
+        name="advertise"
+        options={{ headerShown: false, presentation: "card" }}
+      />
     </Stack>
   );
 }

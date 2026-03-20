@@ -63,7 +63,7 @@ export default function SignupScreen() {
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient
-          colors={["#FF6B00", "#FF8C42"]}
+          colors={["#00873E", "#00A64C"]}
           style={styles.headerGradient}
         >
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
@@ -157,7 +157,7 @@ export default function SignupScreen() {
             disabled={loading}
           >
             <LinearGradient
-              colors={["#FF6B00", "#FF8C42"]}
+              colors={["#00873E", "#00A64C"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.buttonGradient}

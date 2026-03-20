@@ -13,50 +13,46 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GHANA_CITIES } from "@/utils/ghanaData";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 export default function SplashScreen() {
   const insets = useSafeAreaInsets();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.7)).current;
-  const cityAnim = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(0.6)).current;
+  const logoOpacity = useRef(new Animated.Value(0)).current;
+  const taglineOpacity = useRef(new Animated.Value(0)).current;
+  const cityOpacity = useRef(new Animated.Value(0)).current;
+  const lineWidth = useRef(new Animated.Value(0)).current;
   const [cityIndex, setCityIndex] = useState(0);
 
   useEffect(() => {
+    // Step 1: Logo appears
     Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: 6,
-        tension: 50,
-        useNativeDriver: true,
-      }),
+      Animated.spring(logoScale, { toValue: 1, friction: 7, tension: 60, useNativeDriver: true }),
+      Animated.timing(logoOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
     ]).start();
+
+    // Step 2: Line + tagline
+    setTimeout(() => {
+      Animated.parallel([
+        Animated.timing(lineWidth, { toValue: 1, duration: 600, useNativeDriver: false }),
+        Animated.timing(taglineOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+      ]).start();
+    }, 400);
+
+    // Step 3: City text
+    setTimeout(() => {
+      Animated.timing(cityOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+    }, 800);
 
     // City rotation
     const cityInterval = setInterval(() => {
-      Animated.sequence([
-        Animated.timing(cityAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(cityAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
       setCityIndex((prev) => (prev + 1) % GHANA_CITIES.length);
-    }, 800);
+    }, 500);
 
+    // Navigate
     const navTimeout = setTimeout(() => {
       router.replace("/auth/login");
-    }, 3200);
+    }, 3000);
 
     return () => {
       clearInterval(cityInterval);
@@ -66,51 +62,71 @@ export default function SplashScreen() {
 
   return (
     <LinearGradient
-      colors={["#FF6B00", "#FF8C42", "#FFA84E"]}
+      colors={["#003D1A", "#005F2B", "#00873E"]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={[styles.container, { paddingTop: insets.top || (Platform.OS === "web" ? 67 : 0) }]}
     >
-      {/* Background decoration circles */}
-      <View style={styles.circleTopRight} />
-      <View style={styles.circleBottomLeft} />
+      {/* Decorative rings */}
+      <View style={styles.ring1} />
+      <View style={styles.ring2} />
+      <View style={styles.ring3} />
 
-      {/* Logo */}
+      {/* Logo block */}
       <Animated.View
         style={[
-          styles.logoContainer,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
+          styles.logoBlock,
+          { opacity: logoOpacity, transform: [{ scale: logoScale }] },
         ]}
       >
-        <View style={styles.iconCircle}>
-          <Feather name="truck" size={48} color="#FF6B00" />
+        {/* Icon mark */}
+        <View style={styles.iconMark}>
+          <View style={styles.iconMarkInner}>
+            <Feather name="truck" size={36} color="#00873E" />
+          </View>
+          {/* Gold accent dot */}
+          <View style={styles.goldDot} />
         </View>
-        <Text style={styles.appName}>Westcars</Text>
-        <Text style={styles.tagline}>Ghana's Trusted Car Marketplace</Text>
+
+        {/* Wordmark */}
+        <View style={styles.wordmark}>
+          <Text style={styles.wordmarkWest}>WEST</Text>
+          <Text style={styles.wordmarkCars}>CARS</Text>
+        </View>
       </Animated.View>
 
-      {/* City rotation */}
+      {/* Divider line */}
       <Animated.View
         style={[
-          styles.cityContainer,
+          styles.dividerLine,
           {
-            opacity: cityAnim,
-            paddingBottom: insets.bottom || (Platform.OS === "web" ? 34 : 0),
+            width: lineWidth.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 120],
+            }),
           },
         ]}
-      >
-        <Feather name="map-pin" size={14} color="rgba(255,255,255,0.8)" />
+      />
+
+      {/* Tagline */}
+      <Animated.Text style={[styles.tagline, { opacity: taglineOpacity }]}>
+        Ghana's Premier Car Marketplace
+      </Animated.Text>
+
+      {/* City scroller */}
+      <Animated.View style={[styles.cityRow, { opacity: cityOpacity }]}>
+        <Feather name="map-pin" size={12} color="rgba(255,255,255,0.6)" />
         <Text style={styles.cityText}>{GHANA_CITIES[cityIndex]}</Text>
       </Animated.View>
 
-      {/* Loading dots */}
-      <View style={[styles.dotsContainer, { marginBottom: 40 + (insets.bottom || 0) }]}>
-        {[0, 1, 2].map((i) => (
-          <View key={i} style={styles.dot} />
-        ))}
+      {/* Version tag */}
+      <View
+        style={[
+          styles.versionTag,
+          { bottom: 40 + (insets.bottom || (Platform.OS === "web" ? 34 : 0)) },
+        ]}
+      >
+        <Text style={styles.versionText}>v1.0 · Made in 🇬🇭</Text>
       </View>
     </LinearGradient>
   );
@@ -121,76 +137,119 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    gap: 16,
   },
-  circleTopRight: {
+  ring1: {
     position: "absolute",
-    top: -60,
-    right: -60,
-    width: 240,
-    height: 240,
-    borderRadius: 120,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    width: 400,
+    height: 400,
+    borderRadius: 200,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+    top: -100,
+    right: -120,
   },
-  circleBottomLeft: {
+  ring2: {
     position: "absolute",
-    bottom: -80,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.05)",
+    bottom: -60,
     left: -80,
-    width: 280,
-    height: 280,
-    borderRadius: 140,
-    backgroundColor: "rgba(255,255,255,0.08)",
   },
-  logoContainer: {
+  ring3: {
+    position: "absolute",
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.07)",
+    bottom: 40,
+    right: -20,
+  },
+  logoBlock: {
     alignItems: "center",
-    gap: 12,
+    gap: 18,
   },
-  iconCircle: {
+  iconMark: {
+    position: "relative",
     width: 100,
     height: 100,
-    borderRadius: 28,
+  },
+  iconMarkInner: {
+    width: 100,
+    height: 100,
     backgroundColor: "#fff",
+    borderRadius: 26,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 12,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 20,
   },
-  appName: {
-    fontSize: 42,
+  goldDot: {
+    position: "absolute",
+    bottom: 4,
+    right: 4,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#FFD700",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  wordmark: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 2,
+  },
+  wordmarkWest: {
+    fontSize: 40,
     fontFamily: "Inter_700Bold",
     color: "#fff",
-    letterSpacing: -1,
+    letterSpacing: 4,
+  },
+  wordmarkCars: {
+    fontSize: 40,
+    fontFamily: "Inter_400Regular",
+    color: "rgba(255,255,255,0.75)",
+    letterSpacing: 4,
+  },
+  dividerLine: {
+    height: 1.5,
+    backgroundColor: "rgba(255,255,255,0.3)",
+    borderRadius: 1,
   },
   tagline: {
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.9)",
-    textAlign: "center",
+    color: "rgba(255,255,255,0.7)",
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
   },
-  cityContainer: {
-    position: "absolute",
-    bottom: 90,
+  cityRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 5,
+    marginTop: 8,
   },
   cityText: {
-    color: "rgba(255,255,255,0.9)",
-    fontSize: 16,
-    fontFamily: "Inter_500Medium",
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+    color: "rgba(255,255,255,0.85)",
+    letterSpacing: 0.5,
   },
-  dotsContainer: {
+  versionTag: {
     position: "absolute",
-    bottom: 60,
-    flexDirection: "row",
-    gap: 8,
+    alignSelf: "center",
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "rgba(255,255,255,0.6)",
+  versionText: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.35)",
+    fontFamily: "Inter_400Regular",
   },
 });

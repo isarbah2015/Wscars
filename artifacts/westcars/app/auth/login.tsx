@@ -24,10 +24,11 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [focused, setFocused] = useState<string | null>(null);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert("Error", "Please enter your email and password.");
+      Alert.alert("Missing Fields", "Please enter your email and password.");
       return;
     }
     setLoading(true);
@@ -48,52 +49,60 @@ export default function LoginScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.container,
-          {
-            paddingTop: insets.top + (Platform.OS === "web" ? 67 : 16),
-            paddingBottom: insets.bottom + 24,
-          },
+          { paddingTop: insets.top + (Platform.OS === "web" ? 67 : 16) },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Header gradient */}
+        {/* Header */}
         <LinearGradient
-          colors={["#FF6B00", "#FF8C42"]}
-          style={styles.headerGradient}
+          colors={["#003D1A", "#005F2B", "#00873E"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
         >
-          <View style={styles.logoArea}>
-            <View style={styles.iconCircle}>
-              <Feather name="truck" size={28} color="#FF6B00" />
+          {/* Logo */}
+          <View style={styles.logoRow}>
+            <View style={styles.logoIcon}>
+              <Feather name="truck" size={24} color="#00873E" />
             </View>
-            <Text style={styles.appName}>Westcars</Text>
+            <View>
+              <View style={styles.wordmarkRow}>
+                <Text style={styles.wordWest}>WEST</Text>
+                <Text style={styles.wordCars}>CARS</Text>
+              </View>
+              <Text style={styles.logoTagline}>Ghana's Premier Car Marketplace</Text>
+            </View>
           </View>
-          <Text style={styles.welcomeText}>Welcome back!</Text>
-          <Text style={styles.subText}>
-            Sign in to buy or sell cars in Ghana
-          </Text>
+
+          <Text style={styles.headerGreeting}>Welcome back</Text>
+          <Text style={styles.headerSub}>Sign in to continue</Text>
         </LinearGradient>
 
-        <View style={styles.formContainer}>
+        {/* Form Card */}
+        <View style={styles.formCard}>
           <Text style={styles.formTitle}>Sign In</Text>
 
-          {/* Email field */}
-          <View style={styles.inputContainer}>
-            <Feather name="mail" size={18} color={Colors.light.textTertiary} />
+          {/* Email */}
+          <View style={[styles.field, focused === "email" && styles.fieldFocused]}>
+            <Feather name="mail" size={17} color={focused === "email" ? Colors.primary : Colors.light.textTertiary} />
             <TextInput
               style={styles.input}
-              placeholder="Email address or phone"
+              placeholder="Email or phone number"
               placeholderTextColor={Colors.light.textTertiary}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
               returnKeyType="next"
+              onFocus={() => setFocused("email")}
+              onBlur={() => setFocused(null)}
             />
           </View>
 
-          {/* Password field */}
-          <View style={styles.inputContainer}>
-            <Feather name="lock" size={18} color={Colors.light.textTertiary} />
+          {/* Password */}
+          <View style={[styles.field, focused === "pass" && styles.fieldFocused]}>
+            <Feather name="lock" size={17} color={focused === "pass" ? Colors.primary : Colors.light.textTertiary} />
             <TextInput
               style={styles.input}
               placeholder="Password"
@@ -102,61 +111,67 @@ export default function LoginScreen() {
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
               returnKeyType="done"
+              onFocus={() => setFocused("pass")}
+              onBlur={() => setFocused(null)}
               onSubmitEditing={handleLogin}
             />
             <Pressable onPress={() => setShowPassword(!showPassword)} hitSlop={8}>
               <Feather
                 name={showPassword ? "eye-off" : "eye"}
-                size={18}
+                size={17}
                 color={Colors.light.textTertiary}
               />
             </Pressable>
           </View>
 
-          <Pressable style={styles.forgotPassword}>
+          <Pressable style={styles.forgotRow}>
             <Text style={styles.forgotText}>Forgot password?</Text>
           </Pressable>
 
-          {/* Login button */}
+          {/* Sign In Button */}
           <Pressable
-            style={({ pressed }) => [
-              styles.loginButton,
-              pressed && { opacity: 0.85 },
-              loading && { opacity: 0.7 },
-            ]}
+            style={({ pressed }) => [styles.signInBtn, pressed && { opacity: 0.88 }, loading && { opacity: 0.7 }]}
             onPress={handleLogin}
             disabled={loading}
           >
             <LinearGradient
-              colors={["#FF6B00", "#FF8C42"]}
+              colors={["#005F2B", "#00873E"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={styles.loginGradient}
+              style={styles.btnGradient}
             >
               {loading ? (
-                <Text style={styles.loginText}>Signing in...</Text>
+                <Text style={styles.btnText}>Signing in…</Text>
               ) : (
                 <>
-                  <Text style={styles.loginText}>Sign In</Text>
-                  <Feather name="arrow-right" size={20} color="#fff" />
+                  <Text style={styles.btnText}>Sign In</Text>
+                  <Feather name="arrow-right" size={19} color="#fff" />
                 </>
               )}
             </LinearGradient>
           </Pressable>
 
-          <View style={styles.divider}>
+          <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
+            <Text style={styles.dividerLabel}>or</Text>
             <View style={styles.dividerLine} />
           </View>
 
-          {/* Sign up */}
           <View style={styles.signupRow}>
             <Text style={styles.signupPrompt}>Don't have an account?</Text>
             <Pressable onPress={() => router.push("/auth/signup")}>
-              <Text style={styles.signupLink}>Sign Up Free</Text>
+              <Text style={styles.signupLink}>Create one free</Text>
             </Pressable>
           </View>
+
+          {/* Quick browse hint */}
+          <Pressable
+            style={styles.browseRow}
+            onPress={() => router.replace("/(tabs)")}
+          >
+            <Text style={styles.browseText}>Browse listings without signing in</Text>
+            <Feather name="arrow-right" size={13} color={Colors.light.textTertiary} />
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -164,75 +179,55 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#fff",
-  },
-  headerGradient: {
+  container: { flexGrow: 1, backgroundColor: "#fff" },
+  header: {
     paddingHorizontal: 24,
     paddingTop: 20,
-    paddingBottom: 40,
-    gap: 4,
+    paddingBottom: 44,
+    gap: 6,
   },
-  logoArea: {
+  logoRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginBottom: 20,
+    gap: 12,
+    marginBottom: 24,
   },
-  iconCircle: {
+  logoIcon: {
     width: 48,
     height: 48,
-    backgroundColor: "#fff",
     borderRadius: 14,
+    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
   },
-  appName: {
-    fontSize: 24,
-    fontFamily: "Inter_700Bold",
-    color: "#fff",
-  },
-  welcomeText: {
-    fontSize: 28,
-    fontFamily: "Inter_700Bold",
-    color: "#fff",
-  },
-  subText: {
-    fontSize: 14,
-    fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.85)",
-  },
-  formContainer: {
-    flex: 1,
+  wordmarkRow: { flexDirection: "row", gap: 1 },
+  wordWest: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: 2 },
+  wordCars: { fontSize: 20, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.7)", letterSpacing: 2 },
+  logoTagline: { fontSize: 11, color: "rgba(255,255,255,0.6)", fontFamily: "Inter_400Regular", marginTop: 1 },
+  headerGreeting: { fontSize: 30, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: -0.5 },
+  headerSub: { fontSize: 14, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.75)" },
+  formCard: {
     backgroundColor: "#fff",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    marginTop: -20,
+    marginTop: -22,
     padding: 28,
-    gap: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
+    flex: 1,
+    gap: 14,
   },
-  formTitle: {
-    fontSize: 22,
-    fontFamily: "Inter_700Bold",
-    color: Colors.light.text,
-    marginBottom: 4,
-  },
-  inputContainer: {
+  formTitle: { fontSize: 22, fontFamily: "Inter_700Bold", color: Colors.light.text, marginBottom: 4 },
+  field: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
     backgroundColor: Colors.light.backgroundSecondary,
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    gap: 12,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.light.border,
   },
+  fieldFocused: { borderColor: Colors.primary, backgroundColor: Colors.primary + "06" },
   input: {
     flex: 1,
     fontSize: 15,
@@ -240,60 +235,29 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     padding: 0,
   },
-  forgotPassword: {
-    alignSelf: "flex-end",
-  },
-  forgotText: {
-    fontSize: 14,
-    color: Colors.primary,
-    fontFamily: "Inter_500Medium",
-  },
-  loginButton: {
-    borderRadius: 14,
-    overflow: "hidden",
-    marginTop: 4,
-  },
-  loginGradient: {
+  forgotRow: { alignSelf: "flex-end", marginTop: -4 },
+  forgotText: { fontSize: 13, color: Colors.primary, fontFamily: "Inter_500Medium" },
+  signInBtn: { borderRadius: 14, overflow: "hidden" },
+  btnGradient: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 16,
     gap: 8,
   },
-  loginText: {
-    fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
-    color: "#fff",
-  },
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.light.border,
-  },
-  dividerText: {
-    fontSize: 13,
-    color: Colors.light.textTertiary,
-    fontFamily: "Inter_400Regular",
-  },
-  signupRow: {
+  btnText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff" },
+  dividerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.light.border },
+  dividerLabel: { fontSize: 13, color: Colors.light.textTertiary, fontFamily: "Inter_400Regular" },
+  signupRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 6 },
+  signupPrompt: { fontSize: 14, color: Colors.light.textSecondary, fontFamily: "Inter_400Regular" },
+  signupLink: { fontSize: 14, color: Colors.primary, fontFamily: "Inter_700Bold" },
+  browseRow: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 6,
+    gap: 5,
+    paddingTop: 4,
   },
-  signupPrompt: {
-    fontSize: 14,
-    color: Colors.light.textSecondary,
-    fontFamily: "Inter_400Regular",
-  },
-  signupLink: {
-    fontSize: 14,
-    color: Colors.primary,
-    fontFamily: "Inter_700Bold",
-  },
+  browseText: { fontSize: 13, color: Colors.light.textTertiary, fontFamily: "Inter_400Regular" },
 });
