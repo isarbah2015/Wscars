@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -24,68 +23,51 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [focused, setFocused] = useState<string | null>(null);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert("Missing Fields", "Please enter your email and password.");
+      Alert.alert("Required", "Please enter your email and password.");
       return;
     }
     setLoading(true);
     const ok = await login(email.trim(), password);
     setLoading(false);
-    if (ok) {
-      router.replace("/(tabs)");
-    } else {
-      Alert.alert("Login Failed", "Invalid credentials. Please try again.");
-    }
+    if (ok) router.replace("/(tabs)");
+    else Alert.alert("Login Failed", "Invalid email or password.");
   };
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: "#fff" }}
+      style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
         contentContainerStyle={[
           styles.container,
-          { paddingTop: insets.top + (Platform.OS === "web" ? 67 : 16) },
+          { paddingTop: (insets.top || 0) + (Platform.OS === "web" ? 67 : 0) + 40 },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <LinearGradient
-          colors={["#003D1A", "#005F2B", "#00873E"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.header}
-        >
-          {/* Logo */}
+        {/* Logo */}
+        <View style={styles.logoBlock}>
           <View style={styles.logoRow}>
             <View style={styles.logoIcon}>
-              <Feather name="truck" size={24} color="#00873E" />
+              <Text style={styles.logoIconText}>W</Text>
             </View>
-            <View>
-              <View style={styles.wordmarkRow}>
-                <Text style={styles.wordWest}>WEST</Text>
-                <Text style={styles.wordCars}>CARS</Text>
-              </View>
-              <Text style={styles.logoTagline}>Ghana's Premier Car Marketplace</Text>
-            </View>
+            <Text style={styles.logoText}>
+              West<Text style={styles.logoThin}>cars</Text>
+            </Text>
           </View>
+          <Text style={styles.tagline}>Ghana's Car Marketplace</Text>
+        </View>
 
-          <Text style={styles.headerGreeting}>Welcome back</Text>
-          <Text style={styles.headerSub}>Sign in to continue</Text>
-        </LinearGradient>
+        {/* Form */}
+        <View style={styles.form}>
+          <Text style={styles.formTitle}>Sign in</Text>
 
-        {/* Form Card */}
-        <View style={styles.formCard}>
-          <Text style={styles.formTitle}>Sign In</Text>
-
-          {/* Email */}
-          <View style={[styles.field, focused === "email" && styles.fieldFocused]}>
-            <Feather name="mail" size={17} color={focused === "email" ? Colors.primary : Colors.light.textTertiary} />
+          <View style={[styles.field, focusedField === "email" && styles.fieldFocus]}>
             <TextInput
               style={styles.input}
               placeholder="Email or phone number"
@@ -94,83 +76,60 @@ export default function LoginScreen() {
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              onFocus={() => setFocusedField("email")}
+              onBlur={() => setFocusedField(null)}
               returnKeyType="next"
-              onFocus={() => setFocused("email")}
-              onBlur={() => setFocused(null)}
             />
           </View>
 
-          {/* Password */}
-          <View style={[styles.field, focused === "pass" && styles.fieldFocused]}>
-            <Feather name="lock" size={17} color={focused === "pass" ? Colors.primary : Colors.light.textTertiary} />
+          <View style={[styles.field, focusedField === "pass" && styles.fieldFocus]}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { flex: 1 }]}
               placeholder="Password"
               placeholderTextColor={Colors.light.textTertiary}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
+              onFocus={() => setFocusedField("pass")}
+              onBlur={() => setFocusedField(null)}
               returnKeyType="done"
-              onFocus={() => setFocused("pass")}
-              onBlur={() => setFocused(null)}
               onSubmitEditing={handleLogin}
             />
             <Pressable onPress={() => setShowPassword(!showPassword)} hitSlop={8}>
-              <Feather
-                name={showPassword ? "eye-off" : "eye"}
-                size={17}
-                color={Colors.light.textTertiary}
-              />
+              <Feather name={showPassword ? "eye-off" : "eye"} size={16} color={Colors.light.textTertiary} />
             </Pressable>
           </View>
 
-          <Pressable style={styles.forgotRow}>
+          <Pressable style={styles.forgotBtn}>
             <Text style={styles.forgotText}>Forgot password?</Text>
           </Pressable>
 
-          {/* Sign In Button */}
           <Pressable
-            style={({ pressed }) => [styles.signInBtn, pressed && { opacity: 0.88 }, loading && { opacity: 0.7 }]}
+            style={[styles.signInBtn, loading && { opacity: 0.7 }]}
             onPress={handleLogin}
             disabled={loading}
           >
-            <LinearGradient
-              colors={["#005F2B", "#00873E"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.btnGradient}
-            >
-              {loading ? (
-                <Text style={styles.btnText}>Signing in…</Text>
-              ) : (
-                <>
-                  <Text style={styles.btnText}>Sign In</Text>
-                  <Feather name="arrow-right" size={19} color="#fff" />
-                </>
-              )}
-            </LinearGradient>
+            <Text style={styles.signInText}>{loading ? "Signing in…" : "Sign in"}</Text>
           </Pressable>
 
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerLabel}>or</Text>
-            <View style={styles.dividerLine} />
+          <View style={styles.divider}>
+            <View style={styles.divLine} />
+            <Text style={styles.divText}>or</Text>
+            <View style={styles.divLine} />
           </View>
 
-          <View style={styles.signupRow}>
-            <Text style={styles.signupPrompt}>Don't have an account?</Text>
-            <Pressable onPress={() => router.push("/auth/signup")}>
-              <Text style={styles.signupLink}>Create one free</Text>
-            </Pressable>
-          </View>
-
-          {/* Quick browse hint */}
           <Pressable
-            style={styles.browseRow}
+            style={styles.registerBtn}
+            onPress={() => router.push("/auth/signup")}
+          >
+            <Text style={styles.registerText}>Create account</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.guestBtn}
             onPress={() => router.replace("/(tabs)")}
           >
-            <Text style={styles.browseText}>Browse listings without signing in</Text>
-            <Feather name="arrow-right" size={13} color={Colors.light.textTertiary} />
+            <Text style={styles.guestText}>Browse without signing in</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -179,55 +138,32 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: "#fff" },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 44,
-    gap: 6,
-  },
-  logoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 24,
-  },
+  root: { flex: 1, backgroundColor: "#fff" },
+  container: { flexGrow: 1, paddingHorizontal: 24, paddingBottom: 40 },
+  logoBlock: { alignItems: "center", marginBottom: 40, gap: 8 },
+  logoRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   logoIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    width: 40, height: 40, borderRadius: 8,
+    backgroundColor: "#0066CC",
+    alignItems: "center", justifyContent: "center",
   },
-  wordmarkRow: { flexDirection: "row", gap: 1 },
-  wordWest: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: 2 },
-  wordCars: { fontSize: 20, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.7)", letterSpacing: 2 },
-  logoTagline: { fontSize: 11, color: "rgba(255,255,255,0.6)", fontFamily: "Inter_400Regular", marginTop: 1 },
-  headerGreeting: { fontSize: 30, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: -0.5 },
-  headerSub: { fontSize: 14, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.75)" },
-  formCard: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    marginTop: -22,
-    padding: 28,
-    flex: 1,
-    gap: 14,
-  },
-  formTitle: { fontSize: 22, fontFamily: "Inter_700Bold", color: Colors.light.text, marginBottom: 4 },
+  logoIconText: { color: "#fff", fontSize: 22, fontFamily: "Inter_700Bold" },
+  logoText: { fontSize: 28, fontFamily: "Inter_700Bold", color: "#0066CC" },
+  logoThin: { fontFamily: "Inter_400Regular" },
+  tagline: { fontSize: 13, color: Colors.light.textTertiary, fontFamily: "Inter_400Regular" },
+  form: { gap: 12 },
+  formTitle: { fontSize: 22, fontFamily: "Inter_700Bold", color: Colors.light.text, marginBottom: 6 },
   field: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderWidth: 1.5,
+    height: 50,
+    borderWidth: 1,
     borderColor: Colors.light.border,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    backgroundColor: "#fff",
   },
-  fieldFocused: { borderColor: Colors.primary, backgroundColor: Colors.primary + "06" },
+  fieldFocus: { borderColor: "#0066CC", borderWidth: 1.5 },
   input: {
     flex: 1,
     fontSize: 15,
@@ -235,29 +171,29 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     padding: 0,
   },
-  forgotRow: { alignSelf: "flex-end", marginTop: -4 },
-  forgotText: { fontSize: 13, color: Colors.primary, fontFamily: "Inter_500Medium" },
-  signInBtn: { borderRadius: 14, overflow: "hidden" },
-  btnGradient: {
-    flexDirection: "row",
+  forgotBtn: { alignSelf: "flex-end" },
+  forgotText: { fontSize: 13, color: "#0066CC", fontFamily: "Inter_400Regular" },
+  signInBtn: {
+    height: 50,
+    backgroundColor: "#0066CC",
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 16,
-    gap: 8,
+    marginTop: 4,
   },
-  btnText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff" },
-  dividerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.light.border },
-  dividerLabel: { fontSize: 13, color: Colors.light.textTertiary, fontFamily: "Inter_400Regular" },
-  signupRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 6 },
-  signupPrompt: { fontSize: 14, color: Colors.light.textSecondary, fontFamily: "Inter_400Regular" },
-  signupLink: { fontSize: 14, color: Colors.primary, fontFamily: "Inter_700Bold" },
-  browseRow: {
-    flexDirection: "row",
-    justifyContent: "center",
+  signInText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff" },
+  divider: { flexDirection: "row", alignItems: "center", gap: 12 },
+  divLine: { flex: 1, height: 1, backgroundColor: Colors.light.border },
+  divText: { fontSize: 13, color: Colors.light.textTertiary, fontFamily: "Inter_400Regular" },
+  registerBtn: {
+    height: 50,
+    borderWidth: 1.5,
+    borderColor: "#0066CC",
+    borderRadius: 8,
     alignItems: "center",
-    gap: 5,
-    paddingTop: 4,
+    justifyContent: "center",
   },
-  browseText: { fontSize: 13, color: Colors.light.textTertiary, fontFamily: "Inter_400Regular" },
+  registerText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#0066CC" },
+  guestBtn: { alignItems: "center", paddingVertical: 8 },
+  guestText: { fontSize: 13, color: Colors.light.textTertiary, fontFamily: "Inter_400Regular" },
 });

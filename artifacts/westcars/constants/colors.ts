@@ -1,34 +1,34 @@
-const PRIMARY = "#00873E";
-const PRIMARY_DARK = "#005F2B";
-const PRIMARY_LIGHT = "#00A64C";
+const PRIMARY = "#0066CC";
+const PRIMARY_DARK = "#0052A3";
+const PRIMARY_LIGHT = "#3385D6";
 
 export const Colors = {
   primary: PRIMARY,
   primaryDark: PRIMARY_DARK,
   primaryLight: PRIMARY_LIGHT,
-  accent: "#FFD700",
+  accent: "#FF4444",
 
   light: {
-    text: "#0D1F14",
-    textSecondary: "#3D5247",
-    textTertiary: "#8FA59B",
-    background: "#FFFFFF",
-    backgroundSecondary: "#F4F8F5",
-    backgroundTertiary: "#E8F0EA",
+    text: "#1A1A1A",
+    textSecondary: "#4A4A4A",
+    textTertiary: "#9E9E9E",
+    background: "#F5F5F5",
+    backgroundSecondary: "#FAFAFA",
+    backgroundTertiary: "#EEEEEE",
     card: "#FFFFFF",
-    border: "#DCE8DE",
+    border: "#E0E0E0",
     tint: PRIMARY,
-    tabIconDefault: "#A0B8A6",
+    tabIconDefault: "#9E9E9E",
     tabIconSelected: PRIMARY,
-    shadow: "rgba(0,80,30,0.10)",
+    shadow: "rgba(0,0,0,0.08)",
   },
 
-  verified: "#00873E",
-  star: "#F59E0B",
-  danger: "#DC2626",
-  success: "#16A34A",
-  warning: "#D97706",
-  info: "#2563EB",
+  verified: "#0066CC",
+  star: "#F5A623",
+  danger: "#E53935",
+  success: "#43A047",
+  warning: "#FB8C00",
+  info: "#0288D1",
 };
 
 export default Colors;

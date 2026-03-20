@@ -54,7 +54,7 @@ export default function ProfileScreen() {
           onPress={() => router.push("/auth/login")}
         >
           <LinearGradient
-            colors={["#00873E", "#00A64C"]}
+            colors={["#0066CC", "#3385D6"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.authGradient}
@@ -117,7 +117,7 @@ export default function ProfileScreen() {
     >
       {/* Profile Header */}
       <LinearGradient
-        colors={["#00873E", "#00A64C"]}
+        colors={["#0066CC", "#3385D6"]}
         style={styles.profileHeader}
       >
         <View style={styles.avatarArea}>
@@ -143,7 +143,7 @@ export default function ProfileScreen() {
           <VerifiedBadge />
         ) : (
           <Pressable style={styles.verifyBtn} onPress={handleVerify}>
-            <Feather name="shield" size={14} color="#00873E" />
+            <Feather name="shield" size={14} color="#0066CC" />
             <Text style={styles.verifyBtnText}>Get Verified</Text>
           </Pressable>
         )}

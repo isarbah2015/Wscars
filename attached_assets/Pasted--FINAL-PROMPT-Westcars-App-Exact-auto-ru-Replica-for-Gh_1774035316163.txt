@@ -1,0 +1,395 @@
+🎯 FINAL PROMPT – Westcars App (Exact auto.ru Replica for Ghana)
+
+Copy and paste this entire block into Replit's AI. This is the final, complete instruction.
+
+---
+
+```
+Build a complete React Native mobile app called "Westcars" – an EXACT replica of auto.ru (the Russian car marketplace) but adapted for Ghana. Study auto.ru's design, layout, and features carefully. The app must look and function exactly like auto.ru with Ghana-specific adaptations.
+
+---
+
+## 1. UI DESIGN – EXACT AUTO.RU STYLE
+
+**Study auto.ru's design:**
+- Clean, professional, information-dense layout
+- White background with subtle gray dividers
+- Blue accent color (auto.ru uses blue – adapt to deep blue #0066CC)
+- Card-based listings with clear typography
+- Everything is functional, not overly flashy
+
+**Color Palette (auto.ru style):**
+- Primary Blue: #0066CC
+- Secondary: #F5F5F5 (light gray background)
+- Text: #333333 (dark gray)
+- Secondary Text: #6B6B6B (medium gray)
+- Borders: #E0E0E0
+- White cards with subtle shadows
+
+**Typography:**
+- Clean sans-serif (SF Pro, Roboto)
+- Clear hierarchy
+- All information easily scannable
+
+---
+
+## 2. SPLASH SCREEN – SIMPLE & PROFESSIONAL
+
+- White background
+- Simple logo: "Westcars" in blue with a car icon
+- Loading indicator in blue
+- Fades out after 2 seconds
+- NO fancy animations, NO orange, NO gold – keep it clean like auto.ru
+
+---
+
+## 3. LOGO – AUTO.RU STYLE
+
+- Simple text logo: "Westcars" in bold blue (#0066CC)
+- Optional: small car icon next to text
+- Clean, professional, recognizable
+
+---
+
+## 4. HOME SCREEN – EXACT AUTO.RU LAYOUT
+
+**Header:**
+- Location selector: "Ghana, Accra" with dropdown arrow
+- Search bar with placeholder: "Search by brand, model, or code"
+- "Sell car" button in blue
+- Notification icon
+
+**Main Content:**
+
+**Section 1: Popular Brands**
+- Horizontal scroll of brand logos (Toyota, Honda, Hyundai, Kia, Nissan, Mercedes, BMW)
+- Each brand shows count of available cars
+
+**Section 2: Special Offers**
+- Horizontal scroll of sponsored/dealer cars
+- "Special price" tag in red
+- "Credit" option displayed
+
+**Section 3: Latest Listings**
+- 2-column grid of car cards
+
+**Car Card Design (EXACT auto.ru style):**
+```
+
+┌─────────────────┐
+│   [CAR IMAGE]   │
+├─────────────────┤
+│ Toyota Corolla  │
+│ 2020 • 45,000km │
+│ GHS 85,000      │
+│ Accra           │
+│ [DEALER BADGE]  │
+└─────────────────┘
+
+```
+
+**Card Elements:**
+- Car image (top)
+- Brand + model (bold, 16px)
+- Year + mileage (gray text, 14px)
+- Price (bold, blue, 18px)
+- Location (gray, 12px)
+- Condition badge (if "Foreign Used" or "New")
+- Dealer badge if applicable
+
+**NO RATINGS on cards** – ratings only in detailed view
+
+**Bottom Navigation:**
+- Home (active)
+- Search
+- Favorites
+- Messages
+- Profile
+
+---
+
+## 5. CAR DETAIL SCREEN – EXACT AUTO.RU STYLE
+
+**Image Gallery:**
+- Full-width carousel
+- Thumbnail strip below
+- Share and favorite buttons
+
+**Main Info:**
+- Title: "Toyota Corolla, 2020"
+- Price: "GHS 85,000" (large, blue)
+- "Negotiable" tag
+- Monthly payment calculator: "from GHS 1,200/month"
+
+**Technical Specifications – AUTO.RU STYLE:**
+Display in 2-column grid:
+
+| Left Column | Right Column |
+|-------------|--------------|
+| Mileage: 45,000 km | Fuel: Petrol |
+| Year: 2020 | Transmission: Automatic |
+| Engine: 1.8L | Drive: Front-wheel |
+| Color: Black | Condition: Foreign Used |
+
+**Equipment/Features:**
+- List with checkmarks
+- Air conditioning, heated seats, etc.
+
+**Seller Information (auto.ru style):**
+- Card with seller type (Dealer or Private)
+- Seller name
+- Verified badge
+- Response time
+- "Contact seller" button (blue)
+- "Call" button (outline)
+- "Write message" link
+
+**Ratings Section – ONLY HERE:**
+- Seller rating: 4.8 ★ (based on 24 reviews)
+- Brief reviews: show 2-3 latest reviews
+- "Read all reviews" link
+
+**Location:**
+- Map showing car location
+- Address
+
+**Similar Listings:**
+- Horizontal scroll of similar cars (same brand, similar price)
+
+**Bottom Sticky Bar:**
+- "Save to favorites" (icon)
+- "Contact seller" (blue button)
+
+---
+
+## 6. SEARCH SCREEN – AUTO.RU STYLE
+
+**Search Header:**
+- Search input with filter icon
+- "Advanced search" link
+
+**Filters (slide-up drawer):**
+- Brand (dropdown)
+- Model (dropdown)
+- Year from/to
+- Price from/to (GHS)
+- Mileage from/to
+- Fuel type (checkboxes)
+- Transmission (radio buttons)
+- Condition (New/Foreign Used/Ghana Used)
+- Location (Ghana cities)
+- Body type (SUV, Sedan, etc.)
+
+**Results:**
+- Count of results
+- Sort by: Relevance, Price low-high, Price high-low, Year
+- 2-column grid of car cards (same as home)
+
+---
+
+## 7. SELL CAR SCREEN – AUTO.RU STYLE
+
+**Form Layout:**
+- Step-by-step or one long form
+- Image upload (drag & drop style, up to 15 photos)
+- Car brand (dropdown)
+- Car model (dropdown)
+- Year (dropdown)
+- Mileage (input)
+- Price (input)
+- Location (dropdown – Ghana cities)
+- Fuel type (dropdown)
+- Transmission (dropdown)
+- Condition (dropdown: New, Foreign Used, Ghana Used)
+- Color (dropdown)
+- Engine (input)
+- Description (textarea)
+- Contact phone (input)
+- "Publish" button (blue)
+
+---
+
+## 8. FAVORITES SCREEN
+
+- List of saved cars
+- 2-column grid
+- Remove from favorites option
+- Same card design as home
+
+---
+
+## 9. PROFILE SCREEN – AUTO.RU STYLE
+
+**User Info:**
+- Name
+- Phone
+- Location
+- Member since
+- "Edit profile" button
+
+**Tabs:**
+1. **My Listings** – user's cars (edit/delete options)
+2. **Saved Searches** – saved search filters
+3. **Viewed Cars** – recently viewed
+
+**My Listings:**
+- List of user's cars
+- Status (active/sold)
+- Views count
+- Edit/Delete/Upgrade options
+
+**Settings:**
+- Notifications
+- Language (English/Twi/French)
+- Logout
+
+---
+
+## 10. MESSAGING SCREEN – AUTO.RU STYLE
+
+- List of conversations (buyer/seller)
+- Each shows last message, timestamp
+- Chat screen: message bubbles, image sharing
+- Store messages in Firestore
+
+---
+
+## 11. RATINGS SYSTEM – AUTO.RU STYLE
+
+**Where ratings appear:**
+- ONLY in Car Detail screen (seller rating)
+- ONLY in Seller Profile screen
+- NOT on car cards
+
+**Rating structure:**
+- Overall rating (1-5 stars)
+- Review text
+- Reviewer name
+- Date
+- Response from seller (optional)
+
+**How to leave rating:**
+- After transaction/purchase
+- Via "Rate seller" button in chat
+
+---
+
+## 12. ADVERTISING – AUTO.RU STYLE
+
+- "Special offers" section on home
+- Sponsored cards in search results (labeled "Ad")
+- Dealer highlighted listings (gold border)
+- Banner ads in between sections
+
+---
+
+## 13. DATA STRUCTURE
+
+**Cars collection:**
+- brand, model, year, mileage, price, location, fuelType, transmission, condition, color, engine, description, images, sellerId, status, views, createdAt
+
+**Users collection:**
+- name, phone, email, location, memberSince, rating, totalReviews, verified
+
+**Messages collection:**
+- conversationId, senderId, receiverId, message, timestamp, read
+
+**Favorites collection:**
+- userId, carId, savedAt
+
+**Reviews collection:**
+- sellerId, reviewerId, rating, reviewText, date, response
+
+---
+
+## 14. GHANA-SPECIFIC DATA
+
+**Cities:**
+Accra, Kumasi, Tamale, Sekondi-Takoradi, Ashaiman, Cape Coast, Tema, Obuasi, Koforidua, Wa, Techiman
+
+**Brands:**
+Toyota, Honda, Hyundai, Kia, Nissan, Mitsubishi, Mercedes-Benz, BMW, Volkswagen, Ford, Chevrolet, Mazda, Suzuki, Lexus, Range Rover
+
+**Fuel types:**
+Petrol, Diesel, Electric, Hybrid
+
+**Transmissions:**
+Manual, Automatic
+
+**Conditions:**
+New, Foreign Used, Ghana Used
+
+---
+
+## 15. TECHNICAL REQUIREMENTS
+
+- Expo (React Native)
+- React Navigation (bottom tabs + stack)
+- Firebase (Auth, Firestore, Storage)
+- react-native-vector-icons
+- expo-image-picker
+- AsyncStorage
+- All screens responsive
+
+---
+
+## 16. FILES TO PROVIDE
+
+Provide complete code for ALL files in this structure:
+
+```
+
+src/
+├── screens/
+│   ├── SplashScreen.js
+│   ├── HomeScreen.js
+│   ├── SearchScreen.js
+│   ├── CarDetailScreen.js
+│   ├── SellScreen.js
+│   ├── FavoritesScreen.js
+│   ├── ProfileScreen.js
+│   ├── MessagesScreen.js
+│   ├── SellerProfileScreen.js
+│   └── LoginScreen.js
+├── components/
+│   ├── CarCard.js
+│   ├── SearchBar.js
+│   ├── CategoryChip.js
+│   └── BottomNav.js
+├── services/
+│   └── firebase.js
+├── utils/
+│   └── ghanaData.js
+└── assets/
+└── logo.png
+
+```
+
+---
+
+## 17. CRITICAL REQUIREMENTS
+
+1. **EXACT auto.ru replica** – study and copy their layout, spacing, typography
+2. **NO ratings on car cards** – ratings only in seller profile and car detail
+3. **Clean, professional design** – white background, blue accent (#0066CC)
+4. **All information displayed clearly** – year, mileage, price, location on every card
+5. **Ghana-specific data** – cities, brands, currency (GHS)
+6. **Fully functional Firebase integration**
+
+---
+
+Please generate all files with the exact auto.ru design style and functionality. The app should look and work exactly like auto.ru but for the Ghanaian market.
+```
+
+---
+
+This prompt tells Replit AI to:
+
+✅ Study auto.ru and replicate its exact design
+✅ Use clean, professional blue/white/gray color scheme
+✅ Display car specs clearly on cards (year, mileage, price, location)
+✅ Put ratings ONLY on seller profiles and car detail seller section
+✅ Create Ghana-specific data for cities, brands, currency
+✅ Build a fully functional, professional marketplace
+
+Copy and paste this into Replit AI for your exact auto.ru replica! 🚗

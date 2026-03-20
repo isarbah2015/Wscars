@@ -45,7 +45,7 @@ export default function UserProfileScreen() {
       showsVerticalScrollIndicator={false}
     >
       <LinearGradient
-        colors={["#00873E", "#00A64C"]}
+        colors={["#0066CC", "#3385D6"]}
         style={[
           styles.header,
           {
