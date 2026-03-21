@@ -14,8 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Creative size requirements per ad type
-const SIZE_REQUIREMENTS: Record<string, { label: string; specs: { key: string; value: string }[] }> = {
-  sponsored_listing: {
+   sponsored_listing: {
     label: "Sponsored Listing",
     specs: [
       { key: "Format", value: "Auto-generated from your listing" },
