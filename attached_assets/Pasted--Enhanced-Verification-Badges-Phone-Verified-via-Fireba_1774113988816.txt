@@ -1,0 +1,111 @@
+. Enhanced Verification Badges
+Phone Verified – via Firebase SMS during signup.
+
+ID Verified – integrate Smile ID (automated). User uploads ID + selfie; SDK returns verification status.
+
+Business/Dealer Verified – manual admin approval.
+
+Badges appear on: profile, car cards, car detail (seller info), chat list, chat screen.
+
+2. User Review & Rating System
+After a transaction (or meeting), both parties can rate each other (1‑5 stars + comment).
+
+Aggregate rating and total reviews displayed on profiles and car cards.
+
+Firestore collections: reviews (fromUserId, toUserId, carId, rating, comment, createdAt) and aggregated fields in user document.
+
+3. Seller Reputation Score (Trust Score)
+Combine verification level, successful sales count, average rating, account age into a single score (0‑100).
+
+Display score prominently on listings and profile (e.g., as a meter or badge).
+
+4. Flag & Report System
+Users can report listings or other users (reasons: fake, scam, etc.).
+
+After 3 reports, auto‑hide content pending admin review.
+
+Firestore collection reports with status.
+
+5. In‑App Safety Tips & Checklist
+Show modal before every chat with safety tips: “Meet in public, bring a friend, inspect car, never pay before seeing the car.”
+
+Optional checklist accessible from profile.
+
+6. Mark as Sold / Transaction Confirmation
+Seller can mark a car as sold; buyer can confirm.
+
+Creates transaction record in Firestore, used for trust score.
+
+7. Anonymous Contact (Optional)
+Toggle in profile to hide phone number; only show in‑app chat.
+
+8. Block Users
+Users can block others; blocked users cannot send messages and their listings are hidden.
+
+9. Listing Expiration & Renewal
+Listings expire after 30 days. Seller can renew to extend.
+
+10. Admin Dashboard (Firebase)
+Web dashboard to review reports, manage users, verify dealers, view analytics.
+
+💬 Chat Enhancements
+11. Safety Warning for External Numbers
+If a user sends a phone number in chat that is different from the listing’s contact number, show a prominent warning:
+“Warning: This number is different from the seller’s registered number. Be cautious of scams – only use the number on the listing or the in‑app chat.”
+
+Detection: compare any text that matches a phone number pattern against the seller’s stored phone; if mismatch, show warning.
+
+12. Rich Media Messaging
+Allow sending photos, videos, and voice messages in chat.
+
+Use expo-image-picker for images/videos, and expo-av for voice recording.
+
+Store media in Firebase Storage and link in Firestore message document.
+
+13. Chat Interface Features
+Typing indicators.
+
+Message read receipts (optional).
+
+Timestamps.
+
+Delete message for self (optional).
+
+🎨 Theming – Dark & Light Mode
+14. Global Dark / Light Theme
+Toggle in settings (Profile → Settings).
+
+Theme affects all screens:
+
+Background colors
+
+Text colors
+
+Card backgrounds
+
+Icons
+
+Tab bar
+
+Status bar
+
+Use React Context or Redux to manage theme state; persist choice in AsyncStorage.
+
+Default: light theme (white background, dark text). Dark theme: dark background, light text, with orange accent (#FF6B00) unchanged.
+
+📢 Advertising Enhancements
+15. Banner Before Recommended Listings
+On home screen, before the “Recommended for you” section, display a banner ad (sponsored listing or promotional card).
+
+Banner can be a static image or a carousel.
+
+Ad data fetched from Firestore ads collection (for future dynamic updates).
+
+🔧 Implementation Notes for AI / Developer
+Use existing Firebase setup (Authentication, Firestore, Storage).
+
+Install required packages: smileid-react-native-expo, expo-av, expo-image-picker, and any theming‑related libraries (e.g., react-native-dark-mode or custom Context).
+
+Update Firestore security rules to enforce verification checks where needed.
+
+All UI must be responsive and maintain the orange accent (#FF6B00).
