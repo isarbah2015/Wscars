@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   Image,
   Platform,
@@ -14,95 +14,114 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
-import { Car } from "@/types";
-import { MOCK_ADS } from "@/utils/mockData";
-import { CAR_BRANDS } from "@/utils/ghanaData";
 
-const POPULAR_BRANDS = [
-  { name: "Toyota", icon: "🚗", count: 12 },
-  { name: "Honda", icon: "🚘", count: 7 },
-  { name: "Hyundai", icon: "🚙", count: 5 },
-  { name: "Mercedes", icon: "🏎️", count: 4 },
-  { name: "BMW", icon: "🚀", count: 3 },
-  { name: "Kia", icon: "🚖", count: 6 },
-  { name: "Nissan", icon: "🚐", count: 4 },
-  { name: "Ford", icon: "🛻", count: 3 },
-];
+type Condition = "new" | "used" | "moto";
 
 export default function HomeScreen() {
   const { cars, currentUser } = useApp();
   const insets = useSafeAreaInsets();
   const topPad = (insets.top || 0) + (Platform.OS === "web" ? 67 : 0);
+  const [condition, setCondition] = useState<Condition>("used");
 
-  const sponsored = cars.filter((c) => c.isSponsored);
-  const featured = cars.filter((c) => c.isFeatured && !c.isSponsored);
-  const specialOffers = [...sponsored, ...featured].filter(
-    (car, i, arr) => arr.findIndex((c) => c.id === car.id) === i
-  ).slice(0, 5);
-  const latest = cars.slice(0, 8);
+  const filteredCars =
+    condition === "new"
+      ? cars.filter((c) => c.condition === "New")
+      : condition === "moto"
+      ? []
+      : cars.filter((c) => c.condition !== "New");
+
+  const displayCars = filteredCars.length > 0 ? filteredCars : cars;
+  const totalCount = cars.length;
+
+  const specialOffers = cars.filter((c) => c.isSponsored || c.isFeatured)
+    .filter((car, i, arr) => arr.findIndex((c) => c.id === car.id) === i)
+    .slice(0, 5);
 
   return (
     <View style={styles.root}>
-      {/* ── Sticky Header ── */}
-      <View style={[styles.header, { paddingTop: topPad + 8 }]}>
-        {/* Location row */}
-        <View style={styles.locRow}>
-          <Pressable style={styles.locBtn}>
-            <Feather name="map-pin" size={13} color="#0066CC" />
-            <Text style={styles.locText}>Ghana, Accra</Text>
-            <Feather name="chevron-down" size={13} color="#0066CC" />
-          </Pressable>
-          <View style={styles.headerRight}>
-            <Pressable
-              style={styles.sellBtn}
-              onPress={() => router.push("/(tabs)/sell")}
-            >
-              <Feather name="plus" size={14} color="#fff" />
-              <Text style={styles.sellBtnText}>Sell car</Text>
-            </Pressable>
-            <Pressable style={styles.notifBtn} onPress={() => {}}>
-              <Feather name="bell" size={20} color={Colors.light.textSecondary} />
-              <View style={styles.notifDot} />
-            </Pressable>
+      {/* ── Header ── */}
+      <View style={[styles.header, { paddingTop: topPad + 10 }]}>
+        <View style={styles.topRow}>
+          {/* User avatar + name */}
+          <View style={styles.userRow}>
+            <View style={styles.avatarCircle}>
+              <Text style={styles.avatarText}>
+                {currentUser?.name?.[0] || "W"}
+              </Text>
+            </View>
+            <Text style={styles.userName}>
+              {currentUser?.name?.split(" ")[0] || "Guest"}
+            </Text>
           </View>
+          <Pressable onPress={() => router.push("/(tabs)/search")}>
+            <Feather name="search" size={22} color="#1A1A1A" />
+          </Pressable>
         </View>
 
-        {/* Search bar */}
+        {/* Logo */}
+        <Text style={styles.logo}>Westcars</Text>
+
+        {/* Search box */}
         <Pressable
-          style={styles.searchBar}
+          style={styles.searchBox}
           onPress={() => router.push("/(tabs)/search")}
         >
-          <Feather name="search" size={16} color={Colors.light.textTertiary} />
-          <Text style={styles.searchPlaceholder}>Search by brand, model, or code…</Text>
+          <Feather name="truck" size={22} color="#9E9E9E" />
+          <View style={styles.searchBoxText}>
+            <Text style={styles.searchBoxLabel}>Brand, model</Text>
+            <Text style={styles.searchBoxCount}>
+              {totalCount.toLocaleString()} listings
+            </Text>
+          </View>
+          <Pressable style={styles.filterBtn}>
+            <Feather name="sliders" size={18} color="#1A1A1A" />
+          </Pressable>
         </Pressable>
+
+        {/* Condition tabs */}
+        <View style={styles.tabs}>
+          {(
+            [
+              { id: "new", label: "New", emoji: "🚗" },
+              { id: "used", label: "Used", emoji: "🚙" },
+              { id: "moto", label: "Moto", emoji: "🏍️" },
+            ] as { id: Condition; label: string; emoji: string }[]
+          ).map((tab) => (
+            <Pressable
+              key={tab.id}
+              style={[styles.tab, condition === tab.id && styles.tabActive]}
+              onPress={() => setCondition(tab.id)}
+            >
+              <Text style={[styles.tabLabel, condition === tab.id && styles.tabLabelActive]}>
+                {tab.label}
+              </Text>
+              <Text style={styles.tabEmoji}>{tab.emoji}</Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
 
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 + (insets.bottom || 0) }}
+        contentContainerStyle={{
+          paddingBottom: 100 + (insets.bottom || 0),
+        }}
       >
-        {/* ── Popular Brands ── */}
+        {/* ── "Personally for you" section ── */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Popular Brands</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.brandsRow}>
-              {POPULAR_BRANDS.map((b) => (
-                <Pressable
-                  key={b.name}
-                  style={styles.brandChip}
-                  onPress={() => router.push({ pathname: "/(tabs)/search", params: { brand: b.name } })}
-                >
-                  <Text style={styles.brandEmoji}>{b.icon}</Text>
-                  <Text style={styles.brandName}>{b.name}</Text>
-                  <Text style={styles.brandCount}>{b.count}</Text>
-                </Pressable>
-              ))}
-            </View>
-          </ScrollView>
+          <Text style={styles.sectionTitle}>Personally for you</Text>
+          <View style={styles.grid}>
+            {displayCars.map((car) => (
+              <View key={car.id} style={styles.gridItem}>
+                <CarCard car={car} />
+              </View>
+            ))}
+          </View>
         </View>
 
-        <View style={styles.dividerBlock} />
+        {/* Divider */}
+        <View style={styles.sep} />
 
         {/* ── Special Offers ── */}
         <View style={styles.section}>
@@ -116,25 +135,30 @@ export default function HomeScreen() {
             <View style={styles.offersRow}>
               {specialOffers.map((car) => (
                 <Pressable
-                  key={`offer_${car.id}`}
+                  key={`special_${car.id}`}
                   style={styles.offerCard}
-                  onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
+                  onPress={() =>
+                    router.push({ pathname: "/car/[id]", params: { id: car.id } })
+                  }
                 >
-                  <View style={styles.offerImageWrap}>
-                    <Image source={{ uri: car.images[0] }} style={styles.offerImage} />
-                    <View style={styles.offerBadge}>
-                      <Text style={styles.offerBadgeText}>Special price</Text>
+                  <View style={styles.offerImgWrap}>
+                    <Image
+                      source={{ uri: car.images[0] }}
+                      style={styles.offerImg}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.offerHeart}>
+                      <Feather name="heart" size={18} color="rgba(255,255,255,0.9)" />
                     </View>
                   </View>
                   <View style={styles.offerInfo}>
-                    <Text style={styles.offerTitle} numberOfLines={1}>
-                      {car.year} {car.brand} {car.model}
+                    <Text style={styles.offerPrice}>
+                      from {car.price >= 1000 ? `GHS ${car.price.toLocaleString()}` : `GHS ${car.price}`}
                     </Text>
-                    <Text style={styles.offerPrice} numberOfLines={1}>
-                      GHS {car.price.toLocaleString()}
+                    <Text style={styles.offerName} numberOfLines={1}>
+                      {car.brand} {car.model}
                     </Text>
-                    <Text style={styles.offerSub}>{Math.round(car.mileage / 1000)}k km · {car.location}</Text>
-                    <Text style={styles.creditTag}>Credit available</Text>
+                    <Text style={styles.offerYear}>{car.year}</Text>
                   </View>
                 </Pressable>
               ))}
@@ -142,45 +166,19 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.dividerBlock} />
+        <View style={styles.sep} />
 
-        {/* ── Advertise Banner ── */}
+        {/* ── Advertise ── */}
         <Pressable style={styles.adBanner} onPress={() => router.push("/advertise")}>
           <View>
             <Text style={styles.adBannerTitle}>Advertise on Westcars</Text>
-            <Text style={styles.adBannerSub}>Reach 50,000+ buyers · Flyer & Video ads from GHS 50</Text>
+            <Text style={styles.adBannerSub}>
+              Reach 50,000+ buyers · Flyer & Video from GHS 50
+            </Text>
           </View>
-          <View style={styles.adBannerBtn}>
-            <Text style={styles.adBannerBtnText}>Learn more</Text>
-            <Feather name="arrow-right" size={14} color="#0066CC" />
+          <View style={styles.adBannerArrow}>
+            <Feather name="arrow-right" size={16} color="#0066CC" />
           </View>
-        </Pressable>
-
-        <View style={styles.dividerBlock} />
-
-        {/* ── Latest Listings ── */}
-        <View style={styles.section}>
-          <View style={styles.sectionRow}>
-            <Text style={styles.sectionTitle}>Latest Listings</Text>
-            <Text style={styles.sectionCount}>{cars.length} cars</Text>
-          </View>
-        </View>
-
-        {/* 2-column grid */}
-        <View style={styles.grid}>
-          {latest.map((car, i) => (
-            <View key={car.id} style={styles.gridItem}>
-              <CarCard car={car} />
-            </View>
-          ))}
-        </View>
-
-        <Pressable
-          style={styles.showAllBtn}
-          onPress={() => router.push("/(tabs)/search")}
-        >
-          <Text style={styles.showAllText}>Show all {cars.length} listings</Text>
-          <Feather name="arrow-right" size={15} color="#0066CC" />
         </Pressable>
       </ScrollView>
     </View>
@@ -194,64 +192,111 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: "#fff",
     paddingHorizontal: 16,
-    paddingBottom: 10,
-    gap: 10,
+    paddingBottom: 12,
+    gap: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    borderBottomColor: "#EEEEEE",
   },
-  locRow: {
+  topRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  locBtn: {
+  userRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  avatarCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#E8F0FE",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#0066CC" },
+  userName: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#1A1A1A" },
+
+  // Logo — big red like auto.ru
+  logo: {
+    fontSize: 38,
+    fontFamily: "Inter_700Bold",
+    color: "#E8192C",
+    textAlign: "center",
+    letterSpacing: -1,
+    marginVertical: -4,
+  },
+
+  // Search box
+  searchBox: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-  },
-  locText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#0066CC" },
-  headerRight: { flexDirection: "row", alignItems: "center", gap: 10 },
-  sellBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "#0066CC",
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 6,
-  },
-  sellBtnText: { fontSize: 13, fontFamily: "Inter_700Bold", color: "#fff" },
-  notifBtn: { position: "relative", padding: 4 },
-  notifDot: {
-    position: "absolute", top: 4, right: 4,
-    width: 7, height: 7, borderRadius: 4,
-    backgroundColor: "#E53935",
-    borderWidth: 1.5, borderColor: "#fff",
-  },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
+    gap: 12,
     backgroundColor: "#F5F5F5",
-    borderRadius: 8,
-    height: 42,
+    borderRadius: 12,
     paddingHorizontal: 14,
+    paddingVertical: 12,
     borderWidth: 1,
     borderColor: "#E0E0E0",
   },
-  searchPlaceholder: {
-    fontSize: 14,
-    color: Colors.light.textTertiary,
+  searchBoxText: { flex: 1 },
+  searchBoxLabel: {
+    fontSize: 15,
+    fontFamily: "Inter_500Medium",
+    color: "#1A1A1A",
+  },
+  searchBoxCount: {
+    fontSize: 12,
     fontFamily: "Inter_400Regular",
+    color: "#9E9E9E",
+    marginTop: 1,
+  },
+  filterBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
-  scroll: { flex: 1 },
-  dividerBlock: { height: 8, backgroundColor: "#F5F5F5" },
+  // Tabs
+  tabs: { flexDirection: "row", gap: 8 },
+  tab: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: "#F5F5F5",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  tabActive: {
+    backgroundColor: "#fff",
+    borderColor: "#1A1A1A",
+    borderWidth: 1.5,
+  },
+  tabLabel: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+    color: "#6B6B6B",
+  },
+  tabLabelActive: {
+    fontFamily: "Inter_700Bold",
+    color: "#1A1A1A",
+  },
+  tabEmoji: { fontSize: 18 },
 
+  scroll: { flex: 1 },
+
+  // Section
   section: {
     backgroundColor: "#fff",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 12,
+    paddingTop: 16,
+    paddingBottom: 4,
   },
   sectionRow: {
     flexDirection: "row",
@@ -260,92 +305,76 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontFamily: "Inter_700Bold",
-    color: Colors.light.text,
+    color: "#1A1A1A",
     marginBottom: 12,
   },
-  sectionCount: { fontSize: 13, color: Colors.light.textTertiary, fontFamily: "Inter_400Regular" },
-  seeAll: { fontSize: 13, color: "#0066CC", fontFamily: "Inter_500Medium" },
+  seeAll: { fontSize: 14, color: "#0066CC", fontFamily: "Inter_400Regular" },
 
-  // Brands
-  brandsRow: { flexDirection: "row", gap: 10, paddingRight: 16 },
-  brandChip: {
-    width: 80,
-    backgroundColor: "#F5F5F5",
-    borderRadius: 8,
-    paddingVertical: 10,
-    alignItems: "center",
-    gap: 4,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
+  // Grid — 2 column, no gap (like auto.ru)
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginHorizontal: -4,
   },
-  brandEmoji: { fontSize: 22 },
-  brandName: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: Colors.light.text },
-  brandCount: { fontSize: 10, fontFamily: "Inter_400Regular", color: Colors.light.textTertiary },
+  gridItem: {
+    width: "50%",
+    paddingHorizontal: 4,
+    marginBottom: 16,
+  },
 
-  // Offers
-  offersRow: { flexDirection: "row", gap: 12, paddingRight: 16 },
+  sep: { height: 8, backgroundColor: "#F5F5F5" },
+
+  // Special offers (horizontal)
+  offersRow: { flexDirection: "row", gap: 10, paddingRight: 12, paddingBottom: 12 },
   offerCard: {
-    width: 190,
+    width: 180,
     backgroundColor: "#fff",
-    borderRadius: 8,
+    borderRadius: 10,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: "#EEEEEE",
   },
-  offerImageWrap: { height: 110, backgroundColor: "#F0F4FF", position: "relative" },
-  offerImage: { width: "100%", height: "100%", resizeMode: "cover" },
-  offerBadge: {
-    position: "absolute",
-    top: 8, left: 8,
-    backgroundColor: "#E53935",
-    paddingHorizontal: 8, paddingVertical: 3,
-    borderRadius: 4,
-    zIndex: 1,
-  },
-  offerBadgeText: { color: "#fff", fontSize: 10, fontFamily: "Inter_700Bold" },
-  offerImgPlaceholder: { flex: 1 },
-  offerInfo: { padding: 10, gap: 3 },
-  offerTitle: { fontSize: 13, fontFamily: "Inter_700Bold", color: Colors.light.text },
-  offerPrice: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#0066CC" },
-  offerSub: { fontSize: 11, color: Colors.light.textTertiary, fontFamily: "Inter_400Regular" },
-  creditTag: { fontSize: 11, color: "#43A047", fontFamily: "Inter_600SemiBold", marginTop: 2 },
+  offerImgWrap: { height: 115, position: "relative" },
+  offerImg: { width: "100%", height: "100%" },
+  offerHeart: { position: "absolute", top: 6, right: 6 },
+  offerInfo: { padding: 10, gap: 1 },
+  offerPrice: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
+  offerName: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#6B6B6B" },
+  offerYear: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#9E9E9E" },
 
   // Ad banner
   adBanner: {
-    backgroundColor: "#EBF4FF",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    backgroundColor: "#EBF4FF",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: "#C6DEFF",
   },
-  adBannerTitle: { fontSize: 14, fontFamily: "Inter_700Bold", color: Colors.light.text },
-  adBannerSub: { fontSize: 12, color: Colors.light.textSecondary, fontFamily: "Inter_400Regular", marginTop: 2 },
-  adBannerBtn: { flexDirection: "row", alignItems: "center", gap: 4 },
-  adBannerBtnText: { fontSize: 13, color: "#0066CC", fontFamily: "Inter_600SemiBold" },
-
-  // Grid
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    backgroundColor: "#fff",
+  adBannerTitle: {
+    fontSize: 14,
+    fontFamily: "Inter_700Bold",
+    color: "#1A1A1A",
   },
-  gridItem: { width: "50%" },
-
-  showAllBtn: {
-    flexDirection: "row",
+  adBannerSub: {
+    fontSize: 12,
+    color: "#6B6B6B",
+    fontFamily: "Inter_400Regular",
+    marginTop: 2,
+  },
+  adBannerArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#fff",
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#E0E0E0",
+    borderWidth: 1,
+    borderColor: "#C6DEFF",
   },
-  showAllText: { fontSize: 14, color: "#0066CC", fontFamily: "Inter_600SemiBold" },
 });
