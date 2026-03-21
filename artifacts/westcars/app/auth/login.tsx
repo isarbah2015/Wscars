@@ -4,7 +4,6 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,10 +14,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
-
-const LOGO = require("@/assets/images/westcars-logo.png");
 
 export default function LoginScreen() {
   const { login } = useApp();
@@ -41,7 +37,7 @@ export default function LoginScreen() {
     else Alert.alert("Login Failed", "Invalid email or password.");
   };
 
-  const topPad = (insets.top || 0) + (Platform.OS === "web" ? 67 : 0);
+  const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
 
   return (
     <KeyboardAvoidingView
@@ -60,16 +56,15 @@ export default function LoginScreen() {
           <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.8)" />
         </Pressable>
 
-        {/* Logo + wordmark */}
-        <View style={styles.brandRow}>
-          <View style={styles.logoBg}>
-            <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
+        {/* Wordmark: West 🚙 cars */}
+        <View style={styles.wordmarkRow}>
+          <Text style={styles.wordWest}>West</Text>
+          <View style={styles.iconWrap}>
+            <Feather name="truck" size={36} color="#E8192C" />
           </View>
-          <View>
-            <Text style={styles.wordmark}>Westcars</Text>
-            <Text style={styles.tagline}>Ghana's Car Marketplace</Text>
-          </View>
+          <Text style={styles.wordCars}>cars</Text>
         </View>
+        <Text style={styles.tagline}>Ghana's Car Marketplace</Text>
 
         {/* Hero text */}
         <Text style={styles.heroTitle}>Welcome back</Text>
@@ -228,23 +223,20 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     marginBottom: 4,
   },
-  brandRow: { flexDirection: "row", alignItems: "center", gap: 14 },
-  logoBg: {
-    width: 52, height: 52,
-    borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.15)",
-    alignItems: "center", justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+  wordmarkRow: { flexDirection: "row", alignItems: "center", gap: 0 },
+  wordWest: {
+    fontSize: 42, fontFamily: "Inter_700Bold",
+    color: "#fff", letterSpacing: -1.5, includeFontPadding: false,
   },
-  logoImg: { width: 36, height: 36 },
-  wordmark: {
-    fontSize: 22, fontFamily: "Inter_700Bold",
-    color: "#fff", letterSpacing: -0.5,
+  iconWrap: { marginHorizontal: 3, transform: [{ scaleX: -1 }] },
+  wordCars: {
+    fontSize: 42, fontFamily: "Inter_400Regular",
+    color: "#fff", letterSpacing: -1.5, includeFontPadding: false,
   },
   tagline: {
     fontSize: 12, fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.6)", marginTop: 1,
+    color: "rgba(255,255,255,0.65)", letterSpacing: 1.2,
+    textTransform: "uppercase", marginTop: -4,
   },
   heroTitle: {
     fontSize: 32, fontFamily: "Inter_700Bold",

@@ -20,8 +20,41 @@ const LOGO = require("@/assets/images/westcars-logo.png");
 const CAR_NEW = require("@/assets/images/car-new.png");
 const CAR_USED = require("@/assets/images/car-used.png");
 const CAR_MOTO = require("@/assets/images/car-moto.png");
+const SEARCH_ICON = require("@/assets/images/search-car-icon.png");
+const CAT_SUV = require("@/assets/images/cat-suv.png");
+const CAT_SEDAN = require("@/assets/images/cat-sedan.png");
+const CAT_PICKUP = require("@/assets/images/cat-pickup.png");
+const CAT_VAN = require("@/assets/images/cat-van.png");
+const CAT_COUPE = require("@/assets/images/cat-coupe.png");
+const CAT_HATCH = require("@/assets/images/cat-hatchback.png");
+const CAT_MOTO = require("@/assets/images/cat-motorcycle.png");
 
 type Condition = "new" | "used" | "moto";
+
+const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: number }[]> = {
+  new: [
+    { label: "SUV / 4×4", img: CAT_SUV, count: 4 },
+    { label: "Sedan", img: CAT_SEDAN, count: 2 },
+    { label: "Pickup", img: CAT_PICKUP, count: 1 },
+    { label: "Van", img: CAT_VAN, count: 0 },
+    { label: "Coupe", img: CAT_COUPE, count: 0 },
+    { label: "Hatchback", img: CAT_HATCH, count: 0 },
+  ],
+  used: [
+    { label: "SUV / 4×4", img: CAT_SUV, count: 5 },
+    { label: "Sedan", img: CAT_SEDAN, count: 2 },
+    { label: "Pickup", img: CAT_PICKUP, count: 1 },
+    { label: "Van", img: CAT_VAN, count: 0 },
+    { label: "Coupe", img: CAT_COUPE, count: 0 },
+    { label: "Hatchback", img: CAT_HATCH, count: 0 },
+  ],
+  moto: [
+    { label: "Motorcycle", img: CAT_MOTO, count: 3 },
+    { label: "Scooter", img: CAT_MOTO, count: 2 },
+    { label: "ATV / Quad", img: CAT_MOTO, count: 0 },
+    { label: "Dirt Bike", img: CAT_MOTO, count: 0 },
+  ],
+};
 
 export default function HomeScreen() {
   const { cars, currentUser } = useApp();
@@ -75,7 +108,7 @@ export default function HomeScreen() {
           style={styles.searchBox}
           onPress={() => router.push("/(tabs)/search")}
         >
-          <Feather name="truck" size={22} color="#9E9E9E" />
+          <Image source={SEARCH_ICON} style={styles.searchCarIcon} resizeMode="contain" />
           <View style={styles.searchBoxText}>
             <Text style={styles.searchBoxLabel}>Brand, model</Text>
             <Text style={styles.searchBoxCount}>
@@ -117,6 +150,36 @@ export default function HomeScreen() {
           paddingBottom: 100 + (insets.bottom || 0),
         }}
       >
+        {/* ── Vehicle Type Categories (2×2 horizontal grid) ── */}
+        <View style={styles.catSection}>
+          <Text style={styles.catSectionTitle}>Browse by type</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catScrollContent}>
+            {/* Group into pairs forming columns of 2 */}
+            {(() => {
+              const cats = VEHICLE_CATEGORIES[condition];
+              const pairs: typeof cats[] = [];
+              for (let i = 0; i < cats.length; i += 2) {
+                pairs.push(cats.slice(i, i + 2));
+              }
+              return pairs.map((pair, pIdx) => (
+                <View key={pIdx} style={styles.catColumn}>
+                  {pair.map((cat) => (
+                    <Pressable key={cat.label} style={styles.catCard}>
+                      <Image source={cat.img} style={styles.catImg} resizeMode="contain" />
+                      <Text style={styles.catLabel} numberOfLines={1}>{cat.label}</Text>
+                      {cat.count > 0 && (
+                        <Text style={styles.catCount}>{cat.count} available</Text>
+                      )}
+                    </Pressable>
+                  ))}
+                </View>
+              ));
+            })()}
+          </ScrollView>
+        </View>
+
+        <View style={styles.sep} />
+
         {/* ── "Personally for you" section ── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personally for you</Text>
@@ -303,6 +366,54 @@ const styles = StyleSheet.create({
     color: "#1A1A1A",
   },
   tabImg: { width: 40, height: 28 },
+  searchCarIcon: { width: 28, height: 28 },
+
+  // Vehicle category grid
+  catSection: {
+    backgroundColor: "#fff",
+    paddingTop: 14,
+    paddingBottom: 12,
+  },
+  catSectionTitle: {
+    fontSize: 16,
+    fontFamily: "Inter_700Bold",
+    color: "#1A1A1A",
+    paddingHorizontal: 14,
+    marginBottom: 10,
+  },
+  catScrollContent: {
+    paddingHorizontal: 14,
+    gap: 8,
+  },
+  catColumn: { flexDirection: "column", gap: 8 },
+  catCard: {
+    width: 120,
+    backgroundColor: "#F8F8F8",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#EEEEEE",
+    overflow: "hidden",
+    padding: 8,
+    alignItems: "center",
+  },
+  catImg: {
+    width: 100,
+    height: 60,
+    marginBottom: 4,
+  },
+  catLabel: {
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+    color: "#1A1A1A",
+    textAlign: "center",
+  },
+  catCount: {
+    fontSize: 10,
+    fontFamily: "Inter_400Regular",
+    color: "#9E9E9E",
+    textAlign: "center",
+    marginTop: 2,
+  },
 
   scroll: { flex: 1 },
 

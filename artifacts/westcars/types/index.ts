@@ -22,6 +22,62 @@ export interface CarRating {
   totalRatings: number;
 }
 
+export interface TechSpecs {
+  // Quick overview
+  bodyType: string;
+  owners: number;
+  color: string;
+  trim: string;
+  // General
+  country: string;
+  carClass: string;
+  doors: number;
+  seats: number;
+  steering: string;
+  // Dimensions (mm)
+  length: number;
+  width: number;
+  height: number;
+  wheelbase: number;
+  clearance: number;
+  frontTrack: number;
+  rearTrack: number;
+  wheelSize: string;
+  // Engine
+  engineType: string;
+  engineLayout: string;
+  engineDisplacement: string;
+  engineCode: string;
+  horsepower: number;
+  horsepowerRpm: string;
+  torque: string;
+  torqueRpm: string;
+  cylinderConfig: string;
+  fuelGrade: string;
+  // Transmission
+  gearbox: string;
+  gears: number;
+  drive: string;
+  // Weight & Mass
+  curbWeight: number;
+  maxWeight: number;
+  tankVolume: number;
+  // Suspension & Brakes
+  frontSuspension: string;
+  rearSuspension: string;
+  frontBrakes: string;
+  rearBrakes: string;
+  // Performance
+  maxSpeed: number;
+  acceleration: string;
+  fuelCity: string;
+  fuelHighway: string;
+  fuelMixed: string;
+  co2: string;
+  euroStandard: string;
+  annualTax: number;
+}
+
 export interface Car {
   id: string;
   brand: string;
@@ -43,6 +99,7 @@ export interface Car {
   createdAt: string;
   category: string;
   views?: number;
+  techSpecs?: TechSpecs;
 }
 
 export interface Advertisement {

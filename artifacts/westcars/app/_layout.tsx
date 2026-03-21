@@ -43,6 +43,14 @@ function RootLayoutNav() {
         name="advertise"
         options={{ headerShown: false, presentation: "card" }}
       />
+      <Stack.Screen
+        name="full-specs/[id]"
+        options={{ headerShown: false, presentation: "card" }}
+      />
+      <Stack.Screen
+        name="advertise-book"
+        options={{ headerShown: false, presentation: "card" }}
+      />
     </Stack>
   );
 }

@@ -107,25 +107,27 @@ export default function CarDetailScreen() {
     .filter((c) => c.id !== car.id && (c.brand === car.brand || c.category === car.category))
     .slice(0, 4);
 
+  const s = car.techSpecs;
+
   // Icon-based spec cells (2-column grid, auto.ru style)
   const specCells = [
     { icon: "calendar", value: String(car.year), label: "Year" },
     { icon: "activity", value: `${Math.round(car.mileage / 1000)}k km`, label: "Mileage" },
     { icon: "zap", value: car.fuelType, label: "Fuel" },
-    { icon: "settings", value: car.transmission, label: "Gearbox" },
-    { icon: "navigation-2", value: "All-wheel", label: "Drive" },
-    { icon: "droplet", value: car.condition === "New" ? "White" : "Silver", label: "Color" },
+    { icon: "settings", value: s?.gearbox?.split(" ")[0] || car.transmission, label: "Gearbox" },
+    { icon: "navigation-2", value: s?.drive?.split(" ")[0] || "AWD", label: "Drive" },
+    { icon: "droplet", value: s?.color?.split(" ")[0] || "White", label: "Color" },
   ];
 
-  // Row-based additional specs
+  // Row-based additional specs — from real techSpecs
   const extraSpecs = [
-    { label: "Trim", value: car.brand + " Standard", highlight: true },
-    { label: "Body type", value: car.category || "SUV" },
-    { label: "Owners", value: car.condition === "New" ? "0" : "1" },
-    { label: "Annual tax", value: `GHS ${Math.round(car.price * 0.002).toLocaleString()}` },
+    { label: "Trim", value: s?.trim || `${car.brand} Standard`, highlight: true },
+    { label: "Body type", value: s?.bodyType || car.category || "SUV" },
+    { label: "Owners", value: String(s?.owners ?? (car.condition === "New" ? 0 : 1)) },
+    { label: "Annual tax", value: `GHS ${(s?.annualTax ?? Math.round(car.price * 0.002)).toLocaleString()}` },
   ];
 
-  const topPad = (insets.top || 0) + (Platform.OS === "web" ? 67 : 0);
+  const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
 
   return (
     <View style={styles.container}>
@@ -265,10 +267,11 @@ export default function CarDetailScreen() {
           </View>
 
           {/* More details button */}
-          <Pressable style={styles.moreBtn} onPress={() => setShowAllSpecs(!showAllSpecs)}>
-            <Text style={styles.moreBtnText}>
-              {showAllSpecs ? "Show less" : "More details"}
-            </Text>
+          <Pressable
+            style={styles.moreBtn}
+            onPress={() => router.push({ pathname: "/full-specs/[id]", params: { id: car.id } })}
+          >
+            <Text style={styles.moreBtnText}>More details →</Text>
           </Pressable>
         </View>
 

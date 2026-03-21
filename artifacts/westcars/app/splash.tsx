@@ -1,152 +1,125 @@
+import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import {
   Animated,
   Easing,
-  Image,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 
-const LOGO = require("@/assets/images/westcars-logo.png");
-
 export default function SplashScreen() {
-  const logoScale = useRef(new Animated.Value(0.5)).current;
+  // Animations
+  const logoX = useRef(new Animated.Value(-60)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
-  const nameOpacity = useRef(new Animated.Value(0)).current;
-  const nameSlide = useRef(new Animated.Value(18)).current;
-  const taglineOpacity = useRef(new Animated.Value(0)).current;
-  const loaderOpacity = useRef(new Animated.Value(0)).current;
-  const pulseScale = useRef(new Animated.Value(1)).current;
+  const lineWidth = useRef(new Animated.Value(0)).current;
+  const tagOpacity = useRef(new Animated.Value(0)).current;
+  const dotsOpacity = useRef(new Animated.Value(0)).current;
+  const dot1Scale = useRef(new Animated.Value(0.4)).current;
+  const dot2Scale = useRef(new Animated.Value(0.4)).current;
+  const dot3Scale = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
-    // Step 1: Logo pops in with overshoot spring
-    Animated.spring(logoScale, {
-      toValue: 1,
-      tension: 60,
-      friction: 6,
-      useNativeDriver: true,
-    }).start();
+    // 1) Logo slides in from left + fades
+    Animated.parallel([
+      Animated.spring(logoX, {
+        toValue: 0,
+        tension: 55,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+      Animated.timing(logoOpacity, {
+        toValue: 1,
+        duration: 500,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
 
-    Animated.timing(logoOpacity, {
-      toValue: 1,
-      duration: 350,
-      useNativeDriver: true,
-    }).start();
+    // 2) Red underline sweeps in after logo lands
+    setTimeout(() => {
+      Animated.timing(lineWidth, {
+        toValue: 1,
+        duration: 420,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
+      }).start();
+    }, 400);
 
-    // Step 2: Name slides up after logo settles
-    const nameTimer = setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(nameOpacity, {
-          toValue: 1,
-          duration: 380,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.spring(nameSlide, {
-          toValue: 0,
-          tension: 80,
-          friction: 10,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, 250);
-
-    // Step 3: Tagline fades in
-    const tagTimer = setTimeout(() => {
-      Animated.timing(taglineOpacity, {
+    // 3) Tagline fades in
+    setTimeout(() => {
+      Animated.timing(tagOpacity, {
         toValue: 1,
         duration: 400,
         useNativeDriver: true,
       }).start();
-    }, 520);
-
-    // Step 4: Loader appears
-    const loaderTimer = setTimeout(() => {
-      Animated.timing(loaderOpacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-
-      // Pulse animation on loader dots
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseScale, { toValue: 1.2, duration: 600, useNativeDriver: true }),
-          Animated.timing(pulseScale, { toValue: 1.0, duration: 600, useNativeDriver: true }),
-        ])
-      ).start();
     }, 700);
 
-    // Navigate
-    const navTimer = setTimeout(() => {
-      router.replace("/auth/login");
-    }, 2600);
+    // 4) Pulsing dots
+    setTimeout(() => {
+      Animated.timing(dotsOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
 
-    return () => {
-      clearTimeout(nameTimer);
-      clearTimeout(tagTimer);
-      clearTimeout(loaderTimer);
-      clearTimeout(navTimer);
-    };
+      const pulse = (dot: Animated.Value, delay: number) =>
+        Animated.loop(
+          Animated.sequence([
+            Animated.delay(delay),
+            Animated.spring(dot, { toValue: 1.3, useNativeDriver: true, speed: 40, bounciness: 8 }),
+            Animated.spring(dot, { toValue: 0.4, useNativeDriver: true, speed: 20, bounciness: 0 }),
+          ])
+        ).start();
+
+      pulse(dot1Scale, 0);
+      pulse(dot2Scale, 150);
+      pulse(dot3Scale, 300);
+    }, 900);
+
+    const navTimer = setTimeout(() => router.replace("/auth/login"), 2800);
+    return () => clearTimeout(navTimer);
   }, []);
 
   return (
     <View style={styles.container}>
-      {/* Big logo */}
-      <Animated.View
-        style={[
-          styles.logoWrap,
-          { opacity: logoOpacity, transform: [{ scale: logoScale }] },
-        ]}
-      >
-        <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
-      </Animated.View>
+      <View style={styles.center}>
+        {/* Wordmark: West 🚙 cars */}
+        <Animated.View
+          style={[
+            styles.wordmarkRow,
+            { opacity: logoOpacity, transform: [{ translateX: logoX }] },
+          ]}
+        >
+          <Text style={styles.wordWest}>West</Text>
+          <View style={styles.iconWrap}>
+            <Feather name="truck" size={40} color="#E8192C" />
+          </View>
+          <Text style={styles.wordCars}>cars</Text>
+        </Animated.View>
 
-      {/* Westcars name — slides up, smaller than logo */}
-      <Animated.View
-        style={{
-          opacity: nameOpacity,
-          transform: [{ translateY: nameSlide }],
-          alignItems: "center",
-          marginTop: 16,
-        }}
-      >
-        <Text style={styles.wordmark}>
-          West<Text style={styles.wordmarkThin}>cars</Text>
-        </Text>
-      </Animated.View>
+        {/* Red sweep line */}
+        <Animated.View
+          style={[
+            styles.sweepLine,
+            {
+              width: lineWidth.interpolate({
+                inputRange: [0, 1],
+                outputRange: ["0%", "100%"],
+              }),
+            },
+          ]}
+        />
 
-      {/* Tagline */}
-      <Animated.Text style={[styles.tagline, { opacity: taglineOpacity }]}>
-        Ghana's Car Marketplace
-      </Animated.Text>
+        {/* Ghana's Car Marketplace */}
+        <Animated.Text style={[styles.tagline, { opacity: tagOpacity }]}>
+          Ghana's Car Marketplace
+        </Animated.Text>
+      </View>
 
-      {/* Pulsing dots loader */}
-      <Animated.View style={[styles.loaderRow, { opacity: loaderOpacity }]}>
-        {[0, 1, 2].map((i) => (
+      {/* Pulsing dots */}
+      <Animated.View style={[styles.dotsRow, { opacity: dotsOpacity }]}>
+        {[dot1Scale, dot2Scale, dot3Scale].map((s, i) => (
           <Animated.View
             key={i}
-            style={[
-              styles.dot,
-              {
-                transform: [
-                  {
-                    scale: i === 1
-                      ? pulseScale
-                      : pulseScale.interpolate({
-                          inputRange: [1, 1.2],
-                          outputRange: [1, i === 0 ? 1.15 : 1.1],
-                        }),
-                  },
-                ],
-                opacity: pulseScale.interpolate({
-                  inputRange: [1, 1.2],
-                  outputRange: [0.4 + i * 0.2, 1],
-                }),
-              },
-            ]}
+            style={[styles.dot, { transform: [{ scale: s }] }]}
           />
         ))}
       </Animated.View>
@@ -161,35 +134,50 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  logoWrap: {
-    width: 160,
-    height: 160,
+  center: { alignItems: "center" },
+
+  wordmarkRow: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    gap: 0,
   },
-  logoImg: {
-    width: 160,
-    height: 160,
-  },
-  wordmark: {
-    fontSize: 24,
+  wordWest: {
+    fontSize: 52,
     fontFamily: "Inter_700Bold",
     color: "#1A1A1A",
-    letterSpacing: -0.4,
+    letterSpacing: -2,
+    includeFontPadding: false,
   },
-  wordmarkThin: {
+  iconWrap: {
+    marginHorizontal: 4,
+    transform: [{ scaleX: -1 }],
+  },
+  wordCars: {
+    fontSize: 52,
     fontFamily: "Inter_400Regular",
-    color: "#E8192C",
+    color: "#1A1A1A",
+    letterSpacing: -2,
+    includeFontPadding: false,
   },
-  tagline: {
+
+  sweepLine: {
+    height: 3,
+    backgroundColor: "#E8192C",
+    borderRadius: 2,
     marginTop: 6,
-    fontSize: 12,
+    alignSelf: "flex-start",
+  },
+
+  tagline: {
+    fontSize: 13,
     fontFamily: "Inter_400Regular",
     color: "#9E9E9E",
-    letterSpacing: 0.6,
+    letterSpacing: 1.5,
     textTransform: "uppercase",
+    marginTop: 16,
   },
-  loaderRow: {
+
+  dotsRow: {
     position: "absolute",
     bottom: 72,
     flexDirection: "row",
@@ -197,9 +185,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#0066CC",
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: "#E8192C",
   },
 });
