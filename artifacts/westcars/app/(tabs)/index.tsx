@@ -123,8 +123,12 @@ export default function HomeScreen() {
           </Pressable>
         </Pressable>
 
-        {/* Condition tabs */}
-        <View style={styles.tabs}>
+        {/* Condition tabs + category type cards in one horizontal scroll */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabsRow}
+        >
           {(
             [
               { id: "new", label: "New", img: CAR_NEW },
@@ -143,7 +147,21 @@ export default function HomeScreen() {
               <Image source={tab.img} style={styles.tabImg} resizeMode="contain" />
             </Pressable>
           ))}
-        </View>
+
+          {/* Divider */}
+          <View style={styles.tabDivider} />
+
+          {/* Category type cards — same size as condition tabs */}
+          {VEHICLE_CATEGORIES[condition].map((cat) => (
+            <Pressable key={cat.label} style={styles.tab}>
+              <Text style={styles.tabLabel} numberOfLines={1}>{cat.label}</Text>
+              <Image source={cat.img} style={styles.tabImg} resizeMode="contain" />
+              {cat.count > 0 && (
+                <Text style={styles.tabCount}>{cat.count}</Text>
+              )}
+            </Pressable>
+          ))}
+        </ScrollView>
       </View>
 
       <ScrollView
@@ -153,36 +171,6 @@ export default function HomeScreen() {
           paddingBottom: 100 + (insets.bottom || 0),
         }}
       >
-        {/* ── Vehicle Type Categories (2×2 horizontal grid) ── */}
-        <View style={styles.catSection}>
-          <Text style={styles.catSectionTitle}>Browse by type</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catScrollContent}>
-            {/* Group into pairs forming columns of 2 */}
-            {(() => {
-              const cats = VEHICLE_CATEGORIES[condition];
-              const pairs: typeof cats[] = [];
-              for (let i = 0; i < cats.length; i += 2) {
-                pairs.push(cats.slice(i, i + 2));
-              }
-              return pairs.map((pair, pIdx) => (
-                <View key={pIdx} style={styles.catColumn}>
-                  {pair.map((cat) => (
-                    <Pressable key={cat.label} style={styles.catCard}>
-                      <Image source={cat.img} style={styles.catImg} resizeMode="contain" />
-                      <Text style={styles.catLabel} numberOfLines={1}>{cat.label}</Text>
-                      {cat.count > 0 && (
-                        <Text style={styles.catCount}>{cat.count} available</Text>
-                      )}
-                    </Pressable>
-                  ))}
-                </View>
-              ));
-            })()}
-          </ScrollView>
-        </View>
-
-        <View style={styles.sep} />
-
         {/* ── "Personally for you" section ── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personally for you</Text>
@@ -349,15 +337,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // Tabs
-  tabs: { flexDirection: "row", gap: 8 },
+  // Tabs — horizontal scroll row
+  tabsRow: { flexDirection: "row", gap: 8, paddingVertical: 2 },
   tab: {
-    flex: 1,
-    flexDirection: "row",
+    width: 100,
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
-    paddingVertical: 10,
+    gap: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
     borderRadius: 10,
     backgroundColor: "#F5F5F5",
     borderWidth: 1,
@@ -369,15 +358,28 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   tabLabel: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Inter_500Medium",
     color: "#6B6B6B",
+    textAlign: "center",
   },
   tabLabelActive: {
     fontFamily: "Inter_700Bold",
     color: "#1A1A1A",
   },
-  tabImg: { width: 40, height: 28 },
+  tabCount: {
+    fontSize: 10,
+    fontFamily: "Inter_400Regular",
+    color: "#9E9E9E",
+  },
+  tabImg: { width: 64, height: 36 },
+  tabDivider: {
+    width: 1,
+    marginHorizontal: 2,
+    backgroundColor: "#E0E0E0",
+    alignSelf: "stretch",
+    marginVertical: 4,
+  },
   searchCarIcon: { width: 28, height: 28 },
 
   // Vehicle category grid

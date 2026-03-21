@@ -250,11 +250,14 @@ export default function AdvertiseScreen() {
       Alert.alert("Select a package", "Choose an ad format and duration first.");
       return;
     }
-    Alert.alert(
-      "Booking received!",
-      `${selectedPkg.label}\n${periodLabel(selectedPeriod.period, selectedPeriod.count)}\n\nOur ads team will contact you within 24 hours.\n\nTotal: GHS ${selectedPeriod.price.toLocaleString()}`,
-      [{ text: "OK", onPress: () => router.back() }]
-    );
+    router.push({
+      pathname: "/advertise-book",
+      params: {
+        pkg: selectedPkg.id,
+        price: String(selectedPeriod.price),
+        duration: periodLabel(selectedPeriod.period, selectedPeriod.count),
+      },
+    });
   };
 
   const displayPkgs = activeCategory === "All"

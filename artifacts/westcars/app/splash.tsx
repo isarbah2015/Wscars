@@ -9,182 +9,134 @@ import {
   View,
 } from "react-native";
 
-const LOGO = require("@/assets/images/wc-logomark.png");
+const SPLASH_CAR = require("@/assets/images/splash-car.png");
 
 export default function SplashScreen() {
-  const logoScale   = useRef(new Animated.Value(0.6)).current;
-  const logoOpacity = useRef(new Animated.Value(0)).current;
-  const lineWidth   = useRef(new Animated.Value(0)).current;
-  const tagOpacity  = useRef(new Animated.Value(0)).current;
-  const dotsOpacity = useRef(new Animated.Value(0)).current;
+  const carOpacity  = useRef(new Animated.Value(0)).current;
+  const carScale    = useRef(new Animated.Value(0.88)).current;
+  const textOpacity = useRef(new Animated.Value(0)).current;
   const dot1Scale   = useRef(new Animated.Value(0.4)).current;
   const dot2Scale   = useRef(new Animated.Value(0.4)).current;
   const dot3Scale   = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
-    // 1) Logo pops in with spring scale + fade
+    // Car floats in
     Animated.parallel([
-      Animated.spring(logoScale, {
-        toValue: 1,
-        tension: 60,
-        friction: 7,
+      Animated.timing(carOpacity, {
+        toValue: 1, duration: 700,
+        easing: Easing.out(Easing.quad),
         useNativeDriver: true,
       }),
-      Animated.timing(logoOpacity, {
-        toValue: 1,
-        duration: 420,
-        easing: Easing.out(Easing.quad),
+      Animated.spring(carScale, {
+        toValue: 1, tension: 45, friction: 7,
         useNativeDriver: true,
       }),
     ]).start();
 
-    // 2) Red underline sweeps in
+    // Text fades in after car
     setTimeout(() => {
-      Animated.timing(lineWidth, {
-        toValue: 1,
-        duration: 500,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: false,
-      }).start();
-    }, 350);
-
-    // 3) Tagline fades in
-    setTimeout(() => {
-      Animated.timing(tagOpacity, {
-        toValue: 1,
-        duration: 400,
+      Animated.timing(textOpacity, {
+        toValue: 1, duration: 500,
         useNativeDriver: true,
       }).start();
-    }, 700);
+    }, 500);
 
-    // 4) Pulsing dots appear
+    // Loading dots pulse
     setTimeout(() => {
-      Animated.timing(dotsOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
-
       const pulse = (dot: Animated.Value, delay: number) =>
         Animated.loop(
           Animated.sequence([
             Animated.delay(delay),
-            Animated.spring(dot, { toValue: 1.35, useNativeDriver: true, speed: 40, bounciness: 8 }),
-            Animated.spring(dot, { toValue: 0.4, useNativeDriver: true, speed: 20, bounciness: 0 }),
+            Animated.spring(dot, { toValue: 1.4, useNativeDriver: true, speed: 40, bounciness: 8 }),
+            Animated.spring(dot, { toValue: 0.4, useNativeDriver: true, speed: 18, bounciness: 0 }),
           ])
         ).start();
-
       pulse(dot1Scale, 0);
-      pulse(dot2Scale, 160);
-      pulse(dot3Scale, 320);
-    }, 900);
+      pulse(dot2Scale, 170);
+      pulse(dot3Scale, 340);
+    }, 800);
 
-    const navTimer = setTimeout(() => router.replace("/auth/login"), 2900);
-    return () => clearTimeout(navTimer);
+    const nav = setTimeout(() => router.replace("/auth/login"), 3000);
+    return () => clearTimeout(nav);
   }, []);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.center}>
-        {/* Logo mark: W formed from two car silhouettes */}
-        <Animated.View style={{ opacity: logoOpacity, transform: [{ scale: logoScale }] }}>
-          <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
-        </Animated.View>
+    <View style={styles.root}>
+      {/* Car hero image */}
+      <Animated.View style={[styles.carWrap, { opacity: carOpacity, transform: [{ scale: carScale }] }]}>
+        <Image source={SPLASH_CAR} style={styles.car} resizeMode="contain" />
+      </Animated.View>
 
-        {/* Wordmark text below logo */}
-        <Animated.View style={{ opacity: logoOpacity, alignItems: "center", marginTop: 12 }}>
-          <View style={styles.wordmarkRow}>
-            <Text style={styles.wordW}>W</Text>
-            <Text style={styles.wordRest}>ESTCARS</Text>
-          </View>
+      {/* Brand text */}
+      <Animated.View style={[styles.brandBlock, { opacity: textOpacity }]}>
+        <View style={styles.wordRow}>
+          <Text style={styles.wordW}>W</Text>
+          <Text style={styles.wordRest}>ESTCARS</Text>
+        </View>
+        <Text style={styles.tagline}>Ghana's Car Marketplace</Text>
+      </Animated.View>
 
-          {/* Red sweep underline */}
-          <Animated.View
-            style={[
-              styles.sweepLine,
-              {
-                width: lineWidth.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ["0%", "100%"],
-                }),
-              },
-            ]}
-          />
-        </Animated.View>
-
-        {/* Tagline */}
-        <Animated.Text style={[styles.tagline, { opacity: tagOpacity }]}>
-          Ghana's Car Marketplace
-        </Animated.Text>
-      </View>
-
-      {/* Pulsing loading dots */}
-      <Animated.View style={[styles.dotsRow, { opacity: dotsOpacity }]}>
+      {/* Pulsing dots */}
+      <View style={styles.dotsRow}>
         {[dot1Scale, dot2Scale, dot3Scale].map((s, i) => (
           <Animated.View key={i} style={[styles.dot, { transform: [{ scale: s }] }]} />
         ))}
-      </Animated.View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-  },
-  center: { alignItems: "center" },
-
-  logoImg: {
-    width: 130,
-    height: 130,
+    gap: 24,
   },
 
-  wordmarkRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
+  carWrap: {
+    width: "100%",
+    paddingHorizontal: 20,
   },
+  car: {
+    width: "100%",
+    height: 220,
+  },
+
+  brandBlock: { alignItems: "center", gap: 6 },
+  wordRow: { flexDirection: "row", alignItems: "baseline" },
   wordW: {
-    fontSize: 40,
+    fontSize: 36,
     fontFamily: "Inter_700Bold",
     color: "#0066CC",
     letterSpacing: -1,
     includeFontPadding: false,
   },
   wordRest: {
-    fontSize: 40,
+    fontSize: 36,
     fontFamily: "Inter_700Bold",
     color: "#1A1A1A",
     letterSpacing: -1,
     includeFontPadding: false,
   },
-
-  sweepLine: {
-    height: 3,
-    backgroundColor: "#E8192C",
-    borderRadius: 2,
-    marginTop: 5,
-    alignSelf: "flex-start",
-  },
-
   tagline: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Inter_400Regular",
-    color: "#9E9E9E",
+    color: "#BDBDBD",
     letterSpacing: 2,
     textTransform: "uppercase",
-    marginTop: 18,
   },
 
   dotsRow: {
     position: "absolute",
-    bottom: 72,
+    bottom: 64,
     flexDirection: "row",
-    gap: 8,
+    gap: 7,
     alignItems: "center",
   },
   dot: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
+    width: 8, height: 8, borderRadius: 4,
     backgroundColor: "#0066CC",
   },
 });
