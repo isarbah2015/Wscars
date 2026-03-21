@@ -35,7 +35,7 @@ const BANNER_CAR  = require("@/assets/images/banner-car.png");
 
 type Condition = "new" | "used" | "moto";
 
-const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; emoji?: string; count: number }[]> = {
+const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: number }[]> = {
   new: [
     { label: "SUV / 4×4", img: CAT_SUV,    count: 4 },
     { label: "Sedan",     img: CAT_SEDAN,  count: 2 },
@@ -53,14 +53,14 @@ const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; emoji?: s
     { label: "Hatchback", img: CAT_HATCH,  count: 0 },
   ],
   moto: [
-    { label: "Motorcycle", img: CAT_MOTO, emoji: "🏍️", count: 3 },
-    { label: "Scooter",    img: CAT_MOTO, emoji: "🛵",  count: 2 },
-    { label: "ATV / Quad", img: CAT_MOTO, emoji: "🚵",  count: 0 },
-    { label: "Dirt Bike",  img: CAT_MOTO, emoji: "🤾",  count: 0 },
+    { label: "Motorcycle", img: CAT_MOTO,   count: 3 },
+    { label: "Scooter",    img: CAR_MOTO,   count: 2 },
+    { label: "ATV / Quad", img: CAT_PICKUP, count: 0 },
+    { label: "Dirt Bike",  img: CAT_COUPE,  count: 0 },
   ],
 };
 
-const CATS_HEIGHT = 110;
+const SUB_CATS_HEIGHT = 100;
 
 export default function HomeScreen() {
   const { cars, currentUser } = useApp();
@@ -83,27 +83,27 @@ export default function HomeScreen() {
     .filter((car, i, arr) => arr.findIndex((c) => c.id === car.id) === i)
     .slice(0, 5);
 
-  // ── Animated collapse of category row on scroll ──
-  const catHeightAnim = useRef(new Animated.Value(CATS_HEIGHT)).current;
-  const catOpacityAnim = useRef(new Animated.Value(1)).current;
+  // ── Animated collapse of SUB-category row on scroll (main tabs always visible) ──
+  const subHeightAnim = useRef(new Animated.Value(SUB_CATS_HEIGHT)).current;
+  const subOpacityAnim = useRef(new Animated.Value(1)).current;
   const lastScrollY = useRef(0);
-  const catsVisible = useRef(true);
+  const subsVisible = useRef(true);
 
   const showCats = () => {
-    if (catsVisible.current) return;
-    catsVisible.current = true;
+    if (subsVisible.current) return;
+    subsVisible.current = true;
     Animated.parallel([
-      Animated.spring(catHeightAnim, { toValue: CATS_HEIGHT, useNativeDriver: false, speed: 30, bounciness: 0 }),
-      Animated.timing(catOpacityAnim, { toValue: 1, duration: 200, useNativeDriver: false }),
+      Animated.spring(subHeightAnim, { toValue: SUB_CATS_HEIGHT, useNativeDriver: false, speed: 30, bounciness: 0 }),
+      Animated.timing(subOpacityAnim, { toValue: 1, duration: 200, useNativeDriver: false }),
     ]).start();
   };
 
   const hideCats = () => {
-    if (!catsVisible.current) return;
-    catsVisible.current = false;
+    if (!subsVisible.current) return;
+    subsVisible.current = false;
     Animated.parallel([
-      Animated.spring(catHeightAnim, { toValue: 0, useNativeDriver: false, speed: 30, bounciness: 0 }),
-      Animated.timing(catOpacityAnim, { toValue: 0, duration: 160, useNativeDriver: false }),
+      Animated.spring(subHeightAnim, { toValue: 0, useNativeDriver: false, speed: 30, bounciness: 0 }),
+      Animated.timing(subOpacityAnim, { toValue: 0, duration: 160, useNativeDriver: false }),
     ]).start();
   };
 
@@ -157,46 +157,60 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* ── Row 3: Condition tabs + category chips (collapses on scroll-up) ── */}
-        <Animated.View style={{ height: catHeightAnim, opacity: catOpacityAnim, overflow: "hidden" }}>
+        {/* ── Row 3: 3 FIXED main condition tabs — always visible ── */}
+        <View style={styles.mainTabsRow}>
+          {(
+            [
+              { id: "new",  label: "New",  img: CAR_NEW  },
+              { id: "used", label: "Used", img: CAR_USED },
+              { id: "moto", label: "Moto", img: CAR_MOTO },
+            ] as { id: Condition; label: string; img: any }[]
+          ).map((tab) => (
+            <Pressable
+              key={tab.id}
+              style={[
+                styles.mainTab,
+                { backgroundColor: colors.background, borderColor: colors.border },
+                condition === tab.id && {
+                  backgroundColor: colors.accentLight,
+                  borderColor: colors.accent,
+                  borderWidth: 1.5,
+                },
+              ]}
+              onPress={() => setCondition(tab.id)}
+            >
+              <Text
+                style={[
+                  styles.mainTabLabel,
+                  { color: colors.textSecondary },
+                  condition === tab.id && { color: colors.accent, fontFamily: "Manrope_700Bold" },
+                ]}
+              >
+                {tab.label}
+              </Text>
+              <Image source={tab.img} style={styles.mainTabImg} resizeMode="contain" />
+            </Pressable>
+          ))}
+        </View>
+
+        {/* ── Row 4: Sub-categories — horizontal 1×1 scroll, collapses on scroll ── */}
+        <Animated.View style={{ height: subHeightAnim, opacity: subOpacityAnim, overflow: "hidden" }}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.tabsRow}
+            contentContainerStyle={styles.subCatsRow}
           >
-            {(
-              [
-                { id: "new",  label: "New",  img: CAR_NEW  },
-                { id: "used", label: "Used", img: CAR_USED },
-                { id: "moto", label: "Moto", img: CAR_MOTO },
-              ] as { id: Condition; label: string; img: any }[]
-            ).map((tab) => (
-              <Pressable
-                key={tab.id}
-                style={[styles.tab, { backgroundColor: colors.background, borderColor: colors.border },
-                  condition === tab.id && { backgroundColor: colors.accentLight, borderColor: colors.accent, borderWidth: 1.5 }]}
-                onPress={() => setCondition(tab.id)}
-              >
-                <Text style={[styles.tabLabel, { color: colors.textSecondary },
-                  condition === tab.id && { color: colors.accent, fontFamily: "Manrope_700Bold" }]}>
-                  {tab.label}
-                </Text>
-                <Image source={tab.img} style={styles.tabImg} resizeMode="contain" />
-              </Pressable>
-            ))}
-
-            <View style={[styles.tabDivider, { backgroundColor: colors.border }]} />
-
             {VEHICLE_CATEGORIES[condition].map((cat) => (
-              <Pressable key={cat.label} style={[styles.tab, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                <Text style={[styles.tabLabel, { color: colors.textSecondary }]} numberOfLines={1}>{cat.label}</Text>
-                {cat.emoji ? (
-                  <Text style={styles.tabEmoji}>{cat.emoji}</Text>
-                ) : (
-                  <Image source={cat.img} style={styles.tabImg} resizeMode="contain" />
-                )}
+              <Pressable
+                key={cat.label}
+                style={[styles.subTab, { backgroundColor: colors.background, borderColor: colors.border }]}
+              >
+                <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
+                <Text style={[styles.subTabLabel, { color: colors.textSecondary }]} numberOfLines={1}>
+                  {cat.label}
+                </Text>
                 {cat.count > 0 && (
-                  <Text style={[styles.tabCount, { color: colors.textTertiary }]}>{cat.count}</Text>
+                  <Text style={[styles.subTabCount, { color: colors.textTertiary }]}>{cat.count}</Text>
                 )}
               </Pressable>
             ))}
@@ -396,49 +410,61 @@ const styles = StyleSheet.create({
   // Search car icon — bigger
   searchCarIcon: { width: 44, height: 44 },
 
-  // Tabs row
-  tabsRow: { flexDirection: "row", gap: 8, paddingVertical: 4 },
-  tab: {
-    width: 100,
+  // ── 3 fixed main condition tabs ──
+  mainTabsRow: {
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingTop: 8,
+    paddingBottom: 6,
+  },
+  mainTab: {
+    flex: 1,
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 3,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  mainTabLabel: {
+    fontSize: 12,
+    fontFamily: "Manrope_600SemiBold",
+    textAlign: "center",
+  },
+  mainTabImg: { width: 72, height: 40 },
+
+  // ── Sub-category row (horizontal scroll) ──
+  subCatsRow: {
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    alignItems: "center",
+  },
+  subTab: {
+    width: 82,
+    height: 82,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     gap: 4,
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    borderRadius: 12,
-    backgroundColor: "#F5F7FA",
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#E0E4EA",
+    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
-  tabActive: {
-    backgroundColor: "#EEF3FF",
-    borderColor: "#0066CC",
-    borderWidth: 1.5,
-  },
-  tabLabel: {
-    fontSize: 11,
+  subTabImg: { width: 58, height: 34 },
+  subTabLabel: {
+    fontSize: 10,
     fontFamily: "Manrope_500Medium",
-    color: "#6B7A90",
     textAlign: "center",
   },
-  tabLabelActive: {
-    fontFamily: "Manrope_700Bold",
-    color: "#0066CC",
-  },
-  tabCount: {
+  subTabCount: {
     fontSize: 10,
     fontFamily: "Manrope_400Regular",
-    color: "#9E9E9E",
-  },
-  tabImg: { width: 64, height: 36 },
-  tabEmoji: { fontSize: 28, textAlign: "center", lineHeight: 36 },
-  tabDivider: {
-    width: 1,
-    marginHorizontal: 2,
-    backgroundColor: "#E0E4EA",
-    alignSelf: "stretch",
-    marginVertical: 4,
   },
 
   scroll: { flex: 1 },
