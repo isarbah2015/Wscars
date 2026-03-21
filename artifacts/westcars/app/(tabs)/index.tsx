@@ -10,10 +10,16 @@ import {
   Text,
   View,
 } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
+
+const LOGO = require("@/assets/images/westcars-logo.png");
+const CAR_NEW = require("@/assets/images/car-new.png");
+const CAR_USED = require("@/assets/images/car-used.png");
+const CAR_MOTO = require("@/assets/images/car-moto.png");
 
 type Condition = "new" | "used" | "moto";
 
@@ -58,8 +64,11 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        {/* Logo */}
-        <Text style={styles.logo}>Westcars</Text>
+        {/* Logo — AI generated PNG */}
+        <View style={styles.logoRow}>
+          <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
+          <Text style={styles.logoText}>Westcars</Text>
+        </View>
 
         {/* Search box */}
         <Pressable
@@ -82,10 +91,10 @@ export default function HomeScreen() {
         <View style={styles.tabs}>
           {(
             [
-              { id: "new", label: "New", emoji: "🚗" },
-              { id: "used", label: "Used", emoji: "🚙" },
-              { id: "moto", label: "Moto", emoji: "🏍️" },
-            ] as { id: Condition; label: string; emoji: string }[]
+              { id: "new", label: "New", img: CAR_NEW },
+              { id: "used", label: "Used", img: CAR_USED },
+              { id: "moto", label: "Moto", img: CAR_MOTO },
+            ] as { id: Condition; label: string; img: any }[]
           ).map((tab) => (
             <Pressable
               key={tab.id}
@@ -95,7 +104,7 @@ export default function HomeScreen() {
               <Text style={[styles.tabLabel, condition === tab.id && styles.tabLabelActive]}>
                 {tab.label}
               </Text>
-              <Text style={styles.tabEmoji}>{tab.emoji}</Text>
+              <Image source={tab.img} style={styles.tabImg} resizeMode="contain" />
             </Pressable>
           ))}
         </View>
@@ -214,14 +223,20 @@ const styles = StyleSheet.create({
   avatarText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#0066CC" },
   userName: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#1A1A1A" },
 
-  // Logo — big red like auto.ru
-  logo: {
-    fontSize: 38,
+  // Logo
+  logoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    marginVertical: -4,
+  },
+  logoImg: { width: 44, height: 44 },
+  logoText: {
+    fontSize: 34,
     fontFamily: "Inter_700Bold",
     color: "#E8192C",
-    textAlign: "center",
     letterSpacing: -1,
-    marginVertical: -4,
   },
 
   // Search box
@@ -287,7 +302,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
     color: "#1A1A1A",
   },
-  tabEmoji: { fontSize: 18 },
+  tabImg: { width: 40, height: 28 },
 
   scroll: { flex: 1 },
 

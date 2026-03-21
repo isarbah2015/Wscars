@@ -17,6 +17,7 @@ import {
   ViewToken,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { EquipmentModal } from "@/components/EquipmentModal";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
 import { formatMileage, formatPrice } from "@/utils/ghanaData";
@@ -49,6 +50,7 @@ export default function CarDetailScreen() {
   const [activeImg, setActiveImg] = useState(0);
   const [message, setMessage] = useState("");
   const [showAllSpecs, setShowAllSpecs] = useState(false);
+  const [showEquipment, setShowEquipment] = useState(false);
 
   const car = cars.find((c) => c.id === id);
   if (!car) {
@@ -322,7 +324,7 @@ export default function CarDetailScreen() {
               </View>
             ))}
           </View>
-          <Pressable style={styles.moreBtn}>
+          <Pressable style={styles.moreBtn} onPress={() => setShowEquipment(true)}>
             <Text style={styles.moreBtnText}>All options</Text>
           </Pressable>
         </View>
@@ -447,6 +449,13 @@ export default function CarDetailScreen() {
 
         <View style={{ height: 100 + (insets.bottom || 0) }} />
       </ScrollView>
+
+      {/* Equipment full-list modal */}
+      <EquipmentModal
+        visible={showEquipment}
+        trimName={`${car.brand} Standard`}
+        onClose={() => setShowEquipment(false)}
+      />
 
       {/* ── Bottom Sticky Bar — green Call + green chat (auto.ru style) ── */}
       <View
