@@ -97,54 +97,72 @@ export default function FavouritesScreen() {
                 style={({ pressed }) => [
                   styles.favCard,
                   { backgroundColor: colors.card, borderColor: colors.border },
-                  pressed && { opacity: 0.9 },
+                  pressed && { opacity: 0.93 },
                 ]}
                 onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
               >
-                {/* Image */}
+                {/* ── Image (top, full width) ── */}
                 <View style={styles.favImgWrap}>
                   <Image
                     source={{ uri: car.images[0] }}
                     style={styles.favImg}
                     resizeMode="cover"
                   />
+
+                  {/* Gradient scrim at bottom of image */}
+                  <LinearGradient
+                    colors={["transparent", "rgba(0,0,0,0.45)"]}
+                    style={styles.imgScrim}
+                  />
+
+                  {/* Condition badge */}
                   {badgeLabel && (
                     <View style={[styles.condBadge, { backgroundColor: badgeColor }]}>
                       <Text style={styles.condBadgeText}>{badgeLabel}</Text>
                     </View>
                   )}
+
+                  {/* Sold overlay */}
                   {(car as any).isSold && (
                     <View style={styles.soldOverlay}>
                       <Text style={styles.soldText}>SOLD</Text>
                     </View>
                   )}
+
+                  {/* Heart button — top right */}
+                  <Pressable
+                    style={styles.heartBtn}
+                    hitSlop={12}
+                    onPress={() => toggleFavorite(car.id)}
+                  >
+                    <Feather name="heart" size={18} color="#E8192C" />
+                  </Pressable>
+
+                  {/* Price overlay at bottom of image */}
+                  <View style={styles.priceOverlay}>
+                    <Text style={styles.priceOverlayText}>{formatPrice(car.price)}</Text>
+                    {car.isSponsored && (
+                      <View style={styles.adBadge}>
+                        <Text style={styles.adBadgeText}>Ad</Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
 
-                {/* Details */}
+                {/* ── Details (below image) ── */}
                 <View style={styles.favDetails}>
-                  <View style={styles.favTop}>
-                    <Text style={[styles.favPrice, { color: colors.text }]}>
-                      {formatPrice(car.price)}
+                  {/* Name + year */}
+                  <View style={styles.nameRow}>
+                    <Text style={[styles.favName, { color: colors.text }]}>
+                      {car.brand} {car.model}
                     </Text>
-                    <Pressable
-                      hitSlop={10}
-                      onPress={() => toggleFavorite(car.id)}
-                    >
-                      <Feather name="heart" size={20} color="#E8192C" />
-                    </Pressable>
+                    <Text style={[styles.favYear, { color: colors.textTertiary }]}>{car.year}</Text>
                   </View>
 
-                  <Text style={[styles.favName, { color: colors.textSecondary }]} numberOfLines={1}>
-                    {car.brand} {car.model}
-                  </Text>
-
+                  {/* Meta chips */}
                   <View style={styles.metaChips}>
-                    <View style={[styles.metaChip, { backgroundColor: colors.accentLight }]}>
-                      <Feather name="calendar" size={11} color={colors.accent} />
-                      <Text style={[styles.metaChipText, { color: colors.accent }]}>{car.year}</Text>
-                    </View>
                     {car.mileage > 0 && (
-                      <View style={[styles.metaChip, { backgroundColor: isDark ? "#1C2F1C" : "#DCFCE7" }]}>
+                      <View style={[styles.metaChip, { backgroundColor: isDark ? "#132313" : "#DCFCE7" }]}>
                         <Feather name="activity" size={11} color="#22C55E" />
                         <Text style={[styles.metaChipText, { color: "#22C55E" }]}>
                           {(car.mileage / 1000).toFixed(0)}k km
@@ -155,18 +173,25 @@ export default function FavouritesScreen() {
                       <Feather name="zap" size={11} color="#F59E0B" />
                       <Text style={[styles.metaChipText, { color: "#F59E0B" }]}>{car.fuelType}</Text>
                     </View>
+                    <View style={[styles.metaChip, { backgroundColor: isDark ? "#1A2D44" : "#EDF4FF" }]}>
+                      <Feather name="settings" size={11} color="#3B9EFF" />
+                      <Text style={[styles.metaChipText, { color: "#3B9EFF" }]}>{car.transmission}</Text>
+                    </View>
                   </View>
 
-                  <View style={styles.favFooter}>
-                    <View style={styles.locationRow}>
+                  {/* Location */}
+                  <View style={[styles.locationRow, { borderTopColor: colors.border }]}>
+                    <View style={styles.locationInner}>
                       <Feather name="map-pin" size={12} color={colors.textTertiary} />
                       <Text style={[styles.locationText, { color: colors.textTertiary }]}>{car.location}</Text>
                     </View>
-                    {car.isSponsored && (
-                      <View style={[styles.adPill, { backgroundColor: colors.accentLight }]}>
-                        <Text style={[styles.adPillText, { color: colors.accent }]}>Ad</Text>
-                      </View>
-                    )}
+                    <Pressable
+                      style={[styles.contactBtn, { backgroundColor: colors.accent }]}
+                      onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
+                    >
+                      <Text style={styles.contactBtnText}>View</Text>
+                      <Feather name="arrow-right" size={12} color="#fff" />
+                    </Pressable>
                   </View>
                 </View>
               </Pressable>
@@ -206,43 +231,49 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 
-  list: { padding: 14, gap: 12 },
+  list: { padding: 14, gap: 16 },
   countLabel: {
     fontSize: 13,
     fontFamily: "Manrope_400Regular",
-    marginBottom: 2,
+    marginBottom: 4,
   },
 
   favCard: {
-    flexDirection: "row",
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 5,
   },
+
+  /* ── Image section ── */
   favImgWrap: {
-    width: 130,
-    height: 120,
+    width: "100%",
+    height: 220,
     position: "relative",
-    flexShrink: 0,
   },
   favImg: { width: "100%", height: "100%" },
-
+  imgScrim: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+  },
   condBadge: {
     position: "absolute",
-    top: 8,
-    left: 8,
+    top: 12,
+    left: 12,
     borderRadius: 20,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
   condBadgeText: {
     color: "#fff",
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: "Manrope_700Bold",
   },
   soldOverlay: {
@@ -252,73 +283,117 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   soldText: {
-    fontSize: 18,
+    fontSize: 22,
     fontFamily: "Manrope_800ExtraBold",
     color: "#fff",
-    letterSpacing: 4,
+    letterSpacing: 5,
   },
-
-  favDetails: {
-    flex: 1,
-    padding: 12,
-    gap: 5,
-    justifyContent: "space-between",
+  heartBtn: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  favTop: {
+  priceOverlay: {
+    position: "absolute",
+    bottom: 10,
+    left: 12,
+    right: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  favPrice: {
-    fontSize: 16,
-    fontFamily: "Manrope_700Bold",
+  priceOverlayText: {
+    fontSize: 20,
+    fontFamily: "Manrope_800ExtraBold",
+    color: "#fff",
     letterSpacing: -0.3,
   },
+  adBadge: {
+    backgroundColor: "#BFFF00",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  adBadgeText: {
+    fontSize: 11,
+    fontFamily: "Manrope_700Bold",
+    color: "#1A4000",
+  },
+
+  /* ── Details section ── */
+  favDetails: {
+    padding: 14,
+    gap: 10,
+  },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   favName: {
-    fontSize: 13,
+    fontSize: 16,
+    fontFamily: "Manrope_700Bold",
+    flex: 1,
+  },
+  favYear: {
+    fontSize: 14,
     fontFamily: "Manrope_500Medium",
+    marginLeft: 8,
   },
   metaChips: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 6,
+    gap: 8,
   },
   metaChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
   },
   metaChipText: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: "Manrope_600SemiBold",
-  },
-  favFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
   },
   locationRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    justifyContent: "space-between",
+    paddingTop: 10,
+    borderTopWidth: 1,
+  },
+  locationInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
   },
   locationText: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: "Manrope_400Regular",
   },
-  adPill: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
+  contactBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 10,
   },
-  adPillText: {
-    fontSize: 10,
+  contactBtnText: {
+    fontSize: 13,
     fontFamily: "Manrope_600SemiBold",
+    color: "#fff",
   },
 
+  /* ── Empty state ── */
   empty: {
     flex: 1,
     alignItems: "center",
@@ -348,6 +423,7 @@ const styles = StyleSheet.create({
   },
   browseBtnText: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#fff" },
 
+  /* ── Auth wall ── */
   authWall: { flex: 1, alignItems: "center", justifyContent: "center", gap: 14, padding: 40 },
   iconRing: { width: 90, height: 90, borderRadius: 45, alignItems: "center", justifyContent: "center" },
   authTitle: { fontSize: 22, fontFamily: "Manrope_700Bold" },

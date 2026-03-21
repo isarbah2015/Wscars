@@ -35,7 +35,7 @@ const BANNER_CAR  = require("@/assets/images/banner-car.png");
 
 type Condition = "new" | "used" | "moto";
 
-const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: number }[]> = {
+const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; emoji?: string; count: number }[]> = {
   new: [
     { label: "SUV / 4×4", img: CAT_SUV,    count: 4 },
     { label: "Sedan",     img: CAT_SEDAN,  count: 2 },
@@ -53,10 +53,10 @@ const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: nu
     { label: "Hatchback", img: CAT_HATCH,  count: 0 },
   ],
   moto: [
-    { label: "Motorcycle", img: CAT_MOTO, count: 3 },
-    { label: "Scooter",    img: CAT_MOTO, count: 2 },
-    { label: "ATV / Quad", img: CAT_MOTO, count: 0 },
-    { label: "Dirt Bike",  img: CAT_MOTO, count: 0 },
+    { label: "Motorcycle", img: CAT_MOTO, emoji: "🏍️", count: 3 },
+    { label: "Scooter",    img: CAT_MOTO, emoji: "🛵",  count: 2 },
+    { label: "ATV / Quad", img: CAT_MOTO, emoji: "🚵",  count: 0 },
+    { label: "Dirt Bike",  img: CAT_MOTO, emoji: "🤾",  count: 0 },
   ],
 };
 
@@ -190,7 +190,11 @@ export default function HomeScreen() {
             {VEHICLE_CATEGORIES[condition].map((cat) => (
               <Pressable key={cat.label} style={[styles.tab, { backgroundColor: colors.background, borderColor: colors.border }]}>
                 <Text style={[styles.tabLabel, { color: colors.textSecondary }]} numberOfLines={1}>{cat.label}</Text>
-                <Image source={cat.img} style={styles.tabImg} resizeMode="contain" />
+                {cat.emoji ? (
+                  <Text style={styles.tabEmoji}>{cat.emoji}</Text>
+                ) : (
+                  <Image source={cat.img} style={styles.tabImg} resizeMode="contain" />
+                )}
                 {cat.count > 0 && (
                   <Text style={[styles.tabCount, { color: colors.textTertiary }]}>{cat.count}</Text>
                 )}
@@ -428,6 +432,7 @@ const styles = StyleSheet.create({
     color: "#9E9E9E",
   },
   tabImg: { width: 64, height: 36 },
+  tabEmoji: { fontSize: 28, textAlign: "center", lineHeight: 36 },
   tabDivider: {
     width: 1,
     marginHorizontal: 2,
