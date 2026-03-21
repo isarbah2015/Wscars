@@ -1,3 +1,39 @@
+export interface VerificationStatus {
+  phone: boolean;
+  id: boolean;
+  dealer: boolean;
+}
+
+export interface Review {
+  id: string;
+  fromUserId: string;
+  fromUserName: string;
+  fromUserAvatar?: string;
+  toUserId: string;
+  carId?: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+export interface Report {
+  id: string;
+  reporterId: string;
+  targetId: string;
+  targetType: "listing" | "user";
+  reason: string;
+  createdAt: string;
+  status: "pending" | "reviewed" | "dismissed";
+}
+
+export interface Transaction {
+  id: string;
+  carId: string;
+  sellerId: string;
+  buyerId: string;
+  confirmedAt: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -7,9 +43,15 @@ export interface User {
   avatar?: string;
   memberSince: string;
   isVerified: boolean;
+  verification?: VerificationStatus;
   rating: number;
   totalReviews: number;
   totalListings: number;
+  trustScore?: number;
+  isAnonymous?: boolean;
+  blockedUsers?: string[];
+  totalSales?: number;
+  isDealer?: boolean;
 }
 
 export interface CarRating {
@@ -23,18 +65,15 @@ export interface CarRating {
 }
 
 export interface TechSpecs {
-  // Quick overview
   bodyType: string;
   owners: number;
   color: string;
   trim: string;
-  // General
   country: string;
   carClass: string;
   doors: number;
   seats: number;
   steering: string;
-  // Dimensions (mm)
   length: number;
   width: number;
   height: number;
@@ -43,7 +82,6 @@ export interface TechSpecs {
   frontTrack: number;
   rearTrack: number;
   wheelSize: string;
-  // Engine
   engineType: string;
   engineLayout: string;
   engineDisplacement: string;
@@ -54,20 +92,16 @@ export interface TechSpecs {
   torqueRpm: string;
   cylinderConfig: string;
   fuelGrade: string;
-  // Transmission
   gearbox: string;
   gears: number;
   drive: string;
-  // Weight & Mass
   curbWeight: number;
   maxWeight: number;
   tankVolume: number;
-  // Suspension & Brakes
   frontSuspension: string;
   rearSuspension: string;
   frontBrakes: string;
   rearBrakes: string;
-  // Performance
   maxSpeed: number;
   acceleration: string;
   fuelCity: string;
@@ -95,11 +129,15 @@ export interface Car {
   seller?: User;
   isFeatured: boolean;
   isSponsored: boolean;
+  isSold?: boolean;
   rating: CarRating;
   createdAt: string;
+  expiresAt?: string;
   category: string;
   views?: number;
   techSpecs?: TechSpecs;
+  reportCount?: number;
+  isHidden?: boolean;
 }
 
 export interface Advertisement {
@@ -128,6 +166,10 @@ export interface Message {
   senderId: string;
   text: string;
   timestamp: string;
+  mediaUrl?: string;
+  mediaType?: "image" | "voice";
+  isRead?: boolean;
+  isDeletedForSelf?: boolean;
 }
 
 export interface SearchFilters {

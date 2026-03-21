@@ -168,6 +168,20 @@ export default function HomeScreen() {
           paddingBottom: 100 + (insets.bottom || 0),
         }}
       >
+        {/* ── Sponsored Banner (Feature #15) ── */}
+        <View style={styles.promoBanner}>
+          <View style={styles.promoBannerLeft}>
+            <View style={styles.promoBadge}>
+              <Text style={styles.promoBadgeText}>SPONSORED</Text>
+            </View>
+            <Text style={styles.promoBannerTitle}>Toyota Certified Pre-Owned</Text>
+            <Text style={styles.promoBannerSub}>0% Interest · 12-month Warranty · Nationwide</Text>
+          </View>
+          <View style={styles.promoBannerRight}>
+            <Text style={styles.promoBannerEmoji}>🚗</Text>
+          </View>
+        </View>
+
         {/* ── "Personally for you" section ── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personally for you</Text>
@@ -473,6 +487,28 @@ const styles = StyleSheet.create({
   offerYear: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "#9E9E9E" },
 
   // Ad banner
+  promoBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#0A1628",
+    marginHorizontal: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  promoBannerLeft: { flex: 1, gap: 4 },
+  promoBadge: {
+    backgroundColor: "#E53935",
+    paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4,
+    alignSelf: "flex-start",
+  },
+  promoBadgeText: { fontSize: 9, fontFamily: "Manrope_700Bold", color: "#fff", letterSpacing: 1 },
+  promoBannerTitle: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#fff" },
+  promoBannerSub: { fontSize: 12, fontFamily: "Manrope_400Regular", color: "rgba(255,255,255,0.7)" },
+  promoBannerRight: { width: 50, alignItems: "center" },
+  promoBannerEmoji: { fontSize: 36 },
+
   adBanner: {
     flexDirection: "row",
     alignItems: "center",

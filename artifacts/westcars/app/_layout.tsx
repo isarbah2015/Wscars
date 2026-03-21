@@ -16,6 +16,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,34 +25,17 @@ const queryClient = new QueryClient();
 function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="splash" options={{ headerShown: false }} />
-      <Stack.Screen name="auth/login" options={{ headerShown: false }} />
-      <Stack.Screen name="auth/signup" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="car/[id]"
-        options={{ headerShown: false, presentation: "card" }}
-      />
-      <Stack.Screen
-        name="conversation/[id]"
-        options={{ headerShown: false, presentation: "card" }}
-      />
-      <Stack.Screen
-        name="user/[id]"
-        options={{ headerShown: false, presentation: "card" }}
-      />
-      <Stack.Screen
-        name="advertise"
-        options={{ headerShown: false, presentation: "card" }}
-      />
-      <Stack.Screen
-        name="full-specs/[id]"
-        options={{ headerShown: false, presentation: "card" }}
-      />
-      <Stack.Screen
-        name="advertise-book"
-        options={{ headerShown: false, presentation: "card" }}
-      />
+      <Stack.Screen name="splash" />
+      <Stack.Screen name="auth/login" />
+      <Stack.Screen name="auth/signup" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="car/[id]"          options={{ presentation: "card" }} />
+      <Stack.Screen name="conversation/[id]" options={{ presentation: "card" }} />
+      <Stack.Screen name="user/[id]"         options={{ presentation: "card" }} />
+      <Stack.Screen name="advertise"         options={{ presentation: "card" }} />
+      <Stack.Screen name="full-specs/[id]"   options={{ presentation: "card" }} />
+      <Stack.Screen name="advertise-book"    options={{ presentation: "card" }} />
+      <Stack.Screen name="admin/index"       options={{ presentation: "card" }} />
     </Stack>
   );
 }
@@ -66,9 +50,7 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-    }
+    if (fontsLoaded || fontError) SplashScreen.hideAsync();
   }, [fontsLoaded, fontError]);
 
   if (!fontsLoaded && !fontError) return null;
@@ -76,15 +58,17 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <AppProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
-          </AppProvider>
-        </QueryClientProvider>
+        <ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <AppProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <KeyboardProvider>
+                  <RootLayoutNav />
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </AppProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
   );

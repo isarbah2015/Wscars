@@ -18,6 +18,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EquipmentModal } from "@/components/EquipmentModal";
+import { ReportModal } from "@/components/ReportModal";
+import { TrustScore } from "@/components/TrustScore";
+import { VerificationBadges } from "@/components/VerificationBadges";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
 import { formatMileage, formatPrice } from "@/utils/ghanaData";
@@ -45,12 +48,15 @@ const EQUIP_CATEGORIES = [
 
 export default function CarDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { cars, toggleFavorite, isFavorite, startConversation, isAuthenticated } = useApp();
+  const { cars, toggleFavorite, isFavorite, startConversation, isAuthenticated,
+          markAsSold, renewListing, reportItem, currentUser, getSellerTrustScore } = useApp();
   const insets = useSafeAreaInsets();
   const [activeImg, setActiveImg] = useState(0);
   const [message, setMessage] = useState("");
   const [showAllSpecs, setShowAllSpecs] = useState(false);
   const [showEquipment, setShowEquipment] = useState(false);
+  const [showMore, setShowMore] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   const car = cars.find((c) => c.id === id);
   if (!car) {
@@ -147,10 +153,48 @@ export default function CarDetailScreen() {
           <Pressable style={styles.iconBtn} onPress={() => toggleFavorite(car.id)}>
             <Feather name="heart" size={20} color={fav ? "#E8192C" : "#1A1A1A"} />
           </Pressable>
-          <Pressable style={styles.iconBtn}>
+          <Pressable style={styles.iconBtn} onPress={() => setShowMore(true)}>
             <Feather name="more-vertical" size={20} color="#1A1A1A" />
           </Pressable>
         </View>
+
+        {/* ── More Actions Dropdown ── */}
+        {showMore && (
+          <View style={styles.moreDropdown}>
+            {currentUser?.id === car.sellerId && !car.isSold && (
+              <Pressable style={styles.moreItem} onPress={() => {
+                setShowMore(false);
+                Alert.alert("Mark as Sold", "Mark this listing as sold? Buyers will see it's no longer available.", [
+                  { text: "Cancel", style: "cancel" },
+                  { text: "Mark Sold", onPress: () => markAsSold(car.id) },
+                ]);
+              }}>
+                <Feather name="check-circle" size={16} color="#22C55E" />
+                <Text style={[styles.moreItemText, { color: "#22C55E" }]}>Mark as Sold</Text>
+              </Pressable>
+            )}
+            {currentUser?.id === car.sellerId && (
+              <Pressable style={styles.moreItem} onPress={() => {
+                setShowMore(false);
+                renewListing(car.id);
+                Alert.alert("Listing Renewed", "Your listing is now active for another 30 days.");
+              }}>
+                <Feather name="refresh-cw" size={16} color="#0066CC" />
+                <Text style={[styles.moreItemText, { color: "#0066CC" }]}>Renew Listing</Text>
+              </Pressable>
+            )}
+            {currentUser?.id !== car.sellerId && (
+              <Pressable style={styles.moreItem} onPress={() => { setShowMore(false); setShowReport(true); }}>
+                <Feather name="flag" size={16} color="#E53935" />
+                <Text style={[styles.moreItemText, { color: "#E53935" }]}>Report Listing</Text>
+              </Pressable>
+            )}
+            <Pressable style={styles.moreItem} onPress={() => setShowMore(false)}>
+              <Feather name="x" size={16} color="#9E9E9E" />
+              <Text style={[styles.moreItemText, { color: "#9E9E9E" }]}>Cancel</Text>
+            </Pressable>
+          </View>
+        )}
 
         {/* ── Image Gallery ── */}
         <View>
@@ -342,6 +386,14 @@ export default function CarDetailScreen() {
 
         <View style={styles.sep} />
 
+        {/* ── Sold Banner ── */}
+        {car.isSold && (
+          <View style={styles.soldBanner}>
+            <Feather name="check-circle" size={18} color="#fff" />
+            <Text style={styles.soldBannerText}>This car has been sold</Text>
+          </View>
+        )}
+
         {/* ── Seller Info ── */}
         {car.seller && (
           <View style={styles.card}>
@@ -357,15 +409,13 @@ export default function CarDetailScreen() {
                   <Feather name="user" size={22} color={Colors.light.textTertiary} />
                 </View>
               )}
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, gap: 3 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                   <Text style={styles.sellerName}>{car.seller.name}</Text>
-                  {car.seller.isVerified && (
-                    <Feather name="check-circle" size={13} color="#0066CC" />
-                  )}
                 </View>
+                <VerificationBadges user={car.seller} size="sm" />
                 <Text style={styles.sellerType}>
-                  {car.seller.isVerified ? "Dealer" : "Private seller"} · Usually replies fast
+                  {car.seller.isDealer ? "Dealer" : "Private seller"} · Usually replies fast
                 </Text>
                 <View style={styles.sellerStars}>
                   {[1, 2, 3, 4, 5].map((s) => (
@@ -383,6 +433,11 @@ export default function CarDetailScreen() {
               </View>
               <Feather name="chevron-right" size={18} color="#BDBDBD" />
             </Pressable>
+
+            {/* Trust Score */}
+            <View style={styles.trustScoreWrap}>
+              <TrustScore score={getSellerTrustScore(car.seller)} size="md" />
+            </View>
           </View>
         )}
 
@@ -458,6 +513,15 @@ export default function CarDetailScreen() {
         visible={showEquipment}
         trimName={`${car.brand} Standard`}
         onClose={() => setShowEquipment(false)}
+      />
+
+      {/* Report modal */}
+      <ReportModal
+        visible={showReport}
+        targetId={car.id}
+        targetType="listing"
+        targetName={`${car.brand} ${car.model}`}
+        onClose={() => setShowReport(false)}
       />
 
       {/* ── Bottom Sticky Bar — green Call + green chat (auto.ru style) ── */}
@@ -779,5 +843,30 @@ const styles = StyleSheet.create({
     backgroundColor: "#27AE60",
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  // More dropdown
+  moreDropdown: {
+    position: "absolute", top: 55, right: 8, zIndex: 99,
+    backgroundColor: "#fff",
+    borderRadius: 14, borderWidth: 1, borderColor: "#E8E8E8",
+    shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 12, elevation: 8,
+    minWidth: 180, overflow: "hidden",
+  },
+  moreItem: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingVertical: 13 },
+  moreItemText: { fontSize: 14, fontFamily: "Manrope_500Medium" },
+
+  // Sold banner
+  soldBanner: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    backgroundColor: "#22C55E",
+    paddingHorizontal: 16, paddingVertical: 12,
+  },
+  soldBannerText: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#fff" },
+
+  // Trust score wrapper inside seller card
+  trustScoreWrap: {
+    marginTop: 8, paddingTop: 12,
+    borderTopWidth: 1, borderTopColor: "#F0F0F0",
   },
 });
