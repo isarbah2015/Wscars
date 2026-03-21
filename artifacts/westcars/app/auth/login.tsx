@@ -17,7 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 
-const LOGO = require("@/assets/images/logo-wordmark.png");
+const WC_BADGE = require("@/assets/images/wc-badge.png");
 
 export default function LoginScreen() {
   const { login } = useApp();
@@ -58,15 +58,14 @@ export default function LoginScreen() {
           <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.8)" />
         </Pressable>
 
-        {/* WestCars wordmark — tinted white for dark bg */}
-        <Image
-          source={LOGO}
-          style={styles.logo}
-          resizeMode="contain"
-          tintColor="#ffffff"
-        />
-
-        <Text style={styles.tagline}>Ghana's Car Marketplace</Text>
+        {/* WestCars badge + wordmark */}
+        <View style={styles.brandRow}>
+          <Image source={WC_BADGE} style={styles.heroBadge} resizeMode="contain" />
+          <View>
+            <Text style={styles.brandName}>WESTCARS</Text>
+            <Text style={styles.tagline}>Ghana's Car Marketplace</Text>
+          </View>
+        </View>
 
         {/* Hero copy */}
         <Text style={styles.heroTitle}>Welcome back</Text>
@@ -212,11 +211,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 
-  logo: { width: 220, height: 44 },
+  brandRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  heroBadge: { width: 52, height: 52, borderRadius: 12 },
+  brandName: {
+    fontSize: 22, fontFamily: "Manrope_800ExtraBold",
+    color: "#FFFFFF", letterSpacing: 3,
+  },
   tagline: {
-    fontSize: 11, fontFamily: "Manrope_400Regular",
-    color: "rgba(255,255,255,0.5)", letterSpacing: 1.8,
-    textTransform: "uppercase", marginTop: -4,
+    fontSize: 10, fontFamily: "Manrope_400Regular",
+    color: "rgba(255,255,255,0.5)", letterSpacing: 1.5,
+    marginTop: 2,
   },
 
   heroTitle: {

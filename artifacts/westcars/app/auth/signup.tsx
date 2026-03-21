@@ -18,24 +18,18 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 import { COUNTRY_CODE } from "@/utils/ghanaData";
 
-const LOGO = require("@/assets/images/logo-wordmark.png");
-
-const BENEFITS = [
-  { icon: "check-circle", text: "List & sell your car for free" },
-  { icon: "shield",       text: "Verified buyer community" },
-  { icon: "bell",         text: "Instant alerts on new listings" },
-];
+const WC_BADGE = require("@/assets/images/wc-badge.png");
 
 export default function SignupScreen() {
   const { signup } = useApp();
   const insets = useSafeAreaInsets();
-  const [name,          setName]          = useState("");
-  const [email,         setEmail]         = useState("");
-  const [phone,         setPhone]         = useState("");
-  const [password,      setPassword]      = useState("");
-  const [showPassword,  setShowPassword]  = useState(false);
-  const [loading,       setLoading]       = useState(false);
-  const [focusedField,  setFocusedField]  = useState<string | null>(null);
+  const [name,         setName]         = useState("");
+  const [email,        setEmail]        = useState("");
+  const [phone,        setPhone]        = useState("");
+  const [password,     setPassword]     = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading,      setLoading]      = useState(false);
+  const [focused,      setFocused]      = useState<string | null>(null);
 
   const handleSignup = async () => {
     if (!name.trim() || !email.trim() || !phone.trim() || !password.trim()) {
@@ -53,6 +47,15 @@ export default function SignupScreen() {
     if (ok) router.replace("/(tabs)");
   };
 
+  const strength =
+    password.length === 0 ? 0
+    : password.length < 4 ? 1
+    : password.length < 7 ? 2
+    : password.length < 10 ? 3 : 4;
+
+  const strengthColor = ["#E8E8E8","#E8192C","#FF8C00","#F5C400","#22C55E"][strength];
+  const strengthLabel = ["","Weak","Fair","Good","Strong"][strength];
+
   const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
 
   return (
@@ -60,151 +63,148 @@ export default function SignupScreen() {
       style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      {/* ── Dark hero header ── */}
-      <LinearGradient
-        colors={["#070D1A", "#0A1628", "#003D99"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.hero, { paddingTop: topPad + 12 }]}
-      >
-        <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
-          <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.8)" />
-        </Pressable>
-
-        {/* White wordmark */}
-        <Image
-          source={LOGO}
-          style={styles.logo}
-          resizeMode="contain"
-          tintColor="#ffffff"
-        />
-        <Text style={styles.logoSub}>Ghana's Car Marketplace</Text>
-
-        <Text style={styles.heroTitle}>Create your account</Text>
-        <Text style={styles.heroSub}>
-          Join 50,000+ buyers & sellers across Ghana
-        </Text>
-
-        {/* Benefits strip */}
-        <View style={styles.benefits}>
-          {BENEFITS.map((b) => (
-            <View key={b.text} style={styles.benefitItem}>
-              <Feather name={b.icon as any} size={14} color="#4DB3FF" />
-              <Text style={styles.benefitText}>{b.text}</Text>
-            </View>
-          ))}
-        </View>
-      </LinearGradient>
-
-      {/* ── Form card ── */}
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ flexGrow: 1 }}
       >
-        <View style={styles.formCard}>
-          <Text style={styles.formTitle}>Your details</Text>
+        {/* ── Dark hero ── */}
+        <LinearGradient
+          colors={["#060C18", "#091529", "#0044AA"]}
+          start={{ x: 0.1, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.hero, { paddingTop: topPad + 14 }]}
+        >
+          {/* Back */}
+          <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
+            <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.75)" />
+          </Pressable>
 
+          {/* Badge + brand */}
+          <View style={styles.brandRow}>
+            <Image source={WC_BADGE} style={styles.heroBadge} resizeMode="contain" />
+            <View>
+              <Text style={styles.brandName}>WESTCARS</Text>
+              <Text style={styles.brandSub}>Ghana's Car Marketplace</Text>
+            </View>
+          </View>
+
+          <Text style={styles.heroTitle}>Create account</Text>
+          <Text style={styles.heroSubtitle}>
+            Join 50,000+ buyers &amp; sellers. List your car free.
+          </Text>
+
+          {/* Pill stats */}
+          <View style={styles.statsRow}>
+            {[
+              { value: "Free", label: "To list" },
+              { value: "50k+", label: "Members" },
+              { value: "8",    label: "Regions" },
+            ].map((s) => (
+              <View key={s.label} style={styles.statItem}>
+                <Text style={styles.statValue}>{s.value}</Text>
+                <Text style={styles.statLabel}>{s.label}</Text>
+              </View>
+            ))}
+          </View>
+        </LinearGradient>
+
+        {/* ── White form sheet ── */}
+        <View style={styles.sheet}>
           {/* Full name */}
-          <Field
+          <InputField
             label="Full name"
             icon="user"
-            placeholder="Kwame Mensah"
+            placeholder="e.g. Kwame Mensah"
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
+            keyboardType="default"
             returnKeyType="next"
-            focused={focusedField === "name"}
-            onFocus={() => setFocusedField("name")}
-            onBlur={() => setFocusedField(null)}
+            focused={focused === "name"}
+            onFocus={() => setFocused("name")}
+            onBlur={() => setFocused(null)}
           />
 
           {/* Email */}
-          <Field
+          <InputField
             label="Email address"
             icon="mail"
             placeholder="you@example.com"
             value={email}
             onChangeText={setEmail}
-            keyboardType="email-address"
             autoCapitalize="none"
+            keyboardType="email-address"
             returnKeyType="next"
-            focused={focusedField === "email"}
-            onFocus={() => setFocusedField("email")}
-            onBlur={() => setFocusedField(null)}
+            focused={focused === "email"}
+            onFocus={() => setFocused("email")}
+            onBlur={() => setFocused(null)}
           />
 
-          {/* Phone */}
-          <View style={styles.fieldWrap}>
-            <Text style={styles.fieldLabel}>Phone number</Text>
-            <View style={[styles.field, focusedField === "phone" && styles.fieldFocused]}>
-              <View style={styles.dialCode}>
-                <Text style={styles.dialCodeText}>{COUNTRY_CODE}</Text>
+          {/* Phone with country code */}
+          <View style={styles.fieldGroup}>
+            <Text style={styles.label}>Phone number</Text>
+            <View style={[styles.row, focused === "phone" && styles.rowFocused]}>
+              <View style={styles.dialBadge}>
+                <Text style={styles.dialText}>{COUNTRY_CODE}</Text>
               </View>
-              <View style={styles.dividerV} />
+              <View style={styles.sep} />
               <TextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="024 000 0000"
-                placeholderTextColor="#BDBDBD"
+                placeholderTextColor="#C0C0C0"
                 value={phone}
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
                 returnKeyType="next"
-                onFocus={() => setFocusedField("phone")}
-                onBlur={() => setFocusedField(null)}
+                onFocus={() => setFocused("phone")}
+                onBlur={() => setFocused(null)}
               />
             </View>
           </View>
 
           {/* Password */}
-          <View style={styles.fieldWrap}>
-            <Text style={styles.fieldLabel}>Password</Text>
-            <View style={[styles.field, focusedField === "pass" && styles.fieldFocused]}>
-              <Feather name="lock" size={16} color={focusedField === "pass" ? "#0066CC" : "#9E9E9E"} />
+          <View style={styles.fieldGroup}>
+            <Text style={styles.label}>Password</Text>
+            <View style={[styles.row, focused === "pass" && styles.rowFocused]}>
+              <Feather name="lock" size={16} color={focused === "pass" ? "#0066CC" : "#AAAAAA"} />
               <TextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="Min. 6 characters"
-                placeholderTextColor="#BDBDBD"
+                placeholderTextColor="#C0C0C0"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
                 returnKeyType="done"
                 onSubmitEditing={handleSignup}
-                onFocus={() => setFocusedField("pass")}
-                onBlur={() => setFocusedField(null)}
+                onFocus={() => setFocused("pass")}
+                onBlur={() => setFocused(null)}
               />
               <Pressable onPress={() => setShowPassword(!showPassword)} hitSlop={10}>
-                <Feather name={showPassword ? "eye-off" : "eye"} size={16} color="#9E9E9E" />
+                <Feather name={showPassword ? "eye-off" : "eye"} size={16} color="#AAAAAA" />
               </Pressable>
             </View>
+
+            {/* Strength bar */}
+            {password.length > 0 && (
+              <View style={styles.strengthWrap}>
+                {[1,2,3,4].map((n) => (
+                  <View
+                    key={n}
+                    style={[
+                      styles.strengthSeg,
+                      { backgroundColor: n <= strength ? strengthColor : "#EEEEEE" },
+                    ]}
+                  />
+                ))}
+                <Text style={[styles.strengthLabel, { color: strengthColor }]}>
+                  {strengthLabel}
+                </Text>
+              </View>
+            )}
           </View>
 
-          {/* Password strength hint */}
-          {password.length > 0 && (
-            <View style={styles.strengthRow}>
-              {[1,2,3,4].map((n) => (
-                <View
-                  key={n}
-                  style={[
-                    styles.strengthBar,
-                    { backgroundColor:
-                        password.length >= n * 3
-                          ? n <= 1 ? "#E8192C"
-                          : n <= 2 ? "#FF8C00"
-                          : n <= 3 ? "#F5C400"
-                          : "#22C55E"
-                          : "#E8E8E8"
-                    }
-                  ]}
-                />
-              ))}
-              <Text style={styles.strengthLabel}>
-                {password.length < 4 ? "Weak" : password.length < 7 ? "Fair" : password.length < 10 ? "Good" : "Strong"}
-              </Text>
-            </View>
-          )}
-
+          {/* Terms */}
           <Text style={styles.terms}>
             By creating an account you agree to our{" "}
             <Text style={styles.termsLink}>Terms of Service</Text>
@@ -212,14 +212,14 @@ export default function SignupScreen() {
             <Text style={styles.termsLink}>Privacy Policy</Text>.
           </Text>
 
-          {/* CTA */}
+          {/* CTA button */}
           <Pressable
-            style={[styles.cta, loading && { opacity: 0.72 }]}
+            style={[styles.cta, loading && { opacity: 0.7 }]}
             onPress={handleSignup}
             disabled={loading}
           >
             <LinearGradient
-              colors={["#0077EE", "#0055BB"]}
+              colors={["#0077EE", "#0050CC"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.ctaGrad}
@@ -235,54 +235,51 @@ export default function SignupScreen() {
             </LinearGradient>
           </Pressable>
 
-          <View style={styles.signInRow}>
-            <Text style={styles.signInPrompt}>Already have an account?</Text>
+          {/* Sign in link */}
+          <View style={styles.signinRow}>
+            <Text style={styles.signinPrompt}>Already have an account?</Text>
             <Pressable onPress={() => router.back()}>
-              <Text style={styles.signInLink}>Sign in</Text>
+              <Text style={styles.signinLink}>Sign in</Text>
             </Pressable>
           </View>
-        </View>
 
-        {/* Trust badges */}
-        <View style={styles.trustRow}>
-          {[
-            { icon: "shield",       label: "Secure" },
-            { icon: "lock",         label: "Private" },
-            { icon: "check-circle", label: "Free to join" },
-          ].map((t) => (
-            <View key={t.label} style={styles.trustItem}>
-              <Feather name={t.icon as any} size={14} color="#BDBDBD" />
-              <Text style={styles.trustLabel}>{t.label}</Text>
-            </View>
-          ))}
-        </View>
+          {/* Trust badges */}
+          <View style={styles.trustRow}>
+            {["Secure & private", "Free to join", "Verified listings"].map((t) => (
+              <View key={t} style={styles.trustPill}>
+                <Feather name="check" size={11} color="#0066CC" />
+                <Text style={styles.trustText}>{t}</Text>
+              </View>
+            ))}
+          </View>
 
-        <View style={{ height: (insets.bottom || 0) + 24 }} />
+          <View style={{ height: (insets.bottom || 0) + 24 }} />
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
-/* ── Reusable field component ── */
-function Field({
+/* ── Reusable field ── */
+function InputField({
   label, icon, placeholder, value, onChangeText,
-  keyboardType, autoCapitalize, returnKeyType,
+  autoCapitalize, keyboardType, returnKeyType,
   focused, onFocus, onBlur,
 }: any) {
   return (
-    <View style={styles.fieldWrap}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <View style={[styles.field, focused && styles.fieldFocused]}>
-        <Feather name={icon} size={16} color={focused ? "#0066CC" : "#9E9E9E"} />
+    <View style={styles.fieldGroup}>
+      <Text style={styles.label}>{label}</Text>
+      <View style={[styles.row, focused && styles.rowFocused]}>
+        <Feather name={icon} size={16} color={focused ? "#0066CC" : "#AAAAAA"} />
         <TextInput
           style={styles.input}
           placeholder={placeholder}
-          placeholderTextColor="#BDBDBD"
+          placeholderTextColor="#C0C0C0"
           value={value}
           onChangeText={onChangeText}
-          keyboardType={keyboardType || "default"}
-          autoCapitalize={autoCapitalize || "none"}
-          returnKeyType={returnKeyType || "next"}
+          autoCapitalize={autoCapitalize}
+          keyboardType={keyboardType}
+          returnKeyType={returnKeyType}
           onFocus={onFocus}
           onBlur={onBlur}
         />
@@ -292,136 +289,149 @@ function Field({
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#F5F5F5" },
+  root: { flex: 1, backgroundColor: "#F2F4F8" },
 
   /* Hero */
   hero: {
     paddingHorizontal: 24,
-    paddingBottom: 26,
-    gap: 10,
+    paddingBottom: 32,
+    gap: 12,
   },
   backBtn: {
-    width: 38, height: 38, borderRadius: 19,
-    backgroundColor: "rgba(255,255,255,0.12)",
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.1)",
     alignItems: "center", justifyContent: "center",
-    marginBottom: 2,
+    marginBottom: 4,
   },
-  logo: { width: 200, height: 40 },
-  logoSub: {
-    fontSize: 10, fontFamily: "Manrope_500Medium",
-    color: "rgba(255,255,255,0.45)", letterSpacing: 2,
-    textTransform: "uppercase", marginTop: -4,
+  brandRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  heroBadge: { width: 52, height: 52, borderRadius: 12 },
+  brandName: {
+    fontSize: 22, fontFamily: "Manrope_800ExtraBold",
+    color: "#FFFFFF", letterSpacing: 3,
+  },
+  brandSub: {
+    fontSize: 11, fontFamily: "Manrope_400Regular",
+    color: "rgba(255,255,255,0.5)", letterSpacing: 1,
+    marginTop: 1,
   },
   heroTitle: {
-    fontSize: 28, fontFamily: "Manrope_800ExtraBold",
-    color: "#fff", letterSpacing: -0.6, marginTop: 4,
+    fontSize: 32, fontFamily: "Manrope_800ExtraBold",
+    color: "#FFFFFF", letterSpacing: -0.5,
   },
-  heroSub: {
-    fontSize: 13, fontFamily: "Manrope_400Regular",
-    color: "rgba(255,255,255,0.6)", lineHeight: 20,
+  heroSubtitle: {
+    fontSize: 14, fontFamily: "Manrope_400Regular",
+    color: "rgba(255,255,255,0.65)", lineHeight: 22,
+    marginTop: -4,
   },
-  benefits: {
-    gap: 7, marginTop: 2,
-    backgroundColor: "rgba(255,255,255,0.07)",
-    borderRadius: 12, padding: 14,
-    borderWidth: 1, borderColor: "rgba(255,255,255,0.1)",
+  statsRow: {
+    flexDirection: "row",
+    backgroundColor: "rgba(255,255,255,0.09)",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
+    paddingVertical: 14,
+    marginTop: 4,
   },
-  benefitItem: { flexDirection: "row", alignItems: "center", gap: 9 },
-  benefitText: {
-    fontSize: 13, fontFamily: "Manrope_500Medium",
-    color: "rgba(255,255,255,0.78)",
-  },
-
-  /* Scroll / card */
-  scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 16, paddingTop: 20 },
-
-  formCard: {
-    backgroundColor: "#fff", borderRadius: 20, padding: 24, gap: 14,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.07, shadowRadius: 16, elevation: 5,
-  },
-  formTitle: {
-    fontSize: 20, fontFamily: "Manrope_700Bold", color: "#1A1A1A",
-    marginBottom: 2,
+  statItem: { flex: 1, alignItems: "center", gap: 2 },
+  statValue: { fontSize: 20, fontFamily: "Manrope_700Bold", color: "#fff" },
+  statLabel: {
+    fontSize: 11, fontFamily: "Manrope_400Regular",
+    color: "rgba(255,255,255,0.5)",
   },
 
-  /* Fields */
-  fieldWrap: { gap: 6 },
-  fieldLabel: {
-    fontSize: 11, fontFamily: "Manrope_600SemiBold",
-    color: "#6B6B6B", letterSpacing: 0.5, textTransform: "uppercase",
+  /* Form sheet */
+  sheet: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -20,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    gap: 16,
   },
-  field: {
+
+  fieldGroup: { gap: 7 },
+  label: {
+    fontSize: 11, fontFamily: "Manrope_700Bold",
+    color: "#666", letterSpacing: 0.6, textTransform: "uppercase",
+  },
+  row: {
     flexDirection: "row", alignItems: "center", gap: 10,
-    height: 52, borderWidth: 1.5, borderColor: "#E8E8E8",
-    borderRadius: 12, paddingHorizontal: 14, backgroundColor: "#FAFAFA",
+    height: 54, borderWidth: 1.5, borderColor: "#E8E8E8",
+    borderRadius: 14, paddingHorizontal: 14,
+    backgroundColor: "#F9F9F9",
   },
-  fieldFocused: {
+  rowFocused: {
     borderColor: "#0066CC", backgroundColor: "#fff",
-    shadowColor: "#0066CC", shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.14, shadowRadius: 6, elevation: 2,
+    shadowColor: "#0066CC",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.15, shadowRadius: 8, elevation: 3,
   },
   input: {
-    flex: 1, fontSize: 15, color: "#1A1A1A",
-    fontFamily: "Manrope_400Regular", padding: 0,
+    flex: 1, fontSize: 15,
+    fontFamily: "Manrope_400Regular",
+    color: "#1A1A1A", padding: 0,
   },
 
   /* Phone prefix */
-  dialCode: {
-    backgroundColor: "#EEF5FF",
-    borderRadius: 7, paddingHorizontal: 9, paddingVertical: 5,
+  dialBadge: {
+    backgroundColor: "#EDF4FF",
+    borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 5,
   },
-  dialCodeText: {
-    fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#0066CC",
+  dialText: {
+    fontSize: 13, fontFamily: "Manrope_700Bold", color: "#0055CC",
   },
-  dividerV: {
-    width: 1, height: 22,
-    backgroundColor: "#E0E0E0", marginHorizontal: 2,
-  },
+  sep: { width: 1, height: 22, backgroundColor: "#E0E0E0" },
 
   /* Password strength */
-  strengthRow: {
-    flexDirection: "row", alignItems: "center", gap: 4, marginTop: -6,
+  strengthWrap: {
+    flexDirection: "row", alignItems: "center",
+    gap: 4, marginTop: 2,
   },
-  strengthBar: { flex: 1, height: 3, borderRadius: 2 },
+  strengthSeg: { flex: 1, height: 3, borderRadius: 2 },
   strengthLabel: {
-    fontSize: 11, fontFamily: "Manrope_500Medium",
-    color: "#9E9E9E", marginLeft: 4, minWidth: 38,
+    fontSize: 11, fontFamily: "Manrope_600SemiBold",
+    minWidth: 36, textAlign: "right",
   },
 
   /* Terms */
   terms: {
     fontSize: 12, fontFamily: "Manrope_400Regular",
-    color: "#9E9E9E", lineHeight: 18, textAlign: "center",
+    color: "#9E9E9E", textAlign: "center", lineHeight: 18,
   },
   termsLink: { color: "#0066CC", fontFamily: "Manrope_600SemiBold" },
 
   /* CTA */
-  cta: { borderRadius: 12, overflow: "hidden", marginTop: 2 },
+  cta: { borderRadius: 14, overflow: "hidden" },
   ctaGrad: {
-    height: 52, flexDirection: "row",
+    height: 56, flexDirection: "row",
     alignItems: "center", justifyContent: "center", gap: 8,
   },
   ctaText: { fontSize: 16, fontFamily: "Manrope_700Bold", color: "#fff" },
 
-  /* Sign-in link */
-  signInRow: {
+  /* Sign in link */
+  signinRow: {
     flexDirection: "row", justifyContent: "center",
     alignItems: "center", gap: 5,
   },
-  signInPrompt: {
-    fontSize: 13, color: "#9E9E9E", fontFamily: "Manrope_400Regular",
+  signinPrompt: {
+    fontSize: 14, fontFamily: "Manrope_400Regular", color: "#9E9E9E",
   },
-  signInLink: {
-    fontSize: 13, color: "#0066CC", fontFamily: "Manrope_700Bold",
+  signinLink: {
+    fontSize: 14, fontFamily: "Manrope_700Bold", color: "#0066CC",
   },
 
   /* Trust row */
   trustRow: {
     flexDirection: "row", justifyContent: "center",
-    gap: 22, marginTop: 20,
+    flexWrap: "wrap", gap: 8,
   },
-  trustItem: { flexDirection: "row", alignItems: "center", gap: 5 },
-  trustLabel: { fontSize: 11, color: "#BDBDBD", fontFamily: "Manrope_400Regular" },
+  trustPill: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    backgroundColor: "#F0F7FF",
+    borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5,
+  },
+  trustText: { fontSize: 11, fontFamily: "Manrope_500Medium", color: "#0066CC" },
 });

@@ -16,7 +16,7 @@ import { CarCard } from "@/components/CarCard";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
 
-const LOGO = require("@/assets/images/logo-wordmark.png");
+const WC_BADGE = require("@/assets/images/wc-badge.png");
 const CAR_NEW = require("@/assets/images/car-new.png");
 const CAR_USED = require("@/assets/images/car-used.png");
 const CAR_MOTO = require("@/assets/images/car-moto.png");
@@ -97,9 +97,10 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        {/* Logo — WestCars AI wordmark PNG */}
+        {/* Logo — WestCars badge + wordmark */}
         <View style={styles.logoRow}>
-          <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
+          <Image source={WC_BADGE} style={styles.logoBadge} resizeMode="contain" />
+          <Text style={styles.logoText}>WESTCARS</Text>
         </View>
 
         {/* Search box */}
@@ -275,11 +276,19 @@ const styles = StyleSheet.create({
 
   // Logo
   logoRow: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 2,
+    gap: 10,
+    marginVertical: 4,
   },
-  logoImg: { width: 200, height: 40 },
+  logoBadge: { width: 36, height: 36, borderRadius: 8 },
+  logoText: {
+    fontSize: 22,
+    fontFamily: "Manrope_800ExtraBold",
+    color: "#0A1628",
+    letterSpacing: 4,
+  },
 
   // Search box
   searchBox: {
