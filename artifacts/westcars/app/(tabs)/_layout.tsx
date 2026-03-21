@@ -6,6 +6,30 @@ import React from "react";
 import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 import { Colors } from "@/constants/colors";
 
+function SellTabIcon({ color }: { color: string }) {
+  return (
+    <View style={sellStyles.box}>
+      <Feather name="plus" size={22} color="#fff" />
+    </View>
+  );
+}
+
+const sellStyles = StyleSheet.create({
+  box: {
+    width: 44,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#BFFF00",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#BFFF00",
+    shadowOpacity: 0.55,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 6,
+  },
+});
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -72,12 +96,7 @@ export default function TabLayout() {
         name="sell"
         options={{
           title: "Sell",
-          tabBarIcon: ({ color, size }) =>
-            isIOS ? (
-              <SymbolView name="plus.circle" tintColor={color} size={size} />
-            ) : (
-              <Feather name="plus-circle" size={22} color={color} />
-            ),
+          tabBarIcon: ({ color }) => <SellTabIcon color={color} />,
         }}
       />
       <Tabs.Screen

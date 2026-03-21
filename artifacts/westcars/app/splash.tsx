@@ -227,8 +227,8 @@ const styles = StyleSheet.create({
     opacity: 0.25,
   },
   car: {
-    width: width * 0.92,
-    height: 200,
+    width: width * 0.62,
+    height: 140,
   },
 
   /* Loading dots */

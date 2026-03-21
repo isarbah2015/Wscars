@@ -1,8 +1,11 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
+  Animated,
   Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Platform,
   Pressable,
   ScrollView,
@@ -10,51 +13,53 @@ import {
   Text,
   View,
 } from "react-native";
-
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
 
-const WC_BADGE = require("@/assets/images/wc-badge.png");
-const CAR_NEW = require("@/assets/images/car-new.png");
-const CAR_USED = require("@/assets/images/car-used.png");
-const CAR_MOTO = require("@/assets/images/car-moto.png");
+const WC_BADGE    = require("@/assets/images/wc-badge.png");
+const CAR_NEW     = require("@/assets/images/car-new.png");
+const CAR_USED    = require("@/assets/images/car-used.png");
+const CAR_MOTO    = require("@/assets/images/car-moto.png");
 const SEARCH_ICON = require("@/assets/images/search-car-icon.png");
-const CAT_SUV = require("@/assets/images/cat-suv.png");
-const CAT_SEDAN = require("@/assets/images/cat-sedan.png");
-const CAT_PICKUP = require("@/assets/images/cat-pickup.png");
-const CAT_VAN = require("@/assets/images/cat-van.png");
-const CAT_COUPE = require("@/assets/images/cat-coupe.png");
-const CAT_HATCH = require("@/assets/images/cat-hatchback.png");
-const CAT_MOTO = require("@/assets/images/cat-motorcycle.png");
+const CAT_SUV     = require("@/assets/images/cat-suv.png");
+const CAT_SEDAN   = require("@/assets/images/cat-sedan.png");
+const CAT_PICKUP  = require("@/assets/images/cat-pickup.png");
+const CAT_VAN     = require("@/assets/images/cat-van.png");
+const CAT_COUPE   = require("@/assets/images/cat-coupe.png");
+const CAT_HATCH   = require("@/assets/images/cat-hatchback.png");
+const CAT_MOTO    = require("@/assets/images/cat-motorcycle.png");
+const BANNER_CAR  = require("@/assets/images/banner-car.png");
 
 type Condition = "new" | "used" | "moto";
 
 const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: number }[]> = {
   new: [
-    { label: "SUV / 4×4", img: CAT_SUV, count: 4 },
-    { label: "Sedan", img: CAT_SEDAN, count: 2 },
-    { label: "Pickup", img: CAT_PICKUP, count: 1 },
-    { label: "Van", img: CAT_VAN, count: 0 },
-    { label: "Coupe", img: CAT_COUPE, count: 0 },
-    { label: "Hatchback", img: CAT_HATCH, count: 0 },
+    { label: "SUV / 4×4", img: CAT_SUV,    count: 4 },
+    { label: "Sedan",     img: CAT_SEDAN,  count: 2 },
+    { label: "Pickup",    img: CAT_PICKUP, count: 1 },
+    { label: "Van",       img: CAT_VAN,    count: 0 },
+    { label: "Coupe",     img: CAT_COUPE,  count: 0 },
+    { label: "Hatchback", img: CAT_HATCH,  count: 0 },
   ],
   used: [
-    { label: "SUV / 4×4", img: CAT_SUV, count: 5 },
-    { label: "Sedan", img: CAT_SEDAN, count: 2 },
-    { label: "Pickup", img: CAT_PICKUP, count: 1 },
-    { label: "Van", img: CAT_VAN, count: 0 },
-    { label: "Coupe", img: CAT_COUPE, count: 0 },
-    { label: "Hatchback", img: CAT_HATCH, count: 0 },
+    { label: "SUV / 4×4", img: CAT_SUV,    count: 5 },
+    { label: "Sedan",     img: CAT_SEDAN,  count: 2 },
+    { label: "Pickup",    img: CAT_PICKUP, count: 1 },
+    { label: "Van",       img: CAT_VAN,    count: 0 },
+    { label: "Coupe",     img: CAT_COUPE,  count: 0 },
+    { label: "Hatchback", img: CAT_HATCH,  count: 0 },
   ],
   moto: [
     { label: "Motorcycle", img: CAT_MOTO, count: 3 },
-    { label: "Scooter", img: CAT_MOTO, count: 2 },
+    { label: "Scooter",    img: CAT_MOTO, count: 2 },
     { label: "ATV / Quad", img: CAT_MOTO, count: 0 },
-    { label: "Dirt Bike", img: CAT_MOTO, count: 0 },
+    { label: "Dirt Bike",  img: CAT_MOTO, count: 0 },
   ],
 };
+
+const CATS_HEIGHT = 110;
 
 export default function HomeScreen() {
   const { cars, currentUser } = useApp();
@@ -69,41 +74,53 @@ export default function HomeScreen() {
       ? []
       : cars.filter((c) => c.condition !== "New");
 
-  const displayCars = filteredCars.length > 0 ? filteredCars : cars;
-  const totalCount = cars.length;
-
-  const specialOffers = cars.filter((c) => c.isSponsored || c.isFeatured)
+  const displayCars  = filteredCars.length > 0 ? filteredCars : cars;
+  const totalCount   = cars.length;
+  const specialOffers = cars
+    .filter((c) => c.isSponsored || c.isFeatured)
     .filter((car, i, arr) => arr.findIndex((c) => c.id === car.id) === i)
     .slice(0, 5);
 
+  // ── Animated collapse of category row on scroll ──
+  const catHeightAnim = useRef(new Animated.Value(CATS_HEIGHT)).current;
+  const catOpacityAnim = useRef(new Animated.Value(1)).current;
+  const lastScrollY = useRef(0);
+  const catsVisible = useRef(true);
+
+  const showCats = () => {
+    if (catsVisible.current) return;
+    catsVisible.current = true;
+    Animated.parallel([
+      Animated.spring(catHeightAnim, { toValue: CATS_HEIGHT, useNativeDriver: false, speed: 30, bounciness: 0 }),
+      Animated.timing(catOpacityAnim, { toValue: 1, duration: 200, useNativeDriver: false }),
+    ]).start();
+  };
+
+  const hideCats = () => {
+    if (!catsVisible.current) return;
+    catsVisible.current = false;
+    Animated.parallel([
+      Animated.spring(catHeightAnim, { toValue: 0, useNativeDriver: false, speed: 30, bounciness: 0 }),
+      Animated.timing(catOpacityAnim, { toValue: 0, duration: 160, useNativeDriver: false }),
+    ]).start();
+  };
+
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const y = e.nativeEvent.contentOffset.y;
+    if (y > lastScrollY.current + 6 && y > 30) {
+      hideCats();
+    } else if (y < lastScrollY.current - 6) {
+      showCats();
+    }
+    lastScrollY.current = y;
+  };
+
   return (
     <View style={styles.root}>
-      {/* ── Header ── */}
-      <View style={[styles.header, { paddingTop: topPad + 10 }]}>
-        <View style={styles.topRow}>
-          {/* User avatar + name */}
-          <View style={styles.userRow}>
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarText}>
-                {currentUser?.name?.[0] || "W"}
-              </Text>
-            </View>
-            <Text style={styles.userName}>
-              {currentUser?.name?.split(" ")[0] || "Guest"}
-            </Text>
-          </View>
-          <Pressable onPress={() => router.push("/(tabs)/search")}>
-            <Feather name="search" size={22} color="#1A1A1A" />
-          </Pressable>
-        </View>
+      {/* ── Fixed Header ── */}
+      <View style={[styles.header, { paddingTop: topPad + 8 }]}>
 
-        {/* Logo — WestCars badge + wordmark */}
-        <View style={styles.logoRow}>
-          <Image source={WC_BADGE} style={styles.logoBadge} resizeMode="contain" />
-          <Text style={styles.logoText}>WESTCARS</Text>
-        </View>
-
-        {/* Search box */}
+        {/* ── Row 1: Search bar (on top) ── */}
         <Pressable
           style={styles.searchBox}
           onPress={() => router.push("/(tabs)/search")}
@@ -115,60 +132,81 @@ export default function HomeScreen() {
               {totalCount.toLocaleString()} listings
             </Text>
           </View>
-          <Pressable style={styles.filterBtn}>
-            <Feather name="sliders" size={18} color="#1A1A1A" />
-          </Pressable>
+          <View style={styles.filterBtn}>
+            <Feather name="sliders" size={17} color="#0066CC" />
+          </View>
         </Pressable>
 
-        {/* Condition tabs + category type cards in one horizontal scroll */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabsRow}
-        >
-          {(
-            [
-              { id: "new", label: "New", img: CAR_NEW },
-              { id: "used", label: "Used", img: CAR_USED },
-              { id: "moto", label: "Moto", img: CAR_MOTO },
-            ] as { id: Condition; label: string; img: any }[]
-          ).map((tab) => (
-            <Pressable
-              key={tab.id}
-              style={[styles.tab, condition === tab.id && styles.tabActive]}
-              onPress={() => setCondition(tab.id)}
-            >
-              <Text style={[styles.tabLabel, condition === tab.id && styles.tabLabelActive]}>
-                {tab.label}
+        {/* ── Row 2: Logo + user avatar ── */}
+        <View style={styles.topRow}>
+          <View style={styles.logoRow}>
+            <Image source={WC_BADGE} style={styles.logoBadge} resizeMode="contain" />
+            <Text style={styles.logoText}>WESTCARS</Text>
+          </View>
+          <View style={styles.userRow}>
+            <View style={styles.avatarCircle}>
+              <Text style={styles.avatarText}>
+                {currentUser?.name?.[0] || "W"}
               </Text>
-              <Image source={tab.img} style={styles.tabImg} resizeMode="contain" />
-            </Pressable>
-          ))}
+            </View>
+            <Text style={styles.userName}>
+              {currentUser?.name?.split(" ")[0] || "Guest"}
+            </Text>
+          </View>
+        </View>
 
-          {/* Divider */}
-          <View style={styles.tabDivider} />
+        {/* ── Row 3: Condition tabs + category chips (collapses on scroll-up) ── */}
+        <Animated.View style={{ height: catHeightAnim, opacity: catOpacityAnim, overflow: "hidden" }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabsRow}
+          >
+            {(
+              [
+                { id: "new",  label: "New",  img: CAR_NEW  },
+                { id: "used", label: "Used", img: CAR_USED },
+                { id: "moto", label: "Moto", img: CAR_MOTO },
+              ] as { id: Condition; label: string; img: any }[]
+            ).map((tab) => (
+              <Pressable
+                key={tab.id}
+                style={[styles.tab, condition === tab.id && styles.tabActive]}
+                onPress={() => setCondition(tab.id)}
+              >
+                <Text style={[styles.tabLabel, condition === tab.id && styles.tabLabelActive]}>
+                  {tab.label}
+                </Text>
+                <Image source={tab.img} style={styles.tabImg} resizeMode="contain" />
+              </Pressable>
+            ))}
 
-          {/* Category type cards — same size as condition tabs */}
-          {VEHICLE_CATEGORIES[condition].map((cat) => (
-            <Pressable key={cat.label} style={styles.tab}>
-              <Text style={styles.tabLabel} numberOfLines={1}>{cat.label}</Text>
-              <Image source={cat.img} style={styles.tabImg} resizeMode="contain" />
-              {cat.count > 0 && (
-                <Text style={styles.tabCount}>{cat.count}</Text>
-              )}
-            </Pressable>
-          ))}
-        </ScrollView>
+            <View style={styles.tabDivider} />
+
+            {VEHICLE_CATEGORIES[condition].map((cat) => (
+              <Pressable key={cat.label} style={styles.tab}>
+                <Text style={styles.tabLabel} numberOfLines={1}>{cat.label}</Text>
+                <Image source={cat.img} style={styles.tabImg} resizeMode="contain" />
+                {cat.count > 0 && (
+                  <Text style={styles.tabCount}>{cat.count}</Text>
+                )}
+              </Pressable>
+            ))}
+          </ScrollView>
+        </Animated.View>
       </View>
 
+      {/* ── Scrollable body ── */}
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={{
           paddingBottom: 100 + (insets.bottom || 0),
         }}
       >
-        {/* ── Sponsored Banner (Feature #15) ── */}
+        {/* ── Sponsored Banner ── */}
         <View style={styles.promoBanner}>
           <View style={styles.promoBannerLeft}>
             <View style={styles.promoBadge}>
@@ -177,9 +215,7 @@ export default function HomeScreen() {
             <Text style={styles.promoBannerTitle}>Toyota Certified Pre-Owned</Text>
             <Text style={styles.promoBannerSub}>0% Interest · 12-month Warranty · Nationwide</Text>
           </View>
-          <View style={styles.promoBannerRight}>
-            <Text style={styles.promoBannerEmoji}>🚗</Text>
-          </View>
+          <Image source={BANNER_CAR} style={styles.bannerCarImg} resizeMode="contain" />
         </View>
 
         {/* ── "Personally for you" section ── */}
@@ -194,7 +230,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Divider */}
         <View style={styles.sep} />
 
         {/* ── Special Offers ── */}
@@ -260,17 +295,24 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#F5F5F5" },
+  root: { flex: 1, backgroundColor: "#F0F2F5" },
 
-  // Header
+  // ── Header ──
   header: {
     backgroundColor: "#fff",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    gap: 12,
+    paddingHorizontal: 14,
+    paddingBottom: 10,
+    gap: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#EEEEEE",
+    borderBottomColor: "#E8EAED",
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+    zIndex: 10,
   },
+
   topRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -278,69 +320,69 @@ const styles = StyleSheet.create({
   },
   userRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   avatarCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: "#E8F0FE",
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarText: { fontSize: 16, fontFamily: "Manrope_700Bold", color: "#0066CC" },
-  userName: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
+  avatarText: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#0066CC" },
+  userName: { fontSize: 14, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
 
   // Logo
   logoRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    marginVertical: 4,
+    gap: 8,
   },
-  logoBadge: { width: 36, height: 36, borderRadius: 8 },
+  logoBadge: { width: 34, height: 34, borderRadius: 8 },
   logoText: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: "Manrope_800ExtraBold",
     color: "#0A1628",
     letterSpacing: 4,
   },
 
-  // Search box
+  // ── Search box (now on top) ──
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    backgroundColor: "#F5F5F5",
-    borderRadius: 12,
+    gap: 10,
+    backgroundColor: "#F0F4FF",
+    borderRadius: 14,
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
+    paddingVertical: 11,
+    borderWidth: 1.5,
+    borderColor: "#C8D8F8",
   },
   searchBoxText: { flex: 1 },
   searchBoxLabel: {
     fontSize: 15,
-    fontFamily: "Manrope_500Medium",
+    fontFamily: "Manrope_600SemiBold",
     color: "#1A1A1A",
   },
   searchBoxCount: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Manrope_400Regular",
-    color: "#9E9E9E",
+    color: "#7A8AA8",
     marginTop: 1,
   },
   filterBtn: {
     width: 36,
     height: 36,
-    borderRadius: 8,
-    backgroundColor: "#fff",
+    borderRadius: 10,
+    backgroundColor: "#E8F0FE",
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: "#C8D8F8",
     alignItems: "center",
     justifyContent: "center",
   },
+  // Search car icon — bigger
+  searchCarIcon: { width: 44, height: 44 },
 
-  // Tabs — horizontal scroll row
-  tabsRow: { flexDirection: "row", gap: 8, paddingVertical: 2 },
+  // Tabs row
+  tabsRow: { flexDirection: "row", gap: 8, paddingVertical: 4 },
   tab: {
     width: 100,
     flexDirection: "column",
@@ -349,25 +391,25 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: 8,
     paddingHorizontal: 6,
-    borderRadius: 10,
-    backgroundColor: "#F5F5F5",
+    borderRadius: 12,
+    backgroundColor: "#F5F7FA",
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: "#E0E4EA",
   },
   tabActive: {
-    backgroundColor: "#fff",
-    borderColor: "#1A1A1A",
+    backgroundColor: "#EEF3FF",
+    borderColor: "#0066CC",
     borderWidth: 1.5,
   },
   tabLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Manrope_500Medium",
-    color: "#6B6B6B",
+    color: "#6B7A90",
     textAlign: "center",
   },
   tabLabelActive: {
     fontFamily: "Manrope_700Bold",
-    color: "#1A1A1A",
+    color: "#0066CC",
   },
   tabCount: {
     fontSize: 10,
@@ -378,62 +420,54 @@ const styles = StyleSheet.create({
   tabDivider: {
     width: 1,
     marginHorizontal: 2,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: "#E0E4EA",
     alignSelf: "stretch",
     marginVertical: 4,
-  },
-  searchCarIcon: { width: 28, height: 28 },
-
-  // Vehicle category grid
-  catSection: {
-    backgroundColor: "#fff",
-    paddingTop: 14,
-    paddingBottom: 12,
-  },
-  catSectionTitle: {
-    fontSize: 16,
-    fontFamily: "Manrope_700Bold",
-    color: "#1A1A1A",
-    paddingHorizontal: 14,
-    marginBottom: 10,
-  },
-  catScrollContent: {
-    paddingHorizontal: 14,
-    gap: 8,
-  },
-  catColumn: { flexDirection: "column", gap: 8 },
-  catCard: {
-    width: 120,
-    backgroundColor: "#F8F8F8",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#EEEEEE",
-    overflow: "hidden",
-    padding: 8,
-    alignItems: "center",
-  },
-  catImg: {
-    width: 100,
-    height: 60,
-    marginBottom: 4,
-  },
-  catLabel: {
-    fontSize: 12,
-    fontFamily: "Manrope_600SemiBold",
-    color: "#1A1A1A",
-    textAlign: "center",
-  },
-  catCount: {
-    fontSize: 10,
-    fontFamily: "Manrope_400Regular",
-    color: "#9E9E9E",
-    textAlign: "center",
-    marginTop: 2,
   },
 
   scroll: { flex: 1 },
 
-  // Section
+  // ── Sponsored Banner ──
+  promoBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#08122A",
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    gap: 8,
+    marginBottom: 2,
+  },
+  promoBannerLeft: { flex: 1, gap: 5 },
+  promoBadge: {
+    backgroundColor: "#E8192C",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: "flex-start",
+  },
+  promoBadgeText: {
+    fontSize: 9,
+    fontFamily: "Manrope_700Bold",
+    color: "#fff",
+    letterSpacing: 1.5,
+  },
+  promoBannerTitle: {
+    fontSize: 16,
+    fontFamily: "Manrope_700Bold",
+    color: "#fff",
+  },
+  promoBannerSub: {
+    fontSize: 12,
+    fontFamily: "Manrope_400Regular",
+    color: "rgba(255,255,255,0.65)",
+  },
+  bannerCarImg: {
+    width: 130,
+    height: 76,
+  },
+
+  // ── Section ──
   section: {
     backgroundColor: "#fff",
     paddingHorizontal: 12,
@@ -447,14 +481,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 19,
     fontFamily: "Manrope_700Bold",
-    color: "#1A1A1A",
+    color: "#0A1628",
     marginBottom: 12,
   },
-  seeAll: { fontSize: 14, color: "#0066CC", fontFamily: "Manrope_400Regular" },
+  seeAll: { fontSize: 13, color: "#0066CC", fontFamily: "Manrope_500Medium" },
 
-  // Grid — 2 column, no gap (like auto.ru)
+  // Grid — 2 column
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -463,52 +497,35 @@ const styles = StyleSheet.create({
   gridItem: {
     width: "50%",
     paddingHorizontal: 4,
-    marginBottom: 16,
+    marginBottom: 14,
   },
 
-  sep: { height: 8, backgroundColor: "#F5F5F5" },
+  sep: { height: 8, backgroundColor: "#F0F2F5" },
 
-  // Special offers (horizontal)
+  // Special offers
   offersRow: { flexDirection: "row", gap: 10, paddingRight: 12, paddingBottom: 12 },
   offerCard: {
     width: 180,
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: 12,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#EEEEEE",
+    borderColor: "#EAEDF1",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   offerImgWrap: { height: 115, position: "relative" },
   offerImg: { width: "100%", height: "100%" },
   offerHeart: { position: "absolute", top: 6, right: 6 },
-  offerInfo: { padding: 10, gap: 1 },
-  offerPrice: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
-  offerName: { fontSize: 12, fontFamily: "Manrope_400Regular", color: "#6B6B6B" },
-  offerYear: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "#9E9E9E" },
+  offerInfo: { padding: 10, gap: 2 },
+  offerPrice: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#0A1628" },
+  offerName: { fontSize: 12, fontFamily: "Manrope_400Regular", color: "#6B7A90" },
+  offerYear: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "#9BAFC4" },
 
-  // Ad banner
-  promoBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#0A1628",
-    marginHorizontal: 0,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 12,
-  },
-  promoBannerLeft: { flex: 1, gap: 4 },
-  promoBadge: {
-    backgroundColor: "#E53935",
-    paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4,
-    alignSelf: "flex-start",
-  },
-  promoBadgeText: { fontSize: 9, fontFamily: "Manrope_700Bold", color: "#fff", letterSpacing: 1 },
-  promoBannerTitle: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#fff" },
-  promoBannerSub: { fontSize: 12, fontFamily: "Manrope_400Regular", color: "rgba(255,255,255,0.7)" },
-  promoBannerRight: { width: 50, alignItems: "center" },
-  promoBannerEmoji: { fontSize: 36 },
-
+  // Advertise banner
   adBanner: {
     flexDirection: "row",
     alignItems: "center",
@@ -523,18 +540,18 @@ const styles = StyleSheet.create({
   adBannerTitle: {
     fontSize: 14,
     fontFamily: "Manrope_700Bold",
-    color: "#1A1A1A",
+    color: "#0A1628",
   },
   adBannerSub: {
     fontSize: 12,
-    color: "#6B6B6B",
+    color: "#6B7A90",
     fontFamily: "Manrope_400Regular",
     marginTop: 2,
   },
   adBannerArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
