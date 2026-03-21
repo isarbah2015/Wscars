@@ -9,24 +9,24 @@ import { Colors } from "@/constants/colors";
 function SellTabIcon({ color }: { color: string }) {
   return (
     <View style={sellStyles.box}>
-      <Feather name="plus" size={22} color="#fff" />
+      <Feather name="plus" size={17} color="#1A4000" />
     </View>
   );
 }
 
 const sellStyles = StyleSheet.create({
   box: {
-    width: 44,
-    height: 36,
-    borderRadius: 10,
+    width: 34,
+    height: 28,
+    borderRadius: 8,
     backgroundColor: "#BFFF00",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#BFFF00",
-    shadowOpacity: 0.55,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 6,
+    shadowColor: "#7EC800",
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
   },
 });
 
@@ -84,12 +84,7 @@ export default function TabLayout() {
         name="search"
         options={{
           title: "Search",
-          tabBarIcon: ({ color, size }) =>
-            isIOS ? (
-              <SymbolView name="magnifyingglass" tintColor={color} size={size} />
-            ) : (
-              <Feather name="search" size={22} color={color} />
-            ),
+          href: null,
         }}
       />
       <Tabs.Screen
