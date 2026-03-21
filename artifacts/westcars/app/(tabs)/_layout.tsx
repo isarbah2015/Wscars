@@ -39,7 +39,7 @@ export default function TabLayout() {
             />
           ),
         tabBarLabelStyle: {
-          fontFamily: "Inter_500Medium",
+          fontFamily: "Manrope_500Medium",
           fontSize: 11,
         },
       }}

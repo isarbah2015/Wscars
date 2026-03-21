@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.light.textSecondary,
     width: 90,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
   track: {
     flex: 1,
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 13,
     color: Colors.light.text,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     width: 28,
     textAlign: "right",
   },

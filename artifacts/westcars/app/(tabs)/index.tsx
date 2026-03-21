@@ -270,8 +270,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#0066CC" },
-  userName: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#1A1A1A" },
+  avatarText: { fontSize: 16, fontFamily: "Manrope_700Bold", color: "#0066CC" },
+  userName: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
 
   // Logo
   logoRow: {
@@ -296,12 +296,12 @@ const styles = StyleSheet.create({
   searchBoxText: { flex: 1 },
   searchBoxLabel: {
     fontSize: 15,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Manrope_500Medium",
     color: "#1A1A1A",
   },
   searchBoxCount: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: "#9E9E9E",
     marginTop: 1,
   },
@@ -338,17 +338,17 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: 12,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Manrope_500Medium",
     color: "#6B6B6B",
     textAlign: "center",
   },
   tabLabelActive: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: "#1A1A1A",
   },
   tabCount: {
     fontSize: 10,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: "#9E9E9E",
   },
   tabImg: { width: 64, height: 36 },
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   },
   catSectionTitle: {
     fontSize: 16,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: "#1A1A1A",
     paddingHorizontal: 14,
     marginBottom: 10,
@@ -396,13 +396,13 @@ const styles = StyleSheet.create({
   },
   catLabel: {
     fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: "#1A1A1A",
     textAlign: "center",
   },
   catCount: {
     fontSize: 10,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: "#9E9E9E",
     textAlign: "center",
     marginTop: 2,
@@ -425,11 +425,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: "#1A1A1A",
     marginBottom: 12,
   },
-  seeAll: { fontSize: 14, color: "#0066CC", fontFamily: "Inter_400Regular" },
+  seeAll: { fontSize: 14, color: "#0066CC", fontFamily: "Manrope_400Regular" },
 
   // Grid — 2 column, no gap (like auto.ru)
   grid: {
@@ -459,9 +459,9 @@ const styles = StyleSheet.create({
   offerImg: { width: "100%", height: "100%" },
   offerHeart: { position: "absolute", top: 6, right: 6 },
   offerInfo: { padding: 10, gap: 1 },
-  offerPrice: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
-  offerName: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#6B6B6B" },
-  offerYear: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#9E9E9E" },
+  offerPrice: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
+  offerName: { fontSize: 12, fontFamily: "Manrope_400Regular", color: "#6B6B6B" },
+  offerYear: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "#9E9E9E" },
 
   // Ad banner
   adBanner: {
@@ -477,13 +477,13 @@ const styles = StyleSheet.create({
   },
   adBannerTitle: {
     fontSize: 14,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: "#1A1A1A",
   },
   adBannerSub: {
     fontSize: 12,
     color: "#6B6B6B",
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     marginTop: 2,
   },
   adBannerArrow: {

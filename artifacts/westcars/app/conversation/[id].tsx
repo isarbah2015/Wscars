@@ -251,13 +251,13 @@ const styles = StyleSheet.create({
   },
   headerName: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.light.text,
   },
   headerCar: {
     fontSize: 12,
     color: Colors.primary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
   headerCallBtn: {
     width: 40,
@@ -287,12 +287,12 @@ const styles = StyleSheet.create({
   },
   carBannerTitle: {
     fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.light.text,
   },
   carBannerPrice: {
     fontSize: 12,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Manrope_500Medium",
     color: Colors.primary,
   },
   messageList: {
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     color: Colors.light.textTertiary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     textAlign: "center",
   },
   bubbleContainer: {
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   bubbleText: {
     fontSize: 14,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     lineHeight: 20,
   },
   bubbleTextOwn: {
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   bubbleTime: {
     fontSize: 10,
     color: Colors.light.textTertiary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     paddingHorizontal: 4,
   },
   bubbleTimeOwn: {
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 15,
     color: Colors.light.text,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     maxHeight: 100,
     borderWidth: 1,
     borderColor: Colors.light.border,

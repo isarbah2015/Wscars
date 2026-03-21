@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: Colors.light.text,
   },
   convRow: {
@@ -193,24 +193,24 @@ const styles = StyleSheet.create({
   },
   participantName: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.light.text,
     flex: 1,
   },
   time: {
     fontSize: 12,
     color: Colors.light.textTertiary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
   carName: {
     fontSize: 12,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Manrope_500Medium",
     color: Colors.primary,
   },
   lastMessage: {
     fontSize: 13,
     color: Colors.light.textSecondary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
   badge: {
     minWidth: 20,
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: "#fff",
     fontSize: 11,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
   },
   separator: {
     height: 1,
@@ -240,13 +240,13 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.light.text,
   },
   emptyText: {
     fontSize: 14,
     color: Colors.light.textTertiary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     textAlign: "center",
     lineHeight: 20,
   },
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   },
   authTitle: {
     fontSize: 20,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: Colors.light.text,
   },
   authBtn: {
@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
   },
   authBtnText: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: "#fff",
   },
 });

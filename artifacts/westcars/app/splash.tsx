@@ -10,82 +10,101 @@ import {
 } from "react-native";
 
 const SPLASH_CAR = require("@/assets/images/splash-car.png");
-const LOGO      = require("@/assets/images/logo-wordmark.png");
+const LOGO       = require("@/assets/images/logo-wordmark.png");
 
 export default function SplashScreen() {
-  const carOpacity   = useRef(new Animated.Value(0)).current;
-  const carY         = useRef(new Animated.Value(30)).current;
-  const logoOpacity  = useRef(new Animated.Value(0)).current;
-  const tagOpacity   = useRef(new Animated.Value(0)).current;
-  const dot1Scale    = useRef(new Animated.Value(0.4)).current;
-  const dot2Scale    = useRef(new Animated.Value(0.4)).current;
-  const dot3Scale    = useRef(new Animated.Value(0.4)).current;
+  const carOpacity  = useRef(new Animated.Value(0)).current;
+  const carY        = useRef(new Animated.Value(40)).current;
+  const logoOpacity = useRef(new Animated.Value(0)).current;
+  const logoScale   = useRef(new Animated.Value(0.85)).current;
+  const tagOpacity  = useRef(new Animated.Value(0)).current;
+  const dot1Scale   = useRef(new Animated.Value(0.4)).current;
+  const dot2Scale   = useRef(new Animated.Value(0.4)).current;
+  const dot3Scale   = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
-    // Car rises up and fades in
+    // Step 1: Car glides up into frame
     Animated.parallel([
       Animated.timing(carOpacity, {
-        toValue: 1, duration: 750,
-        easing: Easing.out(Easing.quad),
+        toValue: 1, duration: 700,
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
       Animated.spring(carY, {
-        toValue: 0, tension: 40, friction: 8,
+        toValue: 0, tension: 45, friction: 9,
         useNativeDriver: true,
       }),
     ]).start();
 
-    // Logo fades in after car settles
+    // Step 2: Logo pops in over the car
     setTimeout(() => {
-      Animated.timing(logoOpacity, {
-        toValue: 1, duration: 500,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }).start();
-    }, 550);
+      Animated.parallel([
+        Animated.timing(logoOpacity, {
+          toValue: 1, duration: 420,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.spring(logoScale, {
+          toValue: 1, tension: 120, friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, 500);
 
-    // Tagline
+    // Step 3: Tagline fades in below
     setTimeout(() => {
       Animated.timing(tagOpacity, {
-        toValue: 1, duration: 400,
+        toValue: 1, duration: 350,
         useNativeDriver: true,
       }).start();
-    }, 850);
+    }, 820);
 
-    // Pulsing dots
+    // Step 4: Pulsing loading dots
     setTimeout(() => {
       const pulse = (dot: Animated.Value, delay: number) =>
         Animated.loop(
           Animated.sequence([
             Animated.delay(delay),
-            Animated.spring(dot, { toValue: 1.4, useNativeDriver: true, speed: 40, bounciness: 8 }),
+            Animated.spring(dot, { toValue: 1.5, useNativeDriver: true, speed: 50, bounciness: 10 }),
             Animated.spring(dot, { toValue: 0.4, useNativeDriver: true, speed: 18, bounciness: 0 }),
           ])
         ).start();
       pulse(dot1Scale, 0);
-      pulse(dot2Scale, 170);
-      pulse(dot3Scale, 340);
+      pulse(dot2Scale, 180);
+      pulse(dot3Scale, 360);
     }, 900);
 
-    const nav = setTimeout(() => router.replace("/auth/login"), 3200);
+    const nav = setTimeout(() => router.replace("/auth/login"), 3400);
     return () => clearTimeout(nav);
   }, []);
 
   return (
     <View style={styles.root}>
-      {/* Car hero */}
+      {/* ── Hero block: car + logo overlaid ── */}
       <Animated.View
         style={[
-          styles.carWrap,
+          styles.heroBlock,
           { opacity: carOpacity, transform: [{ translateY: carY }] },
         ]}
       >
+        {/* Porsche 911 */}
         <Image source={SPLASH_CAR} style={styles.car} resizeMode="contain" />
-      </Animated.View>
 
-      {/* WestCars wordmark logo */}
-      <Animated.View style={[styles.logoWrap, { opacity: logoOpacity }]}>
-        <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+        {/* Wordmark centred over the car's body */}
+        <Animated.View
+          style={[
+            styles.logoOverlay,
+            {
+              opacity: logoOpacity,
+              transform: [{ scale: logoScale }],
+            },
+          ]}
+        >
+          {/* Soft frosted pill behind the logo */}
+          <View style={styles.logoPill}>
+            <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+          </View>
+        </Animated.View>
       </Animated.View>
 
       {/* Tagline */}
@@ -109,29 +128,62 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    gap: 20,
+    gap: 24,
   },
 
-  carWrap: { width: "100%", paddingHorizontal: 10 },
-  car: { width: "100%", height: 210 },
+  /* Contains both the car and the logo overlay */
+  heroBlock: {
+    width: "100%",
+    paddingHorizontal: 16,
+    position: "relative",
+    alignItems: "center",
+  },
 
-  logoWrap: { alignItems: "center" },
-  logo: { width: 260, height: 52 },
+  car: {
+    width: "100%",
+    height: 220,
+  },
+
+  /* Absolutely positioned over the car's centre */
+  logoOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  /* Frosted pill that sits behind the logo text */
+  logoPill: {
+    backgroundColor: "rgba(255,255,255,0.82)",
+    borderRadius: 14,
+    paddingHorizontal: 22,
+    paddingVertical: 10,
+    shadowColor: "#0044AA",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+
+  logo: { width: 240, height: 48 },
 
   tagline: {
     fontSize: 11,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_500Medium",
     color: "#AAAAAA",
-    letterSpacing: 2.5,
+    letterSpacing: 3,
     textTransform: "uppercase",
-    marginTop: -10,
+    marginTop: -8,
   },
 
   dotsRow: {
     position: "absolute",
-    bottom: 60,
+    bottom: 56,
     flexDirection: "row",
-    gap: 7,
+    gap: 8,
     alignItems: "center",
   },
   dot: {

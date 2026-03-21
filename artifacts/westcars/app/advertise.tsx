@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   backBtn: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
-  topBarTitle: { fontSize: 17, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
+  topBarTitle: { fontSize: 17, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
 
   scrollContent: { paddingBottom: 20 },
 
@@ -505,8 +505,8 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 10,
   },
-  heroTitle: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: -0.3 },
-  heroSub: { fontSize: 13, color: "rgba(255,255,255,0.8)", fontFamily: "Inter_400Regular" },
+  heroTitle: { fontSize: 22, fontFamily: "Manrope_700Bold", color: "#fff", letterSpacing: -0.3 },
+  heroSub: { fontSize: 13, color: "rgba(255,255,255,0.8)", fontFamily: "Manrope_400Regular" },
   statsRow: {
     flexDirection: "row",
     backgroundColor: "rgba(255,255,255,0.12)",
@@ -518,8 +518,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.15)",
   },
   statItem: { flex: 1, alignItems: "center", gap: 2 },
-  statVal: { fontSize: 17, fontFamily: "Inter_700Bold", color: "#fff" },
-  statLbl: { fontSize: 10, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_400Regular", textAlign: "center" },
+  statVal: { fontSize: 17, fontFamily: "Manrope_700Bold", color: "#fff" },
+  statLbl: { fontSize: 10, color: "rgba(255,255,255,0.7)", fontFamily: "Manrope_400Regular", textAlign: "center" },
   statDiv: { width: 1, height: 28, backgroundColor: "rgba(255,255,255,0.2)" },
 
   filterBar: { backgroundColor: "#fff", borderBottomWidth: 1, borderBottomColor: "#EEEEEE" },
@@ -530,12 +530,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   filterChipActive: { backgroundColor: "#1A1A1A", borderColor: "#1A1A1A" },
-  filterChipText: { fontSize: 13, fontFamily: "Inter_500Medium", color: "#6B6B6B" },
-  filterChipTextActive: { color: "#fff", fontFamily: "Inter_600SemiBold" },
+  filterChipText: { fontSize: 13, fontFamily: "Manrope_500Medium", color: "#6B6B6B" },
+  filterChipTextActive: { color: "#fff", fontFamily: "Manrope_600SemiBold" },
 
   group: { paddingHorizontal: 16, paddingTop: 16, gap: 10 },
   groupTitle: {
-    fontSize: 12, fontFamily: "Inter_700Bold", color: "#9E9E9E",
+    fontSize: 12, fontFamily: "Manrope_700Bold", color: "#9E9E9E",
     textTransform: "uppercase", letterSpacing: 1, marginBottom: 2,
   },
 
@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, paddingVertical: 5,
     borderBottomLeftRadius: 12,
   },
-  cornerTagText: { fontSize: 9, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: 0.8 },
+  cornerTagText: { fontSize: 9, fontFamily: "Manrope_700Bold", color: "#fff", letterSpacing: 0.8 },
 
   pkgHeader: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
   pkgIcon: {
@@ -563,14 +563,14 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
   pkgTitleRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" },
-  pkgLabel: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
+  pkgLabel: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
   durationTag: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 5 },
-  durationText: { fontSize: 11, fontFamily: "Inter_700Bold" },
-  pkgDesc: { fontSize: 12, color: "#6B6B6B", fontFamily: "Inter_400Regular", lineHeight: 18 },
+  durationText: { fontSize: 11, fontFamily: "Manrope_700Bold" },
+  pkgDesc: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular", lineHeight: 18 },
 
   periodSection: { gap: 10, paddingTop: 4 },
   periodLabel: {
-    fontSize: 11, fontFamily: "Inter_600SemiBold", color: "#9E9E9E",
+    fontSize: 11, fontFamily: "Manrope_600SemiBold", color: "#9E9E9E",
     textTransform: "uppercase", letterSpacing: 0.8,
   },
   periodGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
@@ -580,21 +580,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5", alignItems: "center", minWidth: 90,
   },
   periodOptActive: { borderColor: "#0066CC", backgroundColor: "#EBF4FF" },
-  periodOptLabel: { fontSize: 12, fontFamily: "Inter_500Medium", color: "#6B6B6B" },
-  periodOptLabelActive: { color: "#0066CC", fontFamily: "Inter_700Bold" },
-  periodOptPrice: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#1A1A1A", marginTop: 2 },
+  periodOptLabel: { fontSize: 12, fontFamily: "Manrope_500Medium", color: "#6B6B6B" },
+  periodOptLabelActive: { color: "#0066CC", fontFamily: "Manrope_700Bold" },
+  periodOptPrice: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#1A1A1A", marginTop: 2 },
   periodOptPriceActive: { color: "#0066CC" },
 
   sep: { height: 8, backgroundColor: "#F5F5F5" },
   section: { backgroundColor: "#fff", padding: 16, gap: 12 },
-  sectionTitle: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#1A1A1A", marginBottom: 4 },
+  sectionTitle: { fontSize: 16, fontFamily: "Manrope_700Bold", color: "#1A1A1A", marginBottom: 4 },
 
   includeRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   includeIcon: {
     width: 32, height: 32, borderRadius: 9,
     alignItems: "center", justifyContent: "center",
   },
-  includeText: { fontSize: 13, color: "#4A4A4A", fontFamily: "Inter_400Regular", flex: 1, lineHeight: 18 },
+  includeText: { fontSize: 13, color: "#4A4A4A", fontFamily: "Manrope_400Regular", flex: 1, lineHeight: 18 },
 
   contactCard: {
     backgroundColor: "#fff",
@@ -611,8 +611,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#EBF4FF",
     alignItems: "center", justifyContent: "center",
   },
-  contactTitle: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
-  contactSub: { fontSize: 12, color: "#6B6B6B", fontFamily: "Inter_400Regular", marginTop: 2 },
+  contactTitle: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
+  contactSub: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular", marginTop: 2 },
   contactActions: { flexDirection: "row", gap: 10 },
   contactBtn: {
     flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
@@ -620,8 +620,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: "#0066CC",
     backgroundColor: "#EBF4FF",
   },
-  contactBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#0066CC" },
-  contactEmail: { fontSize: 12, color: "#9E9E9E", fontFamily: "Inter_400Regular", textAlign: "center" },
+  contactBtnText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#0066CC" },
+  contactEmail: { fontSize: 12, color: "#9E9E9E", fontFamily: "Manrope_400Regular", textAlign: "center" },
 
   bookBar: {
     flexDirection: "row", alignItems: "center", gap: 16,
@@ -634,12 +634,12 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
-  bookSummary: { fontSize: 12, color: "#6B6B6B", fontFamily: "Inter_400Regular" },
-  bookPrice: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#0066CC", letterSpacing: -0.5 },
+  bookSummary: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular" },
+  bookPrice: { fontSize: 22, fontFamily: "Manrope_700Bold", color: "#0066CC", letterSpacing: -0.5 },
   bookBtn: {
     backgroundColor: "#0066CC",
     paddingHorizontal: 24, paddingVertical: 14,
     borderRadius: 12,
   },
-  bookBtnText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
+  bookBtnText: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#fff" },
 });

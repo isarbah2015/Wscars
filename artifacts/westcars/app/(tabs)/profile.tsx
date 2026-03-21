@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 22,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: "#fff",
   },
   locationRow: {
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
   },
   userLocation: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: "rgba(255,255,255,0.85)",
   },
   verifyBtn: {
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
   },
   verifyBtnText: {
     fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.primary,
   },
   statsRow: {
@@ -435,12 +435,12 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 18,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: "#fff",
   },
   statLabel: {
     fontSize: 11,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: "rgba(255,255,255,0.8)",
   },
   statDivider: {
@@ -466,12 +466,12 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 14,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Manrope_500Medium",
     color: Colors.light.textSecondary,
   },
   tabTextActive: {
     color: Colors.primary,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
   },
   tabContent: {
     padding: 16,
@@ -492,12 +492,12 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 17,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.light.textSecondary,
   },
   emptySubtitle: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: Colors.light.textTertiary,
     textAlign: "center",
   },
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
   },
   listNowText: {
     fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: "#fff",
   },
   settingsCard: {
@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
   },
   settingsSection: {
     fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.light.textTertiary,
     paddingHorizontal: 16,
     paddingTop: 16,
@@ -549,7 +549,7 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 15,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: Colors.light.text,
   },
   settingRight: {
@@ -559,7 +559,7 @@ const styles = StyleSheet.create({
   },
   settingValue: {
     fontSize: 14,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: Colors.light.textTertiary,
   },
   verifiedBadge: {
@@ -575,7 +575,7 @@ const styles = StyleSheet.create({
   },
   verifiedBadgeText: {
     fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.light.text,
   },
   logoutCard: {
@@ -587,7 +587,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.danger,
   },
   authWall: {
@@ -608,13 +608,13 @@ const styles = StyleSheet.create({
   },
   authTitle: {
     fontSize: 24,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: Colors.light.text,
   },
   authText: {
     fontSize: 14,
     color: Colors.light.textSecondary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     textAlign: "center",
     lineHeight: 20,
   },
@@ -629,12 +629,12 @@ const styles = StyleSheet.create({
   },
   authBtnText: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: "#fff",
   },
   signupLink: {
     fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.primary,
   },
 });

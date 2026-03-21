@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   condBadgeText: {
     color: "#fff",
     fontSize: 11,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
   },
 
   heart: {
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   adBadgeText: {
     color: "rgba(255,255,255,0.9)",
     fontSize: 9,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     letterSpacing: 0.5,
   },
 
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   viewsText: {
     color: "rgba(255,255,255,0.9)",
     fontSize: 9,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
 
   info: {
@@ -221,18 +221,18 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 15,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: "#1A1A1A",
     letterSpacing: -0.2,
   },
   carName: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: "#6B6B6B",
   },
   year: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: "#9E9E9E",
   },
 });

@@ -65,16 +65,16 @@ const styles = StyleSheet.create({
   sponsoredText: {
     fontSize: 10,
     color: Colors.primary,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
   },
   title: {
     fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.light.text,
   },
   price: {
     fontSize: 14,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: Colors.primary,
   },
   meta: {
@@ -85,6 +85,6 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 11,
     color: Colors.light.textTertiary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
 });

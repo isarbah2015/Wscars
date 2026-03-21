@@ -240,8 +240,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#EEEEEE",
   },
-  headerTitle: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
-  headerSub: { fontSize: 13, color: "#6B6B6B", fontFamily: "Inter_400Regular", marginTop: 2 },
+  headerTitle: { fontSize: 20, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
+  headerSub: { fontSize: 13, color: "#6B6B6B", fontFamily: "Manrope_400Regular", marginTop: 2 },
   closeBtn: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: "#F5F5F5",
@@ -267,9 +267,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   catChipActive: { backgroundColor: "#1A1A1A", borderColor: "#1A1A1A" },
-  catChipText: { fontSize: 13, fontFamily: "Inter_500Medium", color: "#1A1A1A" },
+  catChipText: { fontSize: 13, fontFamily: "Manrope_500Medium", color: "#1A1A1A" },
   catChipTextActive: { color: "#fff" },
-  catChipCount: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#6B6B6B" },
+  catChipCount: { fontSize: 12, fontFamily: "Manrope_400Regular", color: "#6B6B6B" },
 
   catBlock: {
     marginTop: 8,
@@ -291,9 +291,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#EBF4FF",
     alignItems: "center", justifyContent: "center",
   },
-  catName: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#1A1A1A" },
+  catName: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
   catCount: {
-    fontSize: 13, fontFamily: "Inter_400Regular",
+    fontSize: 13, fontFamily: "Manrope_400Regular",
     color: "#6B6B6B",
     backgroundColor: "#F5F5F5",
     paddingHorizontal: 8, paddingVertical: 2,
@@ -319,5 +319,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#E8F5E9",
     alignItems: "center", justifyContent: "center",
   },
-  itemText: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#1A1A1A", flex: 1 },
+  itemText: { fontSize: 14, fontFamily: "Manrope_400Regular", color: "#1A1A1A", flex: 1 },
 });

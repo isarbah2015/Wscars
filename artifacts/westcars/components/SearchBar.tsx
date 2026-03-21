@@ -37,7 +37,7 @@ export function SearchBar({
         placeholderTextColor={Colors.light.textTertiary}
         editable={editable}
         returnKeyType="search"
-        fontFamily="Inter_400Regular"
+        fontFamily="Manrope_400Regular"
       />
       {value.length > 0 && (
         <Pressable onPress={() => onChangeText("")} hitSlop={8}>
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     color: Colors.light.text,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     padding: 0,
   },
   filterBtn: {

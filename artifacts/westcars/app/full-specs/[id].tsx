@@ -193,8 +193,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   backBtn: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
-  topTitle: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
-  topSub: { fontSize: 12, color: "#9E9E9E", fontFamily: "Inter_400Regular", marginTop: 1 },
+  topTitle: { fontSize: 16, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
+  topSub: { fontSize: 12, color: "#9E9E9E", fontFamily: "Manrope_400Regular", marginTop: 1 },
 
   heroCard: {
     backgroundColor: "#1A1A1A",
@@ -218,8 +218,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.15)",
   },
-  dimText: { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
-  dimSub: { color: "rgba(255,255,255,0.6)", fontSize: 10, fontFamily: "Inter_400Regular" },
+  dimText: { color: "#fff", fontSize: 13, fontFamily: "Manrope_700Bold" },
+  dimSub: { color: "rgba(255,255,255,0.6)", fontSize: 10, fontFamily: "Manrope_400Regular" },
 
   quickRow: {
     flexDirection: "row",
@@ -234,8 +234,8 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderRightColor: "#F0F0F0",
   },
-  quickVal: { fontSize: 13, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
-  quickLbl: { fontSize: 10, fontFamily: "Inter_400Regular", color: "#9E9E9E", marginTop: 2 },
+  quickVal: { fontSize: 13, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
+  quickLbl: { fontSize: 10, fontFamily: "Manrope_400Regular", color: "#9E9E9E", marginTop: 2 },
 
   sections: { padding: 16, gap: 12 },
 
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 13,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: "#1A1A1A",
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -271,13 +271,13 @@ const styles = StyleSheet.create({
   },
   specLabel: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: "#6B6B6B",
     flex: 1,
   },
   specValue: {
     fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: "#1A1A1A",
     flex: 1,
     textAlign: "right",

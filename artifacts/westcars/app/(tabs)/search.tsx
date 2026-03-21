@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: Colors.light.text,
   },
   filterTag: {
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   filterTagText: {
     fontSize: 12,
     color: Colors.primary,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Manrope_500Medium",
   },
   resultsHeader: {
     paddingHorizontal: 16,
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   resultsText: {
     fontSize: 13,
     color: Colors.light.textSecondary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
   row: {
     flexDirection: "row",
@@ -370,13 +370,13 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.light.text,
   },
   emptyText: {
     fontSize: 14,
     color: Colors.light.textTertiary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     textAlign: "center",
   },
 });
@@ -411,7 +411,7 @@ const fStyles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: Colors.light.text,
   },
   section: {
@@ -419,7 +419,7 @@ const fStyles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.light.text,
     marginBottom: 10,
   },
@@ -443,11 +443,11 @@ const fStyles = StyleSheet.create({
   chipText: {
     fontSize: 13,
     color: Colors.light.textSecondary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
   chipTextActive: {
     color: "#fff",
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
   },
   footer: {
     flexDirection: "row",
@@ -467,7 +467,7 @@ const fStyles = StyleSheet.create({
   resetText: {
     fontSize: 15,
     color: Colors.primary,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
   },
   applyBtn: {
     flex: 2,
@@ -479,6 +479,6 @@ const fStyles = StyleSheet.create({
   applyText: {
     fontSize: 15,
     color: "#fff",
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
   },
 });

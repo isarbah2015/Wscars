@@ -214,17 +214,17 @@ const styles = StyleSheet.create({
 
   logo: { width: 220, height: 44 },
   tagline: {
-    fontSize: 11, fontFamily: "Inter_400Regular",
+    fontSize: 11, fontFamily: "Manrope_400Regular",
     color: "rgba(255,255,255,0.5)", letterSpacing: 1.8,
     textTransform: "uppercase", marginTop: -4,
   },
 
   heroTitle: {
-    fontSize: 30, fontFamily: "Inter_700Bold",
+    fontSize: 30, fontFamily: "Manrope_700Bold",
     color: "#fff", letterSpacing: -0.8, marginTop: 4,
   },
   heroSub: {
-    fontSize: 14, fontFamily: "Inter_400Regular",
+    fontSize: 14, fontFamily: "Manrope_400Regular",
     color: "rgba(255,255,255,0.65)", lineHeight: 22, marginTop: -2,
   },
 
@@ -238,8 +238,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.12)",
   },
   statItem: { flex: 1, alignItems: "center", gap: 2 },
-  statValue: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#fff" },
-  statLabel: { fontSize: 11, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.55)" },
+  statValue: { fontSize: 20, fontFamily: "Manrope_700Bold", color: "#fff" },
+  statLabel: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "rgba(255,255,255,0.55)" },
 
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 16, paddingTop: 20 },
@@ -249,11 +249,11 @@ const styles = StyleSheet.create({
     shadowColor: "#000", shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08, shadowRadius: 16, elevation: 6,
   },
-  formTitle: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#1A1A1A", marginBottom: 4 },
+  formTitle: { fontSize: 22, fontFamily: "Manrope_700Bold", color: "#1A1A1A", marginBottom: 4 },
 
   fieldWrap: { gap: 6 },
   fieldLabel: {
-    fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#6B6B6B",
+    fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#6B6B6B",
     letterSpacing: 0.4, textTransform: "uppercase",
   },
   field: {
@@ -266,21 +266,21 @@ const styles = StyleSheet.create({
     shadowColor: "#0066CC", shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.15, shadowRadius: 6, elevation: 2,
   },
-  input: { flex: 1, fontSize: 15, color: "#1A1A1A", fontFamily: "Inter_400Regular", padding: 0 },
+  input: { flex: 1, fontSize: 15, color: "#1A1A1A", fontFamily: "Manrope_400Regular", padding: 0 },
 
   forgotBtn: { alignSelf: "flex-end", marginTop: -4 },
-  forgotText: { fontSize: 13, color: "#0066CC", fontFamily: "Inter_500Medium" },
+  forgotText: { fontSize: 13, color: "#0066CC", fontFamily: "Manrope_500Medium" },
 
   signInBtn: { borderRadius: 12, overflow: "hidden", marginTop: 4 },
   signInGrad: {
     height: 52, flexDirection: "row",
     alignItems: "center", justifyContent: "center", gap: 8,
   },
-  signInText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: 0.2 },
+  signInText: { fontSize: 16, fontFamily: "Manrope_700Bold", color: "#fff", letterSpacing: 0.2 },
 
   divider: { flexDirection: "row", alignItems: "center", gap: 12 },
   divLine: { flex: 1, height: 1, backgroundColor: "#F0F0F0" },
-  divText: { fontSize: 13, color: "#BDBDBD", fontFamily: "Inter_400Regular" },
+  divText: { fontSize: 13, color: "#BDBDBD", fontFamily: "Manrope_400Regular" },
 
   registerBtn: {
     height: 52, flexDirection: "row", alignItems: "center",
@@ -288,15 +288,15 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: "#0066CC",
     borderRadius: 12, backgroundColor: "#F0F7FF",
   },
-  registerText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#0066CC" },
+  registerText: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#0066CC" },
 
   guestBtn: { alignItems: "center", paddingVertical: 6 },
-  guestText: { fontSize: 13, color: "#9E9E9E", fontFamily: "Inter_400Regular" },
+  guestText: { fontSize: 13, color: "#9E9E9E", fontFamily: "Manrope_400Regular" },
 
   trustRow: {
     flexDirection: "row", justifyContent: "center",
     gap: 20, marginTop: 20, paddingHorizontal: 8,
   },
   trustItem: { flexDirection: "row", alignItems: "center", gap: 5 },
-  trustText: { fontSize: 11, color: "#BDBDBD", fontFamily: "Inter_400Regular" },
+  trustText: { fontSize: 11, color: "#BDBDBD", fontFamily: "Manrope_400Regular" },
 });

@@ -378,12 +378,12 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     fontSize: 26,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: Colors.light.text,
   },
   screenSubtitle: {
     fontSize: 14,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: Colors.light.textSecondary,
     marginBottom: 4,
   },
@@ -400,12 +400,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.light.text,
   },
   sectionSubtitle: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: Colors.light.textTertiary,
     marginTop: -8,
   },
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   addImageText: {
     fontSize: 10,
     color: Colors.primary,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Manrope_500Medium",
     textAlign: "center",
   },
   fieldContainer: {
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 13,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Manrope_500Medium",
     color: Colors.light.textSecondary,
   },
   input: {
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     fontSize: 15,
     color: Colors.light.text,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     borderWidth: 1,
     borderColor: Colors.light.border,
   },
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
   },
   currencyText: {
     color: "#fff",
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     fontSize: 15,
   },
   priceInput: {
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     fontSize: 18,
     color: Colors.light.text,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     padding: 0,
     paddingVertical: 13,
   },
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     fontSize: 17,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: "#fff",
   },
   authWall: {
@@ -534,13 +534,13 @@ const styles = StyleSheet.create({
   },
   authTitle: {
     fontSize: 22,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: Colors.light.text,
   },
   authText: {
     fontSize: 14,
     color: Colors.light.textSecondary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     textAlign: "center",
   },
   authBtn: {
@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
   },
   authBtnText: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: "#fff",
   },
 });
@@ -578,7 +578,7 @@ const pStyles = StyleSheet.create({
   label: {
     fontSize: 13,
     color: Colors.light.textSecondary,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Manrope_500Medium",
   },
   valueRow: {
     flexDirection: "row",
@@ -588,7 +588,7 @@ const pStyles = StyleSheet.create({
   value: {
     fontSize: 15,
     color: Colors.light.text,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
   placeholder: {
     color: Colors.light.textTertiary,
@@ -614,10 +614,10 @@ const pStyles = StyleSheet.create({
   optionText: {
     fontSize: 14,
     color: Colors.light.text,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
   optionTextActive: {
     color: Colors.primary,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
   },
 });

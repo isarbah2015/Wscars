@@ -482,8 +482,8 @@ export default function CarDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F5F5" },
   notFound: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, backgroundColor: "#fff" },
-  notFoundText: { fontSize: 16, color: Colors.light.textSecondary, fontFamily: "Inter_500Medium" },
-  backLink: { fontSize: 14, color: "#0066CC", fontFamily: "Inter_500Medium" },
+  notFoundText: { fontSize: 16, color: Colors.light.textSecondary, fontFamily: "Manrope_500Medium" },
+  backLink: { fontSize: 14, color: "#0066CC", fontFamily: "Manrope_500Medium" },
 
   // Top bar
   topBar: {
@@ -503,13 +503,13 @@ const styles = StyleSheet.create({
   },
   topTitle: {
     fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: "#1A1A1A",
     lineHeight: 18,
   },
   topPrice: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: "#6B6B6B",
   },
 
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6,
   },
-  imgCounterText: { color: "#fff", fontSize: 12, fontFamily: "Inter_500Medium" },
+  imgCounterText: { color: "#fff", fontSize: 12, fontFamily: "Manrope_500Medium" },
   dots: {
     position: "absolute", bottom: 12, alignSelf: "center",
     flexDirection: "row", gap: 5,
@@ -530,18 +530,18 @@ const styles = StyleSheet.create({
 
   // Main info
   mainCard: { backgroundColor: "#fff", padding: 16, gap: 10 },
-  carTitle: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#1A1A1A", letterSpacing: -0.3 },
+  carTitle: { fontSize: 20, fontFamily: "Manrope_700Bold", color: "#1A1A1A", letterSpacing: -0.3 },
   ratingLine: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
   },
-  ratingText: { fontSize: 13, color: "#6B6B6B", fontFamily: "Inter_400Regular" },
-  ratingNum: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#1A1A1A" },
-  ratingCount: { fontSize: 12, color: "#9E9E9E", fontFamily: "Inter_400Regular" },
+  ratingText: { fontSize: 13, color: "#6B6B6B", fontFamily: "Manrope_400Regular" },
+  ratingNum: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
+  ratingCount: { fontSize: 12, color: "#9E9E9E", fontFamily: "Manrope_400Regular" },
   priceRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   bigPrice: {
-    fontSize: 28, fontFamily: "Inter_700Bold",
+    fontSize: 28, fontFamily: "Manrope_700Bold",
     color: "#1A1A1A", letterSpacing: -0.5,
   },
   fairBadge: {
@@ -550,8 +550,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginLeft: 4,
   },
-  fairBadgeText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#2E7D32" },
-  creditLine: { fontSize: 13, color: "#0066CC", fontFamily: "Inter_500Medium" },
+  fairBadgeText: { fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#2E7D32" },
+  creditLine: { fontSize: 13, color: "#0066CC", fontFamily: "Manrope_500Medium" },
   historyBanner: {
     flexDirection: "row",
     alignItems: "center",
@@ -567,16 +567,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3E8FF",
     alignItems: "center", justifyContent: "center",
   },
-  historyTitle: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#1A1A1A" },
-  historySub: { fontSize: 11, color: "#6B6B6B", fontFamily: "Inter_400Regular", marginTop: 2 },
+  historyTitle: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
+  historySub: { fontSize: 11, color: "#6B6B6B", fontFamily: "Manrope_400Regular", marginTop: 2 },
   metaRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  metaDate: { fontSize: 12, color: "#6B6B6B", fontFamily: "Inter_400Regular" },
+  metaDate: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular" },
   metaViews: { flexDirection: "row", alignItems: "center", gap: 4 },
-  metaViewsText: { fontSize: 12, color: "#6B6B6B", fontFamily: "Inter_400Regular" },
+  metaViewsText: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular" },
 
   sep: { height: 8, backgroundColor: "#F5F5F5" },
   card: { backgroundColor: "#fff", padding: 16, gap: 14 },
-  cardTitle: { fontSize: 18, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
+  cardTitle: { fontSize: 18, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
 
   // Icon specs grid — 3 per row, 2 rows
   iconSpecsGrid: {
@@ -596,8 +596,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#E0E0E0",
   },
-  iconSpecValue: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
-  iconSpecLabel: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#9E9E9E", marginTop: 1 },
+  iconSpecValue: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
+  iconSpecLabel: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "#9E9E9E", marginTop: 1 },
 
   // Extra row specs
   extraSpecsList: {
@@ -618,9 +618,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#F0F0F0",
   },
-  extraSpecLabel: { fontSize: 13, color: "#6B6B6B", fontFamily: "Inter_400Regular" },
-  extraSpecValue: { fontSize: 13, fontFamily: "Inter_500Medium", color: "#1A1A1A" },
-  extraSpecHighlight: { color: "#0066CC", fontFamily: "Inter_500Medium" },
+  extraSpecLabel: { fontSize: 13, color: "#6B6B6B", fontFamily: "Manrope_400Regular" },
+  extraSpecValue: { fontSize: 13, fontFamily: "Manrope_500Medium", color: "#1A1A1A" },
+  extraSpecHighlight: { color: "#0066CC", fontFamily: "Manrope_500Medium" },
 
   moreBtn: {
     height: 46,
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#FAFAFA",
   },
-  moreBtnText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#1A1A1A" },
+  moreBtnText: { fontSize: 14, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
 
   // Ask seller
   messageBox: {
@@ -648,7 +648,7 @@ const styles = StyleSheet.create({
   messageInput: {
     flex: 1,
     fontSize: 14,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
     color: "#1A1A1A",
     minHeight: 40,
     maxHeight: 100,
@@ -670,8 +670,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#1A1A1A",
     borderColor: "#1A1A1A",
   },
-  quickChipText: { fontSize: 13, fontFamily: "Inter_400Regular", color: "#1A1A1A" },
-  quickChipTextActive: { color: "#fff", fontFamily: "Inter_500Medium" },
+  quickChipText: { fontSize: 13, fontFamily: "Manrope_400Regular", color: "#1A1A1A" },
+  quickChipTextActive: { color: "#fff", fontFamily: "Manrope_500Medium" },
 
   // Equipment grid — 2 col
   equipGrid: { gap: 0 },
@@ -683,11 +683,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#F0F0F0",
   },
-  equipCellLabel: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#1A1A1A", flex: 1 },
-  equipCellCount: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#1A1A1A" },
+  equipCellLabel: { fontSize: 14, fontFamily: "Manrope_400Regular", color: "#1A1A1A", flex: 1 },
+  equipCellCount: { fontSize: 14, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
 
   // Description
-  description: { fontSize: 14, color: "#6B6B6B", fontFamily: "Inter_400Regular", lineHeight: 22 },
+  description: { fontSize: 14, color: "#6B6B6B", fontFamily: "Manrope_400Regular", lineHeight: 22 },
 
   // Seller
   sellerRow: {
@@ -702,10 +702,10 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     borderWidth: 1, borderColor: "#E0E0E0",
   },
-  sellerName: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
-  sellerType: { fontSize: 12, color: "#6B6B6B", fontFamily: "Inter_400Regular", marginTop: 1 },
+  sellerName: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
+  sellerType: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular", marginTop: 1 },
   sellerStars: { flexDirection: "row", alignItems: "center", gap: 2, marginTop: 4 },
-  sellerRatingText: { fontSize: 12, color: "#6B6B6B", fontFamily: "Inter_400Regular", marginLeft: 4 },
+  sellerRatingText: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular", marginLeft: 4 },
 
   // Recommendations 2×2 grid
   recsGrid: {
@@ -728,7 +728,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 10, paddingVertical: 3,
   },
-  recBadgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: "#fff" },
+  recBadgeText: { fontSize: 11, fontFamily: "Manrope_600SemiBold", color: "#fff" },
   recHeart: { position: "absolute", top: 4, right: 6 },
   recRating: {
     position: "absolute", bottom: 6, right: 6,
@@ -737,20 +737,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6, paddingVertical: 2,
     borderRadius: 4,
   },
-  recRatingText: { fontSize: 10, color: "#fff", fontFamily: "Inter_500Medium" },
-  recPrice: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#1A1A1A", marginTop: 6 },
-  recName: { fontSize: 13, fontFamily: "Inter_400Regular", color: "#6B6B6B", marginTop: 2 },
-  recYear: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#9E9E9E", marginTop: 1 },
+  recRatingText: { fontSize: 10, color: "#fff", fontFamily: "Manrope_500Medium" },
+  recPrice: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#1A1A1A", marginTop: 6 },
+  recName: { fontSize: 13, fontFamily: "Manrope_400Regular", color: "#6B6B6B", marginTop: 2 },
+  recYear: { fontSize: 12, fontFamily: "Manrope_400Regular", color: "#9E9E9E", marginTop: 1 },
 
   // Location
   locationRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  locationText: { fontSize: 14, color: "#1A1A1A", fontFamily: "Inter_400Regular" },
+  locationText: { fontSize: 14, color: "#1A1A1A", fontFamily: "Manrope_400Regular" },
   mapPlaceholder: {
     height: 120, backgroundColor: "#F5F5F5", borderRadius: 8,
     alignItems: "center", justifyContent: "center", gap: 8,
     borderWidth: 1, borderColor: "#E0E0E0",
   },
-  mapPlaceholderText: { fontSize: 13, color: "#BDBDBD", fontFamily: "Inter_400Regular" },
+  mapPlaceholderText: { fontSize: 13, color: "#BDBDBD", fontFamily: "Manrope_400Regular" },
 
   // Bottom bar — auto.ru green style
   stickyBar: {
@@ -771,8 +771,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  callBtnLabel: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff" },
-  callBtnSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.85)" },
+  callBtnLabel: { fontSize: 16, fontFamily: "Manrope_700Bold", color: "#fff" },
+  callBtnSub: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "rgba(255,255,255,0.85)" },
   chatBtn: {
     width: 52, height: 52,
     borderRadius: 10,

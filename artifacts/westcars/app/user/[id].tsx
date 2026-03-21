@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 22,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: "#fff",
   },
   metaRow: {
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 12,
     color: "rgba(255,255,255,0.85)",
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
   dot: {
     width: 4,
@@ -206,13 +206,13 @@ const styles = StyleSheet.create({
   },
   ratingNum: {
     fontSize: 14,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: "#fff",
   },
   ratingCount: {
     fontSize: 12,
     color: "rgba(255,255,255,0.8)",
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
   statsRow: {
     flexDirection: "row",
@@ -229,13 +229,13 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 18,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: "#fff",
   },
   statLabel: {
     fontSize: 11,
     color: "rgba(255,255,255,0.8)",
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
   statDivider: {
     width: 1,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   },
   messageBtnText: {
     fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.primary,
   },
   followBtn: {
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   },
   followBtnText: {
     fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: "#fff",
   },
   listingsSection: {
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 17,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Manrope_700Bold",
     color: Colors.light.text,
   },
   gridRow: {
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 15,
     color: Colors.light.textSecondary,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Manrope_400Regular",
   },
   notFound: {
     flex: 1,
@@ -314,12 +314,12 @@ const styles = StyleSheet.create({
   },
   notFoundText: {
     fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
     color: Colors.light.textSecondary,
   },
   backLink: {
     fontSize: 14,
     color: Colors.primary,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Manrope_600SemiBold",
   },
 });
