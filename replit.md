@@ -15,6 +15,13 @@ A full-featured React Native / Expo mobile app called **Westcars** — Ghana's t
 - **Dir**: `artifacts/api-server`
 - **Port**: 8080
 
+## Design System
+- **Primary**: #0066CC blue, #E8192C red, #BFFF00 lemon green accent
+- **Fonts**: Manrope (Regular/Medium/SemiBold/Bold/ExtraBold)
+- **Theme**: Full dark/light mode via `ThemeContext` — all screens themed
+- **Icons**: Feather icons throughout
+- **Key screens**: Home, Search, Sell, Messages, Profile, Car Detail, Favourites, Advertise
+
 ## Features
 
 ### Core

@@ -17,12 +17,14 @@ import {
   ViewToken,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { EquipmentModal } from "@/components/EquipmentModal";
 import { ReportModal } from "@/components/ReportModal";
 import { TrustScore } from "@/components/TrustScore";
 import { VerificationBadges } from "@/components/VerificationBadges";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
+import { useTheme } from "@/context/ThemeContext";
 import { formatMileage, formatPrice } from "@/utils/ghanaData";
 
 const { width } = Dimensions.get("window");
@@ -50,6 +52,7 @@ export default function CarDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { cars, toggleFavorite, isFavorite, startConversation, isAuthenticated,
           markAsSold, renewListing, reportItem, currentUser, getSellerTrustScore } = useApp();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const [activeImg, setActiveImg] = useState(0);
   const [message, setMessage] = useState("");
@@ -115,14 +118,14 @@ export default function CarDetailScreen() {
 
   const s = car.techSpecs;
 
-  // Icon-based spec cells (2-column grid, auto.ru style)
+  // Icon-based spec cells with color coding
   const specCells = [
-    { icon: "calendar", value: String(car.year), label: "Year" },
-    { icon: "activity", value: `${Math.round(car.mileage / 1000)}k km`, label: "Mileage" },
-    { icon: "zap", value: car.fuelType, label: "Fuel" },
-    { icon: "settings", value: s?.gearbox?.split(" ")[0] || car.transmission, label: "Gearbox" },
-    { icon: "navigation-2", value: s?.drive?.split(" ")[0] || "AWD", label: "Drive" },
-    { icon: "droplet", value: s?.color?.split(" ")[0] || "White", label: "Color" },
+    { icon: "calendar",     value: String(car.year),                              label: "Year",    iconColor: "#3B9EFF", iconBg: isDark ? "#1A2D44" : "#EDF4FF" },
+    { icon: "activity",     value: `${Math.round(car.mileage / 1000)}k km`,       label: "Mileage", iconColor: "#22C55E", iconBg: isDark ? "#132313" : "#DCFCE7" },
+    { icon: "zap",          value: car.fuelType,                                  label: "Fuel",    iconColor: "#F59E0B", iconBg: isDark ? "#2A1F0A" : "#FFF3E0" },
+    { icon: "settings",     value: s?.gearbox?.split(" ")[0] || car.transmission, label: "Gearbox", iconColor: "#8B5CF6", iconBg: isDark ? "#1E1435" : "#F3E8FF" },
+    { icon: "navigation-2", value: s?.drive?.split(" ")[0] || "AWD",              label: "Drive",   iconColor: "#0891B2", iconBg: isDark ? "#0A2030" : "#E0F2FE" },
+    { icon: "droplet",      value: s?.color?.split(" ")[0] || "White",            label: "Color",   iconColor: "#EC4899", iconBg: isDark ? "#2A0A1A" : "#FCE7F3" },
   ];
 
   // Row-based additional specs — from real techSpecs
@@ -136,33 +139,33 @@ export default function CarDetailScreen() {
   const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* ── Top Bar ── */}
-        <View style={[styles.topBar, { paddingTop: topPad + 6 }]}>
-          <Pressable style={styles.iconBtn} onPress={() => router.back()}>
-            <Feather name="arrow-left" size={20} color="#1A1A1A" />
+        <View style={[styles.topBar, { paddingTop: topPad + 6, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+          <Pressable style={[styles.iconBtn, { backgroundColor: colors.background }]} onPress={() => router.back()}>
+            <Feather name="arrow-left" size={20} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={styles.topTitle} numberOfLines={1}>
+            <Text style={[styles.topTitle, { color: colors.text }]} numberOfLines={1}>
               {car.brand} {car.model}, {car.year}
             </Text>
-            <Text style={styles.topPrice}>{formatPrice(car.price)}</Text>
+            <Text style={[styles.topPrice, { color: colors.textSecondary }]}>{formatPrice(car.price)}</Text>
           </View>
-          <Pressable style={styles.iconBtn} onPress={() => toggleFavorite(car.id)}>
-            <Feather name="heart" size={20} color={fav ? "#E8192C" : "#1A1A1A"} />
+          <Pressable style={[styles.iconBtn, { backgroundColor: colors.background }]} onPress={() => toggleFavorite(car.id)}>
+            <Feather name="heart" size={20} color={fav ? "#E8192C" : colors.textSecondary} />
           </Pressable>
-          <Pressable style={styles.iconBtn} onPress={() => setShowMore(true)}>
-            <Feather name="more-vertical" size={20} color="#1A1A1A" />
+          <Pressable style={[styles.iconBtn, { backgroundColor: colors.background }]} onPress={() => setShowMore(true)}>
+            <Feather name="more-vertical" size={20} color={colors.textSecondary} />
           </Pressable>
         </View>
 
         {/* ── More Actions Dropdown ── */}
         {showMore && (
-          <View style={styles.moreDropdown}>
+          <View style={[styles.moreDropdown, { backgroundColor: colors.card, borderColor: colors.border }]}>
             {currentUser?.id === car.sellerId && !car.isSold && (
-              <Pressable style={styles.moreItem} onPress={() => {
+              <Pressable style={[styles.moreItem, { borderBottomColor: colors.border, borderBottomWidth: 1 }]} onPress={() => {
                 setShowMore(false);
                 Alert.alert("Mark as Sold", "Mark this listing as sold? Buyers will see it's no longer available.", [
                   { text: "Cancel", style: "cancel" },
@@ -174,7 +177,7 @@ export default function CarDetailScreen() {
               </Pressable>
             )}
             {currentUser?.id === car.sellerId && (
-              <Pressable style={styles.moreItem} onPress={() => {
+              <Pressable style={[styles.moreItem, { borderBottomColor: colors.border, borderBottomWidth: 1 }]} onPress={() => {
                 setShowMore(false);
                 renewListing(car.id);
                 Alert.alert("Listing Renewed", "Your listing is now active for another 30 days.");
@@ -184,14 +187,14 @@ export default function CarDetailScreen() {
               </Pressable>
             )}
             {currentUser?.id !== car.sellerId && (
-              <Pressable style={styles.moreItem} onPress={() => { setShowMore(false); setShowReport(true); }}>
+              <Pressable style={[styles.moreItem, { borderBottomColor: colors.border, borderBottomWidth: 1 }]} onPress={() => { setShowMore(false); setShowReport(true); }}>
                 <Feather name="flag" size={16} color="#E53935" />
                 <Text style={[styles.moreItemText, { color: "#E53935" }]}>Report Listing</Text>
               </Pressable>
             )}
             <Pressable style={styles.moreItem} onPress={() => setShowMore(false)}>
-              <Feather name="x" size={16} color="#9E9E9E" />
-              <Text style={[styles.moreItemText, { color: "#9E9E9E" }]}>Cancel</Text>
+              <Feather name="x" size={16} color={colors.textTertiary} />
+              <Text style={[styles.moreItemText, { color: colors.textTertiary }]}>Cancel</Text>
             </Pressable>
           </View>
         )}
@@ -230,23 +233,23 @@ export default function CarDetailScreen() {
         </View>
 
         {/* ── Main Info ── */}
-        <View style={styles.mainCard}>
+        <View style={[styles.mainCard, { backgroundColor: colors.card }]}>
           {/* Title + rating */}
-          <Text style={styles.carTitle}>{car.brand} {car.model}, {car.year}</Text>
+          <Text style={[styles.carTitle, { color: colors.text }]}>{car.brand} {car.model}, {car.year}</Text>
           <View style={styles.ratingLine}>
-            <Text style={styles.ratingText}>Model rating</Text>
+            <Text style={[styles.ratingText, { color: colors.textSecondary }]}>Model rating</Text>
             <Feather name="star" size={13} color="#F4B400" />
-            <Text style={styles.ratingNum}>
+            <Text style={[styles.ratingNum, { color: colors.text }]}>
               {car.seller?.rating?.toFixed(1) || "4.2"}
             </Text>
-            <Text style={styles.ratingCount}>
+            <Text style={[styles.ratingCount, { color: colors.textTertiary }]}>
               ({car.seller?.totalReviews || 1})
             </Text>
           </View>
 
           {/* Price row */}
           <View style={styles.priceRow}>
-            <Text style={styles.bigPrice}>{formatPrice(car.price)}</Text>
+            <Text style={[styles.bigPrice, { color: colors.text }]}>{formatPrice(car.price)}</Text>
             <Feather name="trending-down" size={16} color="#43A047" style={{ marginLeft: 4 }} />
             <View style={styles.fairBadge}>
               <Text style={styles.fairBadgeText}>Fair price</Text>
@@ -259,52 +262,68 @@ export default function CarDetailScreen() {
           </Text>
 
           {/* Car history banner */}
-          <View style={styles.historyBanner}>
+          <View style={[styles.historyBanner, { backgroundColor: isDark ? "#1C1A0A" : "#FFFDE7", borderColor: isDark ? "#2A2710" : "#FFF9C4" }]}>
             <View style={styles.historyIcon}>
               <Feather name="check-square" size={18} color="#8B5CF6" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.historyTitle}>Car history — free</Text>
-              <Text style={styles.historySub}>Contact seller and we'll send a full report</Text>
+              <Text style={[styles.historyTitle, { color: colors.text }]}>Car history — free</Text>
+              <Text style={[styles.historySub, { color: colors.textSecondary }]}>Contact seller and we'll send a full report</Text>
             </View>
           </View>
 
           {/* Date + views */}
           <View style={styles.metaRow}>
-            <Text style={styles.metaDate}>Listed in {car.location}</Text>
+            <Text style={[styles.metaDate, { color: colors.textSecondary }]}>Listed in {car.location}</Text>
             <View style={styles.metaViews}>
-              <Feather name="eye" size={12} color={Colors.light.textTertiary} />
-              <Text style={styles.metaViewsText}>
+              <Feather name="eye" size={12} color={colors.textTertiary} />
+              <Text style={[styles.metaViewsText, { color: colors.textSecondary }]}>
                 {car.views || 0} ({Math.floor((car.views || 0) * 0.08)} today)
               </Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.sep} />
+        <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── Specifications Icon Grid ── */}
-        <View style={styles.card}>
-          <View style={styles.iconSpecsGrid}>
-            {specCells.map((s) => (
-              <View key={s.label} style={styles.iconSpecCell}>
-                <Feather name={s.icon as any} size={22} color="#6B6B6B" style={{ marginBottom: 4 }} />
-                <Text style={styles.iconSpecValue}>{s.value}</Text>
-                <Text style={styles.iconSpecLabel}>{s.label}</Text>
+        <View style={[styles.card, { backgroundColor: colors.card }]}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Specs</Text>
+
+          {/* Colorful icon cells — 3 per row */}
+          <View style={[styles.iconSpecsGrid, { borderColor: colors.border, shadowColor: isDark ? "#000" : "#0A1628" }]}>
+            {specCells.map((sc, idx) => (
+              <View
+                key={sc.label}
+                style={[
+                  styles.iconSpecCell,
+                  { borderColor: colors.border },
+                  idx % 3 === 2 && { borderRightWidth: 0 },
+                  idx >= 3 && { borderBottomWidth: 0 },
+                ]}
+              >
+                {/* Colored icon bubble */}
+                <View style={[styles.specIconBubble, { backgroundColor: sc.iconBg }]}>
+                  <Feather name={sc.icon as any} size={17} color={sc.iconColor} />
+                </View>
+                <Text style={[styles.iconSpecValue, { color: colors.text }]}>{sc.value}</Text>
+                <Text style={[styles.iconSpecLabel, { color: colors.textTertiary }]}>{sc.label}</Text>
               </View>
             ))}
           </View>
 
           {/* Extra list-style specs */}
-          <View style={styles.extraSpecsList}>
-            {extraSpecs.map((s, i) => (
+          <View style={[styles.extraSpecsList, { borderColor: colors.border, shadowColor: isDark ? "#000" : "#0A1628" }]}>
+            {extraSpecs.map((sp, i) => (
               <View
-                key={s.label}
-                style={[styles.extraSpecRow, i < extraSpecs.length - 1 && styles.extraSpecBorder]}
+                key={sp.label}
+                style={[styles.extraSpecRow, { backgroundColor: colors.card },
+                  i < extraSpecs.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border }]}
               >
-                <Text style={styles.extraSpecLabel}>{s.label}</Text>
-                <Text style={[styles.extraSpecValue, s.highlight && styles.extraSpecHighlight]}>
-                  {s.value}
+                <Text style={[styles.extraSpecLabel, { color: colors.textSecondary }]}>{sp.label}</Text>
+                <Text style={[styles.extraSpecValue, { color: colors.text },
+                  sp.highlight && styles.extraSpecHighlight]}>
+                  {sp.value}
                 </Text>
               </View>
             ))}
@@ -312,30 +331,30 @@ export default function CarDetailScreen() {
 
           {/* More details button */}
           <Pressable
-            style={styles.moreBtn}
+            style={[styles.moreBtn, { backgroundColor: colors.background, borderColor: colors.border }]}
             onPress={() => router.push({ pathname: "/full-specs/[id]", params: { id: car.id } })}
           >
-            <Text style={styles.moreBtnText}>More details →</Text>
+            <Text style={[styles.moreBtnText, { color: colors.text }]}>More details →</Text>
           </Pressable>
         </View>
 
-        <View style={styles.sep} />
+        <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── Ask the Seller ── */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Ask the seller</Text>
+        <View style={[styles.card, { backgroundColor: colors.card }]}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Ask the seller</Text>
 
-          <View style={styles.messageBox}>
+          <View style={[styles.messageBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
             <TextInput
-              style={styles.messageInput}
+              style={[styles.messageInput, { color: colors.text }]}
               placeholder="Hello, can you send the car report?"
-              placeholderTextColor="#BDBDBD"
+              placeholderTextColor={colors.textTertiary}
               value={message}
               onChangeText={setMessage}
               multiline
             />
             <Pressable style={styles.sendBtn} onPress={() => handleMessage(message)}>
-              <Feather name="send" size={18} color="#0066CC" />
+              <Feather name="send" size={18} color={colors.accent} />
             </Pressable>
           </View>
 
@@ -344,10 +363,12 @@ export default function CarDetailScreen() {
             {QUICK_QUESTIONS.map((q) => (
               <Pressable
                 key={q}
-                style={[styles.quickChip, message === q && styles.quickChipActive]}
+                style={[styles.quickChip, { backgroundColor: colors.card, borderColor: colors.border },
+                  message === q && { backgroundColor: colors.text, borderColor: colors.text }]}
                 onPress={() => setMessage(q)}
               >
-                <Text style={[styles.quickChipText, message === q && styles.quickChipTextActive]}>
+                <Text style={[styles.quickChipText, { color: colors.text },
+                  message === q && { color: colors.card }]}>
                   {q}
                 </Text>
               </Pressable>
@@ -355,36 +376,36 @@ export default function CarDetailScreen() {
           </View>
         </View>
 
-        <View style={styles.sep} />
+        <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── Equipment Categories ── */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Equipment</Text>
+        <View style={[styles.card, { backgroundColor: colors.card }]}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Equipment</Text>
           <View style={styles.equipGrid}>
-            {EQUIP_CATEGORIES.map((cat) => (
-              <View key={cat.label} style={styles.equipCell}>
-                <Feather name={cat.icon as any} size={20} color="#1A1A1A" />
+            {EQUIP_CATEGORIES.map((cat, i) => (
+              <View key={cat.label} style={[styles.equipCell, { borderBottomColor: colors.border }]}>
+                <Feather name={cat.icon as any} size={20} color={colors.accent} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.equipCellLabel}>{cat.label}</Text>
+                  <Text style={[styles.equipCellLabel, { color: colors.text }]}>{cat.label}</Text>
                 </View>
-                <Text style={styles.equipCellCount}>{cat.count}</Text>
+                <Text style={[styles.equipCellCount, { color: colors.text }]}>{cat.count}</Text>
               </View>
             ))}
           </View>
-          <Pressable style={styles.moreBtn} onPress={() => setShowEquipment(true)}>
-            <Text style={styles.moreBtnText}>All options</Text>
+          <Pressable style={[styles.moreBtn, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => setShowEquipment(true)}>
+            <Text style={[styles.moreBtnText, { color: colors.text }]}>All options</Text>
           </Pressable>
         </View>
 
-        <View style={styles.sep} />
+        <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── Description ── */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Description</Text>
-          <Text style={styles.description}>{car.description}</Text>
+        <View style={[styles.card, { backgroundColor: colors.card }]}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Description</Text>
+          <Text style={[styles.description, { color: colors.textSecondary }]}>{car.description}</Text>
         </View>
 
-        <View style={styles.sep} />
+        <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── Sold Banner ── */}
         {car.isSold && (
@@ -396,8 +417,8 @@ export default function CarDetailScreen() {
 
         {/* ── Seller Info ── */}
         {car.seller && (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Seller</Text>
+          <View style={[styles.card, { backgroundColor: colors.card }]}>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>Seller</Text>
             <Pressable
               style={styles.sellerRow}
               onPress={() => router.push({ pathname: "/user/[id]", params: { id: car.seller!.id } })}
@@ -405,16 +426,16 @@ export default function CarDetailScreen() {
               {car.seller.avatar ? (
                 <Image source={{ uri: car.seller.avatar }} style={styles.sellerAvatar} />
               ) : (
-                <View style={styles.sellerAvatarFallback}>
-                  <Feather name="user" size={22} color={Colors.light.textTertiary} />
+                <View style={[styles.sellerAvatarFallback, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                  <Feather name="user" size={22} color={colors.textTertiary} />
                 </View>
               )}
               <View style={{ flex: 1, gap: 3 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                  <Text style={styles.sellerName}>{car.seller.name}</Text>
+                  <Text style={[styles.sellerName, { color: colors.text }]}>{car.seller.name}</Text>
                 </View>
                 <VerificationBadges user={car.seller} size="sm" />
-                <Text style={styles.sellerType}>
+                <Text style={[styles.sellerType, { color: colors.textSecondary }]}>
                   {car.seller.isDealer ? "Dealer" : "Private seller"} · Usually replies fast
                 </Text>
                 <View style={styles.sellerStars}>
@@ -423,15 +444,15 @@ export default function CarDetailScreen() {
                       key={s}
                       name="star"
                       size={12}
-                      color={s <= Math.round(car.seller!.rating) ? "#F4B400" : "#E0E0E0"}
+                      color={s <= Math.round(car.seller!.rating) ? "#F4B400" : colors.border}
                     />
                   ))}
-                  <Text style={styles.sellerRatingText}>
+                  <Text style={[styles.sellerRatingText, { color: colors.textSecondary }]}>
                     {car.seller.rating.toFixed(1)} · {car.seller.totalReviews} reviews
                   </Text>
                 </View>
               </View>
-              <Feather name="chevron-right" size={18} color="#BDBDBD" />
+              <Feather name="chevron-right" size={18} color={colors.textTertiary} />
             </Pressable>
 
             {/* Trust Score */}
@@ -441,24 +462,23 @@ export default function CarDetailScreen() {
           </View>
         )}
 
-        <View style={styles.sep} />
+        <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── Recommendations 2×2 Grid ── */}
         {related.length > 0 && (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>We recommend</Text>
+          <View style={[styles.card, { backgroundColor: colors.card }]}>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>We recommend</Text>
             <View style={styles.recsGrid}>
               {related.slice(0, 4).map((rc) => (
                 <Pressable
                   key={rc.id}
-                  style={styles.recCell}
+                  style={[styles.recCell, { backgroundColor: colors.card }]}
                   onPress={() =>
                     router.push({ pathname: "/car/[id]", params: { id: rc.id } })
                   }
                 >
                   <View style={styles.recImgWrap}>
                     <Image source={{ uri: rc.images[0] }} style={styles.recImg} resizeMode="cover" />
-                    {/* Condition badge */}
                     {(rc.condition === "New" || rc.condition === "Foreign Used") && (
                       <View style={styles.recBadge}>
                         <Text style={styles.recBadgeText}>
@@ -466,11 +486,9 @@ export default function CarDetailScreen() {
                         </Text>
                       </View>
                     )}
-                    {/* Heart */}
                     <View style={styles.recHeart}>
                       <Feather name="heart" size={16} color="rgba(255,255,255,0.9)" />
                     </View>
-                    {/* Rating if exists */}
                     {rc.seller?.rating && rc.seller.rating >= 4.0 && (
                       <View style={styles.recRating}>
                         <Feather name="star" size={10} color="#F4B400" />
@@ -478,30 +496,30 @@ export default function CarDetailScreen() {
                       </View>
                     )}
                   </View>
-                  <Text style={styles.recPrice}>
+                  <Text style={[styles.recPrice, { color: colors.text }]}>
                     from {formatPrice(rc.price)}
                   </Text>
-                  <Text style={styles.recName} numberOfLines={1}>
+                  <Text style={[styles.recName, { color: colors.textSecondary }]} numberOfLines={1}>
                     {rc.brand} {rc.model}
                   </Text>
-                  <Text style={styles.recYear}>{rc.year}</Text>
+                  <Text style={[styles.recYear, { color: colors.textTertiary }]}>{rc.year}</Text>
                 </Pressable>
               ))}
             </View>
           </View>
         )}
 
-        <View style={styles.sep} />
+        <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── Location ── */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: colors.card }]}>
           <View style={styles.locationRow}>
-            <Feather name="map-pin" size={14} color="#0066CC" />
-            <Text style={styles.locationText}>{car.location}, Ghana</Text>
+            <Feather name="map-pin" size={14} color={colors.accent} />
+            <Text style={[styles.locationText, { color: colors.text }]}>{car.location}, Ghana</Text>
           </View>
-          <View style={styles.mapPlaceholder}>
-            <Feather name="map" size={32} color="#BDBDBD" />
-            <Text style={styles.mapPlaceholderText}>Map</Text>
+          <View style={[styles.mapPlaceholder, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <Feather name="map" size={32} color={colors.textTertiary} />
+            <Text style={[styles.mapPlaceholderText, { color: colors.textTertiary }]}>Map</Text>
           </View>
         </View>
 
@@ -528,7 +546,8 @@ export default function CarDetailScreen() {
       <View
         style={[
           styles.stickyBar,
-          { paddingBottom: (insets.bottom || 0) + (Platform.OS === "web" ? 28 : 8) },
+          { paddingBottom: (insets.bottom || 0) + (Platform.OS === "web" ? 28 : 8),
+            backgroundColor: colors.card, borderTopColor: colors.border },
         ]}
       >
         <Pressable style={styles.callBtn} onPress={handleCall}>
@@ -638,30 +657,50 @@ const styles = StyleSheet.create({
   metaViews: { flexDirection: "row", alignItems: "center", gap: 4 },
   metaViewsText: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular" },
 
-  sep: { height: 8, backgroundColor: "#F5F5F5" },
-  card: { backgroundColor: "#fff", padding: 16, gap: 14 },
-  cardTitle: { fontSize: 18, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
+  sep: { height: 8 },
+  card: {
+    padding: 18,
+    gap: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  cardTitle: { fontSize: 17, fontFamily: "Manrope_700Bold" },
 
   // Icon specs grid — 3 per row, 2 rows
   iconSpecsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 10,
+    borderRadius: 16,
     overflow: "hidden",
+    marginBottom: 14,
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
   iconSpecCell: {
     width: "33.33%",
-    alignItems: "flex-start",
-    paddingHorizontal: 14,
-    paddingVertical: 14,
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 18,
     borderRightWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "#E0E0E0",
+    gap: 4,
   },
-  iconSpecValue: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
-  iconSpecLabel: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "#9E9E9E", marginTop: 1 },
+  specIconBubble: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  iconSpecValue: { fontSize: 13, fontFamily: "Manrope_700Bold", textAlign: "center" },
+  iconSpecLabel: { fontSize: 11, fontFamily: "Manrope_400Regular", textAlign: "center" },
 
   // Extra row specs
   extraSpecsList: {
@@ -676,15 +715,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
     paddingHorizontal: 14,
-    backgroundColor: "#fff",
   },
   extraSpecBorder: {
     borderBottomWidth: 1,
     borderBottomColor: "#F0F0F0",
   },
-  extraSpecLabel: { fontSize: 13, color: "#6B6B6B", fontFamily: "Manrope_400Regular" },
-  extraSpecValue: { fontSize: 13, fontFamily: "Manrope_500Medium", color: "#1A1A1A" },
-  extraSpecHighlight: { color: "#0066CC", fontFamily: "Manrope_500Medium" },
+  extraSpecLabel: { fontSize: 13, fontFamily: "Manrope_400Regular" },
+  extraSpecValue: { fontSize: 13, fontFamily: "Manrope_500Medium" },
+  extraSpecHighlight: { color: "#0066CC", fontFamily: "Manrope_700Bold" },
 
   moreBtn: {
     height: 46,
