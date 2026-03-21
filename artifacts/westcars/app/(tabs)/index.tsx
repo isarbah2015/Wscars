@@ -26,7 +26,7 @@ type Condition = "new" | "used" | "moto";
 export default function HomeScreen() {
   const { cars, currentUser } = useApp();
   const insets = useSafeAreaInsets();
-  const topPad = (insets.top || 0) + (Platform.OS === "web" ? 67 : 0);
+  const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
   const [condition, setCondition] = useState<Condition>("used");
 
   const filteredCars =

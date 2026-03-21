@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -11,30 +12,82 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Colors } from "@/constants/colors";
 
-type AdType = "flyer" | "video";
 type Period = "days" | "weeks" | "months";
-
 interface PeriodOption { period: Period; count: number; price: number }
 interface Package {
   id: string;
-  type: AdType;
+  category: string;
   label: string;
   description: string;
+  badge?: string;
+  badgeColor?: string;
   duration?: string;
-  periodOptions: PeriodOption[];
   icon: string;
+  iconBg: string;
+  iconColor: string;
   popular?: boolean;
+  periodOptions: PeriodOption[];
 }
 
 const AD_PACKAGES: Package[] = [
+  // ─── Listing Boost ───
+  {
+    id: "sponsored_listing",
+    category: "Listing Boost",
+    label: "Sponsored Listing",
+    description: "Your car appears at the top of all search results and category pages.",
+    icon: "trending-up",
+    iconBg: "#FFF3E0",
+    iconColor: "#E65100",
+    badge: "Best Seller",
+    badgeColor: "#E65100",
+    periodOptions: [
+      { period: "days", count: 3, price: 40 },
+      { period: "days", count: 7, price: 70 },
+      { period: "weeks", count: 2, price: 130 },
+      { period: "months", count: 1, price: 230 },
+      { period: "months", count: 3, price: 600 },
+    ],
+  },
+  {
+    id: "featured_listing",
+    category: "Listing Boost",
+    label: "Featured Car",
+    description: "Highlighted gold border on your listing card, shown in 'Special Offers' on home.",
+    icon: "star",
+    iconBg: "#FFFDE7",
+    iconColor: "#F9A825",
+    periodOptions: [
+      { period: "days", count: 3, price: 30 },
+      { period: "days", count: 7, price: 55 },
+      { period: "weeks", count: 2, price: 100 },
+      { period: "months", count: 1, price: 180 },
+    ],
+  },
+  {
+    id: "urgent_badge",
+    category: "Listing Boost",
+    label: "Urgent Sale Badge",
+    description: "Bright \"Urgent\" badge added to your car card. Drives 3× more clicks.",
+    icon: "zap",
+    iconBg: "#FCE4EC",
+    iconColor: "#C62828",
+    periodOptions: [
+      { period: "days", count: 3, price: 15 },
+      { period: "days", count: 7, price: 25 },
+      { period: "weeks", count: 2, price: 45 },
+    ],
+  },
+  // ─── Display Ads ───
   {
     id: "flyer",
-    type: "flyer",
+    category: "Display Ads",
     label: "Flyer Ad",
-    description: "Static image shown in the feed and home carousel. Great for brand awareness.",
+    description: "Static image banner shown in the feed carousel and home page. Great for brand awareness.",
     icon: "image",
+    iconBg: "#E8F5E9",
+    iconColor: "#2E7D32",
     periodOptions: [
       { period: "days", count: 3, price: 50 },
       { period: "days", count: 7, price: 100 },
@@ -44,12 +97,32 @@ const AD_PACKAGES: Package[] = [
     ],
   },
   {
+    id: "banner_top",
+    category: "Display Ads",
+    label: "Top Banner Ad",
+    description: "Full-width banner displayed at the top of the listings page — maximum visibility.",
+    icon: "layout",
+    iconBg: "#E3F2FD",
+    iconColor: "#1565C0",
+    badge: "High Impact",
+    badgeColor: "#1565C0",
+    periodOptions: [
+      { period: "days", count: 3, price: 80 },
+      { period: "days", count: 7, price: 150 },
+      { period: "weeks", count: 2, price: 270 },
+      { period: "months", count: 1, price: 480 },
+    ],
+  },
+  // ─── Video Ads ───
+  {
     id: "video_15",
-    type: "video",
+    category: "Video Ads",
     label: "15-Second Video",
     description: "Short video shown before car detail screens. Maximum impact, minimum skip.",
     duration: "15 sec",
     icon: "play-circle",
+    iconBg: "#F3E5F5",
+    iconColor: "#7B1FA2",
     periodOptions: [
       { period: "days", count: 3, price: 120 },
       { period: "days", count: 7, price: 220 },
@@ -60,11 +133,13 @@ const AD_PACKAGES: Package[] = [
   },
   {
     id: "video_20",
-    type: "video",
+    category: "Video Ads",
     label: "20-Second Video",
-    description: "Mid-length video for showcasing your dealership in detail.",
+    description: "Mid-length video for showcasing your dealership or fleet in full detail.",
     duration: "20 sec",
     icon: "play-circle",
+    iconBg: "#E8EAF6",
+    iconColor: "#283593",
     popular: true,
     periodOptions: [
       { period: "days", count: 3, price: 160 },
@@ -76,11 +151,13 @@ const AD_PACKAGES: Package[] = [
   },
   {
     id: "video_30",
-    type: "video",
+    category: "Video Ads",
     label: "30-Second Video",
-    description: "Full-length premium spot. Ideal for dealerships and major brands.",
+    description: "Full-length premium spot. Ideal for dealerships, brands & major campaigns.",
     duration: "30 sec",
     icon: "play-circle",
+    iconBg: "#EDE7F6",
+    iconColor: "#4527A0",
     periodOptions: [
       { period: "days", count: 3, price: 220 },
       { period: "days", count: 7, price: 400 },
@@ -89,7 +166,71 @@ const AD_PACKAGES: Package[] = [
       { period: "months", count: 3, price: 3400 },
     ],
   },
+  // ─── Outreach ───
+  {
+    id: "push_blast",
+    category: "Outreach",
+    label: "Push Notification Blast",
+    description: "Send a push notification about your listing to all Westcars users in your region.",
+    icon: "bell",
+    iconBg: "#FFF3E0",
+    iconColor: "#BF360C",
+    badge: "New",
+    badgeColor: "#BF360C",
+    periodOptions: [
+      { period: "days", count: 1, price: 60 },
+      { period: "days", count: 3, price: 150 },
+      { period: "weeks", count: 1, price: 280 },
+    ],
+  },
+  {
+    id: "social_boost",
+    category: "Outreach",
+    label: "Social Media Cross-Post",
+    description: "Your listing shared to Westcars Facebook, Instagram & WhatsApp channels (50k+ followers).",
+    icon: "share-2",
+    iconBg: "#E1F5FE",
+    iconColor: "#0277BD",
+    periodOptions: [
+      { period: "days", count: 1, price: 45 },
+      { period: "days", count: 3, price: 110 },
+      { period: "days", count: 7, price: 200 },
+    ],
+  },
+  // ─── Dealer Packages ───
+  {
+    id: "dealer_spotlight",
+    category: "Dealer Packages",
+    label: "Dealer Spotlight Page",
+    description: "A dedicated branded page for your dealership shown in search and home — all your listings in one place.",
+    icon: "briefcase",
+    iconBg: "#E8F5E9",
+    iconColor: "#1B5E20",
+    badge: "Dealer Only",
+    badgeColor: "#1B5E20",
+    periodOptions: [
+      { period: "weeks", count: 2, price: 400 },
+      { period: "months", count: 1, price: 700 },
+      { period: "months", count: 3, price: 1800 },
+    ],
+  },
+  {
+    id: "dealer_verified",
+    category: "Dealer Packages",
+    label: "Verified Dealer Badge",
+    description: "Blue verified ✓ badge on all your listings & profile. Builds instant buyer trust.",
+    icon: "check-circle",
+    iconBg: "#E3F2FD",
+    iconColor: "#0D47A1",
+    periodOptions: [
+      { period: "months", count: 1, price: 150 },
+      { period: "months", count: 3, price: 380 },
+      { period: "months", count: 6, price: 650 },
+    ],
+  },
 ];
+
+const CATEGORIES = Array.from(new Set(AD_PACKAGES.map((p) => p.category)));
 
 function periodLabel(period: Period, count: number) {
   if (period === "days") return count === 1 ? "1 Day" : `${count} Days`;
@@ -99,9 +240,10 @@ function periodLabel(period: Period, count: number) {
 
 export default function AdvertiseScreen() {
   const insets = useSafeAreaInsets();
-  const topPad = (insets.top || 0) + (Platform.OS === "web" ? 67 : 0);
+  const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
   const [selectedPkg, setSelectedPkg] = useState<Package | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>("All");
 
   const handleBook = () => {
     if (!selectedPkg || !selectedPeriod) {
@@ -109,77 +251,119 @@ export default function AdvertiseScreen() {
       return;
     }
     Alert.alert(
-      "Booking received",
-      `Your ${selectedPkg.label} (${periodLabel(selectedPeriod.period, selectedPeriod.count)}) has been submitted.\n\nOur team will contact you within 24h.\n\nTotal: GHS ${selectedPeriod.price}`,
+      "Booking received!",
+      `${selectedPkg.label}\n${periodLabel(selectedPeriod.period, selectedPeriod.count)}\n\nOur ads team will contact you within 24 hours.\n\nTotal: GHS ${selectedPeriod.price.toLocaleString()}`,
       [{ text: "OK", onPress: () => router.back() }]
     );
   };
+
+  const displayPkgs = activeCategory === "All"
+    ? AD_PACKAGES
+    : AD_PACKAGES.filter((p) => p.category === activeCategory);
+
+  const groupedPkgs = CATEGORIES
+    .filter((cat) => activeCategory === "All" || cat === activeCategory)
+    .map((cat) => ({
+      category: cat,
+      packages: displayPkgs.filter((p) => p.category === cat),
+    }))
+    .filter((g) => g.packages.length > 0);
 
   return (
     <View style={styles.root}>
       {/* Top bar */}
       <View style={[styles.topBar, { paddingTop: topPad + 8 }]}>
         <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Feather name="arrow-left" size={20} color={Colors.light.text} />
+          <Feather name="arrow-left" size={20} color="#1A1A1A" />
         </Pressable>
         <Text style={styles.topBarTitle}>Advertise on Westcars</Text>
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.content, { paddingBottom: (insets.bottom || 0) + 120 }]}
-      >
-        {/* Hero */}
-        <View style={styles.hero}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+
+        {/* Hero gradient */}
+        <LinearGradient
+          colors={["#0A2463", "#0066CC", "#3385D6"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.hero}
+        >
           <Text style={styles.heroTitle}>Reach Ghana's Car Buyers</Text>
-          <Text style={styles.heroSub}>Over 50,000 active buyers monthly across Ghana</Text>
+          <Text style={styles.heroSub}>50,000+ active buyers monthly · 8 regions covered</Text>
           <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Text style={styles.statVal}>50k+</Text>
-              <Text style={styles.statLbl}>Monthly Users</Text>
-            </View>
-            <View style={styles.statDiv} />
-            <View style={styles.statItem}>
-              <Text style={styles.statVal}>8</Text>
-              <Text style={styles.statLbl}>Regions</Text>
-            </View>
-            <View style={styles.statDiv} />
-            <View style={styles.statItem}>
-              <Text style={styles.statVal}>4.9 ★</Text>
-              <Text style={styles.statLbl}>App Rating</Text>
-            </View>
+            {[
+              { val: "50k+", lbl: "Monthly Users" },
+              { val: "8", lbl: "Regions" },
+              { val: "4.9★", lbl: "App Rating" },
+              { val: "2.4k", lbl: "Listings" },
+            ].map((s, i) => (
+              <React.Fragment key={s.lbl}>
+                {i > 0 && <View style={styles.statDiv} />}
+                <View style={styles.statItem}>
+                  <Text style={styles.statVal}>{s.val}</Text>
+                  <Text style={styles.statLbl}>{s.lbl}</Text>
+                </View>
+              </React.Fragment>
+            ))}
           </View>
+        </LinearGradient>
+
+        {/* Category filter chips */}
+        <View style={styles.filterBar}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.filterRow}>
+              {["All", ...CATEGORIES].map((cat) => (
+                <Pressable
+                  key={cat}
+                  style={[styles.filterChip, activeCategory === cat && styles.filterChipActive]}
+                  onPress={() => setActiveCategory(cat)}
+                >
+                  <Text style={[styles.filterChipText, activeCategory === cat && styles.filterChipTextActive]}>
+                    {cat}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </ScrollView>
         </View>
 
-        <View style={styles.sep} />
+        {/* Package groups */}
+        {groupedPkgs.map((group) => (
+          <View key={group.category} style={styles.group}>
+            <Text style={styles.groupTitle}>{group.category}</Text>
 
-        {/* Packages */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Choose Ad Format</Text>
-          {AD_PACKAGES.map((pkg) => {
-            const isActive = selectedPkg?.id === pkg.id;
-            return (
-              <View key={pkg.id}>
+            {group.packages.map((pkg) => {
+              const isActive = selectedPkg?.id === pkg.id;
+              return (
                 <Pressable
+                  key={pkg.id}
                   style={[styles.pkgCard, isActive && styles.pkgCardActive]}
-                  onPress={() => { setSelectedPkg(pkg); setSelectedPeriod(null); }}
+                  onPress={() => {
+                    setSelectedPkg(isActive ? null : pkg);
+                    setSelectedPeriod(null);
+                  }}
                 >
                   {pkg.popular && (
-                    <View style={styles.popularTag}>
-                      <Text style={styles.popularTagText}>MOST POPULAR</Text>
+                    <View style={[styles.cornerTag, { backgroundColor: "#0066CC" }]}>
+                      <Text style={styles.cornerTagText}>MOST POPULAR</Text>
                     </View>
                   )}
+                  {pkg.badge && !pkg.popular && (
+                    <View style={[styles.cornerTag, { backgroundColor: pkg.badgeColor || "#333" }]}>
+                      <Text style={styles.cornerTagText}>{pkg.badge.toUpperCase()}</Text>
+                    </View>
+                  )}
+
                   <View style={styles.pkgHeader}>
-                    <View style={[styles.pkgIcon, isActive && styles.pkgIconActive]}>
-                      <Feather name={pkg.icon as any} size={20}
-                        color={isActive ? "#0066CC" : Colors.light.textSecondary} />
+                    <View style={[styles.pkgIcon, { backgroundColor: pkg.iconBg }]}>
+                      <Feather name={pkg.icon as any} size={20} color={pkg.iconColor} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <View style={styles.pkgTitleRow}>
                         <Text style={styles.pkgLabel}>{pkg.label}</Text>
                         {pkg.duration && (
-                          <View style={styles.durationTag}>
-                            <Text style={styles.durationText}>{pkg.duration}</Text>
+                          <View style={[styles.durationTag, { backgroundColor: pkg.iconBg }]}>
+                            <Text style={[styles.durationText, { color: pkg.iconColor }]}>{pkg.duration}</Text>
                           </View>
                         )}
                       </View>
@@ -187,15 +371,15 @@ export default function AdvertiseScreen() {
                     </View>
                     <Feather
                       name={isActive ? "check-circle" : "circle"}
-                      size={18}
+                      size={20}
                       color={isActive ? "#0066CC" : "#E0E0E0"}
                     />
                   </View>
 
-                  {/* Duration options */}
+                  {/* Duration grid when selected */}
                   {isActive && (
                     <View style={styles.periodSection}>
-                      <Text style={styles.periodSectionLabel}>Select duration</Text>
+                      <Text style={styles.periodLabel}>Select duration</Text>
                       <View style={styles.periodGrid}>
                         {pkg.periodOptions.map((opt) => {
                           const sel = selectedPeriod === opt;
@@ -209,7 +393,7 @@ export default function AdvertiseScreen() {
                                 {periodLabel(opt.period, opt.count)}
                               </Text>
                               <Text style={[styles.periodOptPrice, sel && styles.periodOptPriceActive]}>
-                                ₵{opt.price.toLocaleString()}
+                                GHS {opt.price.toLocaleString()}
                               </Text>
                             </Pressable>
                           );
@@ -218,10 +402,10 @@ export default function AdvertiseScreen() {
                     </View>
                   )}
                 </Pressable>
-              </View>
-            );
-          })}
-        </View>
+              );
+            })}
+          </View>
+        ))}
 
         <View style={styles.sep} />
 
@@ -229,15 +413,16 @@ export default function AdvertiseScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>What's Included</Text>
           {[
-            { icon: "target", text: "Geo-targeted to your preferred region(s)" },
-            { icon: "trending-up", text: "Real-time impression & click analytics" },
-            { icon: "refresh-cw", text: "Creative revision support" },
-            { icon: "users", text: "Reach verified buyers & dealers" },
-            { icon: "phone", text: "Dedicated account manager" },
+            { icon: "target", text: "Geo-targeted to your preferred region(s)", color: "#E53935" },
+            { icon: "trending-up", text: "Real-time impression & click analytics", color: "#0066CC" },
+            { icon: "refresh-cw", text: "Creative revision support included", color: "#27AE60" },
+            { icon: "users", text: "Reach verified buyers & 200+ active dealers", color: "#7B1FA2" },
+            { icon: "phone", text: "Dedicated account manager assigned", color: "#E65100" },
+            { icon: "bar-chart-2", text: "Weekly performance report via WhatsApp", color: "#0277BD" },
           ].map((item) => (
             <View key={item.text} style={styles.includeRow}>
-              <View style={styles.includeIcon}>
-                <Feather name={item.icon as any} size={14} color="#0066CC" />
+              <View style={[styles.includeIcon, { backgroundColor: item.color + "18" }]}>
+                <Feather name={item.icon as any} size={14} color={item.color} />
               </View>
               <Text style={styles.includeText}>{item.text}</Text>
             </View>
@@ -246,31 +431,49 @@ export default function AdvertiseScreen() {
 
         <View style={styles.sep} />
 
-        {/* Contact */}
-        <View style={styles.section}>
-          <View style={styles.contactRow}>
-            <View style={styles.contactIcon}>
-              <Feather name="phone-call" size={18} color="#0066CC" />
+        {/* Contact team */}
+        <View style={styles.contactCard}>
+          <View style={styles.contactTop}>
+            <View style={styles.contactIconWrap}>
+              <Feather name="phone-call" size={20} color="#0066CC" />
             </View>
-            <View>
-              <Text style={styles.contactTitle}>Talk to our Ad Team</Text>
-              <Text style={styles.contactSub}>+233 30 274 0000 · ads@westcars.com.gh</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.contactTitle}>Talk to our Ads Team</Text>
+              <Text style={styles.contactSub}>Mon – Fri, 8am – 6pm</Text>
             </View>
           </View>
+          <View style={styles.contactActions}>
+            <Pressable style={styles.contactBtn}>
+              <Feather name="phone" size={14} color="#0066CC" />
+              <Text style={styles.contactBtnText}>+233 30 274 0000</Text>
+            </Pressable>
+            <Pressable style={[styles.contactBtn, { backgroundColor: "#E8F5E9", borderColor: "#27AE60" }]}>
+              <Feather name="message-circle" size={14} color="#27AE60" />
+              <Text style={[styles.contactBtnText, { color: "#27AE60" }]}>WhatsApp</Text>
+            </Pressable>
+          </View>
+          <Text style={styles.contactEmail}>ads@westcars.com.gh</Text>
         </View>
+
+        <View style={{ height: (insets.bottom || 0) + 120 }} />
       </ScrollView>
 
-      {/* Book Now bar */}
+      {/* Book Now sticky bar */}
       {selectedPkg && selectedPeriod && (
-        <View style={[styles.bookBar, { paddingBottom: (insets.bottom || 0) + (Platform.OS === "web" ? 28 : 12) }]}>
-          <View>
-            <Text style={styles.bookSummary}>
+        <View
+          style={[
+            styles.bookBar,
+            { paddingBottom: (insets.bottom || 0) + (Platform.OS === "web" ? 16 : 12) },
+          ]}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={styles.bookSummary} numberOfLines={1}>
               {selectedPkg.label} · {periodLabel(selectedPeriod.period, selectedPeriod.count)}
             </Text>
             <Text style={styles.bookPrice}>GHS {selectedPeriod.price.toLocaleString()}</Text>
           </View>
           <Pressable style={styles.bookBtn} onPress={handleBook}>
-            <Text style={styles.bookBtnText}>Book Now</Text>
+            <Text style={styles.bookBtnText}>Book Now →</Text>
           </Pressable>
         </View>
       )}
@@ -287,105 +490,153 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    borderBottomColor: "#EEEEEE",
     gap: 8,
   },
   backBtn: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
-  topBarTitle: { fontSize: 17, fontFamily: "Inter_700Bold", color: Colors.light.text },
-  content: { gap: 0 },
-  sep: { height: 8, backgroundColor: "#F5F5F5" },
+  topBarTitle: { fontSize: 17, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
+
+  scrollContent: { paddingBottom: 20 },
+
   hero: {
-    backgroundColor: "#fff",
     padding: 20,
-    gap: 8,
+    gap: 10,
   },
-  heroTitle: { fontSize: 22, fontFamily: "Inter_700Bold", color: Colors.light.text, letterSpacing: -0.3 },
-  heroSub: { fontSize: 14, color: Colors.light.textSecondary, fontFamily: "Inter_400Regular" },
+  heroTitle: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: -0.3 },
+  heroSub: { fontSize: 13, color: "rgba(255,255,255,0.8)", fontFamily: "Inter_400Regular" },
   statsRow: {
     flexDirection: "row",
-    backgroundColor: "#F0F6FF",
+    backgroundColor: "rgba(255,255,255,0.12)",
     borderRadius: 10,
-    padding: 16,
+    padding: 14,
     marginTop: 4,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
   },
-  statItem: { flex: 1, alignItems: "center" },
-  statVal: { fontSize: 18, fontFamily: "Inter_700Bold", color: "#0066CC" },
-  statLbl: { fontSize: 11, color: Colors.light.textSecondary, fontFamily: "Inter_400Regular", textAlign: "center" },
-  statDiv: { width: 1, height: 28, backgroundColor: "#D0E4FF" },
-  section: { backgroundColor: "#fff", padding: 16, gap: 12 },
-  sectionTitle: { fontSize: 16, fontFamily: "Inter_700Bold", color: Colors.light.text },
+  statItem: { flex: 1, alignItems: "center", gap: 2 },
+  statVal: { fontSize: 17, fontFamily: "Inter_700Bold", color: "#fff" },
+  statLbl: { fontSize: 10, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_400Regular", textAlign: "center" },
+  statDiv: { width: 1, height: 28, backgroundColor: "rgba(255,255,255,0.2)" },
+
+  filterBar: { backgroundColor: "#fff", borderBottomWidth: 1, borderBottomColor: "#EEEEEE" },
+  filterRow: { flexDirection: "row", paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
+  filterChip: {
+    paddingHorizontal: 14, paddingVertical: 7,
+    borderRadius: 20, borderWidth: 1.5, borderColor: "#E0E0E0",
+    backgroundColor: "#fff",
+  },
+  filterChipActive: { backgroundColor: "#1A1A1A", borderColor: "#1A1A1A" },
+  filterChipText: { fontSize: 13, fontFamily: "Inter_500Medium", color: "#6B6B6B" },
+  filterChipTextActive: { color: "#fff", fontFamily: "Inter_600SemiBold" },
+
+  group: { paddingHorizontal: 16, paddingTop: 16, gap: 10 },
+  groupTitle: {
+    fontSize: 12, fontFamily: "Inter_700Bold", color: "#9E9E9E",
+    textTransform: "uppercase", letterSpacing: 1, marginBottom: 2,
+  },
+
   pkgCard: {
     borderWidth: 1.5,
-    borderColor: "#E0E0E0",
-    borderRadius: 10,
+    borderColor: "#E8E8E8",
+    borderRadius: 14,
     padding: 14,
     backgroundColor: "#fff",
     gap: 12,
     overflow: "hidden",
   },
-  pkgCardActive: { borderColor: "#0066CC", backgroundColor: "#FAFCFF" },
-  popularTag: {
+  pkgCardActive: { borderColor: "#0066CC", backgroundColor: "#F8FBFF" },
+
+  cornerTag: {
     position: "absolute", top: 0, right: 0,
-    backgroundColor: "#0066CC",
     paddingHorizontal: 10, paddingVertical: 5,
-    borderBottomLeftRadius: 10,
+    borderBottomLeftRadius: 12,
   },
-  popularTagText: { fontSize: 9, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: 0.8 },
+  cornerTagText: { fontSize: 9, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: 0.8 },
+
   pkgHeader: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
   pkgIcon: {
-    width: 42, height: 42, borderRadius: 10,
-    backgroundColor: "#F5F5F5",
+    width: 44, height: 44, borderRadius: 12,
     alignItems: "center", justifyContent: "center",
   },
-  pkgIconActive: { backgroundColor: "#EBF4FF" },
-  pkgTitleRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 3 },
-  pkgLabel: { fontSize: 15, fontFamily: "Inter_700Bold", color: Colors.light.text },
-  durationTag: {
-    backgroundColor: "#EBF4FF", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 5,
-  },
-  durationText: { fontSize: 11, fontFamily: "Inter_700Bold", color: "#0066CC" },
-  pkgDesc: { fontSize: 12, color: Colors.light.textSecondary, fontFamily: "Inter_400Regular", lineHeight: 18 },
-  periodSection: { gap: 10 },
-  periodSectionLabel: {
-    fontSize: 11, fontFamily: "Inter_600SemiBold", color: Colors.light.textTertiary,
+  pkgTitleRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" },
+  pkgLabel: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
+  durationTag: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 5 },
+  durationText: { fontSize: 11, fontFamily: "Inter_700Bold" },
+  pkgDesc: { fontSize: 12, color: "#6B6B6B", fontFamily: "Inter_400Regular", lineHeight: 18 },
+
+  periodSection: { gap: 10, paddingTop: 4 },
+  periodLabel: {
+    fontSize: 11, fontFamily: "Inter_600SemiBold", color: "#9E9E9E",
     textTransform: "uppercase", letterSpacing: 0.8,
   },
   periodGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   periodOpt: {
-    paddingHorizontal: 14, paddingVertical: 10,
-    borderRadius: 8, borderWidth: 1.5, borderColor: "#E0E0E0",
-    backgroundColor: "#F5F5F5", alignItems: "center", minWidth: 88,
+    paddingHorizontal: 12, paddingVertical: 10,
+    borderRadius: 10, borderWidth: 1.5, borderColor: "#E0E0E0",
+    backgroundColor: "#F5F5F5", alignItems: "center", minWidth: 90,
   },
   periodOptActive: { borderColor: "#0066CC", backgroundColor: "#EBF4FF" },
-  periodOptLabel: { fontSize: 12, fontFamily: "Inter_500Medium", color: Colors.light.textSecondary },
+  periodOptLabel: { fontSize: 12, fontFamily: "Inter_500Medium", color: "#6B6B6B" },
   periodOptLabelActive: { color: "#0066CC", fontFamily: "Inter_700Bold" },
-  periodOptPrice: { fontSize: 14, fontFamily: "Inter_700Bold", color: Colors.light.text, marginTop: 2 },
+  periodOptPrice: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#1A1A1A", marginTop: 2 },
   periodOptPriceActive: { color: "#0066CC" },
-  includeRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+
+  sep: { height: 8, backgroundColor: "#F5F5F5" },
+  section: { backgroundColor: "#fff", padding: 16, gap: 12 },
+  sectionTitle: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#1A1A1A", marginBottom: 4 },
+
+  includeRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   includeIcon: {
-    width: 30, height: 30, borderRadius: 8,
-    backgroundColor: "#EBF4FF", alignItems: "center", justifyContent: "center",
+    width: 32, height: 32, borderRadius: 9,
+    alignItems: "center", justifyContent: "center",
   },
-  includeText: { fontSize: 13, color: Colors.light.textSecondary, fontFamily: "Inter_400Regular", flex: 1 },
-  contactRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  contactIcon: {
-    width: 44, height: 44, borderRadius: 10,
-    backgroundColor: "#EBF4FF", alignItems: "center", justifyContent: "center",
+  includeText: { fontSize: 13, color: "#4A4A4A", fontFamily: "Inter_400Regular", flex: 1, lineHeight: 18 },
+
+  contactCard: {
+    backgroundColor: "#fff",
+    margin: 16,
+    borderRadius: 14,
+    padding: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "#EEEEEE",
   },
-  contactTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: Colors.light.text },
-  contactSub: { fontSize: 12, color: Colors.light.textSecondary, fontFamily: "Inter_400Regular", marginTop: 2 },
+  contactTop: { flexDirection: "row", alignItems: "center", gap: 12 },
+  contactIconWrap: {
+    width: 44, height: 44, borderRadius: 12,
+    backgroundColor: "#EBF4FF",
+    alignItems: "center", justifyContent: "center",
+  },
+  contactTitle: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#1A1A1A" },
+  contactSub: { fontSize: 12, color: "#6B6B6B", fontFamily: "Inter_400Regular", marginTop: 2 },
+  contactActions: { flexDirection: "row", gap: 10 },
+  contactBtn: {
+    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 6, height: 40, borderRadius: 10,
+    borderWidth: 1.5, borderColor: "#0066CC",
+    backgroundColor: "#EBF4FF",
+  },
+  contactBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#0066CC" },
+  contactEmail: { fontSize: 12, color: "#9E9E9E", fontFamily: "Inter_400Regular", textAlign: "center" },
+
   bookBar: {
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    flexDirection: "row", alignItems: "center", gap: 16,
     paddingHorizontal: 16, paddingTop: 14,
     backgroundColor: "#fff",
-    borderTopWidth: 1, borderTopColor: "#E0E0E0",
+    borderTopWidth: 1, borderTopColor: "#EEEEEE",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  bookSummary: { fontSize: 12, color: Colors.light.textSecondary, fontFamily: "Inter_400Regular" },
+  bookSummary: { fontSize: 12, color: "#6B6B6B", fontFamily: "Inter_400Regular" },
   bookPrice: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#0066CC", letterSpacing: -0.5 },
   bookBtn: {
     backgroundColor: "#0066CC",
-    paddingHorizontal: 28, paddingVertical: 14, borderRadius: 8,
+    paddingHorizontal: 24, paddingVertical: 14,
+    borderRadius: 12,
   },
   bookBtnText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
 });
