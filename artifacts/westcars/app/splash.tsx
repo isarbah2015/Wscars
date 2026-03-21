@@ -10,38 +10,49 @@ import {
 } from "react-native";
 
 const SPLASH_CAR = require("@/assets/images/splash-car.png");
+const LOGO      = require("@/assets/images/logo-wordmark.png");
 
 export default function SplashScreen() {
-  const carOpacity  = useRef(new Animated.Value(0)).current;
-  const carScale    = useRef(new Animated.Value(0.88)).current;
-  const textOpacity = useRef(new Animated.Value(0)).current;
-  const dot1Scale   = useRef(new Animated.Value(0.4)).current;
-  const dot2Scale   = useRef(new Animated.Value(0.4)).current;
-  const dot3Scale   = useRef(new Animated.Value(0.4)).current;
+  const carOpacity   = useRef(new Animated.Value(0)).current;
+  const carY         = useRef(new Animated.Value(30)).current;
+  const logoOpacity  = useRef(new Animated.Value(0)).current;
+  const tagOpacity   = useRef(new Animated.Value(0)).current;
+  const dot1Scale    = useRef(new Animated.Value(0.4)).current;
+  const dot2Scale    = useRef(new Animated.Value(0.4)).current;
+  const dot3Scale    = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
-    // Car floats in
+    // Car rises up and fades in
     Animated.parallel([
       Animated.timing(carOpacity, {
-        toValue: 1, duration: 700,
+        toValue: 1, duration: 750,
         easing: Easing.out(Easing.quad),
         useNativeDriver: true,
       }),
-      Animated.spring(carScale, {
-        toValue: 1, tension: 45, friction: 7,
+      Animated.spring(carY, {
+        toValue: 0, tension: 40, friction: 8,
         useNativeDriver: true,
       }),
     ]).start();
 
-    // Text fades in after car
+    // Logo fades in after car settles
     setTimeout(() => {
-      Animated.timing(textOpacity, {
+      Animated.timing(logoOpacity, {
         toValue: 1, duration: 500,
+        easing: Easing.out(Easing.quad),
         useNativeDriver: true,
       }).start();
-    }, 500);
+    }, 550);
 
-    // Loading dots pulse
+    // Tagline
+    setTimeout(() => {
+      Animated.timing(tagOpacity, {
+        toValue: 1, duration: 400,
+        useNativeDriver: true,
+      }).start();
+    }, 850);
+
+    // Pulsing dots
     setTimeout(() => {
       const pulse = (dot: Animated.Value, delay: number) =>
         Animated.loop(
@@ -54,27 +65,33 @@ export default function SplashScreen() {
       pulse(dot1Scale, 0);
       pulse(dot2Scale, 170);
       pulse(dot3Scale, 340);
-    }, 800);
+    }, 900);
 
-    const nav = setTimeout(() => router.replace("/auth/login"), 3000);
+    const nav = setTimeout(() => router.replace("/auth/login"), 3200);
     return () => clearTimeout(nav);
   }, []);
 
   return (
     <View style={styles.root}>
-      {/* Car hero image */}
-      <Animated.View style={[styles.carWrap, { opacity: carOpacity, transform: [{ scale: carScale }] }]}>
+      {/* Car hero */}
+      <Animated.View
+        style={[
+          styles.carWrap,
+          { opacity: carOpacity, transform: [{ translateY: carY }] },
+        ]}
+      >
         <Image source={SPLASH_CAR} style={styles.car} resizeMode="contain" />
       </Animated.View>
 
-      {/* Brand text */}
-      <Animated.View style={[styles.brandBlock, { opacity: textOpacity }]}>
-        <View style={styles.wordRow}>
-          <Text style={styles.wordW}>W</Text>
-          <Text style={styles.wordRest}>ESTCARS</Text>
-        </View>
-        <Text style={styles.tagline}>Ghana's Car Marketplace</Text>
+      {/* WestCars wordmark logo */}
+      <Animated.View style={[styles.logoWrap, { opacity: logoOpacity }]}>
+        <Image source={LOGO} style={styles.logo} resizeMode="contain" />
       </Animated.View>
+
+      {/* Tagline */}
+      <Animated.Text style={[styles.tagline, { opacity: tagOpacity }]}>
+        Ghana's Car Marketplace
+      </Animated.Text>
 
       {/* Pulsing dots */}
       <View style={styles.dotsRow}>
@@ -92,45 +109,27 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    gap: 24,
+    gap: 20,
   },
 
-  carWrap: {
-    width: "100%",
-    paddingHorizontal: 20,
-  },
-  car: {
-    width: "100%",
-    height: 220,
-  },
+  carWrap: { width: "100%", paddingHorizontal: 10 },
+  car: { width: "100%", height: 210 },
 
-  brandBlock: { alignItems: "center", gap: 6 },
-  wordRow: { flexDirection: "row", alignItems: "baseline" },
-  wordW: {
-    fontSize: 36,
-    fontFamily: "Inter_700Bold",
-    color: "#0066CC",
-    letterSpacing: -1,
-    includeFontPadding: false,
-  },
-  wordRest: {
-    fontSize: 36,
-    fontFamily: "Inter_700Bold",
-    color: "#1A1A1A",
-    letterSpacing: -1,
-    includeFontPadding: false,
-  },
+  logoWrap: { alignItems: "center" },
+  logo: { width: 260, height: 52 },
+
   tagline: {
     fontSize: 11,
     fontFamily: "Inter_400Regular",
-    color: "#BDBDBD",
-    letterSpacing: 2,
+    color: "#AAAAAA",
+    letterSpacing: 2.5,
     textTransform: "uppercase",
+    marginTop: -10,
   },
 
   dotsRow: {
     position: "absolute",
-    bottom: 64,
+    bottom: 60,
     flexDirection: "row",
     gap: 7,
     alignItems: "center",

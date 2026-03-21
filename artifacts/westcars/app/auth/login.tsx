@@ -17,7 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 
-const LOGO = require("@/assets/images/wc-logomark.png");
+const LOGO = require("@/assets/images/logo-wordmark.png");
 
 export default function LoginScreen() {
   const { login } = useApp();
@@ -47,9 +47,9 @@ export default function LoginScreen() {
       style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      {/* Hero gradient */}
+      {/* Dark gradient hero */}
       <LinearGradient
-        colors={["#0A0A0A", "#001433", "#0055AA"]}
+        colors={["#070D1A", "#0A1628", "#0055AA"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.hero, { paddingTop: topPad + 16 }]}
@@ -58,17 +58,15 @@ export default function LoginScreen() {
           <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.8)" />
         </Pressable>
 
-        {/* Professional logo: W mark + ESTCARS text */}
-        <View style={styles.brandRow}>
-          <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
-          <View style={styles.brandText}>
-            <View style={styles.wordmarkRow}>
-              <Text style={styles.wordW}>W</Text>
-              <Text style={styles.wordRest}>ESTCARS</Text>
-            </View>
-            <Text style={styles.tagline}>Ghana's Car Marketplace</Text>
-          </View>
-        </View>
+        {/* WestCars wordmark — tinted white for dark bg */}
+        <Image
+          source={LOGO}
+          style={styles.logo}
+          resizeMode="contain"
+          tintColor="#ffffff"
+        />
+
+        <Text style={styles.tagline}>Ghana's Car Marketplace</Text>
 
         {/* Hero copy */}
         <Text style={styles.heroTitle}>Welcome back</Text>
@@ -81,7 +79,7 @@ export default function LoginScreen() {
           {[
             { value: "50k+", label: "Active buyers" },
             { value: "2.4k", label: "Listings" },
-            { value: "8", label: "Regions" },
+            { value: "8",    label: "Regions" },
           ].map((s) => (
             <View key={s.label} style={styles.statItem}>
               <Text style={styles.statValue}>{s.value}</Text>
@@ -186,8 +184,8 @@ export default function LoginScreen() {
 
         <View style={styles.trustRow}>
           {[
-            { icon: "shield", text: "Secure login" },
-            { icon: "lock", text: "Private & safe" },
+            { icon: "shield",       text: "Secure login" },
+            { icon: "lock",         text: "Private & safe" },
             { icon: "check-circle", text: "Verified listings" },
           ].map((t) => (
             <View key={t.text} style={styles.trustItem}>
@@ -206,7 +204,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#F5F5F5" },
 
-  hero: { paddingHorizontal: 24, paddingBottom: 28, gap: 14 },
+  hero: { paddingHorizontal: 24, paddingBottom: 28, gap: 12 },
   backBtn: {
     width: 38, height: 38, borderRadius: 19,
     backgroundColor: "rgba(255,255,255,0.12)",
@@ -214,30 +212,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 
-  brandRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-  },
-  logoImg: {
-    width: 56,
-    height: 56,
-    tintColor: "#fff",
-  },
-  brandText: { gap: 2 },
-  wordmarkRow: { flexDirection: "row", alignItems: "baseline" },
-  wordW: {
-    fontSize: 32, fontFamily: "Inter_700Bold",
-    color: "#4DA6FF", letterSpacing: -1, includeFontPadding: false,
-  },
-  wordRest: {
-    fontSize: 32, fontFamily: "Inter_700Bold",
-    color: "#fff", letterSpacing: -1, includeFontPadding: false,
-  },
+  logo: { width: 220, height: 44 },
   tagline: {
     fontSize: 11, fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.6)", letterSpacing: 1.2,
-    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.5)", letterSpacing: 1.8,
+    textTransform: "uppercase", marginTop: -4,
   },
 
   heroTitle: {
@@ -246,8 +225,7 @@ const styles = StyleSheet.create({
   },
   heroSub: {
     fontSize: 14, fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.65)", lineHeight: 22,
-    marginTop: -4,
+    color: "rgba(255,255,255,0.65)", lineHeight: 22, marginTop: -2,
   },
 
   statsRow: {
@@ -267,22 +245,16 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 16, paddingTop: 20 },
 
   formCard: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 24,
-    gap: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 6,
+    backgroundColor: "#fff", borderRadius: 20, padding: 24, gap: 14,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08, shadowRadius: 16, elevation: 6,
   },
   formTitle: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#1A1A1A", marginBottom: 4 },
 
   fieldWrap: { gap: 6 },
   fieldLabel: {
-    fontSize: 12, fontFamily: "Inter_600SemiBold",
-    color: "#6B6B6B", letterSpacing: 0.4, textTransform: "uppercase",
+    fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#6B6B6B",
+    letterSpacing: 0.4, textTransform: "uppercase",
   },
   field: {
     flexDirection: "row", alignItems: "center", gap: 10,

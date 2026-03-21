@@ -16,7 +16,7 @@ import { CarCard } from "@/components/CarCard";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
 
-const LOGO = require("@/assets/images/wc-logomark.png");
+const LOGO = require("@/assets/images/logo-wordmark.png");
 const CAR_NEW = require("@/assets/images/car-new.png");
 const CAR_USED = require("@/assets/images/car-used.png");
 const CAR_MOTO = require("@/assets/images/car-moto.png");
@@ -97,13 +97,9 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        {/* Logo — W+car mark + wordmark */}
+        {/* Logo — WestCars AI wordmark PNG */}
         <View style={styles.logoRow}>
           <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
-          <View style={styles.wordmarkRow}>
-            <Text style={styles.wordW}>W</Text>
-            <Text style={styles.wordRest}>ESTCARS</Text>
-          </View>
         </View>
 
         {/* Search box */}
@@ -279,28 +275,11 @@ const styles = StyleSheet.create({
 
   // Logo
   logoRow: {
-    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    marginVertical: -2,
+    marginVertical: 2,
   },
-  logoImg: { width: 38, height: 38 },
-  wordmarkRow: { flexDirection: "row", alignItems: "baseline" },
-  wordW: {
-    fontSize: 30,
-    fontFamily: "Inter_700Bold",
-    color: "#0066CC",
-    letterSpacing: -1,
-    includeFontPadding: false,
-  },
-  wordRest: {
-    fontSize: 30,
-    fontFamily: "Inter_700Bold",
-    color: "#1A1A1A",
-    letterSpacing: -1,
-    includeFontPadding: false,
-  },
+  logoImg: { width: 200, height: 40 },
 
   // Search box
   searchBox: {
