@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,6 +16,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
+
+const LOGO = require("@/assets/images/wc-logomark.png");
 
 export default function LoginScreen() {
   const { login } = useApp();
@@ -44,33 +47,36 @@ export default function LoginScreen() {
       style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      {/* Hero gradient top section */}
+      {/* Hero gradient */}
       <LinearGradient
-        colors={["#0A0A0A", "#1A1A2E", "#0066CC"]}
+        colors={["#0A0A0A", "#001433", "#0055AA"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.hero, { paddingTop: topPad + 20 }]}
+        style={[styles.hero, { paddingTop: topPad + 16 }]}
       >
-        {/* Back button */}
         <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
           <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.8)" />
         </Pressable>
 
-        {/* Wordmark: West 🚙 cars */}
-        <View style={styles.wordmarkRow}>
-          <Text style={styles.wordWest}>West</Text>
-          <View style={styles.iconWrap}>
-            <Feather name="truck" size={36} color="#E8192C" />
+        {/* Professional logo: W mark + ESTCARS text */}
+        <View style={styles.brandRow}>
+          <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
+          <View style={styles.brandText}>
+            <View style={styles.wordmarkRow}>
+              <Text style={styles.wordW}>W</Text>
+              <Text style={styles.wordRest}>ESTCARS</Text>
+            </View>
+            <Text style={styles.tagline}>Ghana's Car Marketplace</Text>
           </View>
-          <Text style={styles.wordCars}>cars</Text>
         </View>
-        <Text style={styles.tagline}>Ghana's Car Marketplace</Text>
 
-        {/* Hero text */}
+        {/* Hero copy */}
         <Text style={styles.heroTitle}>Welcome back</Text>
-        <Text style={styles.heroSub}>Sign in to access your listings,{"\n"}saved cars and messages</Text>
+        <Text style={styles.heroSub}>
+          Sign in to access your listings,{"\n"}saved cars and messages
+        </Text>
 
-        {/* Decorative car stats */}
+        {/* Stats strip */}
         <View style={styles.statsRow}>
           {[
             { value: "50k+", label: "Active buyers" },
@@ -95,7 +101,6 @@ export default function LoginScreen() {
         <View style={styles.formCard}>
           <Text style={styles.formTitle}>Sign in</Text>
 
-          {/* Email field */}
           <View style={styles.fieldWrap}>
             <Text style={styles.fieldLabel}>Email or phone</Text>
             <View style={[styles.field, focusedField === "email" && styles.fieldFocused]}>
@@ -115,7 +120,6 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          {/* Password field */}
           <View style={styles.fieldWrap}>
             <Text style={styles.fieldLabel}>Password</Text>
             <View style={[styles.field, focusedField === "pass" && styles.fieldFocused]}>
@@ -142,7 +146,6 @@ export default function LoginScreen() {
             <Text style={styles.forgotText}>Forgot password?</Text>
           </Pressable>
 
-          {/* Sign in button */}
           <Pressable
             style={[styles.signInBtn, loading && { opacity: 0.75 }]}
             onPress={handleLogin}
@@ -165,29 +168,22 @@ export default function LoginScreen() {
             </LinearGradient>
           </Pressable>
 
-          {/* Divider */}
           <View style={styles.divider}>
             <View style={styles.divLine} />
             <Text style={styles.divText}>or</Text>
             <View style={styles.divLine} />
           </View>
 
-          {/* Create account */}
-          <Pressable
-            style={styles.registerBtn}
-            onPress={() => router.push("/auth/signup")}
-          >
+          <Pressable style={styles.registerBtn} onPress={() => router.push("/auth/signup")}>
             <Feather name="user-plus" size={16} color="#0066CC" />
             <Text style={styles.registerText}>Create account</Text>
           </Pressable>
 
-          {/* Guest */}
           <Pressable style={styles.guestBtn} onPress={() => router.replace("/(tabs)")}>
             <Text style={styles.guestText}>Browse without signing in →</Text>
           </Pressable>
         </View>
 
-        {/* Bottom trust indicators */}
         <View style={styles.trustRow}>
           {[
             { icon: "shield", text: "Secure login" },
@@ -210,47 +206,53 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#F5F5F5" },
 
-  // Hero
-  hero: {
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-    gap: 16,
-  },
+  hero: { paddingHorizontal: 24, paddingBottom: 28, gap: 14 },
   backBtn: {
-    width: 38, height: 38,
-    borderRadius: 19,
+    width: 38, height: 38, borderRadius: 19,
     backgroundColor: "rgba(255,255,255,0.12)",
     alignItems: "center", justifyContent: "center",
     marginBottom: 4,
   },
-  wordmarkRow: { flexDirection: "row", alignItems: "center", gap: 0 },
-  wordWest: {
-    fontSize: 42, fontFamily: "Inter_700Bold",
-    color: "#fff", letterSpacing: -1.5, includeFontPadding: false,
+
+  brandRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
   },
-  iconWrap: { marginHorizontal: 3, transform: [{ scaleX: -1 }] },
-  wordCars: {
-    fontSize: 42, fontFamily: "Inter_400Regular",
-    color: "#fff", letterSpacing: -1.5, includeFontPadding: false,
+  logoImg: {
+    width: 56,
+    height: 56,
+    tintColor: "#fff",
+  },
+  brandText: { gap: 2 },
+  wordmarkRow: { flexDirection: "row", alignItems: "baseline" },
+  wordW: {
+    fontSize: 32, fontFamily: "Inter_700Bold",
+    color: "#4DA6FF", letterSpacing: -1, includeFontPadding: false,
+  },
+  wordRest: {
+    fontSize: 32, fontFamily: "Inter_700Bold",
+    color: "#fff", letterSpacing: -1, includeFontPadding: false,
   },
   tagline: {
-    fontSize: 12, fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.65)", letterSpacing: 1.2,
-    textTransform: "uppercase", marginTop: -4,
+    fontSize: 11, fontFamily: "Inter_400Regular",
+    color: "rgba(255,255,255,0.6)", letterSpacing: 1.2,
+    textTransform: "uppercase",
   },
+
   heroTitle: {
-    fontSize: 32, fontFamily: "Inter_700Bold",
-    color: "#fff", letterSpacing: -0.8, marginTop: 8,
+    fontSize: 30, fontFamily: "Inter_700Bold",
+    color: "#fff", letterSpacing: -0.8, marginTop: 4,
   },
   heroSub: {
     fontSize: 14, fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.7)", lineHeight: 22,
-    marginTop: -8,
+    color: "rgba(255,255,255,0.65)", lineHeight: 22,
+    marginTop: -4,
   },
+
   statsRow: {
     flexDirection: "row",
-    gap: 0,
-    marginTop: 8,
+    marginTop: 4,
     backgroundColor: "rgba(255,255,255,0.08)",
     borderRadius: 14,
     paddingVertical: 14,
@@ -259,12 +261,11 @@ const styles = StyleSheet.create({
   },
   statItem: { flex: 1, alignItems: "center", gap: 2 },
   statValue: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#fff" },
-  statLabel: { fontSize: 11, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.6)" },
+  statLabel: { fontSize: 11, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.55)" },
 
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 16, paddingTop: 20 },
 
-  // Form card
   formCard: {
     backgroundColor: "#fff",
     borderRadius: 20,
@@ -276,55 +277,32 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 6,
   },
-  formTitle: {
-    fontSize: 22, fontFamily: "Inter_700Bold",
-    color: "#1A1A1A", marginBottom: 4,
-  },
+  formTitle: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#1A1A1A", marginBottom: 4 },
 
   fieldWrap: { gap: 6 },
   fieldLabel: {
     fontSize: 12, fontFamily: "Inter_600SemiBold",
-    color: "#6B6B6B", letterSpacing: 0.4,
-    textTransform: "uppercase",
+    color: "#6B6B6B", letterSpacing: 0.4, textTransform: "uppercase",
   },
   field: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    height: 52,
-    borderWidth: 1.5,
-    borderColor: "#E8E8E8",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    backgroundColor: "#FAFAFA",
+    flexDirection: "row", alignItems: "center", gap: 10,
+    height: 52, borderWidth: 1.5, borderColor: "#E8E8E8",
+    borderRadius: 12, paddingHorizontal: 14, backgroundColor: "#FAFAFA",
   },
   fieldFocused: {
-    borderColor: "#0066CC",
-    backgroundColor: "#fff",
-    shadowColor: "#0066CC",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 2,
+    borderColor: "#0066CC", backgroundColor: "#fff",
+    shadowColor: "#0066CC", shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.15, shadowRadius: 6, elevation: 2,
   },
-  input: {
-    flex: 1,
-    fontSize: 15,
-    color: "#1A1A1A",
-    fontFamily: "Inter_400Regular",
-    padding: 0,
-  },
+  input: { flex: 1, fontSize: 15, color: "#1A1A1A", fontFamily: "Inter_400Regular", padding: 0 },
 
   forgotBtn: { alignSelf: "flex-end", marginTop: -4 },
   forgotText: { fontSize: 13, color: "#0066CC", fontFamily: "Inter_500Medium" },
 
   signInBtn: { borderRadius: 12, overflow: "hidden", marginTop: 4 },
   signInGrad: {
-    height: 52,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
+    height: 52, flexDirection: "row",
+    alignItems: "center", justifyContent: "center", gap: 8,
   },
   signInText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: 0.2 },
 
@@ -333,28 +311,19 @@ const styles = StyleSheet.create({
   divText: { fontSize: 13, color: "#BDBDBD", fontFamily: "Inter_400Regular" },
 
   registerBtn: {
-    height: 52,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    borderWidth: 1.5,
-    borderColor: "#0066CC",
-    borderRadius: 12,
-    backgroundColor: "#F0F7FF",
+    height: 52, flexDirection: "row", alignItems: "center",
+    justifyContent: "center", gap: 8,
+    borderWidth: 1.5, borderColor: "#0066CC",
+    borderRadius: 12, backgroundColor: "#F0F7FF",
   },
   registerText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#0066CC" },
 
   guestBtn: { alignItems: "center", paddingVertical: 6 },
   guestText: { fontSize: 13, color: "#9E9E9E", fontFamily: "Inter_400Regular" },
 
-  // Trust row
   trustRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 20,
-    marginTop: 20,
-    paddingHorizontal: 8,
+    flexDirection: "row", justifyContent: "center",
+    gap: 20, marginTop: 20, paddingHorizontal: 8,
   },
   trustItem: { flexDirection: "row", alignItems: "center", gap: 5 },
   trustText: { fontSize: 11, color: "#BDBDBD", fontFamily: "Inter_400Regular" },
