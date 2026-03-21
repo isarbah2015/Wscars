@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -14,10 +15,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
-import { SearchBar } from "@/components/SearchBar";
 import { SponsoredCard } from "@/components/SponsoredCard";
-import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
+import { useTheme } from "@/context/ThemeContext";
 import { Car } from "@/types";
 import {
   CAR_BRANDS,
@@ -30,20 +30,24 @@ import {
 const PRICE_RANGES = [
   { label: "Any Price", min: 0, max: 9999999 },
   { label: "Under ₵50k", min: 0, max: 50000 },
-  { label: "₵50k - ₵100k", min: 50000, max: 100000 },
-  { label: "₵100k - ₵250k", min: 100000, max: 250000 },
-  { label: "₵250k - ₵500k", min: 250000, max: 500000 },
+  { label: "₵50k–₵100k", min: 50000, max: 100000 },
+  { label: "₵100k–₵250k", min: 100000, max: 250000 },
+  { label: "₵250k–₵500k", min: 250000, max: 500000 },
   { label: "₵500k+", min: 500000, max: 9999999 },
 ];
+
+const QUICK_FILTERS = ["All", "SUV", "Sedan", "Tokunbo", "Budget", "Luxury", "Pickup", "New"];
 
 function FilterModal({
   visible,
   onClose,
   onApply,
+  colors,
 }: {
   visible: boolean;
   onClose: () => void;
   onApply: (filters: any) => void;
+  colors: any;
 }) {
   const [brand, setBrand] = useState("Any");
   const [location, setLocation] = useState("Any");
@@ -64,18 +68,18 @@ function FilterModal({
     onSelect: (v: string) => void;
   }) => (
     <View style={fStyles.section}>
-      <Text style={fStyles.sectionTitle}>{title}</Text>
+      <Text style={[fStyles.sectionTitle, { color: colors.text }]}>{title}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={fStyles.chips}>
           {["Any", ...options].map((opt) => (
             <Pressable
               key={opt}
-              style={[fStyles.chip, selected === opt && fStyles.chipActive]}
+              style={[fStyles.chip, { backgroundColor: colors.background, borderColor: colors.border },
+                selected === opt && { backgroundColor: colors.accent, borderColor: colors.accent }]}
               onPress={() => onSelect(opt)}
             >
-              <Text
-                style={[fStyles.chipText, selected === opt && fStyles.chipTextActive]}
-              >
+              <Text style={[fStyles.chipText, { color: colors.textSecondary },
+                selected === opt && { color: "#fff", fontFamily: "Manrope_600SemiBold" }]}>
                 {opt}
               </Text>
             </Pressable>
@@ -88,91 +92,52 @@ function FilterModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={fStyles.overlay}>
-        <View style={fStyles.sheet}>
-          <View style={fStyles.handle} />
+        <View style={[fStyles.sheet, { backgroundColor: colors.card }]}>
+          <View style={[fStyles.handle, { backgroundColor: colors.border }]} />
           <View style={fStyles.header}>
-            <Text style={fStyles.title}>Filters</Text>
+            <Text style={[fStyles.title, { color: colors.text }]}>Filters</Text>
             <Pressable onPress={onClose}>
-              <Feather name="x" size={22} color={Colors.light.text} />
+              <Feather name="x" size={22} color={colors.textSecondary} />
             </Pressable>
           </View>
           <ScrollView showsVerticalScrollIndicator={false}>
-            <FilterSection
-              title="Brand"
-              options={CAR_BRANDS.slice(0, 10)}
-              selected={brand}
-              onSelect={setBrand}
-            />
-            <FilterSection
-              title="Location"
-              options={GHANA_CITIES}
-              selected={location}
-              onSelect={setLocation}
-            />
-            <FilterSection
-              title="Fuel Type"
-              options={FUEL_TYPES}
-              selected={fuelType}
-              onSelect={setFuelType}
-            />
-            <FilterSection
-              title="Transmission"
-              options={TRANSMISSIONS}
-              selected={transmission}
-              onSelect={setTransmission}
-            />
-            <FilterSection
-              title="Condition"
-              options={CONDITIONS}
-              selected={condition}
-              onSelect={setCondition}
-            />
+            <FilterSection title="Brand" options={CAR_BRANDS} selected={brand} onSelect={setBrand} />
+            <FilterSection title="Location" options={GHANA_CITIES} selected={location} onSelect={setLocation} />
+            <FilterSection title="Fuel Type" options={FUEL_TYPES} selected={fuelType} onSelect={setFuelType} />
+            <FilterSection title="Transmission" options={TRANSMISSIONS} selected={transmission} onSelect={setTransmission} />
+            <FilterSection title="Condition" options={CONDITIONS} selected={condition} onSelect={setCondition} />
             <View style={fStyles.section}>
-              <Text style={fStyles.sectionTitle}>Price Range</Text>
-              <View style={fStyles.chips}>
-                {PRICE_RANGES.map((range) => (
+              <Text style={[fStyles.sectionTitle, { color: colors.text }]}>Price Range</Text>
+              <View style={[fStyles.chips, { flexWrap: "wrap" }]}>
+                {PRICE_RANGES.map((pr) => (
                   <Pressable
-                    key={range.label}
-                    style={[
-                      fStyles.chip,
-                      priceRange.label === range.label && fStyles.chipActive,
-                    ]}
-                    onPress={() => setPriceRange(range)}
+                    key={pr.label}
+                    style={[fStyles.chip, { backgroundColor: colors.background, borderColor: colors.border },
+                      priceRange.label === pr.label && { backgroundColor: colors.accent, borderColor: colors.accent }]}
+                    onPress={() => setPriceRange(pr)}
                   >
-                    <Text
-                      style={[
-                        fStyles.chipText,
-                        priceRange.label === range.label && fStyles.chipTextActive,
-                      ]}
-                    >
-                      {range.label}
+                    <Text style={[fStyles.chipText, { color: colors.textSecondary },
+                      priceRange.label === pr.label && { color: "#fff", fontFamily: "Manrope_600SemiBold" }]}>
+                      {pr.label}
                     </Text>
                   </Pressable>
                 ))}
               </View>
             </View>
           </ScrollView>
-
-          <View style={fStyles.footer}>
+          <View style={[fStyles.footer, { borderTopColor: colors.border }]}>
             <Pressable
-              style={fStyles.resetBtn}
+              style={[fStyles.resetBtn, { borderColor: colors.accent }]}
               onPress={() => {
-                setBrand("Any");
-                setLocation("Any");
-                setFuelType("Any");
-                setTransmission("Any");
-                setCondition("Any");
-                setPriceRange(PRICE_RANGES[0]);
+                setBrand("Any"); setLocation("Any"); setFuelType("Any");
+                setTransmission("Any"); setCondition("Any"); setPriceRange(PRICE_RANGES[0]);
               }}
             >
-              <Text style={fStyles.resetText}>Reset</Text>
+              <Text style={[fStyles.resetText, { color: colors.accent }]}>Reset</Text>
             </Pressable>
             <Pressable
-              style={fStyles.applyBtn}
-              onPress={() => {
-                onApply({ brand, location, fuelType, transmission, condition, priceRange });
-                onClose();
-              }}
+              style={[fStyles.applyBtn, { backgroundColor: colors.accent }]}
+              onPress={() => { onApply({ brand, location, fuelType, transmission, condition, priceRange }); onClose(); }}
             >
               <Text style={fStyles.applyText}>Apply Filters</Text>
             </Pressable>
@@ -185,12 +150,14 @@ function FilterModal({
 
 export default function SearchScreen() {
   const { cars } = useApp();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const topPad = Platform.OS === "web" ? 10 : insets.top;
+
   const [query, setQuery] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
   const [activeFilters, setActiveFilters] = useState<any>(null);
-
-  const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);
+  const [quickFilter, setQuickFilter] = useState("All");
 
   const filtered = cars.filter((car) => {
     const q = query.toLowerCase();
@@ -202,11 +169,20 @@ export default function SearchScreen() {
       car.condition.toLowerCase().includes(q);
 
     if (!matchQuery) return false;
+
+    let matchQuick = true;
+    if (quickFilter === "SUV") matchQuick = car.category?.toLowerCase().includes("suv") ?? false;
+    else if (quickFilter === "Sedan") matchQuick = car.category?.toLowerCase().includes("sedan") ?? false;
+    else if (quickFilter === "Tokunbo") matchQuick = car.condition === "Foreign Used";
+    else if (quickFilter === "Budget") matchQuick = car.price < 100000;
+    else if (quickFilter === "Luxury") matchQuick = car.price > 300000;
+    else if (quickFilter === "Pickup") matchQuick = car.category?.toLowerCase().includes("pickup") ?? false;
+    else if (quickFilter === "New") matchQuick = car.condition === "New";
+
+    if (!matchQuick) return false;
     if (!activeFilters) return true;
 
-    const { brand, location, fuelType, transmission, condition, priceRange } =
-      activeFilters;
-
+    const { brand, location, fuelType, transmission, condition, priceRange } = activeFilters;
     return (
       (brand === "Any" || car.brand === brand) &&
       (location === "Any" || car.location === location) &&
@@ -234,38 +210,88 @@ export default function SearchScreen() {
   const listData = buildList();
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: topPad + 10 }]}>
-        <Text style={styles.title}>Search Cars</Text>
-        <SearchBar
-          value={query}
-          onChangeText={setQuery}
-          onFilter={() => setFilterVisible(true)}
-          placeholder="Brand, model, location..."
-        />
-        {activeFilters && (
-          <View style={styles.filterTag}>
-            <Feather name="filter" size={12} color={Colors.primary} />
-            <Text style={styles.filterTagText}>Filters applied</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* ── Gradient Header ── */}
+      <LinearGradient
+        colors={isDark ? ["#1E293B", "#111827"] : ["#0A1628", "#0A4FAA"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: topPad + 14 }]}
+      >
+        <View style={styles.headerTop}>
+          <Text style={styles.headerTitle}>Search Cars</Text>
+          {filtered.length > 0 && (
+            <View style={styles.resultPill}>
+              <Text style={styles.resultPillText}>{filtered.length} found</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Search input */}
+        <View style={[styles.searchRow, { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.15)" }]}>
+          <Feather name="search" size={18} color="rgba(255,255,255,0.7)" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Brand, model, location..."
+            placeholderTextColor="rgba(255,255,255,0.5)"
+            value={query}
+            onChangeText={setQuery}
+          />
+          {query.length > 0 && (
+            <Pressable onPress={() => setQuery("")} hitSlop={8}>
+              <Feather name="x" size={16} color="rgba(255,255,255,0.7)" />
+            </Pressable>
+          )}
+          <Pressable
+            onPress={() => setFilterVisible(true)}
+            style={styles.filterIconBtn}
+          >
+            <Feather name="sliders" size={18} color="#BFFF00" />
+            {activeFilters && <View style={styles.filterDot} />}
+          </Pressable>
+        </View>
+
+        {/* Quick filter chips */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickScroll}>
+          <View style={styles.quickRow}>
+            {QUICK_FILTERS.map((f) => (
+              <Pressable
+                key={f}
+                style={[styles.quickChip,
+                  quickFilter === f && { backgroundColor: "#BFFF00" }]}
+                onPress={() => setQuickFilter(f)}
+              >
+                <Text style={[styles.quickChipText,
+                  quickFilter === f && { color: "#1A4000", fontFamily: "Manrope_700Bold" }]}>
+                  {f}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
+      </LinearGradient>
+
+      {/* Active filter tag */}
+      {activeFilters && (
+        <View style={[styles.filterTagRow, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+          <View style={[styles.filterTag, { backgroundColor: colors.accentLight }]}>
+            <Feather name="filter" size={12} color={colors.accent} />
+            <Text style={[styles.filterTagText, { color: colors.accent }]}>Filters applied</Text>
             <Pressable onPress={() => setActiveFilters(null)} hitSlop={8}>
-              <Feather name="x" size={12} color={Colors.primary} />
+              <Feather name="x" size={12} color={colors.accent} />
             </Pressable>
           </View>
-        )}
-      </View>
+        </View>
+      )}
 
       <FlatList
         data={listData}
-        keyExtractor={(item, i) =>
-          item.type === "car" ? item.item.id : `ad_${i}`
-        }
+        keyExtractor={(item, i) => item.type === "car" ? item.item.id : `ad_${i}`}
         renderItem={({ item, index }) => {
           if (item.type === "ad") {
             return <SponsoredCard car={item.car} />;
           }
-          const carsBefore = listData
-            .slice(0, index)
-            .filter((x) => x.type === "car").length;
+          const carsBefore = listData.slice(0, index).filter((x) => x.type === "car").length;
           if (carsBefore % 2 === 1) return null;
 
           const nextItem = listData[index + 1];
@@ -282,100 +308,150 @@ export default function SearchScreen() {
             </View>
           );
         }}
-        ListHeaderComponent={
-          <View style={styles.resultsHeader}>
-            <Text style={styles.resultsText}>
-              {filtered.length} car{filtered.length !== 1 ? "s" : ""} found
-            </Text>
-          </View>
-        }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Feather name="search" size={48} color={Colors.light.textTertiary} />
-            <Text style={styles.emptyTitle}>No cars found</Text>
-            <Text style={styles.emptyText}>
+            <View style={[styles.emptyIconBg, { backgroundColor: colors.accentLight }]}>
+              <Feather name="search" size={36} color={colors.accent} />
+            </View>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>No cars found</Text>
+            <Text style={[styles.emptyText, { color: colors.textTertiary }]}>
               Try adjusting your search or filters
             </Text>
           </View>
         }
-        ListFooterComponent={
-          <View style={{ height: 100 + insets.bottom }} />
-        }
+        ListFooterComponent={<View style={{ height: 100 + insets.bottom }} />}
         showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ paddingTop: 8 }}
       />
 
       <FilterModal
         visible={filterVisible}
         onClose={() => setFilterVisible(false)}
         onApply={setActiveFilters}
+        colors={colors}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.backgroundSecondary,
-  },
+  container: { flex: 1 },
+
   header: {
-    backgroundColor: "#fff",
     paddingHorizontal: 16,
     paddingBottom: 14,
     gap: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border,
   },
-  title: {
-    fontSize: 22,
-    fontFamily: "Manrope_700Bold",
-    color: Colors.light.text,
+  headerTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontFamily: "Manrope_800ExtraBold",
+    color: "#fff",
+    letterSpacing: 0.3,
+  },
+  resultPill: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  resultPillText: {
+    fontSize: 12,
+    fontFamily: "Manrope_600SemiBold",
+    color: "#fff",
+  },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: "Manrope_400Regular",
+    color: "#fff",
+    padding: 0,
+  },
+  filterIconBtn: {
+    position: "relative",
+    padding: 4,
+  },
+  filterDot: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#BFFF00",
+  },
+  quickScroll: { flexGrow: 0 },
+  quickRow: { flexDirection: "row", gap: 8 },
+  quickChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.12)",
+  },
+  quickChipText: {
+    fontSize: 12,
+    fontFamily: "Manrope_500Medium",
+    color: "rgba(255,255,255,0.85)",
+  },
+
+  filterTagRow: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
   },
   filterTag: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     alignSelf: "flex-start",
-    backgroundColor: Colors.primary + "15",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   filterTagText: {
     fontSize: 12,
-    color: Colors.primary,
     fontFamily: "Manrope_500Medium",
   },
-  resultsHeader: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  resultsText: {
-    fontSize: 13,
-    color: Colors.light.textSecondary,
-    fontFamily: "Manrope_400Regular",
-  },
+
   row: {
     flexDirection: "row",
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     gap: 8,
+    marginBottom: 0,
   },
-  halfCard: { flex: 1 },
+  halfCard: { flex: 1, marginBottom: 10 },
+
   empty: {
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 80,
-    gap: 12,
+    gap: 14,
+  },
+  emptyIconBg: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
   emptyTitle: {
     fontSize: 18,
     fontFamily: "Manrope_600SemiBold",
-    color: Colors.light.text,
   },
   emptyText: {
     fontSize: 14,
-    color: Colors.light.textTertiary,
     fontFamily: "Manrope_400Regular",
     textAlign: "center",
   },
@@ -384,11 +460,10 @@ const styles = StyleSheet.create({
 const fStyles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.55)",
     justifyContent: "flex-end",
   },
   sheet: {
-    backgroundColor: "#fff",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 20,
@@ -399,7 +474,6 @@ const fStyles = StyleSheet.create({
     width: 36,
     height: 4,
     borderRadius: 2,
-    backgroundColor: Colors.light.border,
     alignSelf: "center",
     marginBottom: 12,
   },
@@ -409,76 +483,36 @@ const fStyles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 16,
   },
-  title: {
-    fontSize: 20,
-    fontFamily: "Manrope_700Bold",
-    color: Colors.light.text,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Manrope_600SemiBold",
-    color: Colors.light.text,
-    marginBottom: 10,
-  },
-  chips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
+  title: { fontSize: 20, fontFamily: "Manrope_700Bold" },
+  section: { marginBottom: 20 },
+  sectionTitle: { fontSize: 14, fontFamily: "Manrope_600SemiBold", marginBottom: 10 },
+  chips: { flexDirection: "row", gap: 8 },
   chip: {
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: Colors.light.backgroundSecondary,
     borderWidth: 1,
-    borderColor: Colors.light.border,
   },
-  chipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  chipText: {
-    fontSize: 13,
-    color: Colors.light.textSecondary,
-    fontFamily: "Manrope_400Regular",
-  },
-  chipTextActive: {
-    color: "#fff",
-    fontFamily: "Manrope_600SemiBold",
-  },
+  chipText: { fontSize: 13, fontFamily: "Manrope_400Regular" },
   footer: {
     flexDirection: "row",
     gap: 12,
     paddingVertical: 16,
     borderTopWidth: 1,
-    borderTopColor: Colors.light.border,
   },
   resetBtn: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: Colors.primary,
     alignItems: "center",
   },
-  resetText: {
-    fontSize: 15,
-    color: Colors.primary,
-    fontFamily: "Manrope_600SemiBold",
-  },
+  resetText: { fontSize: 15, fontFamily: "Manrope_600SemiBold" },
   applyBtn: {
     flex: 2,
     paddingVertical: 14,
     borderRadius: 14,
-    backgroundColor: Colors.primary,
     alignItems: "center",
   },
-  applyText: {
-    fontSize: 15,
-    color: "#fff",
-    fontFamily: "Manrope_600SemiBold",
-  },
+  applyText: { fontSize: 15, color: "#fff", fontFamily: "Manrope_600SemiBold" },
 });

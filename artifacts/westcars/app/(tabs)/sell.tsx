@@ -340,6 +340,29 @@ export default function SellScreen() {
           />
         </View>
 
+        {/* ── Boost Your Listing ── */}
+        <Pressable style={styles.boostCard} onPress={() => router.push("/advertise")}>
+          <LinearGradient
+            colors={["#0A1628", "#0066CC"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.boostGradient}
+          >
+            <View style={styles.boostLeft}>
+              <View style={styles.boostIconBg}>
+                <Feather name="zap" size={20} color="#BFFF00" />
+              </View>
+              <View style={styles.boostText}>
+                <Text style={styles.boostTitle}>Boost Your Listing</Text>
+                <Text style={styles.boostSub}>Sponsored · Featured · Urgent Badge</Text>
+              </View>
+            </View>
+            <View style={styles.boostArrow}>
+              <Feather name="arrow-right" size={16} color="#BFFF00" />
+            </View>
+          </LinearGradient>
+        </Pressable>
+
         {/* Submit */}
         <Pressable
           style={({ pressed }) => [
@@ -506,6 +529,50 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_700Bold",
     padding: 0,
     paddingVertical: 13,
+  },
+  boostCard: {
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  boostGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  boostLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  boostIconBg: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(191,255,0,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  boostText: { gap: 2, flex: 1 },
+  boostTitle: {
+    fontSize: 15,
+    fontFamily: "Manrope_700Bold",
+    color: "#fff",
+  },
+  boostSub: {
+    fontSize: 12,
+    fontFamily: "Manrope_400Regular",
+    color: "rgba(255,255,255,0.65)",
+  },
+  boostArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: "rgba(191,255,0,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   submitBtn: {
     borderRadius: 14,

@@ -458,6 +458,20 @@ export default function ProfileScreen() {
               </View>
             </Pressable>
 
+            <Pressable
+              style={[styles.settingRow, { borderTopColor: colors.border }]}
+              onPress={() => router.push("/advertise")}
+            >
+              <View style={styles.settingLeft}>
+                <Feather name="trending-up" size={18} color="#E65100" />
+                <View>
+                  <Text style={[styles.settingLabel, { color: colors.text }]}>Advertise Your Car</Text>
+                  <Text style={[styles.settingHint, { color: colors.textTertiary }]}>Sponsored listings · Boost &amp; reach more buyers</Text>
+                </View>
+              </View>
+              <Feather name="chevron-right" size={16} color={colors.textTertiary} />
+            </Pressable>
+
             <Pressable style={[styles.settingRow, { borderTopColor: colors.border }]}>
               <View style={styles.settingLeft}>
                 <Feather name="help-circle" size={18} color={Colors.primary} />

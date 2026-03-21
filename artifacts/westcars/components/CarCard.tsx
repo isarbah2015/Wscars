@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { useApp } from "@/context/AppContext";
+import { useTheme } from "@/context/ThemeContext";
 import { Car } from "@/types";
 import { formatPrice } from "@/utils/ghanaData";
 
@@ -21,6 +22,7 @@ interface CarCardProps {
 
 export function CarCard({ car, style }: CarCardProps) {
   const { toggleFavorite, isFavorite } = useApp();
+  const { colors } = useTheme();
   const fav = isFavorite(car.id);
 
   const scale = useRef(new Animated.Value(1)).current;
@@ -50,7 +52,7 @@ export function CarCard({ car, style }: CarCardProps) {
   return (
     <Animated.View style={[styles.wrapper, { transform: [{ scale }] }, style]}>
       <Pressable
-        style={styles.card}
+        style={[styles.card, { backgroundColor: colors.card }]}
         onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
         onPressIn={pressIn}
         onPressOut={pressOut}
@@ -109,15 +111,15 @@ export function CarCard({ car, style }: CarCardProps) {
         </View>
 
         {/* ── Info block ── */}
-        <View style={styles.info}>
-          <Text style={styles.price}>from {formatPrice(car.price)}</Text>
-          <Text style={styles.carName} numberOfLines={1}>
+        <View style={[styles.info, { backgroundColor: colors.card }]}>
+          <Text style={[styles.price, { color: colors.text }]}>from {formatPrice(car.price)}</Text>
+          <Text style={[styles.carName, { color: colors.textSecondary }]} numberOfLines={1}>
             {car.brand} {car.model}
           </Text>
           <View style={styles.metaRow}>
-            <Text style={styles.year}>{car.year}</Text>
+            <Text style={[styles.year, { color: colors.textTertiary }]}>{car.year}</Text>
             {car.mileage !== undefined && car.mileage > 0 && (
-              <Text style={styles.mileage}>{(car.mileage / 1000).toFixed(0)}k km</Text>
+              <Text style={[styles.mileage, { color: colors.textTertiary }]}>{(car.mileage / 1000).toFixed(0)}k km</Text>
             )}
           </View>
         </View>

@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
@@ -15,8 +16,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
-import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
+import { useTheme } from "@/context/ThemeContext";
 
 const WC_BADGE    = require("@/assets/images/wc-badge.png");
 const CAR_NEW     = require("@/assets/images/car-new.png");
@@ -63,6 +64,7 @@ const CATS_HEIGHT = 110;
 
 export default function HomeScreen() {
   const { cars, currentUser } = useApp();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
   const [condition, setCondition] = useState<Condition>("used");
@@ -116,24 +118,24 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
       {/* ── Fixed Header ── */}
-      <View style={[styles.header, { paddingTop: topPad + 8 }]}>
+      <View style={[styles.header, { paddingTop: topPad + 8, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
 
         {/* ── Row 1: Search bar (on top) ── */}
         <Pressable
-          style={styles.searchBox}
+          style={[styles.searchBox, { backgroundColor: colors.accentLight, borderColor: isDark ? colors.border : "#C8D8F8" }]}
           onPress={() => router.push("/(tabs)/search")}
         >
           <Image source={SEARCH_ICON} style={styles.searchCarIcon} resizeMode="contain" />
           <View style={styles.searchBoxText}>
-            <Text style={styles.searchBoxLabel}>Brand, model</Text>
-            <Text style={styles.searchBoxCount}>
+            <Text style={[styles.searchBoxLabel, { color: colors.text }]}>Brand, model</Text>
+            <Text style={[styles.searchBoxCount, { color: colors.textTertiary }]}>
               {totalCount.toLocaleString()} listings
             </Text>
           </View>
-          <View style={styles.filterBtn}>
-            <Feather name="sliders" size={17} color="#0066CC" />
+          <View style={[styles.filterBtn, { backgroundColor: colors.card, borderColor: isDark ? colors.border : "#C8D8F8" }]}>
+            <Feather name="sliders" size={17} color={colors.accent} />
           </View>
         </Pressable>
 
@@ -141,15 +143,15 @@ export default function HomeScreen() {
         <View style={styles.topRow}>
           <View style={styles.logoRow}>
             <Image source={WC_BADGE} style={styles.logoBadge} resizeMode="contain" />
-            <Text style={styles.logoText}>WESTCARS</Text>
+            <Text style={[styles.logoText, { color: colors.text }]}>WESTCARS</Text>
           </View>
           <View style={styles.userRow}>
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarText}>
+            <View style={[styles.avatarCircle, { backgroundColor: colors.accentLight }]}>
+              <Text style={[styles.avatarText, { color: colors.accent }]}>
                 {currentUser?.name?.[0] || "W"}
               </Text>
             </View>
-            <Text style={styles.userName}>
+            <Text style={[styles.userName, { color: colors.text }]}>
               {currentUser?.name?.split(" ")[0] || "Guest"}
             </Text>
           </View>
@@ -171,24 +173,26 @@ export default function HomeScreen() {
             ).map((tab) => (
               <Pressable
                 key={tab.id}
-                style={[styles.tab, condition === tab.id && styles.tabActive]}
+                style={[styles.tab, { backgroundColor: colors.background, borderColor: colors.border },
+                  condition === tab.id && { backgroundColor: colors.accentLight, borderColor: colors.accent, borderWidth: 1.5 }]}
                 onPress={() => setCondition(tab.id)}
               >
-                <Text style={[styles.tabLabel, condition === tab.id && styles.tabLabelActive]}>
+                <Text style={[styles.tabLabel, { color: colors.textSecondary },
+                  condition === tab.id && { color: colors.accent, fontFamily: "Manrope_700Bold" }]}>
                   {tab.label}
                 </Text>
                 <Image source={tab.img} style={styles.tabImg} resizeMode="contain" />
               </Pressable>
             ))}
 
-            <View style={styles.tabDivider} />
+            <View style={[styles.tabDivider, { backgroundColor: colors.border }]} />
 
             {VEHICLE_CATEGORIES[condition].map((cat) => (
-              <Pressable key={cat.label} style={styles.tab}>
-                <Text style={styles.tabLabel} numberOfLines={1}>{cat.label}</Text>
+              <Pressable key={cat.label} style={[styles.tab, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                <Text style={[styles.tabLabel, { color: colors.textSecondary }]} numberOfLines={1}>{cat.label}</Text>
                 <Image source={cat.img} style={styles.tabImg} resizeMode="contain" />
                 {cat.count > 0 && (
-                  <Text style={styles.tabCount}>{cat.count}</Text>
+                  <Text style={[styles.tabCount, { color: colors.textTertiary }]}>{cat.count}</Text>
                 )}
               </Pressable>
             ))}
@@ -206,21 +210,25 @@ export default function HomeScreen() {
           paddingBottom: 100 + (insets.bottom || 0),
         }}
       >
-        {/* ── Sponsored Banner ── */}
-        <View style={styles.promoBanner}>
+        {/* ── Sponsored Banner → leads to Advertise ── */}
+        <Pressable style={styles.promoBanner} onPress={() => router.push("/advertise")}>
           <View style={styles.promoBannerLeft}>
             <View style={styles.promoBadge}>
               <Text style={styles.promoBadgeText}>SPONSORED</Text>
             </View>
             <Text style={styles.promoBannerTitle}>Toyota Certified Pre-Owned</Text>
             <Text style={styles.promoBannerSub}>0% Interest · 12-month Warranty · Nationwide</Text>
+            <View style={styles.promoCta}>
+              <Text style={styles.promoCtaText}>View Offer</Text>
+              <Feather name="arrow-right" size={12} color="#BFFF00" />
+            </View>
           </View>
           <Image source={BANNER_CAR} style={styles.bannerCarImg} resizeMode="contain" />
-        </View>
+        </Pressable>
 
         {/* ── "Personally for you" section ── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Personally for you</Text>
+        <View style={[styles.section, { backgroundColor: colors.card }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Personally for you</Text>
           <View style={styles.grid}>
             {displayCars.map((car) => (
               <View key={car.id} style={styles.gridItem}>
@@ -230,14 +238,14 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View style={styles.sep} />
+        <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── Special Offers ── */}
-        <View style={styles.section}>
+        <View style={[styles.section, { backgroundColor: colors.card }]}>
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionTitle}>Special Offers</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Special Offers</Text>
             <Pressable onPress={() => router.push("/(tabs)/search")}>
-              <Text style={styles.seeAll}>See all</Text>
+              <Text style={[styles.seeAll, { color: colors.accent }]}>See all</Text>
             </Pressable>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -245,7 +253,7 @@ export default function HomeScreen() {
               {specialOffers.map((car) => (
                 <Pressable
                   key={`special_${car.id}`}
-                  style={styles.offerCard}
+                  style={[styles.offerCard, { backgroundColor: colors.card }]}
                   onPress={() =>
                     router.push({ pathname: "/car/[id]", params: { id: car.id } })
                   }
@@ -261,13 +269,13 @@ export default function HomeScreen() {
                     </View>
                   </View>
                   <View style={styles.offerInfo}>
-                    <Text style={styles.offerPrice}>
+                    <Text style={[styles.offerPrice, { color: colors.text }]}>
                       from {car.price >= 1000 ? `GHS ${car.price.toLocaleString()}` : `GHS ${car.price}`}
                     </Text>
-                    <Text style={styles.offerName} numberOfLines={1}>
+                    <Text style={[styles.offerName, { color: colors.textSecondary }]} numberOfLines={1}>
                       {car.brand} {car.model}
                     </Text>
-                    <Text style={styles.offerYear}>{car.year}</Text>
+                    <Text style={[styles.offerYear, { color: colors.textTertiary }]}>{car.year}</Text>
                   </View>
                 </Pressable>
               ))}
@@ -275,18 +283,21 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.sep} />
+        <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── Advertise ── */}
-        <Pressable style={styles.adBanner} onPress={() => router.push("/advertise")}>
+        <Pressable
+          style={[styles.adBanner, { backgroundColor: isDark ? colors.accentLight : "#EBF4FF", borderColor: isDark ? colors.border : "#C6DEFF" }]}
+          onPress={() => router.push("/advertise")}
+        >
           <View>
-            <Text style={styles.adBannerTitle}>Advertise on Westcars</Text>
-            <Text style={styles.adBannerSub}>
+            <Text style={[styles.adBannerTitle, { color: colors.text }]}>Advertise on Westcars</Text>
+            <Text style={[styles.adBannerSub, { color: colors.textSecondary }]}>
               Reach 50,000+ buyers · Flyer & Video from GHS 50
             </Text>
           </View>
-          <View style={styles.adBannerArrow}>
-            <Feather name="arrow-right" size={16} color="#0066CC" />
+          <View style={[styles.adBannerArrow, { backgroundColor: colors.card, borderColor: isDark ? colors.border : "#C6DEFF" }]}>
+            <Feather name="arrow-right" size={16} color={colors.accent} />
           </View>
         </Pressable>
       </ScrollView>
@@ -468,6 +479,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Manrope_400Regular",
     color: "rgba(255,255,255,0.65)",
+  },
+  promoCta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+  },
+  promoCtaText: {
+    fontSize: 12,
+    fontFamily: "Manrope_600SemiBold",
+    color: "#BFFF00",
   },
   bannerCarImg: {
     width: 130,

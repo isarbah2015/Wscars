@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -11,8 +12,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
+import { useTheme } from "@/context/ThemeContext";
 import { Conversation } from "@/types";
 
 function timeAgo(iso: string) {
@@ -24,27 +25,28 @@ function timeAgo(iso: string) {
   return `${Math.floor(hrs / 24)}d`;
 }
 
-function ConversationRow({ conv }: { conv: Conversation }) {
+function ConversationRow({ conv, colors }: { conv: Conversation; colors: any }) {
   return (
     <Pressable
-      style={({ pressed }) => [styles.convRow, pressed && { opacity: 0.9 }]}
+      style={({ pressed }) => [
+        styles.convRow,
+        { backgroundColor: colors.card, borderBottomColor: colors.border },
+        pressed && { opacity: 0.85 },
+      ]}
       onPress={() =>
         router.push({ pathname: "/conversation/[id]", params: { id: conv.id } })
       }
     >
       <View style={styles.avatarContainer}>
         {conv.participant.avatar ? (
-          <Image
-            source={{ uri: conv.participant.avatar }}
-            style={styles.avatar}
-          />
+          <Image source={{ uri: conv.participant.avatar }} style={styles.avatar} />
         ) : (
-          <View style={styles.avatarPlaceholder}>
-            <Feather name="user" size={20} color={Colors.light.textTertiary} />
+          <View style={[styles.avatarPlaceholder, { backgroundColor: colors.accentLight }]}>
+            <Feather name="user" size={20} color={colors.accent} />
           </View>
         )}
         {conv.participant.isVerified && (
-          <View style={styles.verifiedDot}>
+          <View style={[styles.verifiedDot, { backgroundColor: colors.success }]}>
             <Feather name="check" size={8} color="#fff" />
           </View>
         )}
@@ -52,21 +54,21 @@ function ConversationRow({ conv }: { conv: Conversation }) {
 
       <View style={styles.convContent}>
         <View style={styles.convTop}>
-          <Text style={styles.participantName} numberOfLines={1}>
+          <Text style={[styles.participantName, { color: colors.text }]} numberOfLines={1}>
             {conv.participant.name}
           </Text>
-          <Text style={styles.time}>{timeAgo(conv.lastMessageTime)}</Text>
+          <Text style={[styles.time, { color: colors.textTertiary }]}>{timeAgo(conv.lastMessageTime)}</Text>
         </View>
-        <Text style={styles.carName} numberOfLines={1}>
+        <Text style={[styles.carName, { color: colors.accent }]} numberOfLines={1}>
           Re: {conv.car.brand} {conv.car.model}
         </Text>
-        <Text style={styles.lastMessage} numberOfLines={1}>
+        <Text style={[styles.lastMessage, { color: colors.textSecondary }]} numberOfLines={1}>
           {conv.lastMessage || "No messages yet"}
         </Text>
       </View>
 
       {conv.unreadCount > 0 && (
-        <View style={styles.badge}>
+        <View style={[styles.badge, { backgroundColor: colors.accent }]}>
           <Text style={styles.badgeText}>{conv.unreadCount}</Text>
         </View>
       )}
@@ -76,75 +78,96 @@ function ConversationRow({ conv }: { conv: Conversation }) {
 
 export default function MessagesScreen() {
   const { conversations, isAuthenticated } = useApp();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);
-
-  if (!isAuthenticated) {
-    return (
-      <View style={[styles.authWall, { paddingTop: topPad }]}>
-        <Feather name="message-circle" size={52} color={Colors.light.textTertiary} />
-        <Text style={styles.authTitle}>Sign In to View Messages</Text>
-        <Pressable
-          style={styles.authBtn}
-          onPress={() => router.push("/auth/login")}
-        >
-          <Text style={styles.authBtnText}>Sign In</Text>
-        </Pressable>
-      </View>
-    );
-  }
+  const topPad = Platform.OS === "web" ? 10 : insets.top;
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: topPad + 10 }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <LinearGradient
+        colors={isDark ? ["#1E293B", "#111827"] : ["#0A1628", "#0066CC"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: topPad + 14 }]}
+      >
         <Text style={styles.title}>Messages</Text>
-      </View>
-
-      <FlatList
-        data={conversations}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ConversationRow conv={item} />}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Feather
-              name="message-circle"
-              size={52}
-              color={Colors.light.textTertiary}
-            />
-            <Text style={styles.emptyTitle}>No conversations yet</Text>
-            <Text style={styles.emptyText}>
-              Contact a seller from a car listing to start chatting
-            </Text>
+        {conversations.length > 0 && (
+          <View style={styles.headerBadge}>
+            <Text style={styles.headerBadgeText}>{conversations.length}</Text>
           </View>
-        }
-        ListFooterComponent={
-          <View
-            style={{ height: 100 + (insets.bottom || 0) }}
-          />
-        }
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="automatic"
-      />
+        )}
+      </LinearGradient>
+
+      {!isAuthenticated ? (
+        <View style={[styles.emptyState, { backgroundColor: colors.background }]}>
+          <View style={[styles.emptyIcon, { backgroundColor: colors.accentLight }]}>
+            <Feather name="message-circle" size={40} color={colors.accent} />
+          </View>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>No messages yet</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+            Sign in to message sellers and manage conversations.
+          </Text>
+          <Pressable
+            style={[styles.signInBtn, { backgroundColor: colors.accent }]}
+            onPress={() => router.push("/auth/login")}
+          >
+            <Text style={styles.signInText}>Sign In</Text>
+          </Pressable>
+        </View>
+      ) : conversations.length === 0 ? (
+        <View style={[styles.emptyState, { backgroundColor: colors.background }]}>
+          <View style={[styles.emptyIcon, { backgroundColor: colors.accentLight }]}>
+            <Feather name="message-circle" size={40} color={colors.accent} />
+          </View>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>No conversations</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+            Message a seller on any car listing to start chatting.
+          </Text>
+          <Pressable
+            style={[styles.signInBtn, { backgroundColor: colors.accent }]}
+            onPress={() => router.push("/(tabs)")}
+          >
+            <Text style={styles.signInText}>Browse Cars</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <FlatList
+          data={conversations}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <ConversationRow conv={item} colors={colors} />}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  container: { flex: 1 },
   header: {
-    paddingHorizontal: 20,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border,
+    paddingHorizontal: 18,
+    paddingBottom: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   title: {
     fontSize: 24,
+    fontFamily: "Manrope_800ExtraBold",
+    color: "#fff",
+    letterSpacing: 0.3,
+  },
+  headerBadge: {
+    backgroundColor: "rgba(255,255,255,0.25)",
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  headerBadgeText: {
+    fontSize: 13,
     fontFamily: "Manrope_700Bold",
-    color: Colors.light.text,
+    color: "#fff",
   },
   convRow: {
     flexDirection: "row",
@@ -152,20 +175,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     gap: 12,
+    borderBottomWidth: 1,
   },
-  avatarContainer: {
-    position: "relative",
-  },
-  avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-  },
+  avatarContainer: { position: "relative" },
+  avatar: { width: 50, height: 50, borderRadius: 25 },
   avatarPlaceholder: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: Colors.light.backgroundSecondary,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -173,19 +190,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: Colors.verified,
-    borderWidth: 2,
-    borderColor: "#fff",
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
   },
-  convContent: {
-    flex: 1,
-    gap: 2,
-  },
+  convContent: { flex: 1, gap: 2 },
   convTop: {
     flexDirection: "row",
     alignItems: "center",
@@ -194,83 +207,45 @@ const styles = StyleSheet.create({
   participantName: {
     fontSize: 15,
     fontFamily: "Manrope_600SemiBold",
-    color: Colors.light.text,
     flex: 1,
   },
-  time: {
-    fontSize: 12,
-    color: Colors.light.textTertiary,
-    fontFamily: "Manrope_400Regular",
-  },
-  carName: {
-    fontSize: 12,
-    fontFamily: "Manrope_500Medium",
-    color: Colors.primary,
-  },
-  lastMessage: {
-    fontSize: 13,
-    color: Colors.light.textSecondary,
-    fontFamily: "Manrope_400Regular",
-  },
+  time: { fontSize: 12, fontFamily: "Manrope_400Regular" },
+  carName: { fontSize: 12, fontFamily: "Manrope_500Medium" },
+  lastMessage: { fontSize: 13, fontFamily: "Manrope_400Regular" },
   badge: {
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: Colors.primary,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 4,
   },
-  badgeText: {
-    color: "#fff",
-    fontSize: 11,
-    fontFamily: "Manrope_700Bold",
-  },
-  separator: {
-    height: 1,
-    backgroundColor: Colors.light.border,
-    marginLeft: 80,
-  },
-  empty: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 80,
-    gap: 12,
-    paddingHorizontal: 40,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontFamily: "Manrope_600SemiBold",
-    color: Colors.light.text,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: Colors.light.textTertiary,
-    fontFamily: "Manrope_400Regular",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  authWall: {
+  badgeText: { fontSize: 11, fontFamily: "Manrope_700Bold", color: "#fff" },
+  emptyState: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     gap: 12,
     padding: 40,
   },
-  authTitle: {
-    fontSize: 20,
-    fontFamily: "Manrope_700Bold",
-    color: Colors.light.text,
+  emptyIcon: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  authBtn: {
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: Colors.primary,
+  emptyTitle: { fontSize: 20, fontFamily: "Manrope_700Bold" },
+  emptyText: {
+    fontSize: 14,
+    fontFamily: "Manrope_400Regular",
+    textAlign: "center",
+    lineHeight: 20,
   },
-  authBtnText: {
-    fontSize: 15,
-    fontFamily: "Manrope_600SemiBold",
-    color: "#fff",
+  signInBtn: {
+    paddingHorizontal: 28,
+    paddingVertical: 13,
+    borderRadius: 14,
+    marginTop: 6,
   },
+  signInText: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#fff" },
 });

@@ -3,50 +3,49 @@ import { Feather } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import React from "react";
-import { Platform, StyleSheet, View, useColorScheme } from "react-native";
-import { Colors } from "@/constants/colors";
+import { Platform, StyleSheet, View } from "react-native";
+import { useTheme } from "@/context/ThemeContext";
 
-function SellTabIcon({ color }: { color: string }) {
+function SellTabIcon() {
   return (
     <View style={sellStyles.box}>
-      <Feather name="plus" size={17} color="#1A4000" />
+      <Feather name="plus" size={15} color="#1A4000" />
     </View>
   );
 }
 
 const sellStyles = StyleSheet.create({
   box: {
-    width: 34,
-    height: 28,
-    borderRadius: 8,
+    width: 28,
+    height: 22,
+    borderRadius: 7,
     backgroundColor: "#BFFF00",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#7EC800",
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
+    shadowOpacity: 0.35,
+    shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
+    elevation: 3,
   },
 });
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { isDark, colors } = useTheme();
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.light.tabIconDefault,
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: isDark ? "#6B7A8D" : "#9BA8BA",
         headerShown: false,
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : "#fff",
+          backgroundColor: isIOS ? "transparent" : colors.tabBar,
           borderTopWidth: 1,
-          borderTopColor: Colors.light.border,
+          borderTopColor: colors.border,
           elevation: 0,
           height: isWeb ? 84 : undefined,
         },
@@ -59,12 +58,12 @@ export default function TabLayout() {
             />
           ) : (
             <View
-              style={[StyleSheet.absoluteFill, { backgroundColor: "#fff" }]}
+              style={[StyleSheet.absoluteFill, { backgroundColor: colors.tabBar }]}
             />
           ),
         tabBarLabelStyle: {
           fontFamily: "Manrope_500Medium",
-          fontSize: 11,
+          fontSize: 10,
         },
       }}
     >
@@ -81,17 +80,22 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="favourites"
         options={{
-          title: "Search",
-          href: null,
+          title: "Saved",
+          tabBarIcon: ({ color, size }) =>
+            isIOS ? (
+              <SymbolView name="heart" tintColor={color} size={size} />
+            ) : (
+              <Feather name="heart" size={22} color={color} />
+            ),
         }}
       />
       <Tabs.Screen
         name="sell"
         options={{
           title: "Sell",
-          tabBarIcon: ({ color }) => <SellTabIcon color={color} />,
+          tabBarIcon: () => <SellTabIcon />,
         }}
       />
       <Tabs.Screen
@@ -118,6 +122,7 @@ export default function TabLayout() {
             ),
         }}
       />
+      <Tabs.Screen name="search" options={{ href: null }} />
     </Tabs>
   );
 }
