@@ -72,10 +72,10 @@ const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: nu
     { label: "Hatchback", img: CAT_HATCH,  count: 0 },
   ],
   moto: [
-    { label: "Motorcycle", img: CAT_MOTO, count: 3 },
-    { label: "Scooter",    img: CAR_MOTO, count: 2 },
-    { label: "ATV / Quad", img: { uri: "https://images.unsplash.com/photo-1522083165195-3424ed129620?w=300&h=180&fit=crop&auto=format" }, count: 0 },
-    { label: "Dirt Bike",  img: { uri: "https://images.unsplash.com/photo-1609630875171-b1321377ee65?w=300&h=180&fit=crop&auto=format" }, count: 0 },
+    { label: "Motorcycle", img: CAT_MOTO,    count: 3 },
+    { label: "Scooter",    img: CAR_MOTO,    count: 2 },
+    { label: "ATV / Quad", img: CAT_PICKUP,  count: 0 },
+    { label: "Dirt Bike",  img: CAT_MOTO,    count: 0 },
   ],
 };
 
@@ -136,11 +136,13 @@ export default function HomeScreen() {
     lastScrollY.current = y;
   };
 
+  const darkBg = isDark ? "#080F1E" : "#06112A";
+
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
+    <View style={[styles.root, { backgroundColor: darkBg }]}>
       {/* ── Fixed Header (Gradient) ── */}
       <LinearGradient
-        colors={isDark ? ["#0C1829", "#0A1628"] : ["#03102B", "#0044AA"]}
+        colors={isDark ? ["#0C1829", "#06112A"] : ["#06112A", "#06112A"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.header, { paddingTop: topPad + 8 }]}
@@ -187,20 +189,24 @@ export default function HomeScreen() {
             return (
               <Pressable
                 key={tab.id}
-                style={[styles.mainTab, !active && { borderColor: "rgba(255,255,255,0.18)" }]}
+                style={[
+                  styles.mainTab,
+                  active
+                    ? { backgroundColor: "rgba(255,107,0,0.28)", borderColor: "rgba(255,107,0,0.6)" }
+                    : { backgroundColor: "rgba(255,255,255,0.07)", borderColor: "rgba(255,255,255,0.12)" },
+                ]}
                 onPress={() => setCondition(tab.id)}
               >
-                {active ? (
-                  <LinearGradient
-                    colors={tab.grad}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={StyleSheet.absoluteFill}
-                  />
-                ) : null}
-                <Text style={[styles.mainTabLabel, !active && { color: "rgba(255,255,255,0.55)" }]}>
+                {/* Label — left side */}
+                <Text style={[
+                  styles.mainTabLabel,
+                  active
+                    ? { color: "#FFFFFF", fontFamily: "Manrope_800ExtraBold" }
+                    : { color: "rgba(255,255,255,0.5)", fontFamily: "Manrope_600SemiBold" },
+                ]}>
                   {tab.label}
                 </Text>
+                {/* Car image — right side */}
                 <Image source={tab.img} style={styles.mainTabImg} resizeMode="contain" />
               </Pressable>
             );
@@ -285,7 +291,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View style={[styles.sep, { backgroundColor: colors.background }]} />
+        <View style={[styles.sep, { backgroundColor: darkBg }]} />
 
         {/* ── Special Offers ── */}
         <View style={[styles.section, { backgroundColor: colors.card }]}>
@@ -333,7 +339,7 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
-        <View style={[styles.sep, { backgroundColor: colors.background }]} />
+        <View style={[styles.sep, { backgroundColor: darkBg }]} />
 
         {/* ── Advertise Banner ── */}
         <Pressable onPress={() => router.push("/advertise")} style={styles.adBannerWrap}>
@@ -452,25 +458,23 @@ const styles = StyleSheet.create({
   },
   mainTab: {
     flex: 1,
-    flexDirection: "column",
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 3,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 14,
+    justifyContent: "space-between",
+    paddingLeft: 10,
+    paddingRight: 0,
+    height: 66,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.18)",
     overflow: "hidden",
   },
   mainTabLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Manrope_700Bold",
-    textAlign: "center",
     color: "#FFFFFF",
-    zIndex: 1,
+    flex: 1,
   },
-  mainTabImg: { width: 72, height: 40, zIndex: 1 },
+  mainTabImg: { width: 76, height: 54 },
 
   // ── Sub-category row (horizontal scroll) ──
   subCatsRow: {
