@@ -172,7 +172,7 @@ export default function SignupScreen() {
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Password</Text>
             <View style={[styles.row, focused === "pass" && styles.rowFocused]}>
-              <Feather name="lock" size={16} color={focused === "pass" ? "#2D4500" : "#AAAAAA"} />
+              <Feather name="lock" size={16} color={focused === "pass" ? "#0EB5CA" : "#AAAAAA"} />
               <TextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="Min. 6 characters"
@@ -219,17 +219,17 @@ export default function SignupScreen() {
 
           {/* CTA button */}
           <Pressable
-            style={[styles.cta, { backgroundColor: "#BFFF00" }, loading && { opacity: 0.7 }]}
+            style={[styles.cta, { backgroundColor: "#0EB5CA" }, loading && { opacity: 0.7 }]}
             onPress={handleSignup}
             disabled={loading}
           >
             <View style={styles.ctaGrad}>
               {loading ? (
-                <Text style={[styles.ctaText, { color: "#2D4500" }]}>Creating account…</Text>
+                <Text style={[styles.ctaText, { color: "#FFFFFF" }]}>Creating account…</Text>
               ) : (
                 <>
-                  <Text style={[styles.ctaText, { color: "#2D4500" }]}>Create account</Text>
-                  <Feather name="arrow-right" size={18} color="#2D4500" />
+                  <Text style={[styles.ctaText, { color: "#FFFFFF" }]}>Create account</Text>
+                  <Feather name="arrow-right" size={18} color="#FFFFFF" />
                 </>
               )}
             </View>
@@ -247,7 +247,7 @@ export default function SignupScreen() {
           <View style={styles.trustRow}>
             {["Secure & private", "Free to join", "Verified listings"].map((t) => (
               <View key={t} style={styles.trustPill}>
-                <Feather name="check" size={11} color="#2D4500" />
+                <Feather name="check" size={11} color="#FFFFFF" />
                 <Text style={styles.trustText}>{t}</Text>
               </View>
             ))}
@@ -270,7 +270,7 @@ function InputField({
     <View style={styles.fieldGroup}>
       <Text style={styles.label}>{label}</Text>
       <View style={[styles.row, focused && styles.rowFocused]}>
-        <Feather name={icon} size={16} color={focused ? "#2D4500" : "#AAAAAA"} />
+        <Feather name={icon} size={16} color={focused ? "#0EB5CA" : "#AAAAAA"} />
         <TextInput
           style={styles.input}
           placeholder={placeholder}
@@ -289,7 +289,7 @@ function InputField({
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#EEF1F6" },
+  root: { flex: 1, backgroundColor: "#EDF4F7" },
 
   /* Hero */
   hero: {
@@ -363,8 +363,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9F9F9",
   },
   rowFocused: {
-    borderColor: "#BFFF00", backgroundColor: "#fff",
-    shadowColor: "#BFFF00",
+    borderColor: "#0EB5CA", backgroundColor: "#fff",
+    shadowColor: "#0EB5CA",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3, shadowRadius: 8, elevation: 3,
   },
@@ -376,12 +376,12 @@ const styles = StyleSheet.create({
 
   /* Phone prefix */
   dialBadge: {
-    backgroundColor: "rgba(191,255,0,0.12)",
+    backgroundColor: "rgba(14,181,202,0.10)",
     borderRadius: 8,
     paddingHorizontal: 10, paddingVertical: 5,
   },
   dialText: {
-    fontSize: 13, fontFamily: "Manrope_700Bold", color: "#2D4500",
+    fontSize: 13, fontFamily: "Manrope_700Bold", color: "#0098AA",
   },
   sep: { width: 1, height: 22, backgroundColor: "#E0E0E0" },
 
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
     fontSize: 12, fontFamily: "Manrope_400Regular",
     color: "#9E9E9E", textAlign: "center", lineHeight: 18,
   },
-  termsLink: { color: "#2D4500", fontFamily: "Manrope_600SemiBold" },
+  termsLink: { color: "#0098AA", fontFamily: "Manrope_600SemiBold" },
 
   /* CTA */
   cta: { borderRadius: 14, overflow: "hidden" },
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     fontSize: 14, fontFamily: "Manrope_400Regular", color: "#9E9E9E",
   },
   signinLink: {
-    fontSize: 14, fontFamily: "Manrope_700Bold", color: "#2D4500",
+    fontSize: 14, fontFamily: "Manrope_700Bold", color: "#0098AA",
   },
 
   /* Trust row */
@@ -430,8 +430,8 @@ const styles = StyleSheet.create({
   },
   trustPill: {
     flexDirection: "row", alignItems: "center", gap: 4,
-    backgroundColor: "rgba(191,255,0,0.12)",
+    backgroundColor: "rgba(14,181,202,0.10)",
     borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5,
   },
-  trustText: { fontSize: 11, fontFamily: "Manrope_500Medium", color: "#2D4500" },
+  trustText: { fontSize: 11, fontFamily: "Manrope_500Medium", color: "#0098AA" },
 });

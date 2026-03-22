@@ -107,10 +107,10 @@ export default function SellScreen() {
           You need to be logged in to list your car for sale.
         </Text>
         <Pressable
-          style={[styles.authBtn, { backgroundColor: "#BFFF00", borderRadius: 14, paddingVertical: 14, alignItems: "center" }]}
+          style={[styles.authBtn, { backgroundColor: "#0EB5CA", borderRadius: 14, paddingVertical: 14, alignItems: "center" }]}
           onPress={() => router.push("/auth/login")}
         >
-          <Text style={[styles.authBtnText, { color: "#2D4500" }]}>Sign In</Text>
+          <Text style={[styles.authBtnText, { color: "#FFFFFF" }]}>Sign In</Text>
         </Pressable>
       </View>
     );
@@ -224,8 +224,8 @@ export default function SellScreen() {
           ]}
         >
           <View style={styles.sellHeaderBadge}>
-            <Feather name="tag" size={13} color="#2D4500" />
-            <Text style={[styles.sellHeaderBadgeText, { color: "#2D4500" }]}>SELL YOUR CAR</Text>
+            <Feather name="tag" size={13} color="#0098AA" />
+            <Text style={[styles.sellHeaderBadgeText, { color: "#0098AA" }]}>SELL YOUR CAR</Text>
           </View>
           <Text style={[styles.screenTitle, { color: "#0F172A" }]}>List Your Car</Text>
           <Text style={[styles.screenSubtitle, { color: "#64748B" }]}>
@@ -367,7 +367,7 @@ export default function SellScreen() {
           >
             <View style={styles.boostLeft}>
               <View style={styles.boostIconBg}>
-                <Feather name="zap" size={20} color="#BFFF00" />
+                <Feather name="zap" size={20} color="#0EB5CA" />
               </View>
               <View style={styles.boostText}>
                 <Text style={styles.boostTitle}>Boost Your Listing</Text>
@@ -375,7 +375,7 @@ export default function SellScreen() {
               </View>
             </View>
             <View style={styles.boostArrow}>
-              <Feather name="arrow-right" size={16} color="#BFFF00" />
+              <Feather name="arrow-right" size={16} color="#0EB5CA" />
             </View>
           </LinearGradient>
         </Pressable>
@@ -435,9 +435,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "rgba(191,255,0,0.15)",
+    backgroundColor: "rgba(14,181,202,0.12)",
     borderWidth: 1,
-    borderColor: "rgba(191,255,0,0.4)",
+    borderColor: "rgba(14,181,202,0.32)",
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "rgba(191,255,0,0.15)",
+    backgroundColor: "rgba(14,181,202,0.12)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: "rgba(191,255,0,0.15)",
+    backgroundColor: "rgba(14,181,202,0.12)",
     alignItems: "center",
     justifyContent: "center",
   },

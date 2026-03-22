@@ -35,10 +35,10 @@ export default function FavouritesScreen() {
           Sign in to keep track of cars you love.
         </Text>
         <Pressable
-          style={[styles.authBtn, { backgroundColor: "#BFFF00" }]}
+          style={[styles.authBtn, { backgroundColor: "#0EB5CA" }]}
           onPress={() => router.push("/auth/login")}
         >
-          <Text style={[styles.authBtnText, { color: "#2D4500" }]}>Sign In</Text>
+          <Text style={[styles.authBtnText, { color: "#FFFFFF" }]}>Sign In</Text>
         </Pressable>
       </View>
     );
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   countBadge: {
-    backgroundColor: "#BFFF00",
+    backgroundColor: "#0EB5CA",
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 12,
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   countText: {
     fontSize: 13,
     fontFamily: "Manrope_700Bold",
-    color: "#2D4500",
+    color: "#FFFFFF",
   },
 
   list: { padding: 14, gap: 16 },
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   adBadge: {
-    backgroundColor: "#BFFF00",
+    backgroundColor: "#0EB5CA",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
   adBadgeText: {
     fontSize: 11,
     fontFamily: "Manrope_700Bold",
-    color: "#1A4000",
+    color: "#FFFFFF",
   },
 
   /* ── Details section ── */

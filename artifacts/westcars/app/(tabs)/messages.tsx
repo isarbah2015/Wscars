@@ -101,8 +101,8 @@ export default function MessagesScreen() {
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           {isAdmin && (
             <View style={styles.adminHeaderBadge}>
-              <Feather name="shield" size={11} color="#2D4500" />
-              <Text style={[styles.adminHeaderBadgeText, { color: "#2D4500" }]}>ADMIN</Text>
+              <Feather name="shield" size={11} color="#FFFFFF" />
+              <Text style={[styles.adminHeaderBadgeText, { color: "#FFFFFF" }]}>ADMIN</Text>
             </View>
           )}
           {conversations.length > 0 && (
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   headerBadge: {
-    backgroundColor: "#BFFF00",
+    backgroundColor: "#0EB5CA",
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 12,
@@ -196,18 +196,18 @@ const styles = StyleSheet.create({
   headerBadgeText: {
     fontSize: 13,
     fontFamily: "Manrope_700Bold",
-    color: "#2D4500",
+    color: "#FFFFFF",
   },
   adminHeaderBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "rgba(191,255,0,0.2)",
+    backgroundColor: "rgba(14,181,202,0.15)",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#BFFF00",
+    borderColor: "#0EB5CA",
   },
   adminHeaderBadgeText: {
     fontSize: 10,

@@ -41,7 +41,7 @@ function SellTabIcon({ focused }: { focused: boolean }) {
   return (
     <View style={[sellStyles.outer, focused && sellStyles.outerActive]}>
       <View style={sellStyles.box}>
-        <Feather name="plus" size={18} color="#1A4000" />
+        <Feather name="plus" size={18} color="#FFFFFF" />
       </View>
     </View>
   );
@@ -52,22 +52,22 @@ const sellStyles = StyleSheet.create({
     width: 50,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(191,255,0,0.18)",
+    backgroundColor: "rgba(14,181,202,0.15)",
     alignItems: "center",
     justifyContent: "center",
     marginTop: -2,
   },
   outerActive: {
-    backgroundColor: "rgba(191,255,0,0.3)",
+    backgroundColor: "rgba(14,181,202,0.22)",
   },
   box: {
     width: 40,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#BFFF00",
+    backgroundColor: "#0EB5CA",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#7EC800",
+    shadowColor: "#0EB5CA",
     shadowOpacity: 0.55,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 3 },
@@ -85,7 +85,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#5B8500",
+        tabBarActiveTintColor: "#0098AA",
         tabBarInactiveTintColor: inactiveColor,
         headerShown: false,
         tabBarShowLabel: true,
@@ -169,7 +169,7 @@ export default function TabLayout() {
           tabBarLabelStyle: {
             fontFamily: "Manrope_700Bold",
             fontSize: 10,
-            color: "#5B8500",
+            color: "#0098AA",
             marginBottom: 5,
             marginTop: -2,
           },

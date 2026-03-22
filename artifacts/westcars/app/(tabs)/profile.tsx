@@ -70,10 +70,10 @@ export default function ProfileScreen() {
           Create an account to list cars, save favourites, and message sellers.
         </Text>
         <Pressable
-          style={[styles.authBtn, { backgroundColor: "#BFFF00" }]}
+          style={[styles.authBtn, { backgroundColor: "#0EB5CA" }]}
           onPress={() => router.push("/auth/login")}
         >
-          <Text style={[styles.authBtnText, { color: "#2D4500" }]}>Sign In</Text>
+          <Text style={[styles.authBtnText, { color: "#FFFFFF" }]}>Sign In</Text>
         </Pressable>
         <Pressable onPress={() => router.push("/auth/signup")}>
           <Text style={[styles.signupLink, { color: colors.accent }]}>Create Account</Text>
@@ -155,14 +155,14 @@ export default function ProfileScreen() {
             <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
           ) : (
             <View style={[styles.avatarPlaceholder, {
-              backgroundColor: isDark ? "#1E2D1E" : "rgba(191,255,0,0.12)",
-              borderColor: "#BFFF00",
+              backgroundColor: isDark ? "rgba(14,181,202,0.15)" : "rgba(14,181,202,0.10)",
+              borderColor: "#0EB5CA",
             }]}>
-              <Feather name="user" size={36} color="#2D4500" />
+              <Feather name="user" size={36} color="#0098AA" />
             </View>
           )}
           <Pressable style={styles.editAvatarBtn}>
-            <Feather name="camera" size={14} color="#2D4500" />
+            <Feather name="camera" size={14} color="#FFFFFF" />
           </Pressable>
         </View>
 
@@ -180,7 +180,7 @@ export default function ProfileScreen() {
 
         {!currentUser.isVerified && !v?.phone && (
           <Pressable style={styles.verifyBtn} onPress={handleVerifyPhone}>
-            <Feather name="shield" size={14} color="#2D4500" />
+            <Feather name="shield" size={14} color="#FFFFFF" />
             <Text style={styles.verifyBtnText}>Get Verified</Text>
           </Pressable>
         )}
@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
   // Profile header
   profileHeader: { padding: 20, alignItems: "center", gap: 6, paddingBottom: 24 },
   avatarArea: { position: "relative", marginBottom: 4 },
-  avatar: { width: 88, height: 88, borderRadius: 44, borderWidth: 3, borderColor: "#BFFF00" },
+  avatar: { width: 88, height: 88, borderRadius: 44, borderWidth: 3, borderColor: "#0EB5CA" },
   avatarPlaceholder: {
     width: 88, height: 88, borderRadius: 44,
     borderWidth: 3,
@@ -545,7 +545,7 @@ const styles = StyleSheet.create({
   editAvatarBtn: {
     position: "absolute", bottom: 2, right: 2,
     width: 28, height: 28, borderRadius: 14,
-    backgroundColor: "#BFFF00", borderWidth: 2, borderColor: "#fff",
+    backgroundColor: "#0EB5CA", borderWidth: 2, borderColor: "#fff",
     alignItems: "center", justifyContent: "center",
   },
   userName: { fontSize: 22, fontFamily: "Manrope_700Bold" },
@@ -554,9 +554,9 @@ const styles = StyleSheet.create({
   veriBadges: { marginTop: 2 },
   verifyBtn: {
     flexDirection: "row", alignItems: "center", gap: 6,
-    backgroundColor: "#BFFF00", paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20,
+    backgroundColor: "#0EB5CA", paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20,
   },
-  verifyBtnText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#2D4500" },
+  verifyBtnText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#FFFFFF" },
 
   statsRow: {
     flexDirection: "row", alignItems: "center",

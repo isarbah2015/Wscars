@@ -6,157 +6,117 @@ import {
   Easing,
   Image,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 
-const { width, height } = Dimensions.get("window");
-
-const SPLASH_BG  = require("@/assets/images/splash-bg.png");
-const WC_BADGE   = require("@/assets/images/wc-badge.png");
-const SPLASH_CAR = require("@/assets/images/splash-car.png");
+const { width } = Dimensions.get("window");
+const WC_BADGE = require("@/assets/images/wc-badge.png");
 
 export default function SplashScreen() {
-  // Animation refs
   const badgeOpacity = useRef(new Animated.Value(0)).current;
-  const badgeScale   = useRef(new Animated.Value(0.6)).current;
-  const wordOpacity  = useRef(new Animated.Value(0)).current;
-  const wordY        = useRef(new Animated.Value(16)).current;
-  const tagOpacity   = useRef(new Animated.Value(0)).current;
-  const carOpacity   = useRef(new Animated.Value(0)).current;
-  const carY         = useRef(new Animated.Value(60)).current;
-  const dot1         = useRef(new Animated.Value(0.3)).current;
-  const dot2         = useRef(new Animated.Value(0.3)).current;
-  const dot3         = useRef(new Animated.Value(0.3)).current;
+  const badgeScale   = useRef(new Animated.Value(0.7)).current;
+
+  const ring1Scale   = useRef(new Animated.Value(1)).current;
+  const ring1Opacity = useRef(new Animated.Value(0.6)).current;
+  const ring2Scale   = useRef(new Animated.Value(1)).current;
+  const ring2Opacity = useRef(new Animated.Value(0.4)).current;
+  const ring3Scale   = useRef(new Animated.Value(1)).current;
+  const ring3Opacity = useRef(new Animated.Value(0.2)).current;
 
   useEffect(() => {
-    // 1. Badge pops in
+    // Logo fades and scales in
     Animated.parallel([
       Animated.timing(badgeOpacity, {
-        toValue: 1, duration: 500,
-        easing: Easing.out(Easing.quad),
+        toValue: 1,
+        duration: 600,
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
       Animated.spring(badgeScale, {
-        toValue: 1, tension: 100, friction: 8,
+        toValue: 1,
+        tension: 80,
+        friction: 9,
         useNativeDriver: true,
       }),
     ]).start();
 
-    // 2. WESTCARS wordmark slides up
-    setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(wordOpacity, {
-          toValue: 1, duration: 400,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.spring(wordY, {
-          toValue: 0, tension: 80, friction: 9,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, 350);
+    // Ripple rings pulse outward continuously
+    const pulse = (scaleVal: Animated.Value, opacityVal: Animated.Value, delay: number) => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.parallel([
+            Animated.timing(scaleVal, {
+              toValue: 2.8,
+              duration: 1800,
+              easing: Easing.out(Easing.cubic),
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacityVal, {
+              toValue: 0,
+              duration: 1800,
+              easing: Easing.out(Easing.quad),
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.parallel([
+            Animated.timing(scaleVal, { toValue: 1, duration: 0, useNativeDriver: true }),
+            Animated.timing(opacityVal, { toValue: delay === 0 ? 0.55 : delay === 600 ? 0.35 : 0.18, duration: 0, useNativeDriver: true }),
+          ]),
+        ])
+      ).start();
+    };
 
-    // 3. Tagline fades
     setTimeout(() => {
-      Animated.timing(tagOpacity, {
-        toValue: 1, duration: 400,
-        useNativeDriver: true,
-      }).start();
-    }, 600);
+      pulse(ring1Scale, ring1Opacity, 0);
+      pulse(ring2Scale, ring2Opacity, 600);
+      pulse(ring3Scale, ring3Opacity, 1200);
+    }, 400);
 
-    // 4. Car glides up from bottom
-    setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(carOpacity, {
-          toValue: 1, duration: 700,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.spring(carY, {
-          toValue: 0, tension: 40, friction: 10,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, 700);
-
-    // 5. Pulsing dots
-    setTimeout(() => {
-      const pulse = (dot: Animated.Value, delay: number) =>
-        Animated.loop(
-          Animated.sequence([
-            Animated.delay(delay),
-            Animated.timing(dot, { toValue: 1, duration: 340, useNativeDriver: true }),
-            Animated.timing(dot, { toValue: 0.3, duration: 340, useNativeDriver: true }),
-          ])
-        ).start();
-      pulse(dot1, 0);
-      pulse(dot2, 200);
-      pulse(dot3, 400);
-    }, 1000);
-
-    const nav = setTimeout(() => router.replace("/auth/login"), 3600);
+    const nav = setTimeout(() => router.replace("/auth/login"), 3200);
     return () => clearTimeout(nav);
   }, []);
 
+  const RING_SIZE = 130;
+
   return (
     <View style={styles.root}>
-      {/* Full-bleed dark background */}
-      <Image source={SPLASH_BG} style={styles.bg} resizeMode="cover" />
+      {/* Very soft radial gradient background: achieved with layered Views */}
+      <View style={styles.bgCenter} />
 
-      {/* Dark overlay to deepen it */}
-      <View style={styles.overlay} />
-
-      {/* ── Logo block ── */}
-      <View style={styles.logoBlock}>
-        {/* W badge */}
+      {/* Ripple rings */}
+      {[
+        { scale: ring1Scale, opacity: ring1Opacity },
+        { scale: ring2Scale, opacity: ring2Opacity },
+        { scale: ring3Scale, opacity: ring3Opacity },
+      ].map((r, i) => (
         <Animated.View
-          style={{
-            opacity: badgeOpacity,
-            transform: [{ scale: badgeScale }],
-          }}
-        >
-          <Image source={WC_BADGE} style={styles.badge} resizeMode="contain" />
-        </Animated.View>
+          key={i}
+          style={[
+            styles.ring,
+            {
+              width: RING_SIZE,
+              height: RING_SIZE,
+              borderRadius: RING_SIZE / 2,
+              opacity: r.opacity,
+              transform: [{ scale: r.scale }],
+            },
+          ]}
+        />
+      ))}
 
-        {/* WESTCARS wordmark in code — crisp on all densities */}
-        <Animated.View
-          style={{
-            opacity: wordOpacity,
-            transform: [{ translateY: wordY }],
-            alignItems: "center",
-            gap: 4,
-          }}
-        >
-          <Text style={styles.wordmark}>WESTCARS</Text>
-          <Animated.Text style={[styles.tagline, { opacity: tagOpacity }]}>
-            Ghana's Car Marketplace
-          </Animated.Text>
-        </Animated.View>
-      </View>
-
-      {/* ── Car hero at the bottom ── */}
+      {/* W Badge */}
       <Animated.View
-        style={[
-          styles.carWrap,
-          {
-            opacity: carOpacity,
-            transform: [{ translateY: carY }],
-          },
-        ]}
+        style={{
+          opacity: badgeOpacity,
+          transform: [{ scale: badgeScale }],
+          zIndex: 10,
+        }}
       >
-        {/* Glow under the car */}
-        <View style={styles.carGlow} />
-        <Image source={SPLASH_CAR} style={styles.car} resizeMode="contain" />
+        <View style={styles.badgeWrap}>
+          <Image source={WC_BADGE} style={styles.badge} resizeMode="contain" />
+        </View>
       </Animated.View>
-
-      {/* ── Pulsing loading dots ── */}
-      <View style={styles.dotsRow}>
-        {[dot1, dot2, dot3].map((d, i) => (
-          <Animated.View key={i} style={[styles.dot, { opacity: d }]} />
-        ))}
-      </View>
     </View>
   );
 }
@@ -164,85 +124,46 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#060C18",
+    backgroundColor: "#EDF4F7",
     alignItems: "center",
     justifyContent: "center",
   },
 
-  bg: {
-    ...StyleSheet.absoluteFillObject,
-    width: "100%",
-    height: "100%",
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(4,8,18,0.55)",
+  bgCenter: {
+    position: "absolute",
+    width: width * 1.4,
+    height: width * 1.4,
+    borderRadius: width * 0.7,
+    backgroundColor: "rgba(14,181,202,0.08)",
+    alignSelf: "center",
+    top: "50%",
+    marginTop: -(width * 0.7),
   },
 
-  /* Logo sits in the upper-centre area */
-  logoBlock: {
+  ring: {
     position: "absolute",
-    top: "18%",
+    borderWidth: 1.5,
+    borderColor: "rgba(14,181,202,0.55)",
+    backgroundColor: "transparent",
+  },
+
+  badgeWrap: {
+    width: 120,
+    height: 120,
+    borderRadius: 30,
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
-    gap: 18,
+    justifyContent: "center",
+    shadowColor: "rgba(14,181,202,1)",
+    shadowOpacity: 0.22,
+    shadowRadius: 30,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 16,
   },
 
   badge: {
-    width: 100,
-    height: 100,
-    borderRadius: 22,
-  },
-
-  wordmark: {
-    fontSize: 38,
-    fontFamily: "Manrope_800ExtraBold",
-    color: "#FFFFFF",
-    letterSpacing: 8,
-    textAlign: "center",
-  },
-
-  tagline: {
-    fontSize: 12,
-    fontFamily: "Manrope_500Medium",
-    color: "rgba(255,255,255,0.45)",
-    letterSpacing: 3.5,
-    textTransform: "uppercase",
-    textAlign: "center",
-  },
-
-  /* Car slides up from bottom-centre */
-  carWrap: {
-    position: "absolute",
-    bottom: 80,
-    width: "100%",
-    alignItems: "center",
-  },
-  carGlow: {
-    position: "absolute",
-    bottom: -20,
-    width: width * 0.7,
-    height: 40,
-    borderRadius: 100,
-    backgroundColor: "#BFFF00",
-    opacity: 0.35,
-  },
-  car: {
-    width: width * 0.62,
-    height: 140,
-  },
-
-  /* Loading dots */
-  dotsRow: {
-    position: "absolute",
-    bottom: 34,
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
-  },
-  dot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: "#BFFF00",
+    width: 90,
+    height: 90,
+    borderRadius: 20,
   },
 });

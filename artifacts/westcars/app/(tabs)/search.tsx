@@ -38,7 +38,7 @@ const PRICE_RANGES = [
 
 const QUICK_FILTERS = ["All", "SUV", "Sedan", "Tokunbo", "Budget", "Luxury", "Pickup", "New"];
 const CHIP_COLORS: Record<string, { bg: string; text: string; activeBg: string; activeText: string }> = {
-  "All":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#BFFF00", activeText: "#2D4500" },
+  "All":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#0EB5CA", activeText: "#FFFFFF" },
   "SUV":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#818CF8", activeText: "#fff" },
   "Sedan":   { bg: "#F1F5F9", text: "#64748B", activeBg: "#F472B6", activeText: "#fff" },
   "Tokunbo": { bg: "#F1F5F9", text: "#64748B", activeBg: "#22C55E", activeText: "#fff" },
@@ -235,7 +235,7 @@ export default function SearchScreen() {
         <View style={styles.headerTop}>
           <Text style={[styles.headerTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Search Cars</Text>
           {filtered.length > 0 && (
-            <View style={[styles.resultPill, { backgroundColor: "#BFFF00" }]}>
+            <View style={[styles.resultPill, { backgroundColor: "#0EB5CA" }]}>
               <Text style={styles.resultPillText}>{filtered.length} found</Text>
             </View>
           )}
@@ -261,9 +261,9 @@ export default function SearchScreen() {
           )}
           <Pressable
             onPress={() => setFilterVisible(true)}
-            style={[styles.filterIconBtn, { backgroundColor: "#BFFF00" }]}
+            style={[styles.filterIconBtn, { backgroundColor: "#0EB5CA" }]}
           >
-            <Feather name="sliders" size={17} color="#2D4500" />
+            <Feather name="sliders" size={17} color="#FFFFFF" />
             {activeFilters && <View style={styles.filterDot} />}
           </Pressable>
         </View>
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
   resultPillText: {
     fontSize: 12,
     fontFamily: "Manrope_700Bold",
-    color: "#2D4500",
+    color: "#FFFFFF",
   },
   searchRow: {
     flexDirection: "row",

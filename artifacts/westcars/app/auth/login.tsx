@@ -97,7 +97,7 @@ export default function LoginScreen() {
           <View style={styles.fieldWrap}>
             <Text style={styles.fieldLabel}>Email or phone</Text>
             <View style={[styles.field, focusedField === "email" && styles.fieldFocused]}>
-              <Feather name="mail" size={16} color={focusedField === "email" ? "#2D4500" : "#9E9E9E"} />
+              <Feather name="mail" size={16} color={focusedField === "email" ? "#0EB5CA" : "#9E9E9E"} />
               <TextInput
                 style={styles.input}
                 placeholder="you@example.com"
@@ -116,7 +116,7 @@ export default function LoginScreen() {
           <View style={styles.fieldWrap}>
             <Text style={styles.fieldLabel}>Password</Text>
             <View style={[styles.field, focusedField === "pass" && styles.fieldFocused]}>
-              <Feather name="lock" size={16} color={focusedField === "pass" ? "#2D4500" : "#9E9E9E"} />
+              <Feather name="lock" size={16} color={focusedField === "pass" ? "#0EB5CA" : "#9E9E9E"} />
               <TextInput
                 style={[styles.input, { flex: 1 }]}
                 placeholder="Your password"
@@ -140,17 +140,17 @@ export default function LoginScreen() {
           </Pressable>
 
           <Pressable
-            style={[styles.signInBtn, { backgroundColor: "#BFFF00" }, loading && { opacity: 0.75 }]}
+            style={[styles.signInBtn, { backgroundColor: "#0EB5CA" }, loading && { opacity: 0.75 }]}
             onPress={handleLogin}
             disabled={loading}
           >
             <View style={styles.signInGrad}>
               {loading ? (
-                <Text style={[styles.signInText, { color: "#2D4500" }]}>Signing in…</Text>
+                <Text style={[styles.signInText, { color: "#FFFFFF" }]}>Signing in…</Text>
               ) : (
                 <>
-                  <Text style={[styles.signInText, { color: "#2D4500" }]}>Sign in</Text>
-                  <Feather name="arrow-right" size={18} color="#2D4500" />
+                  <Text style={[styles.signInText, { color: "#FFFFFF" }]}>Sign in</Text>
+                  <Feather name="arrow-right" size={18} color="#FFFFFF" />
                 </>
               )}
             </View>
@@ -163,7 +163,7 @@ export default function LoginScreen() {
           </View>
 
           <Pressable style={styles.registerBtn} onPress={() => router.push("/auth/signup")}>
-            <Feather name="user-plus" size={16} color="#2D4500" />
+            <Feather name="user-plus" size={16} color="#0098AA" />
             <Text style={styles.registerText}>Create account</Text>
           </Pressable>
 
@@ -234,7 +234,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#EEF1F6" },
+  root: { flex: 1, backgroundColor: "#EDF4F7" },
 
   hero: { paddingHorizontal: 24, paddingBottom: 28, gap: 12 },
   backBtn: {
@@ -299,14 +299,14 @@ const styles = StyleSheet.create({
     borderRadius: 12, paddingHorizontal: 14, backgroundColor: "#FAFAFA",
   },
   fieldFocused: {
-    borderColor: "#BFFF00", backgroundColor: "#fff",
-    shadowColor: "#BFFF00", shadowOffset: { width: 0, height: 0 },
+    borderColor: "#0EB5CA", backgroundColor: "#fff",
+    shadowColor: "#0EB5CA", shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3, shadowRadius: 6, elevation: 2,
   },
   input: { flex: 1, fontSize: 15, color: "#1A1A1A", fontFamily: "Manrope_400Regular", padding: 0 },
 
   forgotBtn: { alignSelf: "flex-end", marginTop: -4 },
-  forgotText: { fontSize: 13, color: "#2D4500", fontFamily: "Manrope_500Medium" },
+  forgotText: { fontSize: 13, color: "#0098AA", fontFamily: "Manrope_500Medium" },
 
   signInBtn: { borderRadius: 12, overflow: "hidden", marginTop: 4 },
   signInGrad: {
@@ -322,10 +322,10 @@ const styles = StyleSheet.create({
   registerBtn: {
     height: 52, flexDirection: "row", alignItems: "center",
     justifyContent: "center", gap: 8,
-    borderWidth: 1.5, borderColor: "rgba(191,255,0,0.6)",
-    borderRadius: 12, backgroundColor: "rgba(191,255,0,0.08)",
+    borderWidth: 1.5, borderColor: "rgba(14,181,202,0.45)",
+    borderRadius: 12, backgroundColor: "rgba(14,181,202,0.07)",
   },
-  registerText: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#2D4500" },
+  registerText: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#0098AA" },
 
   guestBtn: { alignItems: "center", paddingVertical: 6 },
   guestText: { fontSize: 13, color: "#9E9E9E", fontFamily: "Manrope_400Regular" },
@@ -351,11 +351,11 @@ const styles = StyleSheet.create({
   adminPanelHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
   adminBadge: {
     flexDirection: "row", alignItems: "center", gap: 4,
-    backgroundColor: "#BFFF00", borderRadius: 6,
+    backgroundColor: "#0EB5CA", borderRadius: 6,
     paddingHorizontal: 7, paddingVertical: 3,
   },
-  adminBadgeText: { fontSize: 10, fontFamily: "Manrope_700Bold", color: "#2D4500", letterSpacing: 0.5 },
-  adminPanelTitle: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#2D4500" },
+  adminBadgeText: { fontSize: 10, fontFamily: "Manrope_700Bold", color: "#FFFFFF", letterSpacing: 0.5 },
+  adminPanelTitle: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#0F172A" },
   adminPanelSub: {
     fontSize: 12, fontFamily: "Manrope_400Regular",
     color: "#64748B", lineHeight: 18,
@@ -363,14 +363,14 @@ const styles = StyleSheet.create({
   adminCredRow: { flexDirection: "row", gap: 12 },
   adminCredItem: {
     flex: 1, backgroundColor: "#fff", borderRadius: 10,
-    borderWidth: 1, borderColor: "rgba(191,255,0,0.4)", padding: 10, gap: 2,
+    borderWidth: 1, borderColor: "rgba(14,181,202,0.32)", padding: 10, gap: 2,
   },
   adminCredLabel: { fontSize: 10, fontFamily: "Manrope_600SemiBold", color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.4 },
-  adminCredVal: { fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#2D4500" },
+  adminCredVal: { fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#0F172A" },
   adminAutoFill: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
     height: 38, backgroundColor: "#fff", borderRadius: 10,
-    borderWidth: 1.5, borderColor: "rgba(191,255,0,0.6)",
+    borderWidth: 1.5, borderColor: "rgba(14,181,202,0.45)",
   },
-  adminAutoFillText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#2D4500" },
+  adminAutoFillText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#0098AA" },
 });

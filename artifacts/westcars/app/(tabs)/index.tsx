@@ -118,8 +118,8 @@ export default function HomeScreen() {
             <Text style={[styles.logoText, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>WESTCARS</Text>
           </View>
           <View style={styles.userRow}>
-            <View style={[styles.avatarCircle, { backgroundColor: "#BFFF00" }]}>
-              <Text style={[styles.avatarText, { color: "#2D4500" }]}>
+            <View style={[styles.avatarCircle, { backgroundColor: "#0EB5CA" }]}>
+              <Text style={[styles.avatarText, { color: "#FFFFFF" }]}>
                 {currentUser?.name?.[0] || "W"}
               </Text>
             </View>
@@ -144,8 +144,8 @@ export default function HomeScreen() {
               {totalCount.toLocaleString()} listings available
             </Text>
           </View>
-          <View style={[styles.filterBtn, { backgroundColor: "#BFFF00" }]}>
-            <Feather name="sliders" size={17} color="#2D4500" />
+          <View style={[styles.filterBtn, { backgroundColor: "#0EB5CA" }]}>
+            <Feather name="sliders" size={17} color="#FFFFFF" />
           </View>
         </Pressable>
 
@@ -159,7 +159,7 @@ export default function HomeScreen() {
                 style={[
                   styles.mainTab,
                   active
-                    ? { backgroundColor: "#BFFF00", borderColor: "#A8E600" }
+                    ? { backgroundColor: "#0EB5CA", borderColor: "#0DCAE6" }
                     : {
                         backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9",
                         borderColor: isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0",
@@ -171,7 +171,7 @@ export default function HomeScreen() {
                 <Text style={[
                   styles.mainTabLabel,
                   active
-                    ? { color: "#2D4500", fontFamily: "Manrope_800ExtraBold" }
+                    ? { color: "#FFFFFF", fontFamily: "Manrope_800ExtraBold" }
                     : { color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Manrope_600SemiBold" },
                 ]}>
                   {tab.label}
@@ -240,7 +240,7 @@ export default function HomeScreen() {
               <View style={styles.promoCta}>
                 <View style={styles.promoCtaBtn}>
                   <Text style={styles.promoCtaText}>View Offer</Text>
-                  <Feather name="arrow-right" size={11} color="#1A4000" />
+                  <Feather name="arrow-right" size={11} color="#FFFFFF" />
                 </View>
               </View>
             </View>

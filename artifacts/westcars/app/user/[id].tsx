@@ -63,7 +63,7 @@ export default function UserProfileScreen() {
           <Image source={{ uri: user.avatar }} style={styles.avatar} />
         ) : (
           <View style={styles.avatarPlaceholder}>
-            <Feather name="user" size={36} color="#2D4500" />
+            <Feather name="user" size={36} color="#FFFFFF" />
           </View>
         )}
         <Text style={[styles.userName, { color: "#0F172A" }]}>{user.name}</Text>
@@ -167,15 +167,15 @@ const styles = StyleSheet.create({
     height: 88,
     borderRadius: 44,
     borderWidth: 3,
-    borderColor: "#BFFF00",
+    borderColor: "#0EB5CA",
   },
   avatarPlaceholder: {
     width: 88,
     height: 88,
     borderRadius: 44,
-    backgroundColor: "rgba(191,255,0,0.12)",
+    backgroundColor: "rgba(14,181,202,0.10)",
     borderWidth: 3,
-    borderColor: "#BFFF00",
+    borderColor: "#0EB5CA",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -250,12 +250,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: "rgba(191,255,0,0.6)",
+    borderColor: "rgba(14,181,202,0.45)",
   },
   messageBtnText: {
     fontSize: 14,
     fontFamily: "Manrope_600SemiBold",
-    color: "#2D4500",
+    color: "#FFFFFF",
   },
   followBtn: {
     flex: 1,
@@ -265,12 +265,12 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: "#BFFF00",
+    backgroundColor: "#0EB5CA",
   },
   followBtnText: {
     fontSize: 14,
     fontFamily: "Manrope_600SemiBold",
-    color: "#2D4500",
+    color: "#FFFFFF",
   },
   listingsSection: {
     padding: 16,
