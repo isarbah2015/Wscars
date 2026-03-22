@@ -1,5 +1,24 @@
 import { Car, User, Advertisement, Conversation, Message, TechSpecs } from "@/types";
 
+export const ADMIN_USER: User = {
+  id: "admin",
+  name: "Westcars Support",
+  phone: "+233 30 200 0000",
+  email: "admin@westcars.gh",
+  location: "Accra, Ghana",
+  avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+  memberSince: "2020-01-01",
+  isVerified: true,
+  isAdmin: true,
+  isDealer: false,
+  verification: { phone: true, id: true, dealer: false },
+  rating: 5.0,
+  totalReviews: 0,
+  totalListings: 0,
+  trustScore: 100,
+  totalSales: 0,
+};
+
 export const MOCK_USERS: User[] = [
   {
     id: "user1",

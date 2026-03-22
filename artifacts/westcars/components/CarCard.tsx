@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   Animated,
   Image,
@@ -24,6 +24,7 @@ export function CarCard({ car, style }: CarCardProps) {
   const { toggleFavorite, isFavorite } = useApp();
   const { colors } = useTheme();
   const fav = isFavorite(car.id);
+  const [imgError, setImgError] = useState(false);
 
   const scale = useRef(new Animated.Value(1)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
@@ -66,7 +67,19 @@ export function CarCard({ car, style }: CarCardProps) {
 
         {/* ── Image block ── */}
         <View style={styles.imageWrap}>
-          <Image source={{ uri: car.images[0] }} style={styles.image} resizeMode="cover" />
+          {!imgError ? (
+            <Image
+              source={{ uri: car.images[0] }}
+              style={styles.image}
+              resizeMode="cover"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <View style={[styles.image, styles.imgFallback, { backgroundColor: colors.accentLight }]}>
+              <Feather name="camera" size={28} color={colors.accent} />
+              <Text style={{ color: colors.accent, fontSize: 11, marginTop: 4 }}>No photo</Text>
+            </View>
+          )}
 
           {/* Gradient scrim at bottom of image */}
           <View style={styles.imageScrim} pointerEvents="none" />
@@ -153,6 +166,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#EAECF0",
   },
   image: { width: "100%", height: "100%" },
+  imgFallback: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   imageScrim: {
     position: "absolute",

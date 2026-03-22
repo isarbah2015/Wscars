@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { Car, Conversation, Message, Report, Review, Transaction, User } from "@/types";
-import { MOCK_CARS, MOCK_CONVERSATIONS, MOCK_MESSAGES, MOCK_USERS } from "@/utils/mockData";
+import { ADMIN_USER, MOCK_CARS, MOCK_CONVERSATIONS, MOCK_MESSAGES, MOCK_USERS } from "@/utils/mockData";
 
 interface AppContextType {
   currentUser: User | null;
@@ -95,7 +95,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // ── Auth ──────────────────────────────────────────────────────────────
   const login = useCallback(async (email: string, _pw: string): Promise<boolean> => {
-    const u: User = {
+    const isAdmin = email.toLowerCase().trim() === "admin@westcars.gh";
+    const u: User = isAdmin ? { ...ADMIN_USER } : {
       id: "currentUser",
       name: "Akosua Darko",
       phone: "+233 24 555 0000",

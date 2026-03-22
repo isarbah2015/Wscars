@@ -43,6 +43,7 @@ export interface User {
   avatar?: string;
   memberSince: string;
   isVerified: boolean;
+  isAdmin?: boolean;
   verification?: VerificationStatus;
   rating: number;
   totalReviews: number;

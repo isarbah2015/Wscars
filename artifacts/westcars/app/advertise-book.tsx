@@ -183,7 +183,7 @@ export default function AdvertiseBookScreen() {
   const [email, setEmail] = useState("");
   const [region, setRegion] = useState("Greater Accra");
   const [notes, setNotes] = useState("");
-  const [payMethod, setPayMethod] = useState<"mobile" | "bank" | "cash">("mobile");
+  const [payMethod, setPayMethod] = useState<"mobile" | "bank">("mobile");
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [specsOpen, setSpecsOpen] = useState(false);
 
@@ -395,8 +395,7 @@ export default function AdvertiseBookScreen() {
           {([
             { id: "mobile", label: "Mobile Money", sub: "MTN · Vodafone · AirtelTigo", icon: "smartphone" },
             { id: "bank",   label: "Bank Transfer",  sub: "GCB · Ecobank · Stanbic",   icon: "credit-card" },
-            { id: "cash",   label: "Cash on Visit",  sub: "Pay at our Accra office",    icon: "dollar-sign" },
-          ] as { id: "mobile"|"bank"|"cash"; label: string; sub: string; icon: string }[]).map((p) => (
+          ] as { id: "mobile"|"bank"; label: string; sub: string; icon: string }[]).map((p) => (
             <Pressable
               key={p.id}
               style={[styles.payOpt, payMethod === p.id && styles.payOptActive]}
@@ -425,7 +424,7 @@ export default function AdvertiseBookScreen() {
             { k: "Package", v: info.label },
             { k: "Duration", v: duration || "N/A" },
             { k: "Region", v: region },
-            { k: "Payment", v: payMethod === "mobile" ? "Mobile Money" : payMethod === "bank" ? "Bank Transfer" : "Cash" },
+            { k: "Payment", v: payMethod === "mobile" ? "Mobile Money" : "Bank Transfer" },
           ].map((row) => (
             <View key={row.k} style={styles.sumRow}>
               <Text style={styles.sumKey}>{row.k}</Text>

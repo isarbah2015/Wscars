@@ -77,10 +77,11 @@ function ConversationRow({ conv, colors }: { conv: Conversation; colors: any }) 
 }
 
 export default function MessagesScreen() {
-  const { conversations, isAuthenticated } = useApp();
+  const { conversations, isAuthenticated, currentUser } = useApp();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 10 : insets.top;
+  const isAdmin = currentUser?.isAdmin === true;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -90,13 +91,28 @@ export default function MessagesScreen() {
         end={{ x: 1, y: 1 }}
         style={[styles.header, { paddingTop: topPad + 14 }]}
       >
-        <Text style={styles.title}>Messages</Text>
+        <Text style={styles.title}>{isAdmin ? "Support Inbox" : "Messages"}</Text>
+        {isAdmin && (
+          <View style={styles.adminHeaderBadge}>
+            <Feather name="shield" size={11} color="#fff" />
+            <Text style={styles.adminHeaderBadgeText}>ADMIN</Text>
+          </View>
+        )}
         {conversations.length > 0 && (
           <View style={styles.headerBadge}>
             <Text style={styles.headerBadgeText}>{conversations.length}</Text>
           </View>
         )}
       </LinearGradient>
+
+      {isAdmin && (
+        <View style={[styles.adminBanner, { backgroundColor: isDark ? "#1A2744" : "#EBF4FF", borderColor: isDark ? "#2A3F6B" : "#BFDBFF" }]}>
+          <Feather name="info" size={14} color={colors.accent} />
+          <Text style={[styles.adminBannerText, { color: colors.accent }]}>
+            Viewing all {conversations.length} user conversation{conversations.length !== 1 ? "s" : ""}
+          </Text>
+        </View>
+      )}
 
       {!isAuthenticated ? (
         <View style={[styles.emptyState, { backgroundColor: colors.background }]}>
@@ -168,6 +184,36 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Manrope_700Bold",
     color: "#fff",
+  },
+  adminHeaderBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#E8192C",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  adminHeaderBadgeText: {
+    fontSize: 10,
+    fontFamily: "Manrope_700Bold",
+    color: "#fff",
+    letterSpacing: 0.5,
+  },
+  adminBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: 14,
+    marginTop: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  adminBannerText: {
+    fontSize: 13,
+    fontFamily: "Manrope_500Medium",
   },
   convRow: {
     flexDirection: "row",
