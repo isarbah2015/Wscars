@@ -1,10 +1,10 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
   Animated,
   Image,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -22,49 +22,40 @@ interface CarCardProps {
 
 export function CarCard({ car, style }: CarCardProps) {
   const { toggleFavorite, isFavorite } = useApp();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const fav = isFavorite(car.id);
   const [imgError, setImgError] = useState(false);
 
   const scale = useRef(new Animated.Value(1)).current;
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
 
-  const pressIn = () => {
-    Animated.parallel([
-      Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, speed: 80, bounciness: 0 }),
-      Animated.timing(overlayOpacity, { toValue: 1, duration: 80, useNativeDriver: true }),
-    ]).start();
-  };
+  const pressIn = () =>
+    Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 80, bounciness: 0 }).start();
 
-  const pressOut = () => {
-    Animated.parallel([
-      Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 28, bounciness: 4 }),
-      Animated.timing(overlayOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
-    ]).start();
-  };
+  const pressOut = () =>
+    Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 28, bounciness: 5 }).start();
 
   const isNew     = car.condition === "New";
   const isForeign = car.condition === "Foreign Used";
   const badgeLabel = isNew ? "New" : isForeign ? "Foreign" : null;
-  const badgeColor = isNew ? "#00B050" : "#1565C0";
-
   const isSold = (car as any).isSold;
 
   return (
     <Animated.View style={[styles.wrapper, { transform: [{ scale }] }, style]}>
       <Pressable
-        style={[styles.card, { backgroundColor: colors.card }]}
+        style={[
+          styles.card,
+          {
+            backgroundColor: colors.card,
+            borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
+            shadowColor: isDark ? "#FF6B00" : "#0A1628",
+            shadowOpacity: isDark ? 0.06 : 0.12,
+          },
+        ]}
         onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
         onPressIn={pressIn}
         onPressOut={pressOut}
-        android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: false }}
+        android_ripple={{ color: "rgba(255,107,0,0.08)", borderless: false }}
       >
-        {/* Press glow overlay */}
-        <Animated.View
-          style={[StyleSheet.absoluteFillObject, styles.pressOverlay, { opacity: overlayOpacity }]}
-          pointerEvents="none"
-        />
-
         {/* ── Image block ── */}
         <View style={styles.imageWrap}>
           {!imgError ? (
@@ -81,29 +72,31 @@ export function CarCard({ car, style }: CarCardProps) {
             </View>
           )}
 
-          {/* Gradient scrim at bottom of image */}
-          <View style={styles.imageScrim} pointerEvents="none" />
+          {/* Gradient scrim — transparent top → dark bottom */}
+          <LinearGradient
+            colors={["transparent", "rgba(0,0,0,0.72)"]}
+            style={styles.imageScrim}
+            pointerEvents="none"
+          />
 
           {/* Condition badge top-left */}
           {badgeLabel && (
-            <View style={[styles.condBadge, { backgroundColor: badgeColor }]}>
+            <View style={[styles.condBadge, { backgroundColor: isNew ? "#FF6B00" : "#1565C0" }]}>
               <Text style={styles.condBadgeText}>{badgeLabel}</Text>
             </View>
           )}
 
           {/* Heart top-right */}
           <Pressable style={styles.heartBtn} onPress={() => toggleFavorite(car.id)} hitSlop={10}>
-            <View style={styles.heartBg}>
-              <Feather name="heart" size={15} color={fav ? "#E8192C" : "rgba(255,255,255,0.9)"} />
+            <View style={[styles.heartBg, fav && styles.heartBgActive]}>
+              <Feather name="heart" size={15} color={fav ? "#fff" : "rgba(255,255,255,0.9)"} />
             </View>
           </Pressable>
 
-          {/* Sponsored / Ad badge bottom-left */}
-          {car.isSponsored && (
-            <View style={styles.adBadge}>
-              <Text style={styles.adBadgeText}>Ad</Text>
-            </View>
-          )}
+          {/* Floating price badge — bottom-left on image */}
+          <View style={styles.priceBadge}>
+            <Text style={styles.priceBadgeText}>{formatPrice(car.price)}</Text>
+          </View>
 
           {/* Views tag bottom-right */}
           {car.views !== undefined && car.views > 0 && (
@@ -112,6 +105,13 @@ export function CarCard({ car, style }: CarCardProps) {
               <Text style={styles.viewsText}>
                 {car.views >= 1000 ? `${(car.views / 1000).toFixed(1)}k` : car.views}
               </Text>
+            </View>
+          )}
+
+          {/* Sponsored badge */}
+          {car.isSponsored && (
+            <View style={styles.adBadge}>
+              <Text style={styles.adBadgeText}>AD</Text>
             </View>
           )}
 
@@ -125,14 +125,28 @@ export function CarCard({ car, style }: CarCardProps) {
 
         {/* ── Info block ── */}
         <View style={[styles.info, { backgroundColor: colors.card }]}>
-          <Text style={[styles.price, { color: colors.text }]}>from {formatPrice(car.price)}</Text>
-          <Text style={[styles.carName, { color: colors.textSecondary }]} numberOfLines={1}>
+          <Text style={[styles.carName, { color: colors.text }]} numberOfLines={1}>
             {car.brand} {car.model}
           </Text>
           <View style={styles.metaRow}>
-            <Text style={[styles.year, { color: colors.textTertiary }]}>{car.year}</Text>
+            <View style={styles.metaChip}>
+              <Text style={[styles.metaChipText, { color: colors.textSecondary }]}>{car.year}</Text>
+            </View>
             {car.mileage !== undefined && car.mileage > 0 && (
-              <Text style={[styles.mileage, { color: colors.textTertiary }]}>{(car.mileage / 1000).toFixed(0)}k km</Text>
+              <View style={styles.metaChip}>
+                <Feather name="activity" size={9} color={colors.textTertiary} />
+                <Text style={[styles.metaChipText, { color: colors.textSecondary }]}>
+                  {(car.mileage / 1000).toFixed(0)}k km
+                </Text>
+              </View>
+            )}
+            {car.location && (
+              <View style={styles.metaChip}>
+                <Feather name="map-pin" size={9} color={colors.textTertiary} />
+                <Text style={[styles.metaChipText, { color: colors.textSecondary }]} numberOfLines={1}>
+                  {car.location.split(",")[0]}
+                </Text>
+              </View>
             )}
           </View>
         </View>
@@ -144,26 +158,19 @@ export function CarCard({ car, style }: CarCardProps) {
 const styles = StyleSheet.create({
   wrapper: {},
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
+    borderRadius: 16,
     overflow: "hidden",
-    shadowColor: "#0A1628",
-    shadowOpacity: 0.13,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 5,
+    borderWidth: 1,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
     marginBottom: 2,
-  },
-  pressOverlay: {
-    backgroundColor: "rgba(0,0,0,0.04)",
-    zIndex: 10,
-    borderRadius: 14,
   },
 
   imageWrap: {
     position: "relative",
-    height: 150,
-    backgroundColor: "#EAECF0",
+    height: 155,
+    backgroundColor: "#1A2340",
   },
   image: { width: "100%", height: "100%" },
   imgFallback: {
@@ -176,8 +183,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 50,
-    backgroundColor: "transparent",
+    height: 90,
   },
 
   condBadge: {
@@ -192,60 +198,80 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 10,
     fontFamily: "Manrope_700Bold",
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
 
-  heartBtn: {
-    position: "absolute",
-    top: 6,
-    right: 6,
-  },
+  heartBtn: { position: "absolute", top: 6, right: 6 },
   heartBg: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "rgba(0,0,0,0.28)",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "rgba(0,0,0,0.35)",
     alignItems: "center",
     justifyContent: "center",
+  },
+  heartBgActive: {
+    backgroundColor: "#E8192C",
+  },
+
+  priceBadge: {
+    position: "absolute",
+    bottom: 9,
+    left: 9,
+    backgroundColor: "#FF6B00",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    shadowColor: "#FF6B00",
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  priceBadgeText: {
+    color: "#fff",
+    fontSize: 13,
+    fontFamily: "Manrope_800ExtraBold",
+    letterSpacing: -0.3,
   },
 
   adBadge: {
     position: "absolute",
-    bottom: 6,
-    left: 8,
-    backgroundColor: "rgba(0,0,0,0.50)",
+    top: 8,
+    right: 8,
+    backgroundColor: "rgba(255,107,0,0.85)",
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
   adBadgeText: {
-    color: "rgba(255,255,255,0.92)",
+    color: "#fff",
     fontSize: 9,
-    fontFamily: "Manrope_600SemiBold",
-    letterSpacing: 0.5,
+    fontFamily: "Manrope_700Bold",
+    letterSpacing: 0.8,
   },
 
   viewsTag: {
     position: "absolute",
-    bottom: 6,
-    right: 8,
+    bottom: 9,
+    right: 9,
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: "rgba(0,0,0,0.42)",
+    backgroundColor: "rgba(0,0,0,0.45)",
     paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   viewsText: {
     color: "rgba(255,255,255,0.9)",
     fontSize: 9,
-    fontFamily: "Manrope_400Regular",
+    fontFamily: "Manrope_500Medium",
   },
 
   soldOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.55)",
+    backgroundColor: "rgba(0,0,0,0.6)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -253,39 +279,36 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontFamily: "Manrope_800ExtraBold",
     color: "#fff",
-    letterSpacing: 4,
+    letterSpacing: 5,
   },
 
   info: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 11,
     paddingTop: 9,
-    paddingBottom: 11,
-    gap: 2,
-  },
-  price: {
-    fontSize: 15,
-    fontFamily: "Manrope_700Bold",
-    color: "#0A1628",
-    letterSpacing: -0.3,
+    paddingBottom: 10,
+    gap: 5,
   },
   carName: {
-    fontSize: 12,
-    fontFamily: "Manrope_500Medium",
-    color: "#4A5568",
+    fontSize: 13,
+    fontFamily: "Manrope_700Bold",
+    letterSpacing: 0.1,
   },
   metaRow: {
     flexDirection: "row",
-    gap: 8,
-    marginTop: 1,
+    gap: 5,
+    flexWrap: "wrap",
   },
-  year: {
-    fontSize: 11,
-    fontFamily: "Manrope_400Regular",
-    color: "#8A9BB4",
+  metaChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: "rgba(128,128,128,0.1)",
+    borderRadius: 6,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
   },
-  mileage: {
-    fontSize: 11,
-    fontFamily: "Manrope_400Regular",
-    color: "#8A9BB4",
+  metaChipText: {
+    fontSize: 10,
+    fontFamily: "Manrope_500Medium",
   },
 });

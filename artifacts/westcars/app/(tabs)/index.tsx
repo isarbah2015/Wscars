@@ -36,22 +36,22 @@ const BANNER_CAR  = require("@/assets/images/banner-car.png");
 type Condition = "new" | "used" | "moto";
 
 const CONDITION_TABS: { id: Condition; label: string; img: any; grad: [string, string]; dot: string }[] = [
-  { id: "new",  label: "New",  img: CAR_NEW,  grad: ["#15803D", "#22C55E"], dot: "#22C55E" },
-  { id: "used", label: "Used", img: CAR_USED, grad: ["#1D4ED8", "#0066CC"], dot: "#3B82F6" },
-  { id: "moto", label: "Moto", img: CAR_MOTO, grad: ["#C2410C", "#F97316"], dot: "#F97316" },
+  { id: "new",  label: "New",  img: CAR_NEW,  grad: ["#CC3D00", "#FF6B00"], dot: "#FF6B00" },
+  { id: "used", label: "Used", img: CAR_USED, grad: ["#CC3D00", "#FF6B00"], dot: "#FF6B00" },
+  { id: "moto", label: "Moto", img: CAR_MOTO, grad: ["#CC3D00", "#FF6B00"], dot: "#FF6B00" },
 ];
 
 const CAT_COLORS: Record<string, { bg: string; border: string; textColor: string }> = {
-  "SUV / 4×4":  { bg: "#EEF2FF", border: "#818CF8", textColor: "#3730A3" },
-  "Sedan":      { bg: "#FDF2F8", border: "#F472B6", textColor: "#9D174D" },
-  "Pickup":     { bg: "#FFFBEB", border: "#FCD34D", textColor: "#92400E" },
-  "Van":        { bg: "#F0FDF4", border: "#86EFAC", textColor: "#15803D" },
-  "Coupe":      { bg: "#FAF5FF", border: "#C084FC", textColor: "#7E22CE" },
-  "Hatchback":  { bg: "#ECFEFF", border: "#67E8F9", textColor: "#164E63" },
-  "Motorcycle": { bg: "#EFF6FF", border: "#93C5FD", textColor: "#1D4ED8" },
-  "Scooter":    { bg: "#FFF1F2", border: "#FB7185", textColor: "#BE123C" },
-  "ATV / Quad": { bg: "#ECFDF5", border: "#6EE7B7", textColor: "#065F46" },
-  "Dirt Bike":  { bg: "#FFF7ED", border: "#FDBA74", textColor: "#C2410C" },
+  "SUV / 4×4":  { bg: "rgba(129,140,248,0.18)", border: "rgba(129,140,248,0.55)", textColor: "#C7D2FE" },
+  "Sedan":      { bg: "rgba(244,114,182,0.18)", border: "rgba(244,114,182,0.55)", textColor: "#FBCFE8" },
+  "Pickup":     { bg: "rgba(252,211,77,0.18)",  border: "rgba(252,211,77,0.55)",  textColor: "#FDE68A" },
+  "Van":        { bg: "rgba(134,239,172,0.18)", border: "rgba(134,239,172,0.55)", textColor: "#BBF7D0" },
+  "Coupe":      { bg: "rgba(192,132,252,0.18)", border: "rgba(192,132,252,0.55)", textColor: "#E9D5FF" },
+  "Hatchback":  { bg: "rgba(103,232,249,0.18)", border: "rgba(103,232,249,0.55)", textColor: "#A5F3FC" },
+  "Motorcycle": { bg: "rgba(147,197,253,0.18)", border: "rgba(147,197,253,0.55)", textColor: "#BFDBFE" },
+  "Scooter":    { bg: "rgba(251,113,133,0.18)", border: "rgba(251,113,133,0.55)", textColor: "#FECDD3" },
+  "ATV / Quad": { bg: "rgba(110,231,183,0.18)", border: "rgba(110,231,183,0.55)", textColor: "#A7F3D0" },
+  "Dirt Bike":  { bg: "rgba(253,186,116,0.18)", border: "rgba(253,186,116,0.55)", textColor: "#FED7AA" },
 };
 
 const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: number }[]> = {
@@ -74,12 +74,12 @@ const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: nu
   moto: [
     { label: "Motorcycle", img: CAT_MOTO, count: 3 },
     { label: "Scooter",    img: CAR_MOTO, count: 2 },
-    { label: "ATV / Quad", img: { uri: "https://images.unsplash.com/photo-1508009603885-50cf7c089bf6?w=200&h=120&fit=crop" }, count: 0 },
-    { label: "Dirt Bike",  img: { uri: "https://images.unsplash.com/photo-1597090437519-a756c78aa26c?w=200&h=120&fit=crop" }, count: 0 },
+    { label: "ATV / Quad", img: { uri: "https://images.unsplash.com/photo-1522083165195-3424ed129620?w=300&h=180&fit=crop&auto=format" }, count: 0 },
+    { label: "Dirt Bike",  img: { uri: "https://images.unsplash.com/photo-1609630875171-b1321377ee65?w=300&h=180&fit=crop&auto=format" }, count: 0 },
   ],
 };
 
-const SUB_CATS_HEIGHT = 100;
+const SUB_CATS_HEIGHT = 106;
 
 export default function HomeScreen() {
   const { cars, currentUser } = useApp();
@@ -220,14 +220,12 @@ export default function HomeScreen() {
                 <Pressable
                   key={cat.label}
                   style={[styles.subTab, cc ? { backgroundColor: cc.bg, borderColor: cc.border } : { backgroundColor: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.2)" }]}
+                  onPress={() => router.push("/(tabs)/search")}
                 >
                   <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
                   <Text style={[styles.subTabLabel, { color: cc ? cc.textColor : "#fff" }]} numberOfLines={1}>
                     {cat.label}
                   </Text>
-                  {cat.count > 0 && (
-                    <Text style={[styles.subTabCount, { color: cc ? cc.textColor : "rgba(255,255,255,0.6)" }]}>{cat.count} cars</Text>
-                  )}
                 </Pressable>
               );
             })}
@@ -248,7 +246,7 @@ export default function HomeScreen() {
         {/* ── Sponsored Banner → leads to Advertise ── */}
         <Pressable onPress={() => router.push("/advertise")} style={styles.promoBannerWrap}>
           <LinearGradient
-            colors={["#0C1C44", "#0044AA", "#0066CC"]}
+            colors={["#7A2000", "#CC3D00", "#FF6B00"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.promoBanner}
@@ -484,25 +482,27 @@ const styles = StyleSheet.create({
   },
   subTab: {
     width: 110,
-    height: 72,
+    height: 78,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     gap: 4,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 14,
+    borderWidth: 1.5,
     paddingVertical: 6,
     paddingHorizontal: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
-  subTabImg: { width: 70, height: 38 },
+  subTabImg: { width: 72, height: 40 },
   subTabLabel: {
     fontSize: 10,
-    fontFamily: "Manrope_500Medium",
+    fontFamily: "Manrope_700Bold",
     textAlign: "center",
-  },
-  subTabCount: {
-    fontSize: 10,
-    fontFamily: "Manrope_400Regular",
+    letterSpacing: 0.2,
   },
 
   scroll: { flex: 1 },
@@ -558,16 +558,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#BFFF00",
+    backgroundColor: "rgba(255,255,255,0.22)",
     borderRadius: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 5,
     alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.45)",
   },
   promoCtaText: {
     fontSize: 12,
     fontFamily: "Manrope_700Bold",
-    color: "#1A4000",
+    color: "#FFFFFF",
   },
   bannerCarImg: {
     width: 130,

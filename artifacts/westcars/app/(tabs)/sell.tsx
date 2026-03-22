@@ -213,7 +213,7 @@ export default function SellScreen() {
       >
         {/* Gradient header */}
         <LinearGradient
-          colors={["#03102B", "#0044AA", "#0066CC"]}
+          colors={["#7A2000", "#CC3D00", "#FF6B00"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={[styles.sellHeader, { paddingTop: topPad + 14 }]}
@@ -355,7 +355,7 @@ export default function SellScreen() {
         {/* ── Boost Your Listing ── */}
         <Pressable style={styles.boostCard} onPress={() => router.push("/advertise")}>
           <LinearGradient
-            colors={["#0A1628", "#0066CC"]}
+            colors={["#7A2000", "#FF6B00", "#FF8C38"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.boostGradient}
@@ -386,7 +386,7 @@ export default function SellScreen() {
           disabled={submitting}
         >
           <LinearGradient
-            colors={["#0066CC", "#3385D6"]}
+            colors={["#CC3D00", "#FF6B00"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.submitGradient}

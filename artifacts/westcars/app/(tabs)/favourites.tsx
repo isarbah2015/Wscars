@@ -47,7 +47,7 @@ export default function FavouritesScreen() {
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       {/* Header */}
       <LinearGradient
-        colors={isDark ? ["#1E293B", "#111827"] : ["#0A1628", "#0066CC"]}
+        colors={isDark ? ["#1A0A00", "#3D1500"] : ["#7A2000", "#CC3D00", "#FF6B00"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.header, { paddingTop: topPad + 14 }]}

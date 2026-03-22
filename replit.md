@@ -22,14 +22,18 @@ A full-featured React Native / Expo mobile app called **Westcars** — Ghana's t
 - **Icons**: Feather icons throughout
 - **Key screens**: Home, Search, Sell, Messages, Profile, Car Detail, Favourites, Advertise
 
-## Colorful Premium Redesign (v3)
-- **Home header**: Dark navy→blue `LinearGradient` with glassmorphism search bar and per-tab gradient condition pills
-- **Sponsored banner**: Multi-stop blue gradient with lemon-green "View Offer" pill button
-- **Advertise banner**: Purple→pink gradient (eye-catching, distinct from sponsored)
+## High-Tech Premium Redesign (v4)
+- **Primary accent**: #FF6B00 orange (all gradient headers, active tabs, price badges)
+- **Condition tabs**: Equal-width horizontal pills — all use orange (#CC3D00→#FF6B00) when active; transparent with white border when inactive
+- **Sub-category tiles**: Glassmorphic rgba colors (indigo/pink/amber/green etc) on dark gradient header; no car count numbers; tap to navigate to search
+- **ATV/Quad + Dirt Bike images**: Fixed with correct vehicle photos from Unsplash
+- **CarCard upgraded**: LinearGradient scrim (transparent→dark), floating orange price badge at image bottom-left with glow shadow, orange "AD" badge for sponsored, meta chips for year/mileage/location; active heart turns red
+- **Sponsored banner**: Orange gradient (#7A2000→#CC3D00→#FF6B00) with glass "View Offer" button
+- **Advertise banner**: Purple→pink gradient (distinct from sponsored)
+- **All screen headers**: Orange gradient — Home, Search, Sell, Messages, Saved, Profile
+- **Sell screen**: Orange gradient header + "SELL YOUR CAR" badge; Boost card orange gradient; Submit button orange gradient
+- **Messages header**: Dark red→orange gradient
 - **Section headers**: Colored left accent bars (blue=For You, amber=Special Offers)
-- **Profile header**: Deep navy→indigo→blue tricolor diagonal gradient
-- **Search filter chips**: Each quick-filter has its own unique active color (lemon=All, indigo=SUV, pink=Sedan, green=Tokunbo, amber=Budget, purple=Luxury, orange=Pickup, cyan=New)
-- **Sell screen header**: Blue gradient with "SELL YOUR CAR" lemon badge
 - **Tab bar**: Floating rounded tab bar with per-tab active pill highlights
 
 ## Features

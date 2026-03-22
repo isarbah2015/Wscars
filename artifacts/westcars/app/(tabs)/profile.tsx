@@ -143,7 +143,7 @@ export default function ProfileScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* ── Profile Header ── */}
-      <LinearGradient colors={["#03102B", "#4F46E5", "#0066CC"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.profileHeader}>
+      <LinearGradient colors={["#7A2000", "#CC3D00", "#FF6B00"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.profileHeader}>
         <View style={styles.avatarArea}>
           {currentUser.avatar ? (
             <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
