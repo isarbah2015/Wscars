@@ -44,56 +44,57 @@ export default function UserProfileScreen() {
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
     >
-      <LinearGradient
-        colors={["#0066CC", "#3385D6"]}
+      <View
         style={[
           styles.header,
           {
-            paddingTop:
-              (insets.top || (Platform.OS === "web" ? 67 : 0)) + 16,
+            paddingTop: (insets.top || (Platform.OS === "web" ? 67 : 0)) + 16,
+            backgroundColor: "#FFFFFF",
+            borderBottomWidth: 1,
+            borderBottomColor: "rgba(0,0,0,0.07)",
           },
         ]}
       >
         <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Feather name="arrow-left" size={22} color="#fff" />
+          <Feather name="arrow-left" size={22} color="#0F172A" />
         </Pressable>
 
         {user.avatar ? (
           <Image source={{ uri: user.avatar }} style={styles.avatar} />
         ) : (
           <View style={styles.avatarPlaceholder}>
-            <Feather name="user" size={36} color="#fff" />
+            <Feather name="user" size={36} color="#2D4500" />
           </View>
         )}
-        <Text style={styles.userName}>{user.name}</Text>
+        <Text style={[styles.userName, { color: "#0F172A" }]}>{user.name}</Text>
         <View style={styles.metaRow}>
-          <Feather name="map-pin" size={12} color="rgba(255,255,255,0.8)" />
-          <Text style={styles.metaText}>{user.location}</Text>
-          <View style={styles.dot} />
-          <Feather name="calendar" size={12} color="rgba(255,255,255,0.8)" />
-          <Text style={styles.metaText}>Joined {user.memberSince.slice(0, 7)}</Text>
+          <Feather name="map-pin" size={12} color="#64748B" />
+          <Text style={[styles.metaText, { color: "#64748B" }]}>{user.location}</Text>
+          <View style={[styles.dot, { backgroundColor: "#CBD5E1" }]} />
+          <Feather name="calendar" size={12} color="#64748B" />
+          <Text style={[styles.metaText, { color: "#64748B" }]}>Joined {user.memberSince.slice(0, 7)}</Text>
         </View>
 
         {user.isVerified && <VerifiedBadge />}
 
         <View style={styles.ratingRow}>
           <RatingStars rating={user.rating} size={14} />
-          <Text style={styles.ratingNum}>{user.rating.toFixed(1)}</Text>
-          <Text style={styles.ratingCount}>({user.totalReviews} reviews)</Text>
+          <Text style={[styles.ratingNum, { color: "#0F172A" }]}>{user.rating.toFixed(1)}</Text>
+          <Text style={[styles.ratingCount, { color: "#64748B" }]}>({user.totalReviews} reviews)</Text>
         </View>
 
-        <View style={styles.statsRow}>
+        <View style={[styles.statsRow, { backgroundColor: "rgba(0,0,0,0.04)", borderColor: "rgba(0,0,0,0.06)" }]}>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{userListings.length}</Text>
-            <Text style={styles.statLabel}>Listings</Text>
+            <Text style={[styles.statValue, { color: "#0F172A" }]}>{userListings.length}</Text>
+            <Text style={[styles.statLabel, { color: "#64748B" }]}>Listings</Text>
           </View>
-          <View style={styles.statDivider} />
+          <View style={[styles.statDivider, { backgroundColor: "rgba(0,0,0,0.1)" }]} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{user.totalReviews}</Text>
-            <Text style={styles.statLabel}>Reviews</Text>
+            <Text style={[styles.statValue, { color: "#0F172A" }]}>{user.totalReviews}</Text>
+            <Text style={[styles.statLabel, { color: "#64748B" }]}>Reviews</Text>
           </View>
         </View>
-      </LinearGradient>
+      </View>
 
       {/* Action Buttons */}
       <View style={styles.actionRow}>
@@ -166,22 +167,21 @@ const styles = StyleSheet.create({
     height: 88,
     borderRadius: 44,
     borderWidth: 3,
-    borderColor: "#fff",
+    borderColor: "#BFFF00",
   },
   avatarPlaceholder: {
     width: 88,
     height: 88,
     borderRadius: 44,
-    backgroundColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "rgba(191,255,0,0.12)",
     borderWidth: 3,
-    borderColor: "#fff",
+    borderColor: "#BFFF00",
     alignItems: "center",
     justifyContent: "center",
   },
   userName: {
     fontSize: 22,
     fontFamily: "Manrope_700Bold",
-    color: "#fff",
   },
   metaRow: {
     flexDirection: "row",
@@ -190,14 +190,12 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.85)",
     fontFamily: "Manrope_400Regular",
   },
   dot: {
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.5)",
   },
   ratingRow: {
     flexDirection: "row",
@@ -207,18 +205,16 @@ const styles = StyleSheet.create({
   ratingNum: {
     fontSize: 14,
     fontFamily: "Manrope_700Bold",
-    color: "#fff",
   },
   ratingCount: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
     fontFamily: "Manrope_400Regular",
   },
   statsRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.2)",
     borderRadius: 14,
+    borderWidth: 1,
     paddingVertical: 12,
     paddingHorizontal: 32,
     gap: 32,
@@ -230,17 +226,14 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontFamily: "Manrope_700Bold",
-    color: "#fff",
   },
   statLabel: {
     fontSize: 11,
-    color: "rgba(255,255,255,0.8)",
     fontFamily: "Manrope_400Regular",
   },
   statDivider: {
     width: 1,
     height: 30,
-    backgroundColor: "rgba(255,255,255,0.3)",
   },
   actionRow: {
     flexDirection: "row",
@@ -257,12 +250,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: Colors.primary,
+    borderColor: "rgba(191,255,0,0.6)",
   },
   messageBtnText: {
     fontSize: 14,
     fontFamily: "Manrope_600SemiBold",
-    color: Colors.primary,
+    color: "#2D4500",
   },
   followBtn: {
     flex: 1,
@@ -272,12 +265,12 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: Colors.primary,
+    backgroundColor: "#BFFF00",
   },
   followBtnText: {
     fontSize: 14,
     fontFamily: "Manrope_600SemiBold",
-    color: "#fff",
+    color: "#2D4500",
   },
   listingsSection: {
     padding: 16,

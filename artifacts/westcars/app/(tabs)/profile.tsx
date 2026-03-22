@@ -25,11 +25,12 @@ import { useTheme } from "@/context/ThemeContext";
 
 type ProfileTab = "listings" | "saved" | "reviews" | "settings";
 
-function StatBox({ label, value, tc }: { label: string; value: string | number; tc: any }) {
+function StatBox({ label, value }: { label: string; value: string | number }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.statBox}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={[styles.statValue, { color: colors.text }]}>{value}</Text>
+      <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{label}</Text>
     </View>
   );
 }
@@ -68,10 +69,11 @@ export default function ProfileScreen() {
         <Text style={[styles.authText, { color: colors.textSecondary }]}>
           Create an account to list cars, save favourites, and message sellers.
         </Text>
-        <Pressable style={styles.authBtn} onPress={() => router.push("/auth/login")}>
-          <LinearGradient colors={["#0066CC", "#3385D6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.authGradient}>
-            <Text style={styles.authBtnText}>Sign In</Text>
-          </LinearGradient>
+        <Pressable
+          style={[styles.authBtn, { backgroundColor: "#BFFF00" }]}
+          onPress={() => router.push("/auth/login")}
+        >
+          <Text style={[styles.authBtnText, { color: "#2D4500" }]}>Sign In</Text>
         </Pressable>
         <Pressable onPress={() => router.push("/auth/signup")}>
           <Text style={[styles.signupLink, { color: colors.accent }]}>Create Account</Text>
@@ -143,45 +145,60 @@ export default function ProfileScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* ── Profile Header ── */}
-      <LinearGradient colors={["#7A2000", "#CC3D00", "#FF6B00"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.profileHeader}>
+      <View style={[styles.profileHeader, {
+        backgroundColor: isDark ? "#111827" : "#FFFFFF",
+        borderBottomWidth: 1,
+        borderBottomColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
+      }]}>
         <View style={styles.avatarArea}>
           {currentUser.avatar ? (
             <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
           ) : (
-            <View style={styles.avatarPlaceholder}>
-              <Feather name="user" size={36} color="#fff" />
+            <View style={[styles.avatarPlaceholder, {
+              backgroundColor: isDark ? "#1E2D1E" : "rgba(191,255,0,0.12)",
+              borderColor: "#BFFF00",
+            }]}>
+              <Feather name="user" size={36} color="#2D4500" />
             </View>
           )}
           <Pressable style={styles.editAvatarBtn}>
-            <Feather name="camera" size={14} color="#fff" />
+            <Feather name="camera" size={14} color="#2D4500" />
           </Pressable>
         </View>
 
-        <Text style={styles.userName}>{currentUser.name}</Text>
+        <Text style={[styles.userName, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>
+          {currentUser.name}
+        </Text>
         <View style={styles.locationRow}>
-          <Feather name="map-pin" size={12} color="rgba(255,255,255,0.8)" />
-          <Text style={styles.userLocation}>{currentUser.location}</Text>
+          <Feather name="map-pin" size={12} color={isDark ? "#94A3B8" : "#64748B"} />
+          <Text style={[styles.userLocation, { color: isDark ? "#94A3B8" : "#64748B" }]}>
+            {currentUser.location}
+          </Text>
         </View>
 
         <VerificationBadges user={currentUser} size="sm" style={styles.veriBadges} />
 
         {!currentUser.isVerified && !v?.phone && (
           <Pressable style={styles.verifyBtn} onPress={handleVerifyPhone}>
-            <Feather name="shield" size={14} color="#0066CC" />
+            <Feather name="shield" size={14} color="#2D4500" />
             <Text style={styles.verifyBtnText}>Get Verified</Text>
           </Pressable>
         )}
 
-        <View style={styles.statsRow}>
-          <StatBox label="Listings" value={myListings.length} tc={Colors} />
-          <View style={styles.statDivider} />
-          <StatBox label="Saved" value={savedCars.length} tc={Colors} />
-          <View style={styles.statDivider} />
-          <StatBox label="Reviews" value={myReviews.length} tc={Colors} />
-          <View style={styles.statDivider} />
-          <StatBox label="Trust" value={`${trustScore}%`} tc={Colors} />
+        <View style={[styles.statsRow, {
+          backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+          borderWidth: 1,
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+        }]}>
+          <StatBox label="Listings" value={myListings.length} />
+          <View style={[styles.statDivider, { backgroundColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)" }]} />
+          <StatBox label="Saved" value={savedCars.length} />
+          <View style={[styles.statDivider, { backgroundColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)" }]} />
+          <StatBox label="Reviews" value={myReviews.length} />
+          <View style={[styles.statDivider, { backgroundColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)" }]} />
+          <StatBox label="Trust" value={`${trustScore}%`} />
         </View>
-      </LinearGradient>
+      </View>
 
       {/* Trust Score Bar */}
       <View style={[styles.trustCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -519,38 +536,38 @@ const styles = StyleSheet.create({
   // Profile header
   profileHeader: { padding: 20, alignItems: "center", gap: 6, paddingBottom: 24 },
   avatarArea: { position: "relative", marginBottom: 4 },
-  avatar: { width: 88, height: 88, borderRadius: 44, borderWidth: 3, borderColor: "#fff" },
+  avatar: { width: 88, height: 88, borderRadius: 44, borderWidth: 3, borderColor: "#BFFF00" },
   avatarPlaceholder: {
     width: 88, height: 88, borderRadius: 44,
-    backgroundColor: "rgba(255,255,255,0.3)", borderWidth: 3, borderColor: "#fff",
+    borderWidth: 3,
     alignItems: "center", justifyContent: "center",
   },
   editAvatarBtn: {
     position: "absolute", bottom: 2, right: 2,
     width: 28, height: 28, borderRadius: 14,
-    backgroundColor: "#0052A3", borderWidth: 2, borderColor: "#fff",
+    backgroundColor: "#BFFF00", borderWidth: 2, borderColor: "#fff",
     alignItems: "center", justifyContent: "center",
   },
-  userName: { fontSize: 22, fontFamily: "Manrope_700Bold", color: "#fff" },
+  userName: { fontSize: 22, fontFamily: "Manrope_700Bold" },
   locationRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  userLocation: { fontSize: 13, fontFamily: "Manrope_400Regular", color: "rgba(255,255,255,0.85)" },
+  userLocation: { fontSize: 13, fontFamily: "Manrope_400Regular" },
   veriBadges: { marginTop: 2 },
   verifyBtn: {
     flexDirection: "row", alignItems: "center", gap: 6,
-    backgroundColor: "#fff", paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20,
+    backgroundColor: "#BFFF00", paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20,
   },
-  verifyBtnText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: Colors.primary },
+  verifyBtnText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#2D4500" },
 
   statsRow: {
     flexDirection: "row", alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.18)", borderRadius: 16,
+    borderRadius: 16,
     paddingVertical: 14, paddingHorizontal: 16,
     marginTop: 8, width: "100%",
   },
   statBox: { flex: 1, alignItems: "center", gap: 2 },
-  statValue: { fontSize: 16, fontFamily: "Manrope_700Bold", color: "#fff" },
-  statLabel: { fontSize: 10, fontFamily: "Manrope_400Regular", color: "rgba(255,255,255,0.8)" },
-  statDivider: { width: 1, height: 30, backgroundColor: "rgba(255,255,255,0.3)" },
+  statValue: { fontSize: 16, fontFamily: "Manrope_700Bold" },
+  statLabel: { fontSize: 10, fontFamily: "Manrope_400Regular" },
+  statDivider: { width: 1, height: 30 },
 
   // Trust score card
   trustCard: {

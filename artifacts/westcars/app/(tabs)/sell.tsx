@@ -107,15 +107,10 @@ export default function SellScreen() {
           You need to be logged in to list your car for sale.
         </Text>
         <Pressable
-          style={styles.authBtn}
+          style={[styles.authBtn, { backgroundColor: "#BFFF00", borderRadius: 14, paddingVertical: 14, alignItems: "center" }]}
           onPress={() => router.push("/auth/login")}
         >
-          <LinearGradient
-            colors={["#0066CC", "#3385D6"]}
-            style={styles.authBtnGradient}
-          >
-            <Text style={styles.authBtnText}>Sign In</Text>
-          </LinearGradient>
+          <Text style={[styles.authBtnText, { color: "#2D4500" }]}>Sign In</Text>
         </Pressable>
       </View>
     );
@@ -211,22 +206,32 @@ export default function SellScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Gradient header */}
-        <LinearGradient
-          colors={["#7A2000", "#CC3D00", "#FF6B00"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.sellHeader, { paddingTop: topPad + 14 }]}
+        {/* Glass header */}
+        <View
+          style={[
+            styles.sellHeader,
+            {
+              paddingTop: topPad + 14,
+              backgroundColor: "#FFFFFF",
+              borderBottomWidth: 1,
+              borderBottomColor: "rgba(0,0,0,0.07)",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.04,
+              shadowRadius: 8,
+              elevation: 2,
+            },
+          ]}
         >
           <View style={styles.sellHeaderBadge}>
-            <Feather name="tag" size={13} color="#BFFF00" />
-            <Text style={styles.sellHeaderBadgeText}>SELL YOUR CAR</Text>
+            <Feather name="tag" size={13} color="#2D4500" />
+            <Text style={[styles.sellHeaderBadgeText, { color: "#2D4500" }]}>SELL YOUR CAR</Text>
           </View>
-          <Text style={styles.screenTitle}>List Your Car</Text>
-          <Text style={styles.screenSubtitle}>
+          <Text style={[styles.screenTitle, { color: "#0F172A" }]}>List Your Car</Text>
+          <Text style={[styles.screenSubtitle, { color: "#64748B" }]}>
             Reach thousands of buyers across Ghana
           </Text>
-        </LinearGradient>
+        </View>
 
         {/* Cards wrapper */}
         <View style={styles.cardsWrapper}>
@@ -420,19 +425,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingBottom: 22,
     gap: 8,
-    shadowColor: "#0044AA",
-    shadowOpacity: 0.22,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   sellHeaderBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "rgba(255,255,255,0.12)",
+    backgroundColor: "rgba(191,255,0,0.15)",
     borderWidth: 1,
-    borderColor: "rgba(191,255,0,0.35)",
+    borderColor: "rgba(191,255,0,0.4)",
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -442,18 +447,15 @@ const styles = StyleSheet.create({
   sellHeaderBadgeText: {
     fontSize: 10,
     fontFamily: "Manrope_700Bold",
-    color: "#BFFF00",
     letterSpacing: 1.5,
   },
   screenTitle: {
     fontSize: 26,
     fontFamily: "Manrope_800ExtraBold",
-    color: "#FFFFFF",
   },
   screenSubtitle: {
     fontSize: 14,
     fontFamily: "Manrope_400Regular",
-    color: "rgba(255,255,255,0.7)",
     marginBottom: 4,
   },
   card: {

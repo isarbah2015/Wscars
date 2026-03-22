@@ -34,10 +34,11 @@ export default function FavouritesScreen() {
         <Text style={[styles.authText, { color: colors.textSecondary }]}>
           Sign in to keep track of cars you love.
         </Text>
-        <Pressable style={styles.authBtn} onPress={() => router.push("/auth/login")}>
-          <LinearGradient colors={["#0066CC", "#3385D6"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.authGradient}>
-            <Text style={styles.authBtnText}>Sign In</Text>
-          </LinearGradient>
+        <Pressable
+          style={[styles.authBtn, { backgroundColor: "#BFFF00" }]}
+          onPress={() => router.push("/auth/login")}
+        >
+          <Text style={[styles.authBtnText, { color: "#2D4500" }]}>Sign In</Text>
         </Pressable>
       </View>
     );
@@ -46,19 +47,25 @@ export default function FavouritesScreen() {
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <LinearGradient
-        colors={isDark ? ["#1A0A00", "#3D1500"] : ["#7A2000", "#CC3D00", "#FF6B00"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.header, { paddingTop: topPad + 14 }]}
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: topPad + 14,
+            backgroundColor: isDark ? "#111827" : "#FFFFFF",
+            borderBottomColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
+          },
+        ]}
       >
-        <Text style={styles.headerTitle}>Saved Cars</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>
+          Saved Cars
+        </Text>
         {favCars.length > 0 && (
           <View style={styles.countBadge}>
             <Text style={styles.countText}>{favCars.length}</Text>
           </View>
         )}
-      </LinearGradient>
+      </View>
 
       {favCars.length === 0 ? (
         <View style={styles.empty}>
@@ -211,16 +218,21 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   headerTitle: {
     fontSize: 24,
     fontFamily: "Manrope_800ExtraBold",
-    color: "#fff",
     letterSpacing: 0.3,
   },
   countBadge: {
-    backgroundColor: "rgba(255,255,255,0.25)",
+    backgroundColor: "#BFFF00",
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 12,
@@ -228,7 +240,7 @@ const styles = StyleSheet.create({
   countText: {
     fontSize: 13,
     fontFamily: "Manrope_700Bold",
-    color: "#fff",
+    color: "#2D4500",
   },
 
   list: { padding: 14, gap: 16 },

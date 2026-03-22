@@ -223,8 +223,8 @@ const styles = StyleSheet.create({
     width: width * 0.7,
     height: 40,
     borderRadius: 100,
-    backgroundColor: "#0055FF",
-    opacity: 0.25,
+    backgroundColor: "#BFFF00",
+    opacity: 0.35,
   },
   car: {
     width: width * 0.62,
@@ -243,6 +243,6 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: "#3399FF",
+    backgroundColor: "#BFFF00",
   },
 });

@@ -85,25 +85,33 @@ export default function MessagesScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <LinearGradient
-        colors={isDark ? ["#1A0A00", "#3D1500"] : ["#7A2000", "#CC3D00", "#FF6B00"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.header, { paddingTop: topPad + 14 }]}
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: topPad + 14,
+            backgroundColor: isDark ? "#111827" : "#FFFFFF",
+            borderBottomColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
+          },
+        ]}
       >
-        <Text style={styles.title}>{isAdmin ? "Support Inbox" : "Messages"}</Text>
-        {isAdmin && (
-          <View style={styles.adminHeaderBadge}>
-            <Feather name="shield" size={11} color="#fff" />
-            <Text style={styles.adminHeaderBadgeText}>ADMIN</Text>
-          </View>
-        )}
-        {conversations.length > 0 && (
-          <View style={styles.headerBadge}>
-            <Text style={styles.headerBadgeText}>{conversations.length}</Text>
-          </View>
-        )}
-      </LinearGradient>
+        <Text style={[styles.title, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>
+          {isAdmin ? "Support Inbox" : "Messages"}
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {isAdmin && (
+            <View style={styles.adminHeaderBadge}>
+              <Feather name="shield" size={11} color="#2D4500" />
+              <Text style={[styles.adminHeaderBadgeText, { color: "#2D4500" }]}>ADMIN</Text>
+            </View>
+          )}
+          {conversations.length > 0 && (
+            <View style={styles.headerBadge}>
+              <Text style={styles.headerBadgeText}>{conversations.length}</Text>
+            </View>
+          )}
+        </View>
+      </View>
 
       {isAdmin && (
         <View style={[styles.adminBanner, { backgroundColor: isDark ? "#1A2744" : "#EBF4FF", borderColor: isDark ? "#2A3F6B" : "#BFDBFF" }]}>
@@ -166,16 +174,21 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   title: {
     fontSize: 24,
     fontFamily: "Manrope_800ExtraBold",
-    color: "#fff",
     letterSpacing: 0.3,
   },
   headerBadge: {
-    backgroundColor: "rgba(255,255,255,0.25)",
+    backgroundColor: "#BFFF00",
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 12,
@@ -183,21 +196,22 @@ const styles = StyleSheet.create({
   headerBadgeText: {
     fontSize: 13,
     fontFamily: "Manrope_700Bold",
-    color: "#fff",
+    color: "#2D4500",
   },
   adminHeaderBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#E8192C",
+    backgroundColor: "rgba(191,255,0,0.2)",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#BFFF00",
   },
   adminHeaderBadgeText: {
     fontSize: 10,
     fontFamily: "Manrope_700Bold",
-    color: "#fff",
     letterSpacing: 0.5,
   },
   adminBanner: {
