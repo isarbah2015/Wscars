@@ -1,12 +1,9 @@
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
-  Animated,
   Image,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
   Platform,
   Pressable,
   ScrollView,
@@ -79,8 +76,6 @@ const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: nu
   ],
 };
 
-const SUB_CATS_HEIGHT = 106;
-
 export default function HomeScreen() {
   const { cars, currentUser } = useApp();
   const { colors, isDark } = useTheme();
@@ -102,39 +97,6 @@ export default function HomeScreen() {
     .filter((car, i, arr) => arr.findIndex((c) => c.id === car.id) === i)
     .slice(0, 5);
 
-  // ── Animated collapse of SUB-category row on scroll (main tabs always visible) ──
-  const subHeightAnim = useRef(new Animated.Value(SUB_CATS_HEIGHT)).current;
-  const subOpacityAnim = useRef(new Animated.Value(1)).current;
-  const lastScrollY = useRef(0);
-  const subsVisible = useRef(true);
-
-  const showCats = () => {
-    if (subsVisible.current) return;
-    subsVisible.current = true;
-    Animated.parallel([
-      Animated.spring(subHeightAnim, { toValue: SUB_CATS_HEIGHT, useNativeDriver: false, speed: 30, bounciness: 0 }),
-      Animated.timing(subOpacityAnim, { toValue: 1, duration: 200, useNativeDriver: false }),
-    ]).start();
-  };
-
-  const hideCats = () => {
-    if (!subsVisible.current) return;
-    subsVisible.current = false;
-    Animated.parallel([
-      Animated.spring(subHeightAnim, { toValue: 0, useNativeDriver: false, speed: 30, bounciness: 0 }),
-      Animated.timing(subOpacityAnim, { toValue: 0, duration: 160, useNativeDriver: false }),
-    ]).start();
-  };
-
-  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const y = e.nativeEvent.contentOffset.y;
-    if (y > lastScrollY.current + 6 && y > 30) {
-      hideCats();
-    } else if (y < lastScrollY.current - 6) {
-      showCats();
-    }
-    lastScrollY.current = y;
-  };
 
   const darkBg = isDark ? "#080F1E" : "#06112A";
 
@@ -206,49 +168,53 @@ export default function HomeScreen() {
                 ]}>
                   {tab.label}
                 </Text>
-                {/* Car image — right side */}
-                <Image source={tab.img} style={styles.mainTabImg} resizeMode="contain" />
+                {/* Car image — right side, clipped to card bounds */}
+                <View style={styles.mainTabImgWrap}>
+                  <Image source={tab.img} style={styles.mainTabImg} resizeMode="contain" />
+                </View>
               </Pressable>
             );
           })}
         </View>
 
-        {/* ── Row 4: Sub-categories — horizontal scroll, collapses on scroll ── */}
-        <Animated.View style={{ height: subHeightAnim, opacity: subOpacityAnim, overflow: "hidden" }}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.subCatsRow}
-          >
-            {VEHICLE_CATEGORIES[condition].map((cat) => {
-              const cc = CAT_COLORS[cat.label];
-              return (
-                <Pressable
-                  key={cat.label}
-                  style={[styles.subTab, cc ? { backgroundColor: cc.bg, borderColor: cc.border } : { backgroundColor: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.2)" }]}
-                  onPress={() => router.push("/(tabs)/search")}
-                >
-                  <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
-                  <Text style={[styles.subTabLabel, { color: cc ? cc.textColor : "#fff" }]} numberOfLines={1}>
-                    {cat.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </Animated.View>
       </LinearGradient>
 
       {/* ── Scrollable body ── */}
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        contentContainerStyle={{
-          paddingBottom: 100 + (insets.bottom || 0),
-        }}
+        contentContainerStyle={{ paddingBottom: 100 + (insets.bottom || 0) }}
       >
+        {/* ── Sub-categories — horizontal strip, white rectangles ── */}
+        <View style={[styles.subCatsSection, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.subCatsRow}
+          >
+            {VEHICLE_CATEGORIES[condition].map((cat) => (
+              <Pressable
+                key={cat.label}
+                style={[
+                  styles.subTab,
+                  {
+                    backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
+                    borderColor: isDark ? "#2D3A4F" : "#E4E8EF",
+                  },
+                ]}
+                onPress={() => router.push("/(tabs)/search")}
+              >
+                <Text style={[styles.subTabLabel, { color: isDark ? "#CBD5E1" : "#1E293B" }]} numberOfLines={1}>
+                  {cat.label}
+                </Text>
+                <View style={styles.subTabImgWrap}>
+                  <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
+                </View>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+
         {/* ── Sponsored Banner → leads to Advertise ── */}
         <Pressable onPress={() => router.push("/advertise")} style={styles.promoBannerWrap}>
           <LinearGradient
@@ -474,39 +440,57 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     flex: 1,
   },
-  mainTabImg: { width: 76, height: 54 },
+  mainTabImgWrap: {
+    width: 76,
+    height: 66,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mainTabImg: { width: 76, height: 52 },
 
-  // ── Sub-category row (horizontal scroll) ──
+  // ── Sub-category section (white band at top of scroll body) ──
+  subCatsSection: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.06)",
+  },
   subCatsRow: {
     flexDirection: "row",
     gap: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
     alignItems: "center",
   },
   subTab: {
-    width: 110,
-    height: 78,
-    flexDirection: "column",
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
+    justifyContent: "space-between",
+    width: 148,
+    height: 58,
     borderRadius: 14,
-    borderWidth: 1.5,
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    borderWidth: 1,
+    paddingLeft: 12,
+    paddingRight: 0,
     shadowColor: "#000",
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.06,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    elevation: 2,
+    overflow: "hidden",
   },
-  subTabImg: { width: 72, height: 40 },
+  subTabImgWrap: {
+    width: 70,
+    height: 58,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  subTabImg: { width: 70, height: 46 },
   subTabLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: "Manrope_700Bold",
-    textAlign: "center",
-    letterSpacing: 0.2,
+    flex: 1,
+    letterSpacing: 0.1,
   },
 
   scroll: { flex: 1 },

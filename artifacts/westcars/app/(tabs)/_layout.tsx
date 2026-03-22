@@ -3,64 +3,75 @@ import { Feather } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import { useTheme } from "@/context/ThemeContext";
 
 function TabIcon({
   name,
+  label,
   focused,
   color,
   activeColor,
   activeBg,
 }: {
   name: any;
+  label: string;
   focused: boolean;
   color: string;
   activeColor: string;
   activeBg: string;
 }) {
   return (
-    <View
-      style={[
-        tabIconStyles.wrap,
-        focused && { backgroundColor: activeBg, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 5 },
-      ]}
-    >
-      <Feather name={name} size={21} color={focused ? activeColor : color} />
+    <View style={[tabIconStyles.wrap, focused && { backgroundColor: activeBg, paddingHorizontal: 16, paddingVertical: 4 }]}>
+      <Feather name={name} size={22} color={focused ? activeColor : color} />
     </View>
   );
 }
 
 const tabIconStyles = StyleSheet.create({
-  wrap: { alignItems: "center", justifyContent: "center", minWidth: 44 },
+  wrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 44,
+    borderRadius: 50,
+  },
 });
 
 function SellTabIcon({ focused }: { focused: boolean }) {
   return (
-    <View style={[sellStyles.box, focused && sellStyles.boxActive]}>
-      <Feather name="plus" size={15} color="#1A4000" />
+    <View style={[sellStyles.outer, focused && sellStyles.outerActive]}>
+      <View style={sellStyles.box}>
+        <Feather name="plus" size={18} color="#1A4000" />
+      </View>
     </View>
   );
 }
 
 const sellStyles = StyleSheet.create({
+  outer: {
+    width: 50,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(191,255,0,0.18)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: -2,
+  },
+  outerActive: {
+    backgroundColor: "rgba(191,255,0,0.3)",
+  },
   box: {
-    width: 30,
-    height: 24,
-    borderRadius: 8,
+    width: 40,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: "#BFFF00",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#7EC800",
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
-  },
-  boxActive: {
-    shadowOpacity: 0.7,
+    shadowOpacity: 0.55,
     shadowRadius: 10,
-    elevation: 7,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 6,
   },
 });
 
@@ -77,13 +88,14 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: inactiveColor,
         headerShown: false,
+        tabBarShowLabel: true,
         tabBarStyle: {
           position: "absolute",
           backgroundColor: "transparent",
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
-          height: isWeb ? 88 : 72,
+          height: isWeb ? 88 : 74,
         },
         tabBarBackground: () =>
           isIOS ? (
@@ -92,14 +104,14 @@ export default function TabLayout() {
                 StyleSheet.absoluteFill,
                 tabBgStyles.bg,
                 {
-                  backgroundColor: isDark ? "rgba(10,20,40,0.85)" : "rgba(255,255,255,0.9)",
-                  borderTopLeftRadius: 26,
-                  borderTopRightRadius: 26,
+                  backgroundColor: isDark ? "rgba(10,20,40,0.92)" : "rgba(255,255,255,0.94)",
+                  borderTopLeftRadius: 28,
+                  borderTopRightRadius: 28,
                 },
               ]}
             >
               <BlurView
-                intensity={80}
+                intensity={90}
                 tint={isDark ? "dark" : "light"}
                 style={StyleSheet.absoluteFill}
               />
@@ -111,8 +123,8 @@ export default function TabLayout() {
                 tabBgStyles.bg,
                 {
                   backgroundColor: isDark ? "#0C1829" : "#FFFFFF",
-                  borderTopLeftRadius: 26,
-                  borderTopRightRadius: 26,
+                  borderTopLeftRadius: 28,
+                  borderTopRightRadius: 28,
                 },
               ]}
             />
@@ -120,7 +132,8 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontFamily: "Manrope_600SemiBold",
           fontSize: 10,
-          marginBottom: 4,
+          marginBottom: 5,
+          marginTop: -2,
         },
       }}
     >
@@ -130,9 +143,9 @@ export default function TabLayout() {
           title: "Home",
           tabBarIcon: ({ focused, color }) =>
             isIOS ? (
-              <SymbolView name="house" tintColor={focused ? colors.accent : color} size={21} />
+              <SymbolView name="house.fill" tintColor={focused ? colors.accent : color} size={22} />
             ) : (
-              <TabIcon name="home" focused={focused} color={color} activeColor={colors.accent} activeBg={colors.accentLight} />
+              <TabIcon name="home" label="Home" focused={focused} color={color} activeColor={colors.accent} activeBg={colors.accentLight} />
             ),
         }}
       />
@@ -142,9 +155,9 @@ export default function TabLayout() {
           title: "Saved",
           tabBarIcon: ({ focused, color }) =>
             isIOS ? (
-              <SymbolView name="heart" tintColor={focused ? "#E8192C" : color} size={21} />
+              <SymbolView name="heart.fill" tintColor={focused ? "#E8192C" : color} size={22} />
             ) : (
-              <TabIcon name="heart" focused={focused} color={color} activeColor="#E8192C" activeBg="#FFEDEE" />
+              <TabIcon name="heart" label="Saved" focused={focused} color={color} activeColor="#E8192C" activeBg="#FFEDEE" />
             ),
         }}
       />
@@ -153,6 +166,13 @@ export default function TabLayout() {
         options={{
           title: "Sell",
           tabBarIcon: ({ focused }) => <SellTabIcon focused={focused} />,
+          tabBarLabelStyle: {
+            fontFamily: "Manrope_700Bold",
+            fontSize: 10,
+            color: "#5B8500",
+            marginBottom: 5,
+            marginTop: -2,
+          },
         }}
       />
       <Tabs.Screen
@@ -161,9 +181,9 @@ export default function TabLayout() {
           title: "Messages",
           tabBarIcon: ({ focused, color }) =>
             isIOS ? (
-              <SymbolView name="message" tintColor={focused ? "#7C3AED" : color} size={21} />
+              <SymbolView name="message.fill" tintColor={focused ? "#7C3AED" : color} size={22} />
             ) : (
-              <TabIcon name="message-circle" focused={focused} color={color} activeColor="#7C3AED" activeBg="#F3EEFF" />
+              <TabIcon name="message-circle" label="Messages" focused={focused} color={color} activeColor="#7C3AED" activeBg="#F3EEFF" />
             ),
         }}
       />
@@ -173,9 +193,9 @@ export default function TabLayout() {
           title: "Profile",
           tabBarIcon: ({ focused, color }) =>
             isIOS ? (
-              <SymbolView name="person" tintColor={focused ? "#059669" : color} size={21} />
+              <SymbolView name="person.fill" tintColor={focused ? colors.accent : color} size={22} />
             ) : (
-              <TabIcon name="user" focused={focused} color={color} activeColor="#059669" activeBg="#ECFDF5" />
+              <TabIcon name="user" label="Profile" focused={focused} color={color} activeColor={colors.accent} activeBg={colors.accentLight} />
             ),
         }}
       />
@@ -186,11 +206,11 @@ export default function TabLayout() {
 
 const tabBgStyles = StyleSheet.create({
   bg: {
-    shadowColor: "#0A1628",
-    shadowOffset: { width: 0, height: -6 },
-    shadowOpacity: 0.14,
-    shadowRadius: 24,
-    elevation: 22,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 24,
     overflow: "hidden",
   },
 });
