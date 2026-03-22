@@ -1,0 +1,49 @@
+🎨 Final Prompt – Colorful Westcars App (Main Screens Only, Logo & Signup Stay)
+
+Copy and paste the entire block below into Replit AI. This focuses on making the main app screens (Home, Search, Car Detail, Sell, Favorites, Profile, Chat) colorful and advanced while keeping your existing logo and signup pages unchanged.
+
+---
+
+```
+Update the Westcars app to make the **main app screens** (Home, Search, Car Detail, Sell, Favorites, Profile, Chat) **vibrant and modern** with a rich, colorful design. Do not change the splash screen, logo, or signup/login screens – they are already fine.
+
+## Design Requirements for Main Screens
+
+- **Rich Gradients** on headers, buttons, and card backgrounds. Use orange (#FF6B00) as primary, but incorporate secondary gradients like orange to pink, orange to yellow, or orange to deep orange.
+- **Glassmorphism** on modals, banners, and floating elements: translucent backgrounds with blur effect.
+- **Animated Buttons**: Press animations (scale, ripple, gradient shift). All interactive elements must feel responsive.
+- **Neon Accents**: Add glowing borders or shadows on call‑to‑action buttons (e.g., "Contact Seller", "Save to Favorites").
+- **Category Chips**: Each category (SUVs, Sedans, Tokunbo, etc.) gets a unique background color (pastel or vibrant) with shadow.
+- **Car Cards**: Use gradient overlays on images, shiny borders, and subtle hover effects (press scale). Show condition badge with matching gradient.
+- **Bottom Tab Bar**: Rounded elevated bar with shadow; active tab has a glowing orange effect.
+- **Transitions**: Smooth slide/fade animations between screens.
+- **Dark/Light Mode**: Implement global theme toggle; design both themes with colorful elements (orange accent remains).
+
+## All Previously Requested Features Must Remain
+
+- Smile ID verification (ID + selfie)
+- User reviews and ratings (stars + comfort/ergonomics breakdown)
+- Seller trust score
+- Flag/report system
+- In-app safety tips modal
+- Mark as sold / transaction confirmation
+- Block users
+- Listing expiration (30 days) and renewal
+- Admin dashboard (Firebase)
+- Chat with photos, videos, voice messages
+- Safety warning when an external number is sent
+- Global dark/light theme
+- Advertising banners before recommended listings
+
+## Technical
+
+- Use Firebase (Auth, Firestore, Storage).
+- Provide complete code for updated screens (Home, Search, Car Detail, Sell, Favorites, Profile, Chat) with new styling.
+- Ensure the UI is responsive and works on both iOS and Android.
+
+**Generate all files needed to replace or update these screens, preserving existing functionality.**
+```
+
+---
+
+This prompt will instruct Replit AI to generate the colorful, advanced UI for the main app while keeping your existing logo and signup pages untouched. Paste it into Replit AI and let it build the enhanced design.

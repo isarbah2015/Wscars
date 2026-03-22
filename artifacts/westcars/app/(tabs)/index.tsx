@@ -35,6 +35,25 @@ const BANNER_CAR  = require("@/assets/images/banner-car.png");
 
 type Condition = "new" | "used" | "moto";
 
+const CONDITION_TABS: { id: Condition; label: string; img: any; grad: [string, string]; dot: string }[] = [
+  { id: "new",  label: "New",  img: CAR_NEW,  grad: ["#15803D", "#22C55E"], dot: "#22C55E" },
+  { id: "used", label: "Used", img: CAR_USED, grad: ["#1D4ED8", "#0066CC"], dot: "#3B82F6" },
+  { id: "moto", label: "Moto", img: CAR_MOTO, grad: ["#C2410C", "#F97316"], dot: "#F97316" },
+];
+
+const CAT_COLORS: Record<string, { bg: string; border: string; textColor: string }> = {
+  "SUV / 4×4":  { bg: "#EEF2FF", border: "#818CF8", textColor: "#3730A3" },
+  "Sedan":      { bg: "#FDF2F8", border: "#F472B6", textColor: "#9D174D" },
+  "Pickup":     { bg: "#FFFBEB", border: "#FCD34D", textColor: "#92400E" },
+  "Van":        { bg: "#F0FDF4", border: "#86EFAC", textColor: "#15803D" },
+  "Coupe":      { bg: "#FAF5FF", border: "#C084FC", textColor: "#7E22CE" },
+  "Hatchback":  { bg: "#ECFEFF", border: "#67E8F9", textColor: "#164E63" },
+  "Motorcycle": { bg: "#EFF6FF", border: "#93C5FD", textColor: "#1D4ED8" },
+  "Scooter":    { bg: "#FFF1F2", border: "#FB7185", textColor: "#BE123C" },
+  "ATV / Quad": { bg: "#ECFDF5", border: "#6EE7B7", textColor: "#065F46" },
+  "Dirt Bike":  { bg: "#FFF7ED", border: "#FDBA74", textColor: "#C2410C" },
+};
+
 const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: number }[]> = {
   new: [
     { label: "SUV / 4×4", img: CAT_SUV,    count: 4 },
@@ -119,104 +138,102 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      {/* ── Fixed Header ── */}
-      <View style={[styles.header, { paddingTop: topPad + 8, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-
-        {/* ── Row 1: Search bar (on top) ── */}
-        <Pressable
-          style={[styles.searchBox, { backgroundColor: colors.accentLight, borderColor: isDark ? colors.border : "#C8D8F8" }]}
-          onPress={() => router.push("/(tabs)/search")}
-        >
-          <Image source={SEARCH_ICON} style={styles.searchCarIcon} resizeMode="contain" />
-          <View style={styles.searchBoxText}>
-            <Text style={[styles.searchBoxLabel, { color: colors.text }]}>Brand, model</Text>
-            <Text style={[styles.searchBoxCount, { color: colors.textTertiary }]}>
-              {totalCount.toLocaleString()} listings
-            </Text>
-          </View>
-          <View style={[styles.filterBtn, { backgroundColor: colors.card, borderColor: isDark ? colors.border : "#C8D8F8" }]}>
-            <Feather name="sliders" size={17} color={colors.accent} />
-          </View>
-        </Pressable>
-
-        {/* ── Row 2: Logo + user avatar ── */}
+      {/* ── Fixed Header (Gradient) ── */}
+      <LinearGradient
+        colors={isDark ? ["#0C1829", "#0A1628"] : ["#03102B", "#0044AA"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.header, { paddingTop: topPad + 8 }]}
+      >
+        {/* ── Row 1: Logo + user avatar ── */}
         <View style={styles.topRow}>
           <View style={styles.logoRow}>
             <Image source={WC_BADGE} style={styles.logoBadge} resizeMode="contain" />
-            <Text style={[styles.logoText, { color: colors.text }]}>WESTCARS</Text>
+            <Text style={styles.logoText}>WESTCARS</Text>
           </View>
           <View style={styles.userRow}>
-            <View style={[styles.avatarCircle, { backgroundColor: colors.accentLight }]}>
-              <Text style={[styles.avatarText, { color: colors.accent }]}>
+            <View style={styles.avatarCircle}>
+              <Text style={styles.avatarText}>
                 {currentUser?.name?.[0] || "W"}
               </Text>
             </View>
-            <Text style={[styles.userName, { color: colors.text }]}>
+            <Text style={styles.userName}>
               {currentUser?.name?.split(" ")[0] || "Guest"}
             </Text>
           </View>
         </View>
 
+        {/* ── Row 2: Search bar (glassmorphism on gradient) ── */}
+        <Pressable
+          style={styles.searchBox}
+          onPress={() => router.push("/(tabs)/search")}
+        >
+          <Image source={SEARCH_ICON} style={styles.searchCarIcon} resizeMode="contain" />
+          <View style={styles.searchBoxText}>
+            <Text style={styles.searchBoxLabel}>Brand, model, location…</Text>
+            <Text style={styles.searchBoxCount}>
+              {totalCount.toLocaleString()} listings available
+            </Text>
+          </View>
+          <View style={styles.filterBtn}>
+            <Feather name="sliders" size={17} color="#BFFF00" />
+          </View>
+        </Pressable>
+
         {/* ── Row 3: 3 FIXED main condition tabs — always visible ── */}
         <View style={styles.mainTabsRow}>
-          {(
-            [
-              { id: "new",  label: "New",  img: CAR_NEW  },
-              { id: "used", label: "Used", img: CAR_USED },
-              { id: "moto", label: "Moto", img: CAR_MOTO },
-            ] as { id: Condition; label: string; img: any }[]
-          ).map((tab) => (
-            <Pressable
-              key={tab.id}
-              style={[
-                styles.mainTab,
-                { backgroundColor: colors.background, borderColor: colors.border },
-                condition === tab.id && {
-                  backgroundColor: colors.accentLight,
-                  borderColor: colors.accent,
-                  borderWidth: 1.5,
-                },
-              ]}
-              onPress={() => setCondition(tab.id)}
-            >
-              <Text
-                style={[
-                  styles.mainTabLabel,
-                  { color: colors.textSecondary },
-                  condition === tab.id && { color: colors.accent, fontFamily: "Manrope_700Bold" },
-                ]}
+          {CONDITION_TABS.map((tab) => {
+            const active = condition === tab.id;
+            return (
+              <Pressable
+                key={tab.id}
+                style={[styles.mainTab, !active && { borderColor: "rgba(255,255,255,0.18)" }]}
+                onPress={() => setCondition(tab.id)}
               >
-                {tab.label}
-              </Text>
-              <Image source={tab.img} style={styles.mainTabImg} resizeMode="contain" />
-            </Pressable>
-          ))}
+                {active ? (
+                  <LinearGradient
+                    colors={tab.grad}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={StyleSheet.absoluteFill}
+                  />
+                ) : null}
+                <Text style={[styles.mainTabLabel, !active && { color: "rgba(255,255,255,0.55)" }]}>
+                  {tab.label}
+                </Text>
+                <Image source={tab.img} style={styles.mainTabImg} resizeMode="contain" />
+              </Pressable>
+            );
+          })}
         </View>
 
-        {/* ── Row 4: Sub-categories — horizontal 1×1 scroll, collapses on scroll ── */}
+        {/* ── Row 4: Sub-categories — horizontal scroll, collapses on scroll ── */}
         <Animated.View style={{ height: subHeightAnim, opacity: subOpacityAnim, overflow: "hidden" }}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.subCatsRow}
           >
-            {VEHICLE_CATEGORIES[condition].map((cat) => (
-              <Pressable
-                key={cat.label}
-                style={[styles.subTab, { backgroundColor: colors.background, borderColor: colors.border }]}
-              >
-                <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
-                <Text style={[styles.subTabLabel, { color: colors.textSecondary }]} numberOfLines={1}>
-                  {cat.label}
-                </Text>
-                {cat.count > 0 && (
-                  <Text style={[styles.subTabCount, { color: colors.textTertiary }]}>{cat.count}</Text>
-                )}
-              </Pressable>
-            ))}
+            {VEHICLE_CATEGORIES[condition].map((cat) => {
+              const cc = CAT_COLORS[cat.label];
+              return (
+                <Pressable
+                  key={cat.label}
+                  style={[styles.subTab, cc ? { backgroundColor: cc.bg, borderColor: cc.border } : { backgroundColor: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.2)" }]}
+                >
+                  <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
+                  <Text style={[styles.subTabLabel, { color: cc ? cc.textColor : "#fff" }]} numberOfLines={1}>
+                    {cat.label}
+                  </Text>
+                  {cat.count > 0 && (
+                    <Text style={[styles.subTabCount, { color: cc ? cc.textColor : "rgba(255,255,255,0.6)" }]}>{cat.count} cars</Text>
+                  )}
+                </Pressable>
+              );
+            })}
           </ScrollView>
         </Animated.View>
-      </View>
+      </LinearGradient>
 
       {/* ── Scrollable body ── */}
       <ScrollView
@@ -229,24 +246,38 @@ export default function HomeScreen() {
         }}
       >
         {/* ── Sponsored Banner → leads to Advertise ── */}
-        <Pressable style={styles.promoBanner} onPress={() => router.push("/advertise")}>
-          <View style={styles.promoBannerLeft}>
-            <View style={styles.promoBadge}>
-              <Text style={styles.promoBadgeText}>SPONSORED</Text>
+        <Pressable onPress={() => router.push("/advertise")} style={styles.promoBannerWrap}>
+          <LinearGradient
+            colors={["#0C1C44", "#0044AA", "#0066CC"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.promoBanner}
+          >
+            <View style={styles.promoBannerLeft}>
+              <View style={styles.promoBadge}>
+                <Text style={styles.promoBadgeText}>SPONSORED</Text>
+              </View>
+              <Text style={styles.promoBannerTitle}>Toyota Certified Pre-Owned</Text>
+              <Text style={styles.promoBannerSub}>0% Interest · 12-month Warranty · Nationwide</Text>
+              <View style={styles.promoCta}>
+                <View style={styles.promoCtaBtn}>
+                  <Text style={styles.promoCtaText}>View Offer</Text>
+                  <Feather name="arrow-right" size={11} color="#1A4000" />
+                </View>
+              </View>
             </View>
-            <Text style={styles.promoBannerTitle}>Toyota Certified Pre-Owned</Text>
-            <Text style={styles.promoBannerSub}>0% Interest · 12-month Warranty · Nationwide</Text>
-            <View style={styles.promoCta}>
-              <Text style={styles.promoCtaText}>View Offer</Text>
-              <Feather name="arrow-right" size={12} color="#BFFF00" />
-            </View>
-          </View>
-          <Image source={BANNER_CAR} style={styles.bannerCarImg} resizeMode="contain" />
+            <Image source={BANNER_CAR} style={styles.bannerCarImg} resizeMode="contain" />
+          </LinearGradient>
         </Pressable>
 
         {/* ── "Personally for you" section ── */}
         <View style={[styles.section, { backgroundColor: colors.card }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Personally for you</Text>
+          <View style={styles.sectionRow}>
+            <View style={styles.sectionTitleRow}>
+              <View style={[styles.sectionAccentBar, { backgroundColor: colors.accent }]} />
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Personally for you</Text>
+            </View>
+          </View>
           <View style={styles.grid}>
             {displayCars.map((car) => (
               <View key={car.id} style={styles.gridItem}>
@@ -261,7 +292,10 @@ export default function HomeScreen() {
         {/* ── Special Offers ── */}
         <View style={[styles.section, { backgroundColor: colors.card }]}>
           <View style={styles.sectionRow}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Special Offers</Text>
+            <View style={styles.sectionTitleRow}>
+              <View style={[styles.sectionAccentBar, { backgroundColor: "#D97706" }]} />
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Special Offers</Text>
+            </View>
             <Pressable onPress={() => router.push("/(tabs)/search")}>
               <Text style={[styles.seeAll, { color: colors.accent }]}>See all</Text>
             </Pressable>
@@ -303,20 +337,27 @@ export default function HomeScreen() {
 
         <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
-        {/* ── Advertise ── */}
-        <Pressable
-          style={[styles.adBanner, { backgroundColor: isDark ? colors.accentLight : "#EBF4FF", borderColor: isDark ? colors.border : "#C6DEFF" }]}
-          onPress={() => router.push("/advertise")}
-        >
-          <View>
-            <Text style={[styles.adBannerTitle, { color: colors.text }]}>Advertise on Westcars</Text>
-            <Text style={[styles.adBannerSub, { color: colors.textSecondary }]}>
-              Reach 50,000+ buyers · Flyer & Video from GHS 50
-            </Text>
-          </View>
-          <View style={[styles.adBannerArrow, { backgroundColor: colors.card, borderColor: isDark ? colors.border : "#C6DEFF" }]}>
-            <Feather name="arrow-right" size={16} color={colors.accent} />
-          </View>
+        {/* ── Advertise Banner ── */}
+        <Pressable onPress={() => router.push("/advertise")} style={styles.adBannerWrap}>
+          <LinearGradient
+            colors={["#7C3AED", "#A855F7", "#EC4899"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.adBanner}
+          >
+            <View style={styles.adBannerLeft}>
+              <View style={styles.adBannerIconBox}>
+                <Feather name="trending-up" size={16} color="#fff" />
+              </View>
+              <View>
+                <Text style={styles.adBannerTitle}>Advertise on Westcars</Text>
+                <Text style={styles.adBannerSub}>Reach 50,000+ buyers · From GHS 50</Text>
+              </View>
+            </View>
+            <View style={styles.adBannerArrow}>
+              <Feather name="arrow-right" size={16} color="#fff" />
+            </View>
+          </LinearGradient>
         </Pressable>
       </ScrollView>
     </View>
@@ -324,21 +365,18 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#F0F2F5" },
+  root: { flex: 1 },
 
-  // ── Header ──
+  // ── Header (now LinearGradient) ──
   header: {
-    backgroundColor: "#fff",
     paddingHorizontal: 14,
-    paddingBottom: 10,
+    paddingBottom: 12,
     gap: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E8EAED",
     shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 10,
     zIndex: 10,
   },
 
@@ -352,62 +390,58 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#E8F0FE",
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.28)",
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarText: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#0066CC" },
-  userName: { fontSize: 14, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
+  avatarText: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#FFFFFF" },
+  userName: { fontSize: 14, fontFamily: "Manrope_600SemiBold", color: "rgba(255,255,255,0.85)" },
 
-  // Logo
-  logoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
+  logoRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   logoBadge: { width: 34, height: 34, borderRadius: 8 },
   logoText: {
     fontSize: 20,
     fontFamily: "Manrope_800ExtraBold",
-    color: "#0A1628",
+    color: "#FFFFFF",
     letterSpacing: 4,
   },
 
-  // ── Search box (now on top) ──
+  // ── Search box (glassmorphism on gradient) ──
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    backgroundColor: "#F0F4FF",
+    backgroundColor: "rgba(255,255,255,0.13)",
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 11,
-    borderWidth: 1.5,
-    borderColor: "#C8D8F8",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.22)",
   },
   searchBoxText: { flex: 1 },
   searchBoxLabel: {
     fontSize: 15,
     fontFamily: "Manrope_600SemiBold",
-    color: "#1A1A1A",
+    color: "rgba(255,255,255,0.9)",
   },
   searchBoxCount: {
     fontSize: 11,
     fontFamily: "Manrope_400Regular",
-    color: "#7A8AA8",
+    color: "rgba(255,255,255,0.55)",
     marginTop: 1,
   },
   filterBtn: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#E8F0FE",
+    backgroundColor: "rgba(255,255,255,0.12)",
     borderWidth: 1,
-    borderColor: "#C8D8F8",
+    borderColor: "rgba(191,255,0,0.5)",
     alignItems: "center",
     justifyContent: "center",
   },
-  // Search car icon — bigger
   searchCarIcon: { width: 44, height: 44 },
 
   // ── 3 fixed main condition tabs ──
@@ -415,8 +449,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     paddingHorizontal: 10,
-    paddingTop: 8,
-    paddingBottom: 6,
+    paddingTop: 4,
+    paddingBottom: 4,
   },
   mainTab: {
     flex: 1,
@@ -428,13 +462,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     borderRadius: 14,
     borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.18)",
+    overflow: "hidden",
   },
   mainTabLabel: {
     fontSize: 12,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "Manrope_700Bold",
     textAlign: "center",
+    color: "#FFFFFF",
+    zIndex: 1,
   },
-  mainTabImg: { width: 72, height: 40 },
+  mainTabImg: { width: 72, height: 40, zIndex: 1 },
 
   // ── Sub-category row (horizontal scroll) ──
   subCatsRow: {
@@ -470,22 +508,24 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
 
   // ── Sponsored Banner ──
+  promoBannerWrap: {
+    marginHorizontal: 10,
+    marginTop: 10,
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#0044AA",
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 8,
+  },
   promoBanner: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#08122A",
     paddingHorizontal: 18,
     paddingVertical: 16,
     gap: 8,
-    marginHorizontal: 10,
-    marginTop: 10,
-    borderRadius: 18,
-    shadowColor: "#08122A",
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 7,
   },
   promoBannerLeft: { flex: 1, gap: 5 },
   promoBadge: {
@@ -512,15 +552,22 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.65)",
   },
   promoCta: {
+    marginTop: 4,
+  },
+  promoCtaBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    marginTop: 4,
+    backgroundColor: "#BFFF00",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    alignSelf: "flex-start",
   },
   promoCtaText: {
     fontSize: 12,
-    fontFamily: "Manrope_600SemiBold",
-    color: "#BFFF00",
+    fontFamily: "Manrope_700Bold",
+    color: "#1A4000",
   },
   bannerCarImg: {
     width: 130,
@@ -529,18 +576,17 @@ const styles = StyleSheet.create({
 
   // ── Section ──
   section: {
-    backgroundColor: "#fff",
     paddingHorizontal: 12,
-    paddingTop: 18,
+    paddingTop: 16,
     paddingBottom: 8,
     marginHorizontal: 10,
     marginTop: 10,
-    borderRadius: 16,
+    borderRadius: 18,
     shadowColor: "#0A1628",
-    shadowOpacity: 0.07,
-    shadowRadius: 12,
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
     shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    elevation: 4,
   },
   sectionRow: {
     flexDirection: "row",
@@ -548,13 +594,21 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 12,
   },
-  sectionTitle: {
-    fontSize: 19,
-    fontFamily: "Manrope_700Bold",
-    color: "#0A1628",
-    marginBottom: 12,
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
-  seeAll: { fontSize: 13, color: "#0066CC", fontFamily: "Manrope_500Medium" },
+  sectionAccentBar: {
+    width: 4,
+    height: 20,
+    borderRadius: 2,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: "Manrope_700Bold",
+  },
+  seeAll: { fontSize: 13, fontFamily: "Manrope_600SemiBold" },
 
   // Grid — 2 column
   grid: {
@@ -592,33 +646,47 @@ const styles = StyleSheet.create({
   offerYear: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "#9BAFC4" },
 
   // Advertise banner
+  adBannerWrap: {
+    marginHorizontal: 10,
+    marginTop: 10,
+    marginBottom: 6,
+    borderRadius: 18,
+    overflow: "hidden",
+    shadowColor: "#7C3AED",
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 7,
+  },
   adBanner: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#EBF4FF",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    marginHorizontal: 10,
-    marginTop: 10,
-    marginBottom: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#C6DEFF",
-    shadowColor: "#0066CC",
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
+  },
+  adBannerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  adBannerIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   adBannerTitle: {
     fontSize: 14,
     fontFamily: "Manrope_700Bold",
-    color: "#0A1628",
+    color: "#fff",
   },
   adBannerSub: {
     fontSize: 12,
-    color: "#6B7A90",
+    color: "rgba(255,255,255,0.75)",
     fontFamily: "Manrope_400Regular",
     marginTop: 2,
   },
@@ -626,10 +694,8 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#C6DEFF",
   },
 });

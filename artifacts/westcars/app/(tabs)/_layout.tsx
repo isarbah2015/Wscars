@@ -6,9 +6,38 @@ import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { useTheme } from "@/context/ThemeContext";
 
-function SellTabIcon() {
+function TabIcon({
+  name,
+  focused,
+  color,
+  activeColor,
+  activeBg,
+}: {
+  name: any;
+  focused: boolean;
+  color: string;
+  activeColor: string;
+  activeBg: string;
+}) {
   return (
-    <View style={sellStyles.box}>
+    <View
+      style={[
+        tabIconStyles.wrap,
+        focused && { backgroundColor: activeBg, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 5 },
+      ]}
+    >
+      <Feather name={name} size={21} color={focused ? activeColor : color} />
+    </View>
+  );
+}
+
+const tabIconStyles = StyleSheet.create({
+  wrap: { alignItems: "center", justifyContent: "center", minWidth: 44 },
+});
+
+function SellTabIcon({ focused }: { focused: boolean }) {
+  return (
+    <View style={[sellStyles.box, focused && sellStyles.boxActive]}>
       <Feather name="plus" size={15} color="#1A4000" />
     </View>
   );
@@ -16,17 +45,22 @@ function SellTabIcon() {
 
 const sellStyles = StyleSheet.create({
   box: {
-    width: 28,
-    height: 22,
-    borderRadius: 7,
+    width: 30,
+    height: 24,
+    borderRadius: 8,
     backgroundColor: "#BFFF00",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#7EC800",
-    shadowOpacity: 0.35,
-    shadowRadius: 5,
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    elevation: 4,
+  },
+  boxActive: {
+    shadowOpacity: 0.7,
+    shadowRadius: 10,
+    elevation: 7,
   },
 });
 
@@ -35,35 +69,58 @@ export default function TabLayout() {
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
 
+  const inactiveColor = isDark ? "#4A5E7A" : "#8A9AB5";
+
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: isDark ? "#6B7A8D" : "#9BA8BA",
+        tabBarInactiveTintColor: inactiveColor,
         headerShown: false,
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : colors.tabBar,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
+          backgroundColor: "transparent",
+          borderTopWidth: 0,
           elevation: 0,
-          height: isWeb ? 84 : undefined,
+          shadowOpacity: 0,
+          height: isWeb ? 88 : 72,
         },
         tabBarBackground: () =>
           isIOS ? (
-            <BlurView
-              intensity={95}
-              tint={isDark ? "dark" : "systemChromeMaterial"}
-              style={StyleSheet.absoluteFill}
-            />
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                tabBgStyles.bg,
+                {
+                  backgroundColor: isDark ? "rgba(10,20,40,0.85)" : "rgba(255,255,255,0.9)",
+                  borderTopLeftRadius: 26,
+                  borderTopRightRadius: 26,
+                },
+              ]}
+            >
+              <BlurView
+                intensity={80}
+                tint={isDark ? "dark" : "light"}
+                style={StyleSheet.absoluteFill}
+              />
+            </View>
           ) : (
             <View
-              style={[StyleSheet.absoluteFill, { backgroundColor: colors.tabBar }]}
+              style={[
+                StyleSheet.absoluteFill,
+                tabBgStyles.bg,
+                {
+                  backgroundColor: isDark ? "#0C1829" : "#FFFFFF",
+                  borderTopLeftRadius: 26,
+                  borderTopRightRadius: 26,
+                },
+              ]}
             />
           ),
         tabBarLabelStyle: {
-          fontFamily: "Manrope_500Medium",
+          fontFamily: "Manrope_600SemiBold",
           fontSize: 10,
+          marginBottom: 4,
         },
       }}
     >
@@ -71,11 +128,11 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, size }) =>
+          tabBarIcon: ({ focused, color }) =>
             isIOS ? (
-              <SymbolView name="house" tintColor={color} size={size} />
+              <SymbolView name="house" tintColor={focused ? colors.accent : color} size={21} />
             ) : (
-              <Feather name="home" size={22} color={color} />
+              <TabIcon name="home" focused={focused} color={color} activeColor={colors.accent} activeBg={colors.accentLight} />
             ),
         }}
       />
@@ -83,11 +140,11 @@ export default function TabLayout() {
         name="favourites"
         options={{
           title: "Saved",
-          tabBarIcon: ({ color, size }) =>
+          tabBarIcon: ({ focused, color }) =>
             isIOS ? (
-              <SymbolView name="heart" tintColor={color} size={size} />
+              <SymbolView name="heart" tintColor={focused ? "#E8192C" : color} size={21} />
             ) : (
-              <Feather name="heart" size={22} color={color} />
+              <TabIcon name="heart" focused={focused} color={color} activeColor="#E8192C" activeBg="#FFEDEE" />
             ),
         }}
       />
@@ -95,18 +152,18 @@ export default function TabLayout() {
         name="sell"
         options={{
           title: "Sell",
-          tabBarIcon: () => <SellTabIcon />,
+          tabBarIcon: ({ focused }) => <SellTabIcon focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="messages"
         options={{
           title: "Messages",
-          tabBarIcon: ({ color, size }) =>
+          tabBarIcon: ({ focused, color }) =>
             isIOS ? (
-              <SymbolView name="message" tintColor={color} size={size} />
+              <SymbolView name="message" tintColor={focused ? "#7C3AED" : color} size={21} />
             ) : (
-              <Feather name="message-circle" size={22} color={color} />
+              <TabIcon name="message-circle" focused={focused} color={color} activeColor="#7C3AED" activeBg="#F3EEFF" />
             ),
         }}
       />
@@ -114,11 +171,11 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, size }) =>
+          tabBarIcon: ({ focused, color }) =>
             isIOS ? (
-              <SymbolView name="person" tintColor={color} size={size} />
+              <SymbolView name="person" tintColor={focused ? "#059669" : color} size={21} />
             ) : (
-              <Feather name="user" size={22} color={color} />
+              <TabIcon name="user" focused={focused} color={color} activeColor="#059669" activeBg="#ECFDF5" />
             ),
         }}
       />
@@ -126,3 +183,14 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const tabBgStyles = StyleSheet.create({
+  bg: {
+    shadowColor: "#0A1628",
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.14,
+    shadowRadius: 24,
+    elevation: 22,
+    overflow: "hidden",
+  },
+});

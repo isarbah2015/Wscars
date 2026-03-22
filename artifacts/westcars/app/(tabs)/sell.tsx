@@ -206,18 +206,30 @@ export default function SellScreen() {
         style={styles.container}
         contentContainerStyle={[
           styles.content,
-          {
-            paddingTop: topPad + 10,
-            paddingBottom: insets.bottom + 100,
-          },
+          { paddingBottom: insets.bottom + 100 },
         ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.screenTitle}>List Your Car</Text>
-        <Text style={styles.screenSubtitle}>
-          Reach thousands of buyers across Ghana
-        </Text>
+        {/* Gradient header */}
+        <LinearGradient
+          colors={["#03102B", "#0044AA", "#0066CC"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.sellHeader, { paddingTop: topPad + 14 }]}
+        >
+          <View style={styles.sellHeaderBadge}>
+            <Feather name="tag" size={13} color="#BFFF00" />
+            <Text style={styles.sellHeaderBadgeText}>SELL YOUR CAR</Text>
+          </View>
+          <Text style={styles.screenTitle}>List Your Car</Text>
+          <Text style={styles.screenSubtitle}>
+            Reach thousands of buyers across Ghana
+          </Text>
+        </LinearGradient>
+
+        {/* Cards wrapper */}
+        <View style={styles.cardsWrapper}>
 
         {/* Photo upload */}
         <View style={styles.card}>
@@ -385,6 +397,8 @@ export default function SellScreen() {
             </Text>
           </LinearGradient>
         </Pressable>
+
+        </View>{/* end cardsWrapper */}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -396,18 +410,50 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.backgroundSecondary,
   },
   content: {
+    gap: 0,
+  },
+  cardsWrapper: {
     padding: 16,
     gap: 14,
   },
+  sellHeader: {
+    paddingHorizontal: 18,
+    paddingBottom: 22,
+    gap: 8,
+    shadowColor: "#0044AA",
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+  sellHeaderBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(191,255,0,0.35)",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    alignSelf: "flex-start",
+    marginBottom: 4,
+  },
+  sellHeaderBadgeText: {
+    fontSize: 10,
+    fontFamily: "Manrope_700Bold",
+    color: "#BFFF00",
+    letterSpacing: 1.5,
+  },
   screenTitle: {
     fontSize: 26,
-    fontFamily: "Manrope_700Bold",
-    color: Colors.light.text,
+    fontFamily: "Manrope_800ExtraBold",
+    color: "#FFFFFF",
   },
   screenSubtitle: {
     fontSize: 14,
     fontFamily: "Manrope_400Regular",
-    color: Colors.light.textSecondary,
+    color: "rgba(255,255,255,0.7)",
     marginBottom: 4,
   },
   card: {

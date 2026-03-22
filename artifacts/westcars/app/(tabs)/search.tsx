@@ -37,6 +37,16 @@ const PRICE_RANGES = [
 ];
 
 const QUICK_FILTERS = ["All", "SUV", "Sedan", "Tokunbo", "Budget", "Luxury", "Pickup", "New"];
+const CHIP_COLORS: Record<string, { bg: string; text: string; activeBg: string; activeText: string }> = {
+  "All":     { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#BFFF00", activeText: "#1A4000" },
+  "SUV":     { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#818CF8", activeText: "#fff" },
+  "Sedan":   { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#F472B6", activeText: "#fff" },
+  "Tokunbo": { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#22C55E", activeText: "#fff" },
+  "Budget":  { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#F59E0B", activeText: "#fff" },
+  "Luxury":  { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#A855F7", activeText: "#fff" },
+  "Pickup":  { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#F97316", activeText: "#fff" },
+  "New":     { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#06B6D4", activeText: "#fff" },
+};
 
 function FilterModal({
   visible,
@@ -251,22 +261,25 @@ export default function SearchScreen() {
           </Pressable>
         </View>
 
-        {/* Quick filter chips */}
+        {/* Quick filter chips — each with its own color */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickScroll}>
           <View style={styles.quickRow}>
-            {QUICK_FILTERS.map((f) => (
-              <Pressable
-                key={f}
-                style={[styles.quickChip,
-                  quickFilter === f && { backgroundColor: "#BFFF00" }]}
-                onPress={() => setQuickFilter(f)}
-              >
-                <Text style={[styles.quickChipText,
-                  quickFilter === f && { color: "#1A4000", fontFamily: "Manrope_700Bold" }]}>
-                  {f}
-                </Text>
-              </Pressable>
-            ))}
+            {QUICK_FILTERS.map((f) => {
+              const c = CHIP_COLORS[f] || CHIP_COLORS["All"];
+              const active = quickFilter === f;
+              return (
+                <Pressable
+                  key={f}
+                  style={[styles.quickChip, { backgroundColor: active ? c.activeBg : c.bg }]}
+                  onPress={() => setQuickFilter(f)}
+                >
+                  <Text style={[styles.quickChipText, { color: active ? c.activeText : c.text },
+                    active && { fontFamily: "Manrope_700Bold" }]}>
+                    {f}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
         </ScrollView>
       </LinearGradient>

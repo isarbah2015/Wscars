@@ -22,6 +22,16 @@ A full-featured React Native / Expo mobile app called **Westcars** — Ghana's t
 - **Icons**: Feather icons throughout
 - **Key screens**: Home, Search, Sell, Messages, Profile, Car Detail, Favourites, Advertise
 
+## Colorful Premium Redesign (v3)
+- **Home header**: Dark navy→blue `LinearGradient` with glassmorphism search bar and per-tab gradient condition pills
+- **Sponsored banner**: Multi-stop blue gradient with lemon-green "View Offer" pill button
+- **Advertise banner**: Purple→pink gradient (eye-catching, distinct from sponsored)
+- **Section headers**: Colored left accent bars (blue=For You, amber=Special Offers)
+- **Profile header**: Deep navy→indigo→blue tricolor diagonal gradient
+- **Search filter chips**: Each quick-filter has its own unique active color (lemon=All, indigo=SUV, pink=Sedan, green=Tokunbo, amber=Budget, purple=Luxury, orange=Pickup, cyan=New)
+- **Sell screen header**: Blue gradient with "SELL YOUR CAR" lemon badge
+- **Tab bar**: Floating rounded tab bar with per-tab active pill highlights
+
 ## Features
 
 ### Core
