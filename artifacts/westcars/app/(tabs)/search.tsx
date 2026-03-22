@@ -38,14 +38,14 @@ const PRICE_RANGES = [
 
 const QUICK_FILTERS = ["All", "SUV", "Sedan", "Tokunbo", "Budget", "Luxury", "Pickup", "New"];
 const CHIP_COLORS: Record<string, { bg: string; text: string; activeBg: string; activeText: string }> = {
-  "All":     { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#BFFF00", activeText: "#1A4000" },
-  "SUV":     { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#818CF8", activeText: "#fff" },
-  "Sedan":   { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#F472B6", activeText: "#fff" },
-  "Tokunbo": { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#22C55E", activeText: "#fff" },
-  "Budget":  { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#F59E0B", activeText: "#fff" },
-  "Luxury":  { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#A855F7", activeText: "#fff" },
-  "Pickup":  { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#F97316", activeText: "#fff" },
-  "New":     { bg: "rgba(255,255,255,0.12)", text: "rgba(255,255,255,0.75)", activeBg: "#06B6D4", activeText: "#fff" },
+  "All":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#BFFF00", activeText: "#2D4500" },
+  "SUV":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#818CF8", activeText: "#fff" },
+  "Sedan":   { bg: "#F1F5F9", text: "#64748B", activeBg: "#F472B6", activeText: "#fff" },
+  "Tokunbo": { bg: "#F1F5F9", text: "#64748B", activeBg: "#22C55E", activeText: "#fff" },
+  "Budget":  { bg: "#F1F5F9", text: "#64748B", activeBg: "#F59E0B", activeText: "#fff" },
+  "Luxury":  { bg: "#F1F5F9", text: "#64748B", activeBg: "#A855F7", activeText: "#fff" },
+  "Pickup":  { bg: "#F1F5F9", text: "#64748B", activeBg: "#F97316", activeText: "#fff" },
+  "New":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#06B6D4", activeText: "#fff" },
 };
 
 function FilterModal({
@@ -221,47 +221,54 @@ export default function SearchScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* ── Gradient Header ── */}
-      <LinearGradient
-        colors={isDark ? ["#1A0A00", "#3D1500"] : ["#7A2000", "#CC3D00", "#FF6B00"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.header, { paddingTop: topPad + 14 }]}
+      {/* ── Light Header ── */}
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: topPad + 14,
+            backgroundColor: isDark ? "#111827" : "#FFFFFF",
+            borderBottomColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
+          },
+        ]}
       >
         <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>Search Cars</Text>
+          <Text style={[styles.headerTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Search Cars</Text>
           {filtered.length > 0 && (
-            <View style={styles.resultPill}>
+            <View style={[styles.resultPill, { backgroundColor: "#BFFF00" }]}>
               <Text style={styles.resultPillText}>{filtered.length} found</Text>
             </View>
           )}
         </View>
 
         {/* Search input */}
-        <View style={[styles.searchRow, { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.15)" }]}>
-          <Feather name="search" size={18} color="rgba(255,255,255,0.7)" />
+        <View style={[styles.searchRow, {
+          backgroundColor: isDark ? "#1E293B" : "#F1F5F9",
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+        }]}>
+          <Feather name="search" size={18} color={isDark ? "#64748B" : "#94A3B8"} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: isDark ? "#F1F5F9" : "#0F172A" }]}
             placeholder="Brand, model, location..."
-            placeholderTextColor="rgba(255,255,255,0.5)"
+            placeholderTextColor={isDark ? "#475569" : "#94A3B8"}
             value={query}
             onChangeText={setQuery}
           />
           {query.length > 0 && (
             <Pressable onPress={() => setQuery("")} hitSlop={8}>
-              <Feather name="x" size={16} color="rgba(255,255,255,0.7)" />
+              <Feather name="x" size={16} color={isDark ? "#64748B" : "#94A3B8"} />
             </Pressable>
           )}
           <Pressable
             onPress={() => setFilterVisible(true)}
-            style={styles.filterIconBtn}
+            style={[styles.filterIconBtn, { backgroundColor: "#BFFF00" }]}
           >
-            <Feather name="sliders" size={18} color="#BFFF00" />
+            <Feather name="sliders" size={17} color="#2D4500" />
             {activeFilters && <View style={styles.filterDot} />}
           </Pressable>
         </View>
 
-        {/* Quick filter chips — each with its own color */}
+        {/* Quick filter chips */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickScroll}>
           <View style={styles.quickRow}>
             {QUICK_FILTERS.map((f) => {
@@ -270,10 +277,13 @@ export default function SearchScreen() {
               return (
                 <Pressable
                   key={f}
-                  style={[styles.quickChip, { backgroundColor: active ? c.activeBg : c.bg }]}
+                  style={[styles.quickChip, {
+                    backgroundColor: active ? c.activeBg : (isDark ? "#1E293B" : c.bg),
+                    borderColor: active ? "transparent" : (isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0"),
+                  }]}
                   onPress={() => setQuickFilter(f)}
                 >
-                  <Text style={[styles.quickChipText, { color: active ? c.activeText : c.text },
+                  <Text style={[styles.quickChipText, { color: active ? c.activeText : (isDark ? "#94A3B8" : c.text) },
                     active && { fontFamily: "Manrope_700Bold" }]}>
                     {f}
                   </Text>
@@ -282,7 +292,7 @@ export default function SearchScreen() {
             })}
           </View>
         </ScrollView>
-      </LinearGradient>
+      </View>
 
       {/* Active filter tag */}
       {activeFilters && (
@@ -363,19 +373,17 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontFamily: "Manrope_800ExtraBold",
-    color: "#fff",
     letterSpacing: 0.3,
   },
   resultPill: {
-    backgroundColor: "rgba(255,255,255,0.2)",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
   resultPillText: {
     fontSize: 12,
-    fontFamily: "Manrope_600SemiBold",
-    color: "#fff",
+    fontFamily: "Manrope_700Bold",
+    color: "#2D4500",
   },
   searchRow: {
     flexDirection: "row",
@@ -384,17 +392,21 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 11,
+    borderWidth: 1,
   },
   searchInput: {
     flex: 1,
     fontSize: 15,
     fontFamily: "Manrope_400Regular",
-    color: "#fff",
     padding: 0,
   },
   filterIconBtn: {
     position: "relative",
-    padding: 4,
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
   filterDot: {
     position: "absolute",
@@ -403,7 +415,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#BFFF00",
+    backgroundColor: "#EF4444",
   },
   quickScroll: { flexGrow: 0 },
   quickRow: { flexDirection: "row", gap: 8 },
@@ -411,12 +423,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.12)",
+    borderWidth: 1,
   },
   quickChipText: {
     fontSize: 12,
     fontFamily: "Manrope_500Medium",
-    color: "rgba(255,255,255,0.85)",
   },
 
   filterTagRow: {

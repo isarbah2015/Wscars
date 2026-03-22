@@ -98,53 +98,58 @@ export default function HomeScreen() {
     .slice(0, 5);
 
 
-  const darkBg = isDark ? "#080F1E" : "#06112A";
-
   return (
-    <View style={[styles.root, { backgroundColor: darkBg }]}>
-      {/* ── Fixed Header (Gradient) ── */}
-      <LinearGradient
-        colors={isDark ? ["#0C1829", "#06112A"] : ["#06112A", "#06112A"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.header, { paddingTop: topPad + 8 }]}
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
+      {/* ── Fixed Header (glassmorphic light) ── */}
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: topPad + 8,
+            backgroundColor: isDark ? "#111827" : "#FFFFFF",
+            borderBottomColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
+          },
+        ]}
       >
         {/* ── Row 1: Logo + user avatar ── */}
         <View style={styles.topRow}>
           <View style={styles.logoRow}>
             <Image source={WC_BADGE} style={styles.logoBadge} resizeMode="contain" />
-            <Text style={styles.logoText}>WESTCARS</Text>
+            <Text style={[styles.logoText, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>WESTCARS</Text>
           </View>
           <View style={styles.userRow}>
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarText}>
+            <View style={[styles.avatarCircle, { backgroundColor: "#BFFF00" }]}>
+              <Text style={[styles.avatarText, { color: "#2D4500" }]}>
                 {currentUser?.name?.[0] || "W"}
               </Text>
             </View>
-            <Text style={styles.userName}>
+            <Text style={[styles.userName, { color: isDark ? "#94A3B8" : "#475569" }]}>
               {currentUser?.name?.split(" ")[0] || "Guest"}
             </Text>
           </View>
         </View>
 
-        {/* ── Row 2: Search bar (glassmorphism on gradient) ── */}
+        {/* ── Row 2: Search bar ── */}
         <Pressable
-          style={styles.searchBox}
+          style={[styles.searchBox, {
+            backgroundColor: isDark ? "#1E293B" : "#F1F5F9",
+            borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+          }]}
           onPress={() => router.push("/(tabs)/search")}
         >
           <Image source={SEARCH_ICON} style={styles.searchCarIcon} resizeMode="contain" />
           <View style={styles.searchBoxText}>
-            <Text style={styles.searchBoxLabel}>Brand, model, location…</Text>
-            <Text style={styles.searchBoxCount}>
+            <Text style={[styles.searchBoxLabel, { color: isDark ? "#CBD5E1" : "#334155" }]}>Brand, model, location…</Text>
+            <Text style={[styles.searchBoxCount, { color: isDark ? "#475569" : "#94A3B8" }]}>
               {totalCount.toLocaleString()} listings available
             </Text>
           </View>
-          <View style={styles.filterBtn}>
-            <Feather name="sliders" size={17} color="#BFFF00" />
+          <View style={[styles.filterBtn, { backgroundColor: "#BFFF00" }]}>
+            <Feather name="sliders" size={17} color="#2D4500" />
           </View>
         </Pressable>
 
-        {/* ── Row 3: 3 FIXED main condition tabs — always visible ── */}
+        {/* ── Row 3: 3 condition tabs — text TOP, image BOTTOM ── */}
         <View style={styles.mainTabsRow}>
           {CONDITION_TABS.map((tab) => {
             const active = condition === tab.id;
@@ -154,21 +159,24 @@ export default function HomeScreen() {
                 style={[
                   styles.mainTab,
                   active
-                    ? { backgroundColor: "rgba(255,107,0,0.28)", borderColor: "rgba(255,107,0,0.6)" }
-                    : { backgroundColor: "rgba(255,255,255,0.07)", borderColor: "rgba(255,255,255,0.12)" },
+                    ? { backgroundColor: "#BFFF00", borderColor: "#A8E600" }
+                    : {
+                        backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9",
+                        borderColor: isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0",
+                      },
                 ]}
                 onPress={() => setCondition(tab.id)}
               >
-                {/* Label — left side */}
+                {/* Label — TOP */}
                 <Text style={[
                   styles.mainTabLabel,
                   active
-                    ? { color: "#FFFFFF", fontFamily: "Manrope_800ExtraBold" }
-                    : { color: "rgba(255,255,255,0.5)", fontFamily: "Manrope_600SemiBold" },
+                    ? { color: "#2D4500", fontFamily: "Manrope_800ExtraBold" }
+                    : { color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Manrope_600SemiBold" },
                 ]}>
                   {tab.label}
                 </Text>
-                {/* Car image — right side, clipped to card bounds */}
+                {/* Car image — BOTTOM, clipped */}
                 <View style={styles.mainTabImgWrap}>
                   <Image source={tab.img} style={styles.mainTabImg} resizeMode="contain" />
                 </View>
@@ -177,7 +185,7 @@ export default function HomeScreen() {
           })}
         </View>
 
-      </LinearGradient>
+      </View>
 
       {/* ── Scrollable body ── */}
       <ScrollView
@@ -257,7 +265,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View style={[styles.sep, { backgroundColor: darkBg }]} />
+        <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── Special Offers ── */}
         <View style={[styles.section, { backgroundColor: colors.card }]}>
@@ -305,7 +313,7 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
-        <View style={[styles.sep, { backgroundColor: darkBg }]} />
+        <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── Advertise Banner ── */}
         <Pressable onPress={() => router.push("/advertise")} style={styles.adBannerWrap}>
@@ -337,16 +345,16 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
 
-  // ── Header (now LinearGradient) ──
   header: {
     paddingHorizontal: 14,
     paddingBottom: 12,
     gap: 10,
+    borderBottomWidth: 1,
     shadowColor: "#000",
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 10,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 6,
     zIndex: 10,
   },
 
@@ -360,55 +368,44 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.28)",
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarText: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#FFFFFF" },
-  userName: { fontSize: 14, fontFamily: "Manrope_600SemiBold", color: "rgba(255,255,255,0.85)" },
+  avatarText: { fontSize: 15, fontFamily: "Manrope_700Bold" },
+  userName: { fontSize: 14, fontFamily: "Manrope_600SemiBold" },
 
   logoRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   logoBadge: { width: 34, height: 34, borderRadius: 8 },
   logoText: {
     fontSize: 20,
     fontFamily: "Manrope_800ExtraBold",
-    color: "#FFFFFF",
     letterSpacing: 4,
   },
 
-  // ── Search box (glassmorphism on gradient) ──
+  // ── Search box ──
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    backgroundColor: "rgba(255,255,255,0.13)",
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 11,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.22)",
   },
   searchBoxText: { flex: 1 },
   searchBoxLabel: {
     fontSize: 15,
     fontFamily: "Manrope_600SemiBold",
-    color: "rgba(255,255,255,0.9)",
   },
   searchBoxCount: {
     fontSize: 11,
     fontFamily: "Manrope_400Regular",
-    color: "rgba(255,255,255,0.55)",
     marginTop: 1,
   },
   filterBtn: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(191,255,0,0.5)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -419,35 +416,36 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     paddingHorizontal: 10,
-    paddingTop: 4,
-    paddingBottom: 4,
+    paddingTop: 6,
+    paddingBottom: 8,
   },
   mainTab: {
     flex: 1,
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingLeft: 10,
-    paddingRight: 0,
-    height: 66,
+    justifyContent: "center",
+    gap: 0,
+    paddingTop: 8,
+    paddingBottom: 4,
+    paddingHorizontal: 4,
     borderRadius: 16,
     borderWidth: 1,
     overflow: "hidden",
   },
   mainTabLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Manrope_700Bold",
-    color: "#FFFFFF",
-    flex: 1,
+    textAlign: "center",
   },
   mainTabImgWrap: {
-    width: 76,
-    height: 66,
+    width: 80,
+    height: 46,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
+    marginTop: -2,
   },
-  mainTabImg: { width: 76, height: 52 },
+  mainTabImg: { width: 78, height: 48 },
 
   // ── Sub-category section (white band at top of scroll body) ──
   subCatsSection: {
@@ -501,8 +499,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 20,
     overflow: "hidden",
-    shadowColor: "#0044AA",
-    shadowOpacity: 0.3,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 6 },
     elevation: 8,
