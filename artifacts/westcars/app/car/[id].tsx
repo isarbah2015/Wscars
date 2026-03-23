@@ -722,7 +722,7 @@ const styles = StyleSheet.create({
   },
   extraSpecLabel: { fontSize: 13, fontFamily: "Manrope_400Regular" },
   extraSpecValue: { fontSize: 13, fontFamily: "Manrope_500Medium" },
-  extraSpecHighlight: { color: "#0066CC", fontFamily: "Manrope_700Bold" },
+  extraSpecHighlight: { color: "#0EB5CA", fontFamily: "Manrope_700Bold" },
 
   moreBtn: {
     height: 46,

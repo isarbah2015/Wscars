@@ -286,7 +286,7 @@ export default function AdvertiseScreen() {
 
         {/* Hero gradient */}
         <LinearGradient
-          colors={["#0A2463", "#0066CC", "#3385D6"]}
+          colors={["#004D5E", "#0098AA", "#0EB5CA"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.hero}
@@ -347,7 +347,7 @@ export default function AdvertiseScreen() {
                   }}
                 >
                   {pkg.popular && (
-                    <View style={[styles.cornerTag, { backgroundColor: "#0066CC" }]}>
+                    <View style={[styles.cornerTag, { backgroundColor: "#0EB5CA" }]}>
                       <Text style={styles.cornerTagText}>MOST POPULAR</Text>
                     </View>
                   )}
@@ -375,7 +375,7 @@ export default function AdvertiseScreen() {
                     <Feather
                       name={isActive ? "check-circle" : "circle"}
                       size={20}
-                      color={isActive ? "#0066CC" : "#E0E0E0"}
+                      color={isActive ? "#0EB5CA" : "#E0E0E0"}
                     />
                   </View>
 
@@ -417,7 +417,7 @@ export default function AdvertiseScreen() {
           <Text style={styles.sectionTitle}>What's Included</Text>
           {[
             { icon: "target", text: "Geo-targeted to your preferred region(s)", color: "#E53935" },
-            { icon: "trending-up", text: "Real-time impression & click analytics", color: "#0066CC" },
+            { icon: "trending-up", text: "Real-time impression & click analytics", color: "#0EB5CA" },
             { icon: "refresh-cw", text: "Creative revision support included", color: "#27AE60" },
             { icon: "users", text: "Reach verified buyers & 200+ active dealers", color: "#7B1FA2" },
             { icon: "phone", text: "Dedicated account manager assigned", color: "#E65100" },
@@ -438,7 +438,7 @@ export default function AdvertiseScreen() {
         <View style={styles.contactCard}>
           <View style={styles.contactTop}>
             <View style={styles.contactIconWrap}>
-              <Feather name="phone-call" size={20} color="#0066CC" />
+              <Feather name="phone-call" size={20} color="#0EB5CA" />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.contactTitle}>Talk to our Ads Team</Text>
@@ -447,7 +447,7 @@ export default function AdvertiseScreen() {
           </View>
           <View style={styles.contactActions}>
             <Pressable style={styles.contactBtn}>
-              <Feather name="phone" size={14} color="#0066CC" />
+              <Feather name="phone" size={14} color="#0EB5CA" />
               <Text style={styles.contactBtnText}>+233 30 274 0000</Text>
             </Pressable>
             <Pressable style={[styles.contactBtn, { backgroundColor: "#E8F5E9", borderColor: "#27AE60" }]}>
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
     borderRadius: 20, borderWidth: 1.5, borderColor: "#E0E0E0",
     backgroundColor: "#fff",
   },
-  filterChipActive: { backgroundColor: "#1A1A1A", borderColor: "#1A1A1A" },
+  filterChipActive: { backgroundColor: "#0098AA", borderColor: "#0098AA" },
   filterChipText: { fontSize: 13, fontFamily: "Manrope_500Medium", color: "#6B6B6B" },
   filterChipTextActive: { color: "#fff", fontFamily: "Manrope_600SemiBold" },
 
@@ -548,7 +548,7 @@ const styles = StyleSheet.create({
     gap: 12,
     overflow: "hidden",
   },
-  pkgCardActive: { borderColor: "#0066CC", backgroundColor: "#F8FBFF" },
+  pkgCardActive: { borderColor: "#0EB5CA", backgroundColor: "#F8FBFF" },
 
   cornerTag: {
     position: "absolute", top: 0, right: 0,
@@ -579,11 +579,11 @@ const styles = StyleSheet.create({
     borderRadius: 10, borderWidth: 1.5, borderColor: "#E0E0E0",
     backgroundColor: "#F5F5F5", alignItems: "center", minWidth: 90,
   },
-  periodOptActive: { borderColor: "#0066CC", backgroundColor: "#EBF4FF" },
+  periodOptActive: { borderColor: "#0EB5CA", backgroundColor: "rgba(14,181,202,0.08)" },
   periodOptLabel: { fontSize: 12, fontFamily: "Manrope_500Medium", color: "#6B6B6B" },
-  periodOptLabelActive: { color: "#0066CC", fontFamily: "Manrope_700Bold" },
+  periodOptLabelActive: { color: "#0EB5CA", fontFamily: "Manrope_700Bold" },
   periodOptPrice: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#1A1A1A", marginTop: 2 },
-  periodOptPriceActive: { color: "#0066CC" },
+  periodOptPriceActive: { color: "#0EB5CA" },
 
   sep: { height: 8, backgroundColor: "#F5F5F5" },
   section: { backgroundColor: "#fff", padding: 16, gap: 12 },
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   contactTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   contactIconWrap: {
     width: 44, height: 44, borderRadius: 12,
-    backgroundColor: "#EBF4FF",
+    backgroundColor: "rgba(14,181,202,0.08)",
     alignItems: "center", justifyContent: "center",
   },
   contactTitle: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
@@ -617,10 +617,10 @@ const styles = StyleSheet.create({
   contactBtn: {
     flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
     gap: 6, height: 40, borderRadius: 10,
-    borderWidth: 1.5, borderColor: "#0066CC",
-    backgroundColor: "#EBF4FF",
+    borderWidth: 1.5, borderColor: "#0EB5CA",
+    backgroundColor: "rgba(14,181,202,0.08)",
   },
-  contactBtnText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#0066CC" },
+  contactBtnText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#0EB5CA" },
   contactEmail: { fontSize: 12, color: "#9E9E9E", fontFamily: "Manrope_400Regular", textAlign: "center" },
 
   bookBar: {
@@ -635,9 +635,9 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   bookSummary: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular" },
-  bookPrice: { fontSize: 22, fontFamily: "Manrope_700Bold", color: "#0066CC", letterSpacing: -0.5 },
+  bookPrice: { fontSize: 22, fontFamily: "Manrope_700Bold", color: "#0EB5CA", letterSpacing: -0.5 },
   bookBtn: {
-    backgroundColor: "#0066CC",
+    backgroundColor: "#0EB5CA",
     paddingHorizontal: 24, paddingVertical: 14,
     borderRadius: 12,
   },

@@ -330,8 +330,8 @@ const styles = StyleSheet.create({
   brandRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   heroBadge: { width: 52, height: 52, borderRadius: 12 },
   brandName: {
-    fontSize: 22, fontFamily: "Manrope_800ExtraBold",
-    color: "#0F172A", letterSpacing: 3,
+    fontSize: 22, fontFamily: "Raleway_800ExtraBold",
+    color: "#0F172A", letterSpacing: 2,
   },
   brandSub: {
     fontSize: 11, fontFamily: "Manrope_400Regular",

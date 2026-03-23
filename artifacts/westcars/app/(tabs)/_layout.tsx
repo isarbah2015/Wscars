@@ -22,7 +22,7 @@ function TabIcon({
   activeBg: string;
 }) {
   return (
-    <View style={[tabIconStyles.wrap, focused && { backgroundColor: activeBg, paddingHorizontal: 16, paddingVertical: 4 }]}>
+    <View style={[tabIconStyles.wrap, focused && { backgroundColor: activeBg, paddingHorizontal: 16 }]}>
       <Feather name={name} size={22} color={focused ? activeColor : color} />
     </View>
   );

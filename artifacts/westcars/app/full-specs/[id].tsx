@@ -100,11 +100,11 @@ export default function FullSpecsScreen() {
             end={{ x: 0.5, y: 1 }}
             style={StyleSheet.absoluteFill}
           />
-          <View style={styles.dimBadge}>
+          <View style={[styles.dimBadge, styles.dimBadgeLeft]}>
             <Text style={styles.dimText}>{s.length} mm</Text>
             <Text style={styles.dimSub}>Length</Text>
           </View>
-          <View style={[styles.dimBadge, { bottom: 10, right: 10, left: undefined }]}>
+          <View style={[styles.dimBadge, styles.dimBadgeRight]}>
             <Text style={styles.dimText}>{s.height} mm</Text>
             <Text style={styles.dimSub}>Height</Text>
           </View>
@@ -229,13 +229,14 @@ const styles = StyleSheet.create({
   heroImg: { width: "100%", height: "100%", opacity: 0.85 },
   dimBadge: {
     position: "absolute",
-    bottom: 10, left: 10,
     backgroundColor: "rgba(14,181,202,0.25)",
     borderWidth: 1,
     borderColor: "rgba(14,181,202,0.55)",
     paddingHorizontal: 10, paddingVertical: 6,
     borderRadius: 8,
   },
+  dimBadgeLeft:  { bottom: 10, left: 10 },
+  dimBadgeRight: { bottom: 10, right: 10 },
   dimText: { color: "#fff", fontSize: 13, fontFamily: "Manrope_700Bold" },
   dimSub:  { color: "rgba(255,255,255,0.7)", fontSize: 10, fontFamily: "Manrope_400Regular" },
 

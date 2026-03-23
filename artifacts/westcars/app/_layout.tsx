@@ -4,8 +4,13 @@ import {
   Manrope_600SemiBold,
   Manrope_700Bold,
   Manrope_800ExtraBold,
-  useFonts,
+  useFonts as useManropeFonts,
 } from "@expo-google-fonts/manrope";
+import {
+  Raleway_700Bold,
+  Raleway_800ExtraBold,
+  useFonts as useRalewayFonts,
+} from "@expo-google-fonts/raleway";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -41,13 +46,21 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({
+  const [manropeLoaded, manropeError] = useManropeFonts({
     Manrope_400Regular,
     Manrope_500Medium,
     Manrope_600SemiBold,
     Manrope_700Bold,
     Manrope_800ExtraBold,
   });
+
+  const [ralewayLoaded, ralewayError] = useRalewayFonts({
+    Raleway_700Bold,
+    Raleway_800ExtraBold,
+  });
+
+  const fontsLoaded = manropeLoaded && ralewayLoaded;
+  const fontError = manropeError || ralewayError;
 
   useEffect(() => {
     if (fontsLoaded || fontError) SplashScreen.hideAsync();

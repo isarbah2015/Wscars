@@ -68,10 +68,6 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        <Text style={styles.heroTitle}>Sign in</Text>
-        <Text style={styles.heroSub}>
-          Access your listings, saved cars and messages
-        </Text>
       </LinearGradient>
 
       {/* Form card */}
@@ -82,7 +78,7 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.formCard}>
-          <Text style={styles.formTitle}>Sign in</Text>
+          <Text style={styles.formTitle}>Sign in to your account</Text>
 
           <View style={styles.fieldWrap}>
             <Text style={styles.fieldLabel}>Email or phone</Text>
@@ -237,8 +233,8 @@ const styles = StyleSheet.create({
   brandRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   heroBadge: { width: 52, height: 52, borderRadius: 12 },
   brandName: {
-    fontSize: 22, fontFamily: "Manrope_800ExtraBold",
-    color: "#0F172A", letterSpacing: 3,
+    fontSize: 22, fontFamily: "Raleway_800ExtraBold",
+    color: "#0F172A", letterSpacing: 2,
   },
   tagline: {
     fontSize: 10, fontFamily: "Manrope_400Regular",

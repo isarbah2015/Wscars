@@ -378,8 +378,8 @@ const styles = StyleSheet.create({
   logoBadge: { width: 34, height: 34, borderRadius: 8 },
   logoText: {
     fontSize: 20,
-    fontFamily: "Manrope_800ExtraBold",
-    letterSpacing: 4,
+    fontFamily: "Raleway_800ExtraBold",
+    letterSpacing: 3,
   },
 
   // ── Search box ──
