@@ -262,7 +262,7 @@ export default function CarDetailScreen() {
           </Text>
 
           {/* Car history banner */}
-          <View style={[styles.historyBanner, { backgroundColor: isDark ? "#1C1A0A" : "#FFFDE7", borderColor: isDark ? "#2A2710" : "#FFF9C4" }]}>
+          <View style={[styles.historyBanner, { backgroundColor: isDark ? "rgba(14,181,202,0.10)" : "rgba(14,181,202,0.08)", borderColor: isDark ? "rgba(14,181,202,0.25)" : "rgba(14,181,202,0.22)" }]}>
             <View style={styles.historyIcon}>
               <Feather name="check-square" size={18} color="#8B5CF6" />
             </View>

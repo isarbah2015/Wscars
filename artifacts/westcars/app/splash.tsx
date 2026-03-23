@@ -9,117 +9,112 @@ import {
   View,
 } from "react-native";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 const WC_BADGE = require("@/assets/images/wc-badge.png");
 
 export default function SplashScreen() {
+  // Badge animations
+  const badgeScale   = useRef(new Animated.Value(0.5)).current;
   const badgeOpacity = useRef(new Animated.Value(0)).current;
-  const badgeScale   = useRef(new Animated.Value(0.7)).current;
 
-  const ring1Scale   = useRef(new Animated.Value(1)).current;
-  const ring1Opacity = useRef(new Animated.Value(0.6)).current;
-  const ring2Scale   = useRef(new Animated.Value(1)).current;
-  const ring2Opacity = useRef(new Animated.Value(0.4)).current;
-  const ring3Scale   = useRef(new Animated.Value(1)).current;
-  const ring3Opacity = useRef(new Animated.Value(0.2)).current;
+  // Shimmer bar sweep
+  const shimmerX     = useRef(new Animated.Value(-width)).current;
+  const shimmerAlpha = useRef(new Animated.Value(0)).current;
+
+  // Radial circles appear
+  const circle1 = useRef(new Animated.Value(0)).current;
+  const circle2 = useRef(new Animated.Value(0)).current;
+  const circle3 = useRef(new Animated.Value(0)).current;
+
+  // Outer glow pulse
+  const glowScale   = useRef(new Animated.Value(0.9)).current;
+  const glowOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Logo fades and scales in
-    Animated.parallel([
-      Animated.timing(badgeOpacity, {
-        toValue: 1,
-        duration: 600,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.spring(badgeScale, {
-        toValue: 1,
-        tension: 80,
-        friction: 9,
-        useNativeDriver: true,
-      }),
+    // 1. Concentric background circles bloom in
+    Animated.stagger(160, [
+      Animated.timing(circle1, { toValue: 1, duration: 700, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(circle2, { toValue: 1, duration: 700, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(circle3, { toValue: 1, duration: 700, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
     ]).start();
 
-    // Ripple rings pulse outward continuously
-    const pulse = (scaleVal: Animated.Value, opacityVal: Animated.Value, delay: number) => {
-      Animated.loop(
-        Animated.sequence([
-          Animated.delay(delay),
-          Animated.parallel([
-            Animated.timing(scaleVal, {
-              toValue: 2.8,
-              duration: 1800,
-              easing: Easing.out(Easing.cubic),
-              useNativeDriver: true,
-            }),
-            Animated.timing(opacityVal, {
-              toValue: 0,
-              duration: 1800,
-              easing: Easing.out(Easing.quad),
-              useNativeDriver: true,
-            }),
-          ]),
-          Animated.parallel([
-            Animated.timing(scaleVal, { toValue: 1, duration: 0, useNativeDriver: true }),
-            Animated.timing(opacityVal, { toValue: delay === 0 ? 0.55 : delay === 600 ? 0.35 : 0.18, duration: 0, useNativeDriver: true }),
-          ]),
-        ])
-      ).start();
-    };
-
+    // 2. Badge springs in after a short pause
     setTimeout(() => {
-      pulse(ring1Scale, ring1Opacity, 0);
-      pulse(ring2Scale, ring2Opacity, 600);
-      pulse(ring3Scale, ring3Opacity, 1200);
-    }, 400);
+      Animated.parallel([
+        Animated.spring(badgeScale, { toValue: 1, tension: 120, friction: 8, useNativeDriver: true }),
+        Animated.timing(badgeOpacity, { toValue: 1, duration: 350, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      ]).start();
+    }, 300);
 
-    const nav = setTimeout(() => router.replace("/auth/login"), 3200);
+    // 3. Outer glow fades in and gently pulses once
+    setTimeout(() => {
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(glowOpacity, { toValue: 0.5, duration: 400, useNativeDriver: true }),
+          Animated.spring(glowScale, { toValue: 1.15, tension: 60, friction: 10, useNativeDriver: true }),
+        ]),
+        Animated.parallel([
+          Animated.timing(glowOpacity, { toValue: 0.25, duration: 600, useNativeDriver: true }),
+          Animated.spring(glowScale, { toValue: 1.0, tension: 50, friction: 10, useNativeDriver: true }),
+        ]),
+      ]).start();
+    }, 500);
+
+    // 4. Shimmer sweep once across the badge
+    setTimeout(() => {
+      Animated.sequence([
+        Animated.timing(shimmerAlpha, { toValue: 1, duration: 120, useNativeDriver: true }),
+        Animated.timing(shimmerX, { toValue: width * 1.2, duration: 680, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(shimmerAlpha, { toValue: 0, duration: 150, useNativeDriver: true }),
+      ]).start();
+    }, 900);
+
+    const nav = setTimeout(() => router.replace("/auth/login"), 3000);
     return () => clearTimeout(nav);
   }, []);
 
-  const RING_SIZE = 130;
-
   return (
     <View style={styles.root}>
-      {/* Very soft radial gradient background: achieved with layered Views */}
-      <View style={styles.bgCenter} />
+      {/* Radial background circles */}
+      <Animated.View style={[styles.circle, styles.circle3, { opacity: circle3 }]} />
+      <Animated.View style={[styles.circle, styles.circle2, { opacity: circle2 }]} />
+      <Animated.View style={[styles.circle, styles.circle1, { opacity: circle1 }]} />
 
-      {/* Ripple rings */}
-      {[
-        { scale: ring1Scale, opacity: ring1Opacity },
-        { scale: ring2Scale, opacity: ring2Opacity },
-        { scale: ring3Scale, opacity: ring3Opacity },
-      ].map((r, i) => (
+      {/* Outer glow ring around badge */}
+      <Animated.View
+        style={[
+          styles.glowRing,
+          { opacity: glowOpacity, transform: [{ scale: glowScale }] },
+        ]}
+      />
+
+      {/* Badge card */}
+      <Animated.View
+        style={[
+          styles.badgeCard,
+          { opacity: badgeOpacity, transform: [{ scale: badgeScale }] },
+        ]}
+      >
+        <Image source={WC_BADGE} style={styles.badge} resizeMode="contain" />
+
+        {/* Shimmer sweep overlay */}
         <Animated.View
-          key={i}
           style={[
-            styles.ring,
+            styles.shimmer,
             {
-              width: RING_SIZE,
-              height: RING_SIZE,
-              borderRadius: RING_SIZE / 2,
-              opacity: r.opacity,
-              transform: [{ scale: r.scale }],
+              opacity: shimmerAlpha,
+              transform: [{ translateX: shimmerX }],
             },
           ]}
+          pointerEvents="none"
         />
-      ))}
-
-      {/* W Badge */}
-      <Animated.View
-        style={{
-          opacity: badgeOpacity,
-          transform: [{ scale: badgeScale }],
-          zIndex: 10,
-        }}
-      >
-        <View style={styles.badgeWrap}>
-          <Image source={WC_BADGE} style={styles.badge} resizeMode="contain" />
-        </View>
       </Animated.View>
     </View>
   );
 }
+
+const SIZE = 140;
+const RING = SIZE + 40;
 
 const styles = StyleSheet.create({
   root: {
@@ -129,41 +124,57 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  bgCenter: {
+  /* Concentric teal background circles */
+  circle: {
     position: "absolute",
-    width: width * 1.4,
-    height: width * 1.4,
-    borderRadius: width * 0.7,
-    backgroundColor: "rgba(14,181,202,0.08)",
-    alignSelf: "center",
-    top: "50%",
-    marginTop: -(width * 0.7),
+    borderRadius: 9999,
+    backgroundColor: "rgba(14,181,202,0.06)",
   },
+  circle1: { width: 260, height: 260 },
+  circle2: { width: 400, height: 400, backgroundColor: "rgba(14,181,202,0.04)" },
+  circle3: { width: 580, height: 580, backgroundColor: "rgba(14,181,202,0.025)" },
 
-  ring: {
+  /* Outer glow ring */
+  glowRing: {
     position: "absolute",
-    borderWidth: 1.5,
-    borderColor: "rgba(14,181,202,0.55)",
+    width: RING,
+    height: RING,
+    borderRadius: RING / 2,
+    borderWidth: 2,
+    borderColor: "rgba(14,181,202,0.45)",
     backgroundColor: "transparent",
   },
 
-  badgeWrap: {
-    width: 120,
-    height: 120,
-    borderRadius: 30,
+  /* White card holding the badge */
+  badgeCard: {
+    width: SIZE,
+    height: SIZE,
+    borderRadius: 32,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
     shadowColor: "rgba(14,181,202,1)",
-    shadowOpacity: 0.22,
-    shadowRadius: 30,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 16,
+    shadowOpacity: 0.28,
+    shadowRadius: 36,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 20,
   },
 
   badge: {
-    width: 90,
-    height: 90,
-    borderRadius: 20,
+    width: SIZE * 0.7,
+    height: SIZE * 0.7,
+    borderRadius: 16,
+  },
+
+  /* Shimmer diagonal bar */
+  shimmer: {
+    position: "absolute",
+    top: -10,
+    left: -60,
+    width: 60,
+    height: SIZE + 20,
+    backgroundColor: "rgba(255,255,255,0.55)",
+    transform: [{ skewX: "-20deg" }],
   },
 });

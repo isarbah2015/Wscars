@@ -48,8 +48,13 @@ export default function LoginScreen() {
       style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      {/* Light glass hero */}
-      <View style={[styles.hero, { paddingTop: topPad + 16, backgroundColor: "#FFFFFF", borderBottomWidth: 1, borderBottomColor: "rgba(0,0,0,0.07)" }]}>
+      {/* Gradient hero */}
+      <LinearGradient
+        colors={["rgba(14,181,202,0.14)", "#FFFFFF"]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={[styles.hero, { paddingTop: topPad + 16 }]}
+      >
         <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
           <Feather name="arrow-left" size={20} color="#0F172A" />
         </Pressable>
@@ -63,26 +68,11 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        {/* Hero copy */}
-        <Text style={styles.heroTitle}>Welcome back</Text>
+        <Text style={styles.heroTitle}>Sign in</Text>
         <Text style={styles.heroSub}>
-          Sign in to access your listings,{"\n"}saved cars and messages
+          Access your listings, saved cars and messages
         </Text>
-
-        {/* Stats strip */}
-        <View style={styles.statsRow}>
-          {[
-            { value: "50k+", label: "Active buyers" },
-            { value: "2.4k", label: "Listings" },
-            { value: "8",    label: "Regions" },
-          ].map((s) => (
-            <View key={s.label} style={styles.statItem}>
-              <Text style={styles.statValue}>{s.value}</Text>
-              <Text style={styles.statLabel}>{s.label}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
+      </LinearGradient>
 
       {/* Form card */}
       <ScrollView

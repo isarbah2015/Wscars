@@ -30,6 +30,7 @@ export default function SignupScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading,      setLoading]      = useState(false);
   const [focused,      setFocused]      = useState<string | null>(null);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   const handleSignup = async () => {
     if (!name.trim() || !email.trim() || !phone.trim() || !password.trim()) {
@@ -68,17 +69,12 @@ export default function SignupScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ flexGrow: 1 }}
       >
-        {/* ── Light glass hero ── */}
-        <View
-          style={[
-            styles.hero,
-            {
-              paddingTop: topPad + 14,
-              backgroundColor: "#FFFFFF",
-              borderBottomWidth: 1,
-              borderBottomColor: "rgba(0,0,0,0.07)",
-            },
-          ]}
+        {/* ── Gradient hero ── */}
+        <LinearGradient
+          colors={["rgba(14,181,202,0.14)", "#FFFFFF"]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={[styles.hero, { paddingTop: topPad + 14 }]}
         >
           {/* Back */}
           <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
@@ -96,23 +92,9 @@ export default function SignupScreen() {
 
           <Text style={styles.heroTitle}>Create account</Text>
           <Text style={styles.heroSubtitle}>
-            Join 50,000+ buyers &amp; sellers. List your car free.
+            Join thousands of buyers &amp; sellers. List your car for free.
           </Text>
-
-          {/* Pill stats */}
-          <View style={styles.statsRow}>
-            {[
-              { value: "Free", label: "To list" },
-              { value: "50k+", label: "Members" },
-              { value: "8",    label: "Regions" },
-            ].map((s) => (
-              <View key={s.label} style={styles.statItem}>
-                <Text style={styles.statValue}>{s.value}</Text>
-                <Text style={styles.statLabel}>{s.label}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
+        </LinearGradient>
 
         {/* ── White form sheet ── */}
         <View style={styles.sheet}>
@@ -242,6 +224,48 @@ export default function SignupScreen() {
               <Text style={styles.signinLink}>Sign in</Text>
             </Pressable>
           </View>
+
+          {/* ── Admin / Support Access ── */}
+          <Pressable
+            style={styles.adminToggle}
+            onPress={() => setShowAdminPanel(!showAdminPanel)}
+          >
+            <Feather name="settings" size={13} color="#9E9E9E" />
+            <Text style={styles.adminToggleText}>Staff / Support Login</Text>
+            <Feather name={showAdminPanel ? "chevron-up" : "chevron-down"} size={13} color="#9E9E9E" />
+          </Pressable>
+
+          {showAdminPanel && (
+            <View style={styles.adminPanel}>
+              <View style={styles.adminPanelHeader}>
+                <View style={styles.adminBadge}>
+                  <Feather name="shield" size={12} color="#fff" />
+                  <Text style={styles.adminBadgeText}>ADMIN</Text>
+                </View>
+                <Text style={styles.adminPanelTitle}>Westcars Support Access</Text>
+              </View>
+              <Text style={styles.adminPanelSub}>
+                Use these credentials to respond to user support messages and manage the marketplace.
+              </Text>
+              <View style={styles.adminCredRow}>
+                <View style={styles.adminCredItem}>
+                  <Text style={styles.adminCredLabel}>Email</Text>
+                  <Text style={styles.adminCredVal}>admin@westcars.gh</Text>
+                </View>
+                <View style={styles.adminCredItem}>
+                  <Text style={styles.adminCredLabel}>Password</Text>
+                  <Text style={styles.adminCredVal}>any password</Text>
+                </View>
+              </View>
+              <Pressable
+                style={styles.adminAutoFill}
+                onPress={() => router.replace("/auth/login")}
+              >
+                <Feather name="log-in" size={14} color="#0066CC" />
+                <Text style={styles.adminAutoFillText}>Go to Login → Use credentials</Text>
+              </Pressable>
+            </View>
+          )}
 
           {/* Trust badges */}
           <View style={styles.trustRow}>
@@ -434,4 +458,37 @@ const styles = StyleSheet.create({
     borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5,
   },
   trustText: { fontSize: 11, fontFamily: "Manrope_500Medium", color: "#0098AA" },
+
+  /* Admin panel */
+  adminToggle: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 6, marginTop: 4, paddingVertical: 8,
+  },
+  adminToggleText: { fontSize: 12, color: "#BDBDBD", fontFamily: "Manrope_400Regular" },
+  adminPanel: {
+    borderRadius: 14, borderWidth: 1, borderColor: "#D0E4FF",
+    backgroundColor: "#F0F7FF", padding: 16, gap: 10,
+  },
+  adminPanelHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
+  adminBadge: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    backgroundColor: "#0EB5CA", borderRadius: 6,
+    paddingHorizontal: 7, paddingVertical: 3,
+  },
+  adminBadgeText: { fontSize: 10, fontFamily: "Manrope_700Bold", color: "#FFFFFF", letterSpacing: 0.5 },
+  adminPanelTitle: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#0F172A" },
+  adminPanelSub: { fontSize: 12, fontFamily: "Manrope_400Regular", color: "#64748B", lineHeight: 18 },
+  adminCredRow: { flexDirection: "row", gap: 12 },
+  adminCredItem: {
+    flex: 1, backgroundColor: "#fff", borderRadius: 10,
+    borderWidth: 1, borderColor: "rgba(14,181,202,0.32)", padding: 10, gap: 2,
+  },
+  adminCredLabel: { fontSize: 10, fontFamily: "Manrope_600SemiBold", color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.4 },
+  adminCredVal: { fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#0F172A" },
+  adminAutoFill: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
+    height: 40, backgroundColor: "#fff", borderRadius: 10,
+    borderWidth: 1.5, borderColor: "rgba(14,181,202,0.45)",
+  },
+  adminAutoFillText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#0098AA" },
 });

@@ -226,7 +226,7 @@ export default function HomeScreen() {
         {/* ── Sponsored Banner → leads to Advertise ── */}
         <Pressable onPress={() => router.push("/advertise")} style={styles.promoBannerWrap}>
           <LinearGradient
-            colors={["#7A2000", "#CC3D00", "#FF6B00"]}
+            colors={["#006F80", "#0EB5CA", "#38D1E5"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.promoBanner}
@@ -318,7 +318,7 @@ export default function HomeScreen() {
         {/* ── Advertise Banner ── */}
         <Pressable onPress={() => router.push("/advertise")} style={styles.adBannerWrap}>
           <LinearGradient
-            colors={["#7C3AED", "#A855F7", "#EC4899"]}
+            colors={["#005F6E", "#0098AA", "#0EB5CA"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.adBanner}
