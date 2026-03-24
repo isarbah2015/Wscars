@@ -86,6 +86,13 @@ export default function TabLayout() {
         tabBarInactiveTintColor: inactiveColor,
         headerShown: false,
         tabBarShowLabel: false,
+        tabBarItemStyle: {
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingTop: 10,
+          paddingBottom: 10,
+        },
         tabBarStyle: {
           position: "absolute",
           backgroundColor: "transparent",

@@ -104,12 +104,12 @@ export default function HomeScreen() {
 
   const filteredCars =
     condition === "new"
-      ? cars.filter((c) => c.condition === "New")
+      ? cars.filter((c) => c.condition === "New" && c.category !== "motorcycle" && c.category !== "moto")
       : condition === "moto"
       ? cars.filter((c) => c.category === "motorcycle" || c.category === "moto")
-      : cars.filter((c) => c.condition !== "New" && c.category !== "motorcycle");
+      : cars.filter((c) => c.condition !== "New" && c.category !== "motorcycle" && c.category !== "moto");
 
-  const displayCars  = filteredCars.length > 0 ? filteredCars : cars;
+  const displayCars = filteredCars;
   const totalCount   = cars.length;
   const specialOffers = cars
     .filter((c) => c.isSponsored || c.isFeatured)
@@ -148,7 +148,6 @@ export default function HomeScreen() {
             </View>
           </Pressable>
 
-          <Image source={WC_BADGE} style={styles.logoBadgeRight} resizeMode="contain" />
         </View>
 
         {/* ── Row 2: Search bar ── */}
@@ -162,7 +161,7 @@ export default function HomeScreen() {
           <Image
             source={SEARCH_ICON}
             style={styles.searchCarIcon}
-            tintColor="#0EB5CA"
+            tintColor={isDark ? "#94A3B8" : "#334155"}
             resizeMode="contain"
           />
           <View style={styles.searchBoxText}>
@@ -420,9 +419,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   avatarText: { fontSize: 15, fontFamily: "Manrope_700Bold" },
-  profileTextBlock: { gap: 1 },
-  userName: { fontSize: 14, fontFamily: "Manrope_700Bold" },
-  userSub: { fontSize: 11, fontFamily: "Manrope_500Medium" },
+  profileTextBlock: { gap: 0 },
+  userName: { fontSize: 14, fontFamily: "Manrope_700Bold", lineHeight: 17 },
+  userSub: { fontSize: 11, fontFamily: "Manrope_500Medium", lineHeight: 14 },
 
   logoBadgeRight: { width: 36, height: 36, borderRadius: 8 },
 

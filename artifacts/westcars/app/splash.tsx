@@ -148,26 +148,19 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.28)",
   },
 
-  /* White glass badge card */
+  /* Badge wrapper — clips the PNG's built-in white padding */
   badgeCard: {
     width: BADGE,
     height: BADGE,
-    borderRadius: 28,
-    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
-    shadowColor: "rgba(14,181,202,1)",
-    shadowOpacity: 0.3,
-    shadowRadius: 40,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 22,
   },
 
   badge: {
-    width: BADGE * 0.72,
-    height: BADGE * 0.72,
-    borderRadius: 14,
+    width: BADGE * 1.28,
+    height: BADGE * 1.28,
   },
 
   shimmer: {
