@@ -1,8 +1,9 @@
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
+  Animated,
   Image,
   Platform,
   Pressable,
@@ -32,45 +33,30 @@ const BANNER_CAR  = require("@/assets/images/banner-car.png");
 
 type Condition = "new" | "used" | "moto";
 
-const CONDITION_TABS: { id: Condition; label: string; img: any; grad: [string, string]; dot: string }[] = [
-  { id: "new",  label: "New",  img: CAR_NEW,  grad: ["#CC3D00", "#FF6B00"], dot: "#FF6B00" },
-  { id: "used", label: "Used", img: CAR_USED, grad: ["#CC3D00", "#FF6B00"], dot: "#FF6B00" },
-  { id: "moto", label: "Moto", img: CAR_MOTO, grad: ["#CC3D00", "#FF6B00"], dot: "#FF6B00" },
+const CONDITION_TABS: { id: Condition; label: string; img: any }[] = [
+  { id: "new",  label: "New",  img: CAR_NEW  },
+  { id: "used", label: "Used", img: CAR_USED },
+  { id: "moto", label: "Moto", img: CAR_MOTO },
 ];
-
-const CAT_COLORS: Record<string, { bg: string; border: string; textColor: string }> = {
-  "SUV / 4×4":  { bg: "rgba(129,140,248,0.18)", border: "rgba(129,140,248,0.55)", textColor: "#C7D2FE" },
-  "Sedan":      { bg: "rgba(244,114,182,0.18)", border: "rgba(244,114,182,0.55)", textColor: "#FBCFE8" },
-  "Pickup":     { bg: "rgba(252,211,77,0.18)",  border: "rgba(252,211,77,0.55)",  textColor: "#FDE68A" },
-  "Van":        { bg: "rgba(134,239,172,0.18)", border: "rgba(134,239,172,0.55)", textColor: "#BBF7D0" },
-  "Coupe":      { bg: "rgba(192,132,252,0.18)", border: "rgba(192,132,252,0.55)", textColor: "#E9D5FF" },
-  "Hatchback":  { bg: "rgba(103,232,249,0.18)", border: "rgba(103,232,249,0.55)", textColor: "#A5F3FC" },
-  "Motorcycle": { bg: "rgba(147,197,253,0.18)", border: "rgba(147,197,253,0.55)", textColor: "#BFDBFE" },
-  "Scooter":    { bg: "rgba(251,113,133,0.18)", border: "rgba(251,113,133,0.55)", textColor: "#FECDD3" },
-  "ATV / Quad": { bg: "rgba(110,231,183,0.18)", border: "rgba(110,231,183,0.55)", textColor: "#A7F3D0" },
-  "Dirt Bike":  { bg: "rgba(253,186,116,0.18)", border: "rgba(253,186,116,0.55)", textColor: "#FED7AA" },
-};
 
 const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: number }[]> = {
   new: [
-    { label: "SUV / 4×4", img: CAT_SUV,    count: 4 },
+    { label: "SUV / 4×4", img: CAT_SUV,    count: 2 },
     { label: "Sedan",     img: CAT_SEDAN,  count: 2 },
-    { label: "Pickup",    img: CAT_PICKUP, count: 1 },
+    { label: "Hatchback", img: CAT_HATCH,  count: 1 },
+    { label: "Pickup",    img: CAT_PICKUP, count: 0 },
     { label: "Van",       img: CAT_VAN,    count: 0 },
-    { label: "Coupe",     img: CAT_COUPE,  count: 0 },
-    { label: "Hatchback", img: CAT_HATCH,  count: 0 },
   ],
   used: [
     { label: "SUV / 4×4", img: CAT_SUV,    count: 5 },
     { label: "Sedan",     img: CAT_SEDAN,  count: 2 },
     { label: "Pickup",    img: CAT_PICKUP, count: 1 },
-    { label: "Van",       img: CAT_VAN,    count: 0 },
-    { label: "Coupe",     img: CAT_COUPE,  count: 0 },
-    { label: "Hatchback", img: CAT_HATCH,  count: 0 },
+    { label: "Van",       img: CAT_VAN,    count: 1 },
+    { label: "Hatchback", img: CAT_HATCH,  count: 1 },
   ],
   moto: [
-    { label: "Motorcycle", img: CAT_MOTO,    count: 3 },
-    { label: "Scooter",    img: CAR_MOTO,    count: 2 },
+    { label: "Motorcycle", img: CAT_MOTO,    count: 2 },
+    { label: "Scooter",    img: CAR_MOTO,    count: 0 },
     { label: "ATV / Quad", img: CAT_PICKUP,  count: 0 },
     { label: "Dirt Bike",  img: CAT_MOTO,    count: 0 },
   ],
@@ -83,12 +69,45 @@ export default function HomeScreen() {
   const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
   const [condition, setCondition] = useState<Condition>("used");
 
+  const catMaxH   = useRef(new Animated.Value(300)).current;
+  const catOpacity = useRef(new Animated.Value(1)).current;
+  const lastScrollY = useRef(0);
+  const catOpen = useRef(true);
+
+  const handleScroll = (e: any) => {
+    const y = e.nativeEvent.contentOffset.y;
+    const dy = y - lastScrollY.current;
+    lastScrollY.current = y;
+
+    if (y < 8) {
+      if (!catOpen.current) {
+        catOpen.current = true;
+        Animated.parallel([
+          Animated.timing(catMaxH,    { toValue: 300, duration: 220, useNativeDriver: false }),
+          Animated.timing(catOpacity, { toValue: 1,   duration: 180, useNativeDriver: false }),
+        ]).start();
+      }
+    } else if (dy > 5 && catOpen.current) {
+      catOpen.current = false;
+      Animated.parallel([
+        Animated.timing(catMaxH,    { toValue: 0, duration: 200, useNativeDriver: false }),
+        Animated.timing(catOpacity, { toValue: 0, duration: 160, useNativeDriver: false }),
+      ]).start();
+    } else if (dy < -5 && !catOpen.current) {
+      catOpen.current = true;
+      Animated.parallel([
+        Animated.timing(catMaxH,    { toValue: 300, duration: 220, useNativeDriver: false }),
+        Animated.timing(catOpacity, { toValue: 1,   duration: 180, useNativeDriver: false }),
+      ]).start();
+    }
+  };
+
   const filteredCars =
     condition === "new"
       ? cars.filter((c) => c.condition === "New")
       : condition === "moto"
-      ? []
-      : cars.filter((c) => c.condition !== "New");
+      ? cars.filter((c) => c.category === "motorcycle" || c.category === "moto")
+      : cars.filter((c) => c.condition !== "New" && c.category !== "motorcycle");
 
   const displayCars  = filteredCars.length > 0 ? filteredCars : cars;
   const totalCount   = cars.length;
@@ -97,10 +116,10 @@ export default function HomeScreen() {
     .filter((car, i, arr) => arr.findIndex((c) => c.id === car.id) === i)
     .slice(0, 5);
 
-
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      {/* ── Fixed Header (glassmorphic light) ── */}
+
+      {/* ── Fixed Header ── */}
       <View
         style={[
           styles.header,
@@ -111,22 +130,25 @@ export default function HomeScreen() {
           },
         ]}
       >
-        {/* ── Row 1: Logo + user avatar ── */}
+        {/* ── Row 1: Profile on LEFT, WC badge on RIGHT ── */}
         <View style={styles.topRow}>
-          <View style={styles.logoRow}>
-            <Image source={WC_BADGE} style={styles.logoBadge} resizeMode="contain" />
-            <Text style={[styles.logoText, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>WESTCARS</Text>
-          </View>
-          <View style={styles.userRow}>
-            <View style={[styles.avatarCircle, { backgroundColor: "#0EB5CA" }]}>
-              <Text style={[styles.avatarText, { color: "#FFFFFF" }]}>
-                {currentUser?.name?.[0] || "W"}
+          <Pressable style={styles.profileLeft} onPress={() => router.push("/(tabs)/profile")}>
+            <View style={[styles.avatarRoundedSq, { backgroundColor: "rgba(14,181,202,0.16)" }]}>
+              <Text style={[styles.avatarText, { color: "#0098AA" }]}>
+                {currentUser?.name?.[0]?.toUpperCase() || "W"}
               </Text>
             </View>
-            <Text style={[styles.userName, { color: isDark ? "#94A3B8" : "#475569" }]}>
-              {currentUser?.name?.split(" ")[0] || "Guest"}
-            </Text>
-          </View>
+            <View style={styles.profileTextBlock}>
+              <Text style={[styles.userName, { color: isDark ? "#CBD5E1" : "#0F172A" }]} numberOfLines={1}>
+                {currentUser?.name?.split(" ")[0] || "Guest"}
+              </Text>
+              <Text style={[styles.userSub, { color: "#0EB5CA" }]}>
+                Ghana's Car Market
+              </Text>
+            </View>
+          </Pressable>
+
+          <Image source={WC_BADGE} style={styles.logoBadgeRight} resizeMode="contain" />
         </View>
 
         {/* ── Row 2: Search bar ── */}
@@ -137,7 +159,12 @@ export default function HomeScreen() {
           }]}
           onPress={() => router.push("/(tabs)/search")}
         >
-          <Image source={SEARCH_ICON} style={styles.searchCarIcon} resizeMode="contain" />
+          <Image
+            source={SEARCH_ICON}
+            style={styles.searchCarIcon}
+            tintColor="#0EB5CA"
+            resizeMode="contain"
+          />
           <View style={styles.searchBoxText}>
             <Text style={[styles.searchBoxLabel, { color: isDark ? "#CBD5E1" : "#334155" }]}>Brand, model, location…</Text>
             <Text style={[styles.searchBoxCount, { color: isDark ? "#475569" : "#94A3B8" }]}>
@@ -149,78 +176,94 @@ export default function HomeScreen() {
           </View>
         </Pressable>
 
-        {/* ── Row 3: 3 condition tabs — text TOP, image BOTTOM ── */}
-        <View style={styles.mainTabsRow}>
-          {CONDITION_TABS.map((tab) => {
-            const active = condition === tab.id;
-            return (
-              <Pressable
-                key={tab.id}
-                style={[
-                  styles.mainTab,
-                  active
-                    ? { backgroundColor: "#0EB5CA", borderColor: "#0DCAE6" }
-                    : {
-                        backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9",
-                        borderColor: isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0",
-                      },
-                ]}
-                onPress={() => setCondition(tab.id)}
-              >
-                {/* Label — TOP */}
-                <Text style={[
-                  styles.mainTabLabel,
-                  active
-                    ? { color: "#FFFFFF", fontFamily: "Manrope_800ExtraBold" }
-                    : { color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Manrope_600SemiBold" },
-                ]}>
-                  {tab.label}
-                </Text>
-                {/* Car image — BOTTOM, clipped */}
-                <View style={styles.mainTabImgWrap}>
-                  <Image source={tab.img} style={styles.mainTabImg} resizeMode="contain" />
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
+        {/* ── Collapsible: Main condition tabs + Sub-categories ── */}
+        <Animated.View style={{ maxHeight: catMaxH, opacity: catOpacity, overflow: "hidden" }}>
+          {/* Row 3: 3 condition tabs */}
+          <View style={styles.mainTabsRow}>
+            {CONDITION_TABS.map((tab) => {
+              const active = condition === tab.id;
+              return (
+                <Pressable
+                  key={tab.id}
+                  style={[
+                    styles.mainTab,
+                    active
+                      ? { backgroundColor: "#0EB5CA", borderColor: "#0DCAE6" }
+                      : {
+                          backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9",
+                          borderColor: isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0",
+                        },
+                  ]}
+                  onPress={() => setCondition(tab.id)}
+                >
+                  <Text style={[
+                    styles.mainTabLabel,
+                    active
+                      ? { color: "#FFFFFF", fontFamily: "Manrope_800ExtraBold" }
+                      : { color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Manrope_600SemiBold" },
+                  ]}>
+                    {tab.label}
+                  </Text>
+                  <View style={styles.mainTabImgWrap}>
+                    <Image source={tab.img} style={styles.mainTabImg} resizeMode="contain" />
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
 
+          {/* Row 4: Sub-categories horizontal strip */}
+          <View style={[styles.subCatsSection, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.subCatsRow}
+            >
+              {VEHICLE_CATEGORIES[condition].map((cat) => (
+                <Pressable
+                  key={cat.label}
+                  style={[
+                    styles.subTab,
+                    {
+                      backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
+                      borderColor: isDark ? "#2D3A4F" : "#E4E8EF",
+                    },
+                  ]}
+                  onPress={() => router.push("/(tabs)/search")}
+                >
+                  <Text style={[styles.subTabLabel, { color: isDark ? "#CBD5E1" : "#1E293B" }]} numberOfLines={1}>
+                    {cat.label}
+                  </Text>
+                  <View style={styles.subTabImgWrap}>
+                    <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
+                  </View>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </Animated.View>
       </View>
 
       {/* ── Scrollable body ── */}
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: 100 + (insets.bottom || 0) }}
       >
-        {/* ── Sub-categories — horizontal strip, white rectangles ── */}
-        <View style={[styles.subCatsSection, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.subCatsRow}
-          >
-            {VEHICLE_CATEGORIES[condition].map((cat) => (
-              <Pressable
-                key={cat.label}
-                style={[
-                  styles.subTab,
-                  {
-                    backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
-                    borderColor: isDark ? "#2D3A4F" : "#E4E8EF",
-                  },
-                ]}
-                onPress={() => router.push("/(tabs)/search")}
-              >
-                <Text style={[styles.subTabLabel, { color: isDark ? "#CBD5E1" : "#1E293B" }]} numberOfLines={1}>
-                  {cat.label}
-                </Text>
-                <View style={styles.subTabImgWrap}>
-                  <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
-                </View>
-              </Pressable>
-            ))}
-          </ScrollView>
+
+        {/* ── WESTCARS brand strip ── */}
+        <View style={[styles.brandStrip, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
+          <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
+          <View>
+            <Text style={[styles.brandStripName, { color: "#0EB5CA" }]}>
+              WESTCARS
+            </Text>
+            <Text style={[styles.brandStripSub, { color: isDark ? "#475569" : "#94A3B8" }]}>
+              Find your perfect car in Ghana
+            </Text>
+          </View>
         </View>
 
         {/* ── Sponsored Banner → leads to Advertise ── */}
@@ -347,7 +390,7 @@ const styles = StyleSheet.create({
 
   header: {
     paddingHorizontal: 14,
-    paddingBottom: 12,
+    paddingBottom: 10,
     gap: 10,
     borderBottomWidth: 1,
     shadowColor: "#000",
@@ -363,33 +406,33 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  userRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  avatarCircle: {
+
+  profileLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  avatarRoundedSq: {
     width: 34,
     height: 34,
-    borderRadius: 17,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: { fontSize: 15, fontFamily: "Manrope_700Bold" },
-  userName: { fontSize: 14, fontFamily: "Manrope_600SemiBold" },
+  profileTextBlock: { gap: 1 },
+  userName: { fontSize: 14, fontFamily: "Manrope_700Bold" },
+  userSub: { fontSize: 11, fontFamily: "Manrope_500Medium" },
 
-  logoRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  logoBadge: { width: 34, height: 34, borderRadius: 8 },
-  logoText: {
-    fontSize: 20,
-    fontFamily: "Raleway_800ExtraBold",
-    letterSpacing: 3,
-  },
+  logoBadgeRight: { width: 36, height: 36, borderRadius: 8 },
 
-  // ── Search box ──
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
     borderRadius: 14,
     paddingHorizontal: 14,
-    paddingVertical: 11,
+    paddingVertical: 10,
     borderWidth: 1,
   },
   searchBoxText: { flex: 1 },
@@ -409,22 +452,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  searchCarIcon: { width: 44, height: 44 },
+  searchCarIcon: { width: 40, height: 40 },
 
-  // ── 3 fixed main condition tabs ──
   mainTabsRow: {
     flexDirection: "row",
     gap: 8,
-    paddingHorizontal: 10,
-    paddingTop: 6,
-    paddingBottom: 8,
+    paddingHorizontal: 2,
+    paddingTop: 4,
+    paddingBottom: 6,
   },
   mainTab: {
     flex: 1,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: 0,
     paddingTop: 8,
     paddingBottom: 4,
     paddingHorizontal: 4,
@@ -439,51 +480,48 @@ const styles = StyleSheet.create({
   },
   mainTabImgWrap: {
     width: 80,
-    height: 46,
+    height: 44,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
     marginTop: -2,
   },
-  mainTabImg: { width: 78, height: 48 },
+  mainTabImg: { width: 78, height: 46 },
 
-  // ── Sub-category section (white band at top of scroll body) ──
   subCatsSection: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.06)",
+    paddingVertical: 8,
   },
   subCatsRow: {
     flexDirection: "row",
     gap: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 2,
     alignItems: "center",
   },
   subTab: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    width: 148,
-    height: 58,
+    width: 140,
+    height: 54,
     borderRadius: 14,
     borderWidth: 1,
-    paddingLeft: 12,
+    paddingLeft: 10,
     paddingRight: 0,
     shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
     overflow: "hidden",
   },
   subTabImgWrap: {
-    width: 70,
-    height: 58,
+    width: 66,
+    height: 54,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
   },
-  subTabImg: { width: 70, height: 46 },
+  subTabImg: { width: 66, height: 44 },
   subTabLabel: {
     fontSize: 11,
     fontFamily: "Manrope_700Bold",
@@ -493,7 +531,27 @@ const styles = StyleSheet.create({
 
   scroll: { flex: 1 },
 
-  // ── Sponsored Banner ──
+  brandStrip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.05)",
+  },
+  brandStripBadge: { width: 28, height: 28, borderRadius: 6 },
+  brandStripName: {
+    fontSize: 16,
+    fontFamily: "Raleway_800ExtraBold",
+    letterSpacing: 1.5,
+  },
+  brandStripSub: {
+    fontSize: 11,
+    fontFamily: "Manrope_400Regular",
+    marginTop: 1,
+  },
+
   promoBannerWrap: {
     marginHorizontal: 10,
     marginTop: 10,
@@ -537,9 +595,7 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_400Regular",
     color: "rgba(255,255,255,0.65)",
   },
-  promoCta: {
-    marginTop: 4,
-  },
+  promoCta: { marginTop: 4 },
   promoCtaBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -562,7 +618,6 @@ const styles = StyleSheet.create({
     height: 76,
   },
 
-  // ── Section ──
   section: {
     paddingHorizontal: 12,
     paddingTop: 16,
@@ -598,7 +653,6 @@ const styles = StyleSheet.create({
   },
   seeAll: { fontSize: 13, fontFamily: "Manrope_600SemiBold" },
 
-  // Grid — 2 column
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -610,9 +664,8 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
 
-  sep: { height: 10, backgroundColor: "#F0F2F5" },
+  sep: { height: 10 },
 
-  // Special offers
   offersRow: { flexDirection: "row", gap: 10, paddingRight: 12, paddingBottom: 12 },
   offerCard: {
     width: 180,
@@ -629,19 +682,18 @@ const styles = StyleSheet.create({
   offerImg: { width: "100%", height: "100%" },
   offerHeart: { position: "absolute", top: 6, right: 6 },
   offerInfo: { padding: 10, gap: 2 },
-  offerPrice: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#0A1628" },
-  offerName: { fontSize: 12, fontFamily: "Manrope_400Regular", color: "#6B7A90" },
-  offerYear: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "#9BAFC4" },
+  offerPrice: { fontSize: 14, fontFamily: "Manrope_700Bold" },
+  offerName: { fontSize: 12, fontFamily: "Manrope_400Regular" },
+  offerYear: { fontSize: 11, fontFamily: "Manrope_400Regular" },
 
-  // Advertise banner
   adBannerWrap: {
     marginHorizontal: 10,
     marginTop: 10,
     marginBottom: 6,
     borderRadius: 18,
     overflow: "hidden",
-    shadowColor: "#7C3AED",
-    shadowOpacity: 0.28,
+    shadowColor: "#0EB5CA",
+    shadowOpacity: 0.22,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 5 },
     elevation: 7,

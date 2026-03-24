@@ -528,9 +528,9 @@ const styles = StyleSheet.create({
   iconRing: { width: 88, height: 88, borderRadius: 44, alignItems: "center", justifyContent: "center" },
   authTitle: { fontSize: 24, fontFamily: "Manrope_700Bold" },
   authText: { fontSize: 14, fontFamily: "Manrope_400Regular", textAlign: "center", lineHeight: 20 },
-  authBtn: { borderRadius: 14, overflow: "hidden", width: "100%" },
+  authBtn: { borderRadius: 14, width: "100%", paddingVertical: 15, alignItems: "center", justifyContent: "center" },
   authGradient: { paddingVertical: 14, alignItems: "center" },
-  authBtnText: { fontSize: 16, fontFamily: "Manrope_600SemiBold", color: "#fff" },
+  authBtnText: { fontSize: 16, fontFamily: "Manrope_600SemiBold", color: "#fff", textAlign: "center" },
   signupLink: { fontSize: 14, fontFamily: "Manrope_600SemiBold" },
 
   // Profile header

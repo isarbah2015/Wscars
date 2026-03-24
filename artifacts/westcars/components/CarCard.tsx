@@ -149,6 +149,12 @@ export function CarCard({ car, style }: CarCardProps) {
               </View>
             )}
           </View>
+          {car.seller?.isVerified && (
+            <View style={styles.verifiedRow}>
+              <Feather name="check-circle" size={11} color="#1565C0" />
+              <Text style={styles.verifiedText}>Verified seller</Text>
+            </View>
+          )}
         </View>
       </Pressable>
     </Animated.View>
@@ -310,5 +316,16 @@ const styles = StyleSheet.create({
   metaChipText: {
     fontSize: 10,
     fontFamily: "Manrope_500Medium",
+  },
+  verifiedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
+  verifiedText: {
+    fontSize: 10,
+    fontFamily: "Manrope_600SemiBold",
+    color: "#1565C0",
   },
 });

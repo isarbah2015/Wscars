@@ -76,11 +76,6 @@ export default function SignupScreen() {
           end={{ x: 0.5, y: 1 }}
           style={[styles.hero, { paddingTop: topPad + 14 }]}
         >
-          {/* Back */}
-          <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
-            <Feather name="arrow-left" size={20} color="#0F172A" />
-          </Pressable>
-
           {/* Badge + brand */}
           <View style={styles.brandRow}>
             <Image source={WC_BADGE} style={styles.heroBadge} resizeMode="contain" />
@@ -331,7 +326,7 @@ const styles = StyleSheet.create({
   heroBadge: { width: 52, height: 52, borderRadius: 12 },
   brandName: {
     fontSize: 22, fontFamily: "Raleway_800ExtraBold",
-    color: "#0F172A", letterSpacing: 2,
+    color: "#0EB5CA", letterSpacing: 1.5,
   },
   brandSub: {
     fontSize: 11, fontFamily: "Manrope_400Regular",

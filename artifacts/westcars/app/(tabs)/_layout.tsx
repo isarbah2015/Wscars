@@ -1,29 +1,26 @@
-import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
-import { SymbolView } from "expo-symbols";
 import React from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { useTheme } from "@/context/ThemeContext";
 
 function TabIcon({
   name,
-  label,
   focused,
   color,
   activeColor,
   activeBg,
 }: {
   name: any;
-  label: string;
   focused: boolean;
   color: string;
   activeColor: string;
   activeBg: string;
 }) {
   return (
-    <View style={[tabIconStyles.wrap, focused && { backgroundColor: activeBg, paddingHorizontal: 16 }]}>
-      <Feather name={name} size={22} color={focused ? activeColor : color} />
+    <View style={[tabIconStyles.wrap, focused && { backgroundColor: activeBg, paddingHorizontal: 18 }]}>
+      <Feather name={name} size={23} color={focused ? activeColor : color} />
     </View>
   );
 }
@@ -33,6 +30,7 @@ const tabIconStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     minWidth: 44,
+    height: 38,
     borderRadius: 50,
   },
 });
@@ -41,7 +39,7 @@ function SellTabIcon({ focused }: { focused: boolean }) {
   return (
     <View style={[sellStyles.outer, focused && sellStyles.outerActive]}>
       <View style={sellStyles.box}>
-        <Feather name="plus" size={18} color="#FFFFFF" />
+        <Feather name="plus" size={20} color="#FFFFFF" />
       </View>
     </View>
   );
@@ -49,9 +47,9 @@ function SellTabIcon({ focused }: { focused: boolean }) {
 
 const sellStyles = StyleSheet.create({
   outer: {
-    width: 50,
-    height: 36,
-    borderRadius: 18,
+    width: 54,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: "rgba(14,181,202,0.15)",
     alignItems: "center",
     justifyContent: "center",
@@ -61,9 +59,9 @@ const sellStyles = StyleSheet.create({
     backgroundColor: "rgba(14,181,202,0.22)",
   },
   box: {
-    width: 40,
-    height: 28,
-    borderRadius: 14,
+    width: 44,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: "#0EB5CA",
     alignItems: "center",
     justifyContent: "center",
@@ -78,7 +76,6 @@ const sellStyles = StyleSheet.create({
 export default function TabLayout() {
   const { isDark, colors } = useTheme();
   const isIOS = Platform.OS === "ios";
-  const isWeb = Platform.OS === "web";
 
   const inactiveColor = isDark ? "#4A5E7A" : "#8A9AB5";
 
@@ -88,14 +85,14 @@ export default function TabLayout() {
         tabBarActiveTintColor: "#0098AA",
         tabBarInactiveTintColor: inactiveColor,
         headerShown: false,
-        tabBarShowLabel: true,
+        tabBarShowLabel: false,
         tabBarStyle: {
           position: "absolute",
           backgroundColor: "transparent",
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
-          height: isWeb ? 88 : 74,
+          height: 68,
         },
         tabBarBackground: () =>
           isIOS ? (
@@ -129,36 +126,24 @@ export default function TabLayout() {
               ]}
             />
           ),
-        tabBarLabelStyle: {
-          fontFamily: "Manrope_600SemiBold",
-          fontSize: 10,
-          marginBottom: 5,
-          marginTop: -2,
-        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ focused, color }) =>
-            isIOS ? (
-              <SymbolView name="house.fill" tintColor={focused ? colors.accent : color} size={22} />
-            ) : (
-              <TabIcon name="home" label="Home" focused={focused} color={color} activeColor={colors.accent} activeBg={colors.accentLight} />
-            ),
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon name="home" focused={focused} color={color} activeColor={colors.accent} activeBg={colors.accentLight} />
+          ),
         }}
       />
       <Tabs.Screen
         name="favourites"
         options={{
           title: "Saved",
-          tabBarIcon: ({ focused, color }) =>
-            isIOS ? (
-              <SymbolView name="heart.fill" tintColor={focused ? "#E8192C" : color} size={22} />
-            ) : (
-              <TabIcon name="heart" label="Saved" focused={focused} color={color} activeColor="#E8192C" activeBg="#FFEDEE" />
-            ),
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon name="heart" focused={focused} color={color} activeColor="#E8192C" activeBg="#FFEDEE" />
+          ),
         }}
       />
       <Tabs.Screen
@@ -166,37 +151,24 @@ export default function TabLayout() {
         options={{
           title: "Sell",
           tabBarIcon: ({ focused }) => <SellTabIcon focused={focused} />,
-          tabBarLabelStyle: {
-            fontFamily: "Manrope_700Bold",
-            fontSize: 10,
-            color: "#0098AA",
-            marginBottom: 5,
-            marginTop: -2,
-          },
         }}
       />
       <Tabs.Screen
         name="messages"
         options={{
           title: "Messages",
-          tabBarIcon: ({ focused, color }) =>
-            isIOS ? (
-              <SymbolView name="message.fill" tintColor={focused ? "#7C3AED" : color} size={22} />
-            ) : (
-              <TabIcon name="message-circle" label="Messages" focused={focused} color={color} activeColor="#7C3AED" activeBg="#F3EEFF" />
-            ),
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon name="message-square" focused={focused} color={color} activeColor="#7C3AED" activeBg="#F3EEFF" />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ focused, color }) =>
-            isIOS ? (
-              <SymbolView name="person.fill" tintColor={focused ? colors.accent : color} size={22} />
-            ) : (
-              <TabIcon name="user" label="Profile" focused={focused} color={color} activeColor={colors.accent} activeBg={colors.accentLight} />
-            ),
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon name="user" focused={focused} color={color} activeColor={colors.accent} activeBg={colors.accentLight} />
+          ),
         }}
       />
       <Tabs.Screen name="search" options={{ href: null }} />

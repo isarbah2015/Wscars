@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
   iconRing: { width: 90, height: 90, borderRadius: 45, alignItems: "center", justifyContent: "center" },
   authTitle: { fontSize: 22, fontFamily: "Manrope_700Bold" },
   authText: { fontSize: 14, fontFamily: "Manrope_400Regular", textAlign: "center", lineHeight: 20 },
-  authBtn: { borderRadius: 14, overflow: "hidden", marginTop: 8, width: "80%" },
+  authBtn: { borderRadius: 14, marginTop: 8, width: "80%", paddingVertical: 15, alignItems: "center", justifyContent: "center" },
   authGradient: { paddingVertical: 14, alignItems: "center" },
-  authBtnText: { fontSize: 16, fontFamily: "Manrope_600SemiBold", color: "#fff" },
+  authBtnText: { fontSize: 16, fontFamily: "Manrope_600SemiBold", color: "#fff", textAlign: "center" },
 });

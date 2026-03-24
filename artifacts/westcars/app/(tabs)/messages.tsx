@@ -302,10 +302,13 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   signInBtn: {
-    paddingHorizontal: 28,
-    paddingVertical: 13,
+    paddingHorizontal: 40,
+    paddingVertical: 14,
     borderRadius: 14,
     marginTop: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 180,
   },
-  signInText: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#fff" },
+  signInText: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#fff", textAlign: "center" },
 });
