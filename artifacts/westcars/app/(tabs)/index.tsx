@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
@@ -21,7 +21,6 @@ const WC_BADGE    = require("@/assets/images/wc-badge.png");
 const CAR_NEW     = require("@/assets/images/car-new.png");
 const CAR_USED    = require("@/assets/images/car-used.png");
 const CAR_MOTO    = require("@/assets/images/car-moto.png");
-const SEARCH_ICON = require("@/assets/images/search-car-icon.png");
 const CAT_SUV     = require("@/assets/images/cat-suv.png");
 const CAT_SEDAN   = require("@/assets/images/cat-sedan.png");
 const CAT_PICKUP  = require("@/assets/images/cat-pickup.png");
@@ -158,11 +157,10 @@ export default function HomeScreen() {
           }]}
           onPress={() => router.push("/(tabs)/search")}
         >
-          <Image
-            source={SEARCH_ICON}
-            style={styles.searchCarIcon}
-            tintColor={isDark ? "#94A3B8" : "#334155"}
-            resizeMode="contain"
+          <Ionicons
+            name="car-sport-outline"
+            size={26}
+            color={isDark ? "#0EB5CA" : "#0098AA"}
           />
           <View style={styles.searchBoxText}>
             <Text style={[styles.searchBoxLabel, { color: isDark ? "#CBD5E1" : "#334155" }]}>Brand, model, location…</Text>

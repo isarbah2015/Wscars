@@ -149,10 +149,15 @@ export function CarCard({ car, style }: CarCardProps) {
               </View>
             )}
           </View>
-          {car.seller?.isVerified && (
-            <View style={styles.verifiedRow}>
-              <Feather name="check-circle" size={11} color="#1565C0" />
-              <Text style={styles.verifiedText}>Verified seller</Text>
+          {car.seller?.name && (
+            <View style={styles.sellerRow}>
+              <Feather name="user" size={10} color={colors.textTertiary} />
+              <Text style={[styles.sellerName, { color: colors.textSecondary }]} numberOfLines={1}>
+                {car.seller.name}
+              </Text>
+              {car.seller?.isVerified && (
+                <Feather name="check-circle" size={10} color="#1565C0" />
+              )}
             </View>
           )}
         </View>
@@ -317,15 +322,15 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: "Manrope_500Medium",
   },
-  verifiedRow: {
+  sellerRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    marginTop: 2,
+    marginTop: 1,
   },
-  verifiedText: {
+  sellerName: {
     fontSize: 10,
-    fontFamily: "Manrope_600SemiBold",
-    color: "#1565C0",
+    fontFamily: "Manrope_500Medium",
+    flex: 1,
   },
 });
