@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -7,6 +6,7 @@ import {
   Image,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -25,7 +25,47 @@ function timeAgo(iso: string) {
   return `${Math.floor(hrs / 24)}d`;
 }
 
-function ConversationRow({ conv, colors }: { conv: Conversation; colors: any }) {
+function ActiveBubble({
+  conv,
+  colors,
+}: {
+  conv: Conversation;
+  colors: any;
+}) {
+  return (
+    <Pressable
+      style={styles.bubble}
+      onPress={() =>
+        router.push({ pathname: "/conversation/[id]", params: { id: conv.id } })
+      }
+    >
+      <View style={{ position: "relative" }}>
+        {conv.participant.avatar ? (
+          <Image source={{ uri: conv.participant.avatar }} style={styles.bubbleAvatar} />
+        ) : (
+          <View style={[styles.bubbleAvatarPlaceholder, { backgroundColor: colors.accentLight }]}>
+            <Feather name="user" size={16} color={colors.accent} />
+          </View>
+        )}
+        {conv.unreadCount > 0 && (
+          <View style={[styles.bubbleBadge, { backgroundColor: colors.accent }]}>
+            <Text style={styles.bubbleBadgeText}>{conv.unreadCount}</Text>
+          </View>
+        )}
+        {conv.participant.isVerified && (
+          <View style={[styles.bubbleVerified, { backgroundColor: "#22C55E" }]}>
+            <Feather name="check" size={6} color="#fff" />
+          </View>
+        )}
+      </View>
+      <Text style={[styles.bubbleName, { color: colors.textSecondary }]} numberOfLines={1}>
+        {conv.participant.name.split(" ")[0]}
+      </Text>
+    </Pressable>
+  );
+}
+
+function ConversationRow({ conv, colors, isDark }: { conv: Conversation; colors: any; isDark: boolean }) {
   return (
     <Pressable
       style={({ pressed }) => [
@@ -46,7 +86,7 @@ function ConversationRow({ conv, colors }: { conv: Conversation; colors: any }) 
           </View>
         )}
         {conv.participant.isVerified && (
-          <View style={[styles.verifiedDot, { backgroundColor: colors.success }]}>
+          <View style={[styles.verifiedDot, { backgroundColor: "#22C55E" }]}>
             <Feather name="check" size={8} color="#fff" />
           </View>
         )}
@@ -62,7 +102,16 @@ function ConversationRow({ conv, colors }: { conv: Conversation; colors: any }) 
         <Text style={[styles.carName, { color: colors.accent }]} numberOfLines={1}>
           Re: {conv.car.brand} {conv.car.model}
         </Text>
-        <Text style={[styles.lastMessage, { color: colors.textSecondary }]} numberOfLines={1}>
+        <Text
+          style={[
+            styles.lastMessage,
+            {
+              color: conv.unreadCount > 0 ? colors.text : colors.textSecondary,
+              fontFamily: conv.unreadCount > 0 ? "Manrope_600SemiBold" : "Manrope_400Regular",
+            },
+          ]}
+          numberOfLines={1}
+        >
           {conv.lastMessage || "No messages yet"}
         </Text>
       </View>
@@ -83,8 +132,12 @@ export default function MessagesScreen() {
   const topPad = Platform.OS === "web" ? 10 : insets.top;
   const isAdmin = currentUser?.isAdmin === true;
 
+  const totalUnread = conversations.reduce((s, c) => s + (c.unreadCount || 0), 0);
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+
+      {/* ── Header ── */}
       <View
         style={[
           styles.header,
@@ -95,23 +148,70 @@ export default function MessagesScreen() {
           },
         ]}
       >
-        <Text style={[styles.title, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>
-          {isAdmin ? "Support Inbox" : "Messages"}
-        </Text>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          {isAdmin && (
-            <View style={styles.adminHeaderBadge}>
-              <Feather name="shield" size={11} color="#FFFFFF" />
-              <Text style={[styles.adminHeaderBadgeText, { color: "#FFFFFF" }]}>ADMIN</Text>
+        {/* Top row: user profile left + notification bell right */}
+        <View style={styles.headerTopRow}>
+          <Pressable
+            style={styles.userProfileLeft}
+            onPress={() => router.push("/(tabs)/profile")}
+          >
+            <View style={[styles.userAvatarBox, { backgroundColor: "rgba(14,181,202,0.16)" }]}>
+              {currentUser?.avatar ? (
+                <Image source={{ uri: currentUser.avatar }} style={styles.userAvatarImg} />
+              ) : (
+                <Text style={[styles.userAvatarInitial, { color: "#0098AA" }]}>
+                  {currentUser?.name?.[0]?.toUpperCase() || "W"}
+                </Text>
+              )}
             </View>
-          )}
-          {conversations.length > 0 && (
-            <View style={styles.headerBadge}>
-              <Text style={styles.headerBadgeText}>{conversations.length}</Text>
+            <View>
+              <Text style={[styles.headerTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>
+                {isAdmin ? "Support Inbox" : "Messages"}
+              </Text>
+              <Text style={[styles.headerSub, { color: isDark ? "#64748B" : "#94A3B8" }]}>
+                {currentUser?.name?.split(" ")[0] || "Guest"}
+              </Text>
             </View>
-          )}
+          </Pressable>
+
+          <View style={styles.headerRight}>
+            {isAdmin && (
+              <View style={styles.adminHeaderBadge}>
+                <Feather name="shield" size={11} color="#FFFFFF" />
+                <Text style={styles.adminHeaderBadgeText}>ADMIN</Text>
+              </View>
+            )}
+            <Pressable
+              style={[styles.notifBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "#F1F5F9" }]}
+              onPress={() => {}}
+            >
+              <Feather name="bell" size={20} color={isDark ? "#94A3B8" : "#64748B"} />
+              {totalUnread > 0 && (
+                <View style={[styles.notifBadge, { backgroundColor: colors.accent }]}>
+                  <Text style={styles.notifBadgeText}>{totalUnread > 9 ? "9+" : totalUnread}</Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
         </View>
       </View>
+
+      {/* ── Active chats bubble strip (authenticated + has conversations) ── */}
+      {isAuthenticated && conversations.length > 0 && (
+        <View style={[styles.bubbleStrip, {
+          backgroundColor: isDark ? "#111827" : "#FFFFFF",
+          borderBottomColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
+        }]}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.bubbleRow}
+          >
+            {conversations.map((conv) => (
+              <ActiveBubble key={conv.id} conv={conv} colors={colors} />
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       {isAdmin && (
         <View style={[styles.adminBanner, { backgroundColor: isDark ? "#1A2744" : "#EBF4FF", borderColor: isDark ? "#2A3F6B" : "#BFDBFF" }]}>
@@ -155,13 +255,27 @@ export default function MessagesScreen() {
           </Pressable>
         </View>
       ) : (
-        <FlatList
-          data={conversations}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <ConversationRow conv={item} colors={colors} />}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
-        />
+        <>
+          <View style={[styles.sectionLabel, { borderBottomColor: colors.border }]}>
+            <Text style={[styles.sectionLabelText, { color: colors.textSecondary }]}>
+              ALL CONVERSATIONS
+            </Text>
+            {totalUnread > 0 && (
+              <Text style={[styles.sectionLabelUnread, { color: colors.accent }]}>
+                {totalUnread} unread
+              </Text>
+            )}
+          </View>
+          <FlatList
+            data={conversations}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <ConversationRow conv={item} colors={colors} isDark={isDark} />
+            )}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
+          />
+        </>
       )}
     </View>
   );
@@ -170,11 +284,8 @@ export default function MessagesScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
-    paddingHorizontal: 18,
-    paddingBottom: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingBottom: 14,
     borderBottomWidth: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -182,21 +293,44 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  title: {
-    fontSize: 24,
-    fontFamily: "Manrope_800ExtraBold",
-    letterSpacing: 0.3,
+  headerTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
-  headerBadge: {
-    backgroundColor: "#0EB5CA",
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 12,
+  userProfileLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
   },
-  headerBadgeText: {
-    fontSize: 13,
+  userAvatarBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  userAvatarImg: { width: 42, height: 42, borderRadius: 13 },
+  userAvatarInitial: {
+    fontSize: 18,
     fontFamily: "Manrope_700Bold",
-    color: "#FFFFFF",
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: "Manrope_800ExtraBold",
+    letterSpacing: 0.2,
+  },
+  headerSub: {
+    fontSize: 12,
+    fontFamily: "Manrope_400Regular",
+    marginTop: 1,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   adminHeaderBadge: {
     flexDirection: "row",
@@ -212,8 +346,109 @@ const styles = StyleSheet.create({
   adminHeaderBadgeText: {
     fontSize: 10,
     fontFamily: "Manrope_700Bold",
+    color: "#0EB5CA",
     letterSpacing: 0.5,
   },
+  notifBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  notifBadge: {
+    position: "absolute",
+    top: 7,
+    right: 7,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 3,
+    borderWidth: 1.5,
+    borderColor: "#fff",
+  },
+  notifBadgeText: {
+    fontSize: 9,
+    fontFamily: "Manrope_700Bold",
+    color: "#fff",
+  },
+
+  bubbleStrip: {
+    borderBottomWidth: 1,
+    paddingVertical: 12,
+  },
+  bubbleRow: {
+    paddingHorizontal: 16,
+    gap: 16,
+    flexDirection: "row",
+  },
+  bubble: {
+    alignItems: "center",
+    gap: 5,
+    width: 58,
+  },
+  bubbleAvatar: { width: 54, height: 54, borderRadius: 27 },
+  bubbleAvatarPlaceholder: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bubbleBadge: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 3,
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  bubbleBadgeText: { fontSize: 10, fontFamily: "Manrope_700Bold", color: "#fff" },
+  bubbleVerified: {
+    position: "absolute",
+    bottom: 1,
+    right: -1,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  bubbleName: {
+    fontSize: 11,
+    fontFamily: "Manrope_500Medium",
+    textAlign: "center",
+    width: 58,
+  },
+
+  sectionLabel: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+  },
+  sectionLabelText: {
+    fontSize: 11,
+    fontFamily: "Manrope_600SemiBold",
+    letterSpacing: 0.8,
+  },
+  sectionLabelUnread: {
+    fontSize: 12,
+    fontFamily: "Manrope_600SemiBold",
+  },
+
   adminBanner: {
     flexDirection: "row",
     alignItems: "center",
@@ -225,10 +460,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
   },
-  adminBannerText: {
-    fontSize: 13,
-    fontFamily: "Manrope_500Medium",
-  },
+  adminBannerText: { fontSize: 13, fontFamily: "Manrope_500Medium" },
+
   convRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -264,14 +497,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  participantName: {
-    fontSize: 15,
-    fontFamily: "Manrope_600SemiBold",
-    flex: 1,
-  },
+  participantName: { fontSize: 15, fontFamily: "Manrope_600SemiBold", flex: 1 },
   time: { fontSize: 12, fontFamily: "Manrope_400Regular" },
   carName: { fontSize: 12, fontFamily: "Manrope_500Medium" },
-  lastMessage: { fontSize: 13, fontFamily: "Manrope_400Regular" },
+  lastMessage: { fontSize: 13, lineHeight: 18 },
   badge: {
     width: 22,
     height: 22,

@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
   Animated,
+  Easing,
   Image,
   Platform,
   Pressable,
@@ -71,36 +72,73 @@ export default function HomeScreen() {
   const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
   const [condition, setCondition] = useState<Condition>("used");
 
-  const catMaxH   = useRef(new Animated.Value(300)).current;
-  const catOpacity = useRef(new Animated.Value(1)).current;
-  const lastScrollY = useRef(0);
-  const catOpen = useRef(true);
+  const catTranslate  = useRef(new Animated.Value(0)).current;
+  const catOpacity    = useRef(new Animated.Value(1)).current;
+  const lastScrollY   = useRef(0);
+  const catOpen       = useRef(true);
+  const isAnimating   = useRef(false);
+  const [catHeight,   setCatHeight]   = useState(0);
+  const [catVisible,  setCatVisible]  = useState(true);
+
+  const showCat = () => {
+    if (isAnimating.current || catOpen.current) return;
+    isAnimating.current = true;
+    catOpen.current = true;
+    catTranslate.setValue(-(catHeight || 200));
+    catOpacity.setValue(0);
+    setCatVisible(true);
+    requestAnimationFrame(() => {
+      Animated.parallel([
+        Animated.timing(catTranslate, {
+          toValue: 0,
+          duration: 300,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(catOpacity, {
+          toValue: 1,
+          duration: 240,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]).start(() => { isAnimating.current = false; });
+    });
+  };
+
+  const hideCat = () => {
+    if (isAnimating.current || !catOpen.current) return;
+    isAnimating.current = true;
+    catOpen.current = false;
+    Animated.parallel([
+      Animated.timing(catTranslate, {
+        toValue: -(catHeight || 200),
+        duration: 260,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(catOpacity, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setCatVisible(false);
+      isAnimating.current = false;
+    });
+  };
 
   const handleScroll = (e: any) => {
     const y = e.nativeEvent.contentOffset.y;
     const dy = y - lastScrollY.current;
     lastScrollY.current = y;
 
-    if (y < 8) {
-      if (!catOpen.current) {
-        catOpen.current = true;
-        Animated.parallel([
-          Animated.timing(catMaxH,    { toValue: 300, duration: 220, useNativeDriver: false }),
-          Animated.timing(catOpacity, { toValue: 1,   duration: 180, useNativeDriver: false }),
-        ]).start();
-      }
-    } else if (dy > 5 && catOpen.current) {
-      catOpen.current = false;
-      Animated.parallel([
-        Animated.timing(catMaxH,    { toValue: 0, duration: 200, useNativeDriver: false }),
-        Animated.timing(catOpacity, { toValue: 0, duration: 160, useNativeDriver: false }),
-      ]).start();
-    } else if (dy < -5 && !catOpen.current) {
-      catOpen.current = true;
-      Animated.parallel([
-        Animated.timing(catMaxH,    { toValue: 300, duration: 220, useNativeDriver: false }),
-        Animated.timing(catOpacity, { toValue: 1,   duration: 180, useNativeDriver: false }),
-      ]).start();
+    if (y < 10) {
+      if (!catOpen.current) showCat();
+    } else if (dy > 8 && catOpen.current) {
+      hideCat();
+    } else if (dy < -8 && !catOpen.current) {
+      showCat();
     }
   };
 
@@ -177,7 +215,14 @@ export default function HomeScreen() {
         </Pressable>
 
         {/* ── Collapsible: Main condition tabs + Sub-categories ── */}
-        <Animated.View style={{ maxHeight: catMaxH, opacity: catOpacity, overflow: "hidden" }}>
+        {catVisible && (
+        <Animated.View
+          style={{ opacity: catOpacity, transform: [{ translateY: catTranslate }], overflow: "hidden" }}
+          onLayout={(e) => {
+            const h = e.nativeEvent.layout.height;
+            if (h > 0) setCatHeight(h);
+          }}
+        >
           {/* Row 3: 3 condition tabs */}
           <View style={styles.mainTabsRow}>
             {CONDITION_TABS.map((tab) => {
@@ -242,6 +287,7 @@ export default function HomeScreen() {
             </ScrollView>
           </View>
         </Animated.View>
+        )}
       </View>
 
       {/* ── Scrollable body ── */}
