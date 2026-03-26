@@ -77,66 +77,76 @@ export default function HomeScreen() {
   // scrollPad: animated spacer in the ScrollView that tracks header height (JS thread)
   const CAT_DEFAULT_H  = 150;    // ~75px tabs + ~75px subcats
   const STICKY_DEFAULT = 152;    // ~topPad+8 + ~55px profile + ~10px gap + ~72px search
+  // Extra gap between the glass header and the first content card
+  const EXTRA_PAD = 16;
   const catMaxH    = useRef(new Animated.Value(CAT_DEFAULT_H)).current;
   const catOpacity = useRef(new Animated.Value(1)).current;
-  const scrollPad  = useRef(new Animated.Value(STICKY_DEFAULT + CAT_DEFAULT_H + (Platform.OS === "web" ? 4 : insets.top || 0) + 8)).current;
+  const scrollPad  = useRef(new Animated.Value(
+    STICKY_DEFAULT + CAT_DEFAULT_H + EXTRA_PAD + (Platform.OS === "web" ? 4 : insets.top || 0) + 8
+  )).current;
   const lastScrollY = useRef(0);
   const catOpen     = useRef(true);
-  const isAnimating = useRef(false);
-  const [stickyH,  setStickyH]  = useState(0);   // measured profile+search area height
-  const [catMeasH, setCatMeasH] = useState(0);    // measured categories height
+  const [stickyH,  setStickyH]  = useState(0);
+  const [catMeasH, setCatMeasH] = useState(0);
+
+  // Stop all three animated values immediately so direction can reverse mid-animation
+  const stopAll = () => {
+    catMaxH.stopAnimation();
+    catOpacity.stopAnimation();
+    scrollPad.stopAnimation();
+  };
 
   const showCat = () => {
-    if (isAnimating.current || catOpen.current) return;
-    isAnimating.current = true;
+    if (catOpen.current) return;   // already open
     catOpen.current = true;
+    stopAll();
     const catH = catMeasH || CAT_DEFAULT_H;
     Animated.parallel([
       Animated.timing(catMaxH, {
         toValue: catH,
-        duration: 320,
+        duration: 300,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: false,
       }),
       Animated.timing(catOpacity, {
         toValue: 1,
-        duration: 260,
+        duration: 240,
         easing: Easing.out(Easing.quad),
         useNativeDriver: true,
       }),
       Animated.timing(scrollPad, {
-        toValue: stickyH + catH,
-        duration: 320,
+        toValue: stickyH + catH + EXTRA_PAD,
+        duration: 300,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: false,
       }),
-    ]).start(() => { isAnimating.current = false; });
+    ]).start();
   };
 
   const hideCat = () => {
-    if (isAnimating.current || !catOpen.current) return;
-    isAnimating.current = true;
+    if (!catOpen.current) return;  // already closed
     catOpen.current = false;
+    stopAll();
     Animated.parallel([
       Animated.timing(catMaxH, {
         toValue: 0,
-        duration: 280,
+        duration: 260,
         easing: Easing.in(Easing.cubic),
         useNativeDriver: false,
       }),
       Animated.timing(catOpacity, {
         toValue: 0,
-        duration: 160,
+        duration: 150,
         easing: Easing.in(Easing.quad),
         useNativeDriver: true,
       }),
       Animated.timing(scrollPad, {
-        toValue: stickyH,
-        duration: 280,
+        toValue: stickyH + EXTRA_PAD,
+        duration: 260,
         easing: Easing.in(Easing.cubic),
         useNativeDriver: false,
       }),
-    ]).start(() => { isAnimating.current = false; });
+    ]).start();
   };
 
   const handleScroll = (e: any) => {
@@ -144,11 +154,12 @@ export default function HomeScreen() {
     const dy = y - lastScrollY.current;
     lastScrollY.current = y;
 
-    if (y < 12) {
+    if (y < 20) {
+      // Near the very top — always restore categories
       if (!catOpen.current) showCat();
-    } else if (dy > 10 && catOpen.current) {
+    } else if (dy > 8 && catOpen.current) {
       hideCat();
-    } else if (dy < -10 && !catOpen.current) {
+    } else if (dy < -8 && !catOpen.current) {
       showCat();
     }
   };
@@ -204,11 +215,10 @@ export default function HomeScreen() {
           const h = e.nativeEvent.layout.height + topPad + 8;
           if (h > 0 && stickyH === 0) {
             setStickyH(h);
-            // Correct the scrollPad initial value now that we have a real measurement
             if (!catOpen.current) {
-              scrollPad.setValue(h);
+              scrollPad.setValue(h + EXTRA_PAD);
             } else {
-              scrollPad.setValue(h + (catMeasH || CAT_DEFAULT_H));
+              scrollPad.setValue(h + (catMeasH || CAT_DEFAULT_H) + EXTRA_PAD);
             }
           }
         }}>
@@ -269,7 +279,7 @@ export default function HomeScreen() {
             if (h > 0 && catMeasH === 0) {
               setCatMeasH(h);
               catMaxH.setValue(h);
-              scrollPad.setValue((stickyH || (STICKY_DEFAULT + topPad + 8)) + h);
+              scrollPad.setValue((stickyH || (STICKY_DEFAULT + topPad + 8)) + h + EXTRA_PAD);
             }
           }}
         >
