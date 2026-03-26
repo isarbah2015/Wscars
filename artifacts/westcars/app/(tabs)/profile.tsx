@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Location from "expo-location";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -58,6 +59,7 @@ export default function ProfileScreen() {
   const [verifyingPhone, setVerifyingPhone] = useState(false);
   const [verifyingId, setVerifyingId] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
+  const [locLoading, setLocLoading] = useState(false);
 
   if (!isAuthenticated || !currentUser) {
     return (
@@ -127,6 +129,26 @@ export default function ProfileScreen() {
       "To become a Verified Dealer, email westcarsgh@gmail.com with your business registration certificate. Our team will review within 3 business days.",
       [{ text: "Got It" }]
     );
+  };
+
+  const handleUseMyLocation = async () => {
+    setLocLoading(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission Denied", "Please allow location access in your device settings to use this feature.");
+        setLocLoading(false);
+        return;
+      }
+      const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const [place] = await Location.reverseGeocodeAsync({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+      const city = place.city || place.subregion || place.region || "Ghana";
+      updateUserProfile({ location: city });
+      Alert.alert("Location Updated", `Your default location has been set to ${city}.`);
+    } catch {
+      Alert.alert("Error", "Unable to get your location. Please try again.");
+    }
+    setLocLoading(false);
   };
 
   const handleLogout = () => {
@@ -352,92 +374,92 @@ export default function ProfileScreen() {
               />
             </View>
 
-            <Pressable style={[styles.settingRow, { borderTopColor: colors.border }]}>
+            <Pressable
+              style={[styles.settingRow, { borderTopColor: colors.border }]}
+              onPress={handleUseMyLocation}
+              disabled={locLoading}
+            >
               <View style={styles.settingLeft}>
                 <Feather name="map-pin" size={18} color={Colors.primary} />
-                <Text style={[styles.settingLabel, { color: colors.text }]}>Default Location</Text>
+                <View>
+                  <Text style={[styles.settingLabel, { color: colors.text }]}>Default Location</Text>
+                  <Text style={[styles.settingHint, { color: colors.textTertiary }]}>{currentUser.location}</Text>
+                </View>
               </View>
               <View style={styles.settingRight}>
-                <Text style={[styles.settingValue, { color: colors.textTertiary }]}>{currentUser.location}</Text>
-                <Feather name="chevron-right" size={16} color={colors.textTertiary} />
+                <Text style={[styles.settingValue, { color: locLoading ? colors.textTertiary : "#0EB5CA" }]}>
+                  {locLoading ? "Locating…" : "Use My Location"}
+                </Text>
+                <Feather name="navigation" size={14} color="#0EB5CA" />
               </View>
             </Pressable>
           </View>
 
-          {/* Verification Center */}
-          <View style={[styles.settingsCard, { backgroundColor: colors.card }]}>
-            <Text style={[styles.settingsSection, { color: colors.textTertiary }]}>Verification Centre</Text>
+          {/* Verification Centre */}
+          <Pressable
+            style={[styles.settingsCard, { backgroundColor: colors.card }]}
+            onPress={() => router.push("/verification-centre")}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <Text style={[styles.settingsSection, { color: colors.textTertiary }]}>Verification Centre</Text>
+              <Feather name="chevron-right" size={15} color={colors.textTertiary} />
+            </View>
 
-            {/* Phone Verification */}
-            <Pressable
-              style={[styles.veriRow, { borderTopColor: colors.border }]}
-              onPress={!v?.phone ? handleVerifyPhone : undefined}
-            >
+            {/* Phone */}
+            <View style={[styles.veriRow, { borderTopColor: colors.border }]}>
               <View style={[styles.veriIcon, { backgroundColor: "#EDF4FF" }]}>
                 <Feather name="phone" size={16} color="#0066CC" />
               </View>
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={[styles.veriTitle, { color: colors.text }]}>Phone Verification</Text>
-                <Text style={[styles.veriSub, { color: colors.textTertiary }]}>Via SMS — instant</Text>
+                <Text style={[styles.veriSub, { color: colors.textTertiary }]}>Via SMS OTP — instant</Text>
               </View>
               <View style={[styles.veriBadge, { backgroundColor: v?.phone ? "#DCFCE7" : "#FEF3C7" }]}>
                 <Text style={[styles.veriBadgeText, { color: v?.phone ? "#16A34A" : "#D97706" }]}>
-                  {v?.phone ? "Verified" : "Verify"}
+                  {v?.phone ? "Verified ✓" : "Verify"}
                 </Text>
               </View>
-            </Pressable>
+            </View>
 
-            {/* ID Verification */}
-            <Pressable
-              style={[styles.veriRow, { borderTopColor: colors.border }]}
-              onPress={!v?.id ? handleVerifyId : undefined}
-            >
-              <View style={[styles.veriIcon, { backgroundColor: "#DCFCE7" }]}>
-                <Feather name="user-check" size={16} color="#22C55E" />
+            {/* ID */}
+            <View style={[styles.veriRow, { borderTopColor: colors.border }]}>
+              <View style={[styles.veriIcon, { backgroundColor: "#E0F7FA" }]}>
+                <Feather name="credit-card" size={16} color="#0EB5CA" />
               </View>
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={[styles.veriTitle, { color: colors.text }]}>ID Verification</Text>
-                <Text style={[styles.veriSub, { color: colors.textTertiary }]}>Ghana Card / Passport · Smile ID</Text>
+                <Text style={[styles.veriSub, { color: colors.textTertiary }]}>Ghana Card / Passport · Kora</Text>
               </View>
               <View style={[styles.veriBadge, { backgroundColor: v?.id ? "#DCFCE7" : "#FEF3C7" }]}>
                 <Text style={[styles.veriBadgeText, { color: v?.id ? "#16A34A" : "#D97706" }]}>
-                  {v?.id ? "Verified" : "Verify"}
+                  {v?.id ? "Verified ✓" : "Verify"}
                 </Text>
               </View>
-            </Pressable>
+            </View>
 
-            {/* Dealer Verification */}
-            <Pressable
-              style={[styles.veriRow, { borderTopColor: colors.border }]}
-              onPress={!v?.dealer ? handleDealerRequest : undefined}
-            >
+            {/* Dealer */}
+            <View style={[styles.veriRow, { borderTopColor: colors.border }]}>
               <View style={[styles.veriIcon, { backgroundColor: "#FEF3C7" }]}>
-                <Feather name="star" size={16} color="#F59E0B" />
+                <Feather name="briefcase" size={16} color="#F59E0B" />
               </View>
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={[styles.veriTitle, { color: colors.text }]}>Dealer Verification</Text>
-                <Text style={[styles.veriSub, { color: colors.textTertiary }]}>Business registration · Manual review</Text>
+                <Text style={[styles.veriSub, { color: colors.textTertiary }]}>Business registration · Manual</Text>
               </View>
               <View style={[styles.veriBadge, { backgroundColor: v?.dealer ? "#DCFCE7" : "#F3F4F6" }]}>
-                <Text style={[styles.veriBadgeText, { color: v?.dealer ? "#16A34A" : "#9E9E9E" }]}>
-                  {v?.dealer ? "Verified" : "Request"}
+                <Text style={[styles.veriBadgeText, { color: v?.dealer ? "#16A34A" : "#9CA3AF" }]}>
+                  {v?.dealer ? "Verified ✓" : "Request"}
                 </Text>
               </View>
-            </Pressable>
-          </View>
+            </View>
+          </Pressable>
 
-          {/* Blocked Users */}
+          {/* Privacy & Safety */}
           <View style={[styles.settingsCard, { backgroundColor: colors.card }]}>
             <Text style={[styles.settingsSection, { color: colors.textTertiary }]}>Privacy & Safety</Text>
             <Pressable
               style={[styles.settingRow, { borderTopColor: colors.border }]}
-              onPress={() => {
-                if (blockedUsers.length === 0) {
-                  Alert.alert("Blocked Users", "You have no blocked users.");
-                } else {
-                  Alert.alert("Blocked Users", `You have blocked ${blockedUsers.length} user(s).\n\nUnblock from their profile or conversation.`);
-                }
-              }}
+              onPress={() => router.push("/privacy-safety")}
             >
               <View style={styles.settingLeft}>
                 <Feather name="slash" size={18} color={Colors.danger} />
@@ -449,7 +471,10 @@ export default function ProfileScreen() {
               <Feather name="chevron-right" size={16} color={colors.textTertiary} />
             </Pressable>
 
-            <Pressable style={[styles.settingRow, { borderTopColor: colors.border }]}>
+            <Pressable
+              style={[styles.settingRow, { borderTopColor: colors.border }]}
+              onPress={() => router.push("/privacy-safety")}
+            >
               <View style={styles.settingLeft}>
                 <Feather name="shield" size={18} color={Colors.primary} />
                 <Text style={[styles.settingLabel, { color: colors.text }]}>Safety Checklist</Text>

@@ -19,6 +19,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { EquipmentModal } from "@/components/EquipmentModal";
+import { LocationMap } from "@/components/LocationMap";
 import { ReportModal } from "@/components/ReportModal";
 import { TrustScore } from "@/components/TrustScore";
 import { VerificationBadges } from "@/components/VerificationBadges";
@@ -513,14 +514,8 @@ export default function CarDetailScreen() {
 
         {/* ── Location ── */}
         <View style={[styles.card, { backgroundColor: colors.card }]}>
-          <View style={styles.locationRow}>
-            <Feather name="map-pin" size={14} color={colors.accent} />
-            <Text style={[styles.locationText, { color: colors.text }]}>{car.location}, Ghana</Text>
-          </View>
-          <View style={[styles.mapPlaceholder, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <Feather name="map" size={32} color={colors.textTertiary} />
-            <Text style={[styles.mapPlaceholderText, { color: colors.textTertiary }]}>Map</Text>
-          </View>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Location</Text>
+          <LocationMap location={car.location} />
         </View>
 
         <View style={{ height: 100 + (insets.bottom || 0) }} />

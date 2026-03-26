@@ -20,7 +20,7 @@ const APP_VERSION   = "2.0.0";
 const WC_BADGE      = require("@/assets/images/wc-badge.png");
 
 const FEATURES = [
-  { icon: "user-check" as const, label: "Verified Sellers", desc: "ID verification powered by Smile ID" },
+  { icon: "user-check" as const, label: "Verified Sellers", desc: "ID verification powered by Kora" },
   { icon: "message-square" as const, label: "In-App Chat", desc: "Secure messaging with all sellers" },
   { icon: "star" as const, label: "Ratings & Reviews", desc: "Trust-based seller ratings system" },
   { icon: "moon" as const, label: "Dark / Light Mode", desc: "Comfortable viewing any time of day" },
@@ -152,7 +152,7 @@ export default function AboutScreen() {
 
         {/* Credits */}
         <Text style={[styles.credits, { color: colors.textTertiary }]}>
-          Built with React Native, Expo, Firebase & Smile ID{"\n"}Made with ❤️ for Ghana
+          Built with React Native, Expo, Firebase & Kora{"\n"}Made with ❤️ for Ghana
         </Text>
       </ScrollView>
     </View>

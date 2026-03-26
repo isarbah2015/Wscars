@@ -65,7 +65,7 @@ const SECTIONS = [
     bg: "#FEF3C7",
     title: "Third-Party Services",
     items: [
-      "Smile ID — used for identity verification; their privacy policy applies",
+      "Kora — used for identity verification; Kora's privacy policy applies",
       "Firebase (Google) — backend services; Google's privacy policy applies",
       "Expo / React Native — mobile app framework",
       "We do not sell your personal data to any third parties",
