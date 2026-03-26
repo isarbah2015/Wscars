@@ -72,37 +72,45 @@ export default function HomeScreen() {
   const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
   const [condition, setCondition] = useState<Condition>("used");
 
-  const catTranslate  = useRef(new Animated.Value(0)).current;
-  const catOpacity    = useRef(new Animated.Value(1)).current;
-  const lastScrollY   = useRef(0);
-  const catOpen       = useRef(true);
-  const isAnimating   = useRef(false);
-  const [catHeight,   setCatHeight]   = useState(0);
-  const [catVisible,  setCatVisible]  = useState(true);
+  // catMaxH: controls the height collapse of the categories section (JS thread)
+  // catOpacity: smooth fade of categories content (native thread)
+  // scrollPad: animated spacer in the ScrollView that tracks header height (JS thread)
+  const CAT_DEFAULT_H  = 150;    // ~75px tabs + ~75px subcats
+  const STICKY_DEFAULT = 152;    // ~topPad+8 + ~55px profile + ~10px gap + ~72px search
+  const catMaxH    = useRef(new Animated.Value(CAT_DEFAULT_H)).current;
+  const catOpacity = useRef(new Animated.Value(1)).current;
+  const scrollPad  = useRef(new Animated.Value(STICKY_DEFAULT + CAT_DEFAULT_H + (Platform.OS === "web" ? 4 : insets.top || 0) + 8)).current;
+  const lastScrollY = useRef(0);
+  const catOpen     = useRef(true);
+  const isAnimating = useRef(false);
+  const [stickyH,  setStickyH]  = useState(0);   // measured profile+search area height
+  const [catMeasH, setCatMeasH] = useState(0);    // measured categories height
 
   const showCat = () => {
     if (isAnimating.current || catOpen.current) return;
     isAnimating.current = true;
     catOpen.current = true;
-    catTranslate.setValue(-(catHeight || 200));
-    catOpacity.setValue(0);
-    setCatVisible(true);
-    requestAnimationFrame(() => {
-      Animated.parallel([
-        Animated.timing(catTranslate, {
-          toValue: 0,
-          duration: 300,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(catOpacity, {
-          toValue: 1,
-          duration: 240,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ]).start(() => { isAnimating.current = false; });
-    });
+    const catH = catMeasH || CAT_DEFAULT_H;
+    Animated.parallel([
+      Animated.timing(catMaxH, {
+        toValue: catH,
+        duration: 320,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
+      }),
+      Animated.timing(catOpacity, {
+        toValue: 1,
+        duration: 260,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(scrollPad, {
+        toValue: stickyH + catH,
+        duration: 320,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
+      }),
+    ]).start(() => { isAnimating.current = false; });
   };
 
   const hideCat = () => {
@@ -110,34 +118,37 @@ export default function HomeScreen() {
     isAnimating.current = true;
     catOpen.current = false;
     Animated.parallel([
-      Animated.timing(catTranslate, {
-        toValue: -(catHeight || 200),
-        duration: 260,
+      Animated.timing(catMaxH, {
+        toValue: 0,
+        duration: 280,
         easing: Easing.in(Easing.cubic),
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.timing(catOpacity, {
         toValue: 0,
-        duration: 180,
+        duration: 160,
         easing: Easing.in(Easing.quad),
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      setCatVisible(false);
-      isAnimating.current = false;
-    });
+      Animated.timing(scrollPad, {
+        toValue: stickyH,
+        duration: 280,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: false,
+      }),
+    ]).start(() => { isAnimating.current = false; });
   };
 
   const handleScroll = (e: any) => {
-    const y = e.nativeEvent.contentOffset.y;
+    const y  = e.nativeEvent.contentOffset.y;
     const dy = y - lastScrollY.current;
     lastScrollY.current = y;
 
-    if (y < 10) {
+    if (y < 12) {
       if (!catOpen.current) showCat();
-    } else if (dy > 8 && catOpen.current) {
+    } else if (dy > 10 && catOpen.current) {
       hideCat();
-    } else if (dy < -8 && !catOpen.current) {
+    } else if (dy < -10 && !catOpen.current) {
       showCat();
     }
   };
@@ -159,17 +170,49 @@ export default function HomeScreen() {
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
 
-      {/* ── Fixed Header ── */}
+      {/* ── Glassmorphic Absolute Header ── */}
       <View
         style={[
           styles.header,
           {
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 100,
+            elevation: 12,
             paddingTop: topPad + 8,
-            backgroundColor: isDark ? "#111827" : "#FFFFFF",
-            borderBottomColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
+            backgroundColor: isDark
+              ? "rgba(17,24,39,0.86)"
+              : "rgba(255,255,255,0.84)",
+            borderBottomColor: isDark
+              ? "rgba(255,255,255,0.07)"
+              : "rgba(14,181,202,0.12)",
+            borderBottomWidth: 1,
+            shadowColor: "#0EB5CA",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 16,
+            ...(Platform.OS === "web"
+              ? ({ backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" } as any)
+              : {}),
           },
         ]}
       >
+        {/* ── Sticky section: profile + search (always visible) ── */}
+        <View onLayout={(e) => {
+          const h = e.nativeEvent.layout.height + topPad + 8;
+          if (h > 0 && stickyH === 0) {
+            setStickyH(h);
+            // Correct the scrollPad initial value now that we have a real measurement
+            if (!catOpen.current) {
+              scrollPad.setValue(h);
+            } else {
+              scrollPad.setValue(h + (catMeasH || CAT_DEFAULT_H));
+            }
+          }
+        }}>
+
         {/* ── Row 1: Profile on LEFT, WC badge on RIGHT ── */}
         <View style={styles.topRow}>
           <Pressable style={styles.profileLeft} onPress={() => router.push("/(tabs)/profile")}>
@@ -214,13 +257,20 @@ export default function HomeScreen() {
           </View>
         </Pressable>
 
+        </View>{/* end sticky section */}
+
         {/* ── Collapsible: Main condition tabs + Sub-categories ── */}
-        {catVisible && (
+        {/* maxHeight collapses smoothly; inner opacity fades simultaneously */}
+        <Animated.View style={{ maxHeight: catMaxH, overflow: "hidden" }}>
         <Animated.View
-          style={{ opacity: catOpacity, transform: [{ translateY: catTranslate }], overflow: "hidden" }}
+          style={{ opacity: catOpacity }}
           onLayout={(e) => {
             const h = e.nativeEvent.layout.height;
-            if (h > 0) setCatHeight(h);
+            if (h > 0 && catMeasH === 0) {
+              setCatMeasH(h);
+              catMaxH.setValue(h);
+              scrollPad.setValue((stickyH || (STICKY_DEFAULT + topPad + 8)) + h);
+            }
           }}
         >
           {/* Row 3: 3 condition tabs */}
@@ -286,11 +336,11 @@ export default function HomeScreen() {
               ))}
             </ScrollView>
           </View>
-        </Animated.View>
-        )}
-      </View>
+        </Animated.View>{/* end inner opacity Animated.View */}
+        </Animated.View>{/* end outer maxHeight Animated.View */}
+      </View>{/* end absolute header */}
 
-      {/* ── Scrollable body ── */}
+      {/* ── Scrollable body — starts from y:0, spacer pushes content below header ── */}
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -298,6 +348,8 @@ export default function HomeScreen() {
         scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: 100 + (insets.bottom || 0) }}
       >
+        {/* Animated spacer — height tracks header height so content starts below it */}
+        <Animated.View style={{ height: scrollPad }} />
 
         {/* ── WESTCARS brand strip ── */}
         <View style={[styles.brandStrip, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
