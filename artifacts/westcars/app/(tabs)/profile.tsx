@@ -124,7 +124,7 @@ export default function ProfileScreen() {
   const handleDealerRequest = () => {
     Alert.alert(
       "Dealer Verification",
-      "To become a Verified Dealer, email dealers@westcars.com with your business registration certificate. Our team will review within 3 business days.",
+      "To become a Verified Dealer, email westcarsgh@gmail.com with your business registration certificate. Our team will review within 3 business days.",
       [{ text: "Got It" }]
     );
   };
@@ -489,7 +489,7 @@ export default function ProfileScreen() {
               <Feather name="chevron-right" size={16} color={colors.textTertiary} />
             </Pressable>
 
-            <Pressable style={[styles.settingRow, { borderTopColor: colors.border }]}>
+            <Pressable style={[styles.settingRow, { borderTopColor: colors.border }]} onPress={() => router.push("/legal/help")}>
               <View style={styles.settingLeft}>
                 <Feather name="help-circle" size={18} color={Colors.primary} />
                 <Text style={[styles.settingLabel, { color: colors.text }]}>Help & Support</Text>
@@ -497,10 +497,39 @@ export default function ProfileScreen() {
               <Feather name="chevron-right" size={16} color={colors.textTertiary} />
             </Pressable>
 
-            <Pressable style={[styles.settingRow, { borderTopColor: colors.border }]}>
+            <Pressable style={[styles.settingRow, { borderTopColor: colors.border }]} onPress={() => router.push("/legal/about")}>
               <View style={styles.settingLeft}>
                 <Feather name="info" size={18} color={Colors.primary} />
                 <Text style={[styles.settingLabel, { color: colors.text }]}>About Westcars</Text>
+              </View>
+              <Feather name="chevron-right" size={16} color={colors.textTertiary} />
+            </Pressable>
+          </View>
+
+          {/* Support & Legal */}
+          <View style={[styles.settingsCard, { backgroundColor: colors.card }]}>
+            <Text style={[styles.settingsSection, { color: colors.textTertiary }]}>Support & Legal</Text>
+
+            <Pressable style={[styles.settingRow, { borderTopColor: colors.border }]} onPress={() => router.push("/legal/faq")}>
+              <View style={styles.settingLeft}>
+                <Feather name="message-circle" size={18} color="#7C3AED" />
+                <Text style={[styles.settingLabel, { color: colors.text }]}>FAQ</Text>
+              </View>
+              <Feather name="chevron-right" size={16} color={colors.textTertiary} />
+            </Pressable>
+
+            <Pressable style={[styles.settingRow, { borderTopColor: colors.border }]} onPress={() => router.push("/legal/terms")}>
+              <View style={styles.settingLeft}>
+                <Feather name="file-text" size={18} color="#0098AA" />
+                <Text style={[styles.settingLabel, { color: colors.text }]}>Terms of Service</Text>
+              </View>
+              <Feather name="chevron-right" size={16} color={colors.textTertiary} />
+            </Pressable>
+
+            <Pressable style={[styles.settingRow, { borderTopColor: colors.border }]} onPress={() => router.push("/legal/privacy")}>
+              <View style={styles.settingLeft}>
+                <Feather name="lock" size={18} color="#16A34A" />
+                <Text style={[styles.settingLabel, { color: colors.text }]}>Privacy Policy</Text>
               </View>
               <Feather name="chevron-right" size={16} color={colors.textTertiary} />
             </Pressable>

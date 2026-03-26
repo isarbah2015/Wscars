@@ -1,0 +1,162 @@
+Add the following legal and support pages to the Westcars app. All pages must follow the same high‑tech, modern UI design (glassmorphism, gradients, neon accents) used throughout the app. Add these as new screens accessible from the Profile screen under a "Support & Legal" section.
+
+---
+
+## 1. Terms of Service – Westcars
+Create a screen `src/screens/TermsScreen.js` with the following content (formatted nicely with sections, icons, and readable typography):
+
+**Title:** Terms of Service – Westcars
+
+**Sections:**
+- **1. Acceptance of Terms** – By using Westcars, you agree to these terms.
+- **2. Eligibility** – Must be 18+ and a resident of Ghana.
+- **3. User Accounts** – You are responsible for your account activity.
+- **4. Listings** – Sellers must provide accurate information; false listings may result in ban.
+- **5. Transactions** – Westcars is a marketplace connecting buyers and sellers. We do not process payments; transactions are between users.
+- **6. Prohibited Activities** – No fraudulent listings, spam, or illegal content.
+- **7. Termination** – We reserve the right to suspend accounts violating terms.
+- **8. Disclaimer** – Cars are sold "as is"; users should inspect before purchase.
+- **9. Limitation of Liability** – Westcars is not liable for disputes between users.
+- **10. Changes to Terms** – We may update terms; continued use constitutes acceptance.
+
+**Contact Information:** For any questions regarding these terms, contact us at: **westcarsgh@gmail.com**
+
+Include a "Back to Profile" button and a "I Accept" button (just for acknowledgment, no legal binding needed).
+
+---
+
+## 2. Privacy Policy – Westcars
+Create `src/screens/PrivacyScreen.js` with:
+
+**Title:** Privacy Policy – Westcars
+
+**Sections:**
+- **Information We Collect:** Name, phone number, email, location, ID documents (for verification), chat messages, listing data.
+- **How We Use Information:** To provide marketplace services, verify users, improve app, and communicate with you.
+- **Data Storage:** All data stored securely on Firebase (Firestore, Storage). Encryption in transit.
+- **Third-Party Services:** Smile ID for verification; their privacy policy applies.
+- **Your Rights:** You can request data deletion, update information, or delete your account.
+- **Cookies & Tracking:** We use analytics to improve app experience.
+- **Contact:** For privacy concerns, email: **westcarsgh@gmail.com**
+- **Changes:** We will notify users of significant changes.
+
+Add a "Last Updated: March 2026" footer.
+
+---
+
+## 3. FAQ – Frequently Asked Questions
+Create `src/screens/FAQScreen.js` with collapsible accordion sections:
+
+**Questions & Answers:**
+
+| Question | Answer |
+|----------|--------|
+| **How do I create an account?** | Sign up with your Ghana phone number (+233) and create a password. Verify via SMS. |
+| **How do I sell a car?** | Tap the "Sell" button, upload photos, fill in car details, and submit. Your listing will appear after review. |
+| **How do I verify my identity?** | Go to Profile → Verification Center. Upload your government ID and take a selfie. Smile ID will verify you instantly. Verified users get a badge. |
+| **Is it safe to buy a car on Westcars?** | Always meet in a public place, inspect the car thoroughly, test drive, and never pay before seeing the car. Use in‑app chat to communicate. |
+| **How do I contact a seller?** | Use the "Message" button on the listing or call via the provided phone number. Verified sellers have badges. |
+| **How do I report a suspicious listing?** | Tap the flag icon on the listing or go to the user's profile and select "Report". |
+| **What is the Trust Score?** | A score based on verification, completed sales, and user ratings. Higher scores indicate more trustworthy sellers. |
+| **How do I delete my account?** | Go to Profile → Settings → Delete Account. This removes all your data from Westcars. |
+| **Can I post motorcycles?** | Yes! Use the "Мото" subcategory filter to browse or list motorcycles. |
+| **How do I enable dark mode?** | Go to Profile → Settings → Theme and select Dark or Light mode. |
+| **What payment methods can I use?** | Payments are between buyer and seller. Common methods: Mobile Money (MTN, Vodafone, AirtelTigo), bank transfer, or cash on delivery. |
+| **What if I receive a suspicious phone number in chat?** | Westcars will show a warning if a number differs from the listing. Do not transact outside the app. |
+| **How do I contact Westcars support?** | Email us at **westcarsgh@gmail.com** or use the Help & Support section in your profile. |
+
+---
+
+## 4. Help & Support
+Create `src/screens/HelpSupportScreen.js` with:
+
+**Content:**
+- **Contact Options:**
+  - **Email:** westcarsgh@gmail.com (opens device email with subject "Westcars Support")
+  - **WhatsApp:** +233 123 456 789 (opens WhatsApp with pre‑filled message)
+  - **Phone:** +233 123 456 789 (opens dialer)
+- **Report a Problem:** Button to file a report (opens `ReportScreen`)
+- **Safety Tips:** Link to safety guide
+- **FAQ Link:** Button to navigate to FAQ screen
+- **Community Guidelines:** Brief summary of rules
+
+Add a "Submit Feedback" form: name, email, message (store in Firestore under `feedback` collection). The email field should be pre-filled with westcarsgh@gmail.com for support inquiries.
+
+---
+
+## 5. About Westcars
+Create `src/screens/AboutScreen.js` with:
+
+**Content:**
+- **App Name:** Westcars
+- **Tagline:** "Ghana's Trusted Car Marketplace"
+- **Version:** 2.0.0 (auto‑detect from package.json)
+- **Description:** Westcars connects car buyers and sellers across Ghana. We help you find your perfect car safely and easily.
+- **Features Summary:** Verified sellers, in‑app chat, ratings, Smile ID verification, dark/light mode, motorcycle listings.
+- **Our Mission:** To make car buying and selling in Ghana safe, transparent, and convenient.
+- **Contact:** 
+  - **Email:** westcarsgh@gmail.com
+  - **Support:** westcarsgh@gmail.com
+- **Social Links:** (Placeholders) Instagram, Facebook, Twitter
+- **Credits:** Built with React Native, Firebase, Smile ID, and ❤️ for Ghana.
+
+Add a logo and a "Rate Us" button (opens app store).
+
+---
+
+## Navigation & Access
+
+Update `src/screens/ProfileScreen.js`:
+- Add a new section "Support & Legal" with buttons:
+  - Terms of Service
+  - Privacy Policy
+  - FAQ
+  - Help & Support
+  - About Westcars
+
+Each button navigates to its respective screen.
+
+---
+
+## Contact Information Summary
+
+**Westcars Official Contact:**
+- **Support Email:** westcarsgh@gmail.com
+- **Report Problems:** westcarsgh@gmail.com
+- **Privacy Concerns:** westcarsgh@gmail.com
+- **General Inquiries:** westcarsgh@gmail.com
+
+Use this email consistently across all screens:
+- Terms of Service contact section
+- Privacy Policy contact section
+- FAQ support contact
+- Help & Support screen (primary contact method)
+- About screen contact information
+- Feedback form submission target
+
+---
+
+## Technical Requirements
+
+- Use the same high‑tech design system (glassmorphism, gradients, neon accents, rounded corners)
+- Use `react-native-vector-icons` for icons (MaterialIcons, FontAwesome)
+- Add smooth animations when expanding/collapsing FAQ items
+- Ensure all screens have a back button to return to Profile
+- Store feedback submissions in Firestore `feedback` collection
+- All text must be clearly formatted with proper spacing and typography
+- When clicking email links, open device email app with recipient pre-filled as westcarsgh@gmail.com
+
+---
+
+## Files to Create/Update
+
+- `src/screens/TermsScreen.js`
+- `src/screens/PrivacyScreen.js`
+- `src/screens/FAQScreen.js`
+- `src/screens/HelpSupportScreen.js`
+- `src/screens/AboutScreen.js`
+- `src/screens/ProfileScreen.js` (update to include new menu items)
+
+---
+
+Generate all code with clear comments. The design must match the high‑tech, professional aesthetic of the rest of the app.
