@@ -78,7 +78,7 @@ export default function HomeScreen() {
   const CAT_DEFAULT_H  = 150;    // ~75px tabs + ~75px subcats
   const STICKY_DEFAULT = 152;    // ~topPad+8 + ~55px profile + ~10px gap + ~72px search
   // Extra gap between the glass header and the first content card
-  const EXTRA_PAD = 16;
+  const EXTRA_PAD = 28;
   const catMaxH    = useRef(new Animated.Value(CAT_DEFAULT_H)).current;
   const catOpacity = useRef(new Animated.Value(1)).current;
   const scrollPad  = useRef(new Animated.Value(
@@ -498,13 +498,13 @@ const styles = StyleSheet.create({
 
   header: {
     paddingHorizontal: 14,
-    paddingBottom: 10,
-    gap: 10,
+    paddingBottom: 12,
+    gap: 14,
     borderBottomWidth: 1,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
+    shadowColor: "#0EB5CA",
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
     elevation: 6,
     zIndex: 10,
   },
@@ -566,8 +566,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     paddingHorizontal: 2,
-    paddingTop: 4,
-    paddingBottom: 6,
+    paddingTop: 2,
+    paddingBottom: 4,
   },
   mainTab: {
     flex: 1,
