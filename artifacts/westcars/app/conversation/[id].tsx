@@ -20,6 +20,7 @@ import { SafetyTipsModal } from "@/components/SafetyTipsModal";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Message } from "@/types";
+import { MOCK_USERS } from "@/utils/mockData";
 
 // Phone number pattern — detects GH formats (+233, 0xx)
 const PHONE_RE = /(?:\+233|0)[0-9]{9}/g;
@@ -127,6 +128,8 @@ export default function ConversationScreen() {
   const convMessages = (messages[id] || []).filter((m) => !m.isDeletedForSelf);
   const participantId = conv?.participantId || "";
   const blocked = isBlocked(participantId);
+  const participantFull = MOCK_USERS.find((u) => u.id === participantId);
+  const [profileExpanded, setProfileExpanded] = useState(false);
 
   // Mark messages read on open
   useEffect(() => {
@@ -209,23 +212,40 @@ export default function ConversationScreen() {
           <Feather name="arrow-left" size={22} color={colors.text} />
         </Pressable>
 
-        <View style={styles.headerInfo}>
-          {conv?.participant.avatar ? (
-            <Image source={{ uri: conv.participant.avatar }} style={styles.headerAvatar} />
-          ) : (
-            <View style={[styles.headerAvatarPlaceholder, { backgroundColor: colors.backgroundSecondary }]}>
-              <Feather name="user" size={18} color={colors.textTertiary} />
-            </View>
-          )}
+        <Pressable
+          style={styles.headerInfo}
+          onPress={() => setProfileExpanded((v) => !v)}
+        >
+          <View style={{ position: "relative" }}>
+            {conv?.participant.avatar ? (
+              <Image source={{ uri: conv.participant.avatar }} style={styles.headerAvatar} />
+            ) : (
+              <View style={[styles.headerAvatarPlaceholder, { backgroundColor: colors.backgroundSecondary }]}>
+                <Feather name="user" size={18} color={colors.textTertiary} />
+              </View>
+            )}
+            {conv?.participant.isVerified && (
+              <View style={styles.headerVerifiedDot}>
+                <Feather name="check" size={7} color="#fff" />
+              </View>
+            )}
+          </View>
           <View>
-            <Text style={[styles.headerName, { color: colors.text }]}>
-              {conv?.participant.name || "Seller"}
-            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+              <Text style={[styles.headerName, { color: colors.text }]}>
+                {conv?.participant.name || "Seller"}
+              </Text>
+              <Feather
+                name={profileExpanded ? "chevron-up" : "chevron-down"}
+                size={13}
+                color={colors.textTertiary}
+              />
+            </View>
             <Text style={[styles.headerSub, { color: colors.accent }]} numberOfLines={1}>
               {conv?.car.brand} {conv?.car.model}
             </Text>
           </View>
-        </View>
+        </Pressable>
 
         <Pressable style={[styles.moreBtn, { backgroundColor: colors.backgroundSecondary }]}
           onPress={() => setShowActions(true)}>
@@ -236,6 +256,16 @@ export default function ConversationScreen() {
       {/* More actions dropdown */}
       {showActions && (
         <View style={[styles.dropdown, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Pressable
+            style={styles.dropItem}
+            onPress={() => {
+              setShowActions(false);
+              router.push({ pathname: "/user/[id]", params: { id: participantId } });
+            }}
+          >
+            <Feather name="user" size={16} color={colors.accent} />
+            <Text style={[styles.dropText, { color: colors.accent }]}>View Profile</Text>
+          </Pressable>
           <Pressable style={styles.dropItem} onPress={() => { setShowActions(false); setShowReport(true); }}>
             <Feather name="flag" size={16} color="#E53935" />
             <Text style={styles.dropText}>Report User</Text>
@@ -247,6 +277,110 @@ export default function ConversationScreen() {
           <Pressable style={styles.dropItem} onPress={() => setShowActions(false)}>
             <Feather name="x" size={16} color="#9E9E9E" />
             <Text style={[styles.dropText, { color: "#9E9E9E" }]}>Cancel</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/* Client Profile Card (expandable) */}
+      {profileExpanded && conv && (
+        <View style={[styles.profileCard, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+          <View style={styles.profileCardInner}>
+            {/* Avatar + info */}
+            <View style={styles.profileLeft}>
+              <View style={{ position: "relative" }}>
+                {conv.participant.avatar ? (
+                  <Image source={{ uri: conv.participant.avatar }} style={styles.profileAvatar} />
+                ) : (
+                  <View style={[styles.profileAvatarPlaceholder, { backgroundColor: colors.accentLight }]}>
+                    <Feather name="user" size={28} color={colors.accent} />
+                  </View>
+                )}
+                {conv.participant.isVerified && (
+                  <View style={[styles.profileVerifiedBadge, { backgroundColor: "#22C55E" }]}>
+                    <Feather name="check" size={9} color="#fff" />
+                  </View>
+                )}
+              </View>
+              <View style={styles.profileInfo}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <Text style={[styles.profileName, { color: colors.text }]}>
+                    {conv.participant.name}
+                  </Text>
+                  {conv.participant.isVerified && (
+                    <View style={[styles.verifiedTag, { backgroundColor: "rgba(34,197,94,0.12)" }]}>
+                      <Text style={styles.verifiedTagText}>Verified</Text>
+                    </View>
+                  )}
+                </View>
+                {participantFull && (
+                  <>
+                    <View style={styles.profileMetaRow}>
+                      <Feather name="map-pin" size={11} color={colors.textTertiary} />
+                      <Text style={[styles.profileMeta, { color: colors.textSecondary }]}>
+                        {participantFull.location}
+                      </Text>
+                    </View>
+                    <View style={styles.profileMetaRow}>
+                      <Feather name="calendar" size={11} color={colors.textTertiary} />
+                      <Text style={[styles.profileMeta, { color: colors.textSecondary }]}>
+                        Member since {participantFull.memberSince?.slice(0, 7) || "2023"}
+                      </Text>
+                    </View>
+                    <View style={styles.ratingRow}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Feather
+                          key={star}
+                          name={star <= Math.round(participantFull.rating) ? "star" : "star"}
+                          size={12}
+                          color={star <= Math.round(participantFull.rating) ? "#F59E0B" : colors.border}
+                        />
+                      ))}
+                      <Text style={[styles.profileMeta, { color: colors.textSecondary }]}>
+                        {participantFull.rating.toFixed(1)} · {participantFull.totalReviews} reviews
+                      </Text>
+                    </View>
+                  </>
+                )}
+              </View>
+            </View>
+
+            {/* Action buttons */}
+            <View style={styles.profileActions}>
+              {conv.participant.phone && (
+                <Pressable
+                  style={[styles.profileActionBtn, { backgroundColor: colors.accentLight }]}
+                  onPress={() => {
+                    if (Platform.OS !== "web") {
+                      const { Linking } = require("react-native");
+                      Linking.openURL(`tel:${conv.participant.phone}`);
+                    }
+                  }}
+                >
+                  <Feather name="phone" size={16} color={colors.accent} />
+                </Pressable>
+              )}
+              <Pressable
+                style={[styles.profileActionBtn, { backgroundColor: colors.backgroundSecondary }]}
+                onPress={() => {
+                  setProfileExpanded(false);
+                  router.push({ pathname: "/user/[id]", params: { id: participantId } });
+                }}
+              >
+                <Feather name="external-link" size={16} color={colors.text} />
+              </Pressable>
+            </View>
+          </View>
+
+          <Pressable
+            style={[styles.viewFullProfileBtn, { backgroundColor: colors.accent }]}
+            onPress={() => {
+              setProfileExpanded(false);
+              router.push({ pathname: "/user/[id]", params: { id: participantId } });
+            }}
+          >
+            <Feather name="user" size={14} color="#fff" />
+            <Text style={styles.viewFullProfileText}>View Full Profile & Listings</Text>
+            <Feather name="chevron-right" size={14} color="#fff" />
           </Pressable>
         </View>
       )}
@@ -370,9 +504,61 @@ const styles = StyleSheet.create({
   headerInfo: { flex: 1, flexDirection: "row", alignItems: "center", gap: 10 },
   headerAvatar: { width: 40, height: 40, borderRadius: 20 },
   headerAvatarPlaceholder: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  headerVerifiedDot: {
+    position: "absolute", bottom: 0, right: 0,
+    width: 14, height: 14, borderRadius: 7,
+    backgroundColor: "#22C55E",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1.5, borderColor: "#fff",
+  },
   headerName: { fontSize: 15, fontFamily: "Manrope_600SemiBold" },
   headerSub:  { fontSize: 12, fontFamily: "Manrope_400Regular" },
   moreBtn: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
+
+  profileCard: {
+    borderBottomWidth: 1,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 4,
+  },
+  profileCardInner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  profileLeft: { flexDirection: "row", alignItems: "flex-start", gap: 12, flex: 1 },
+  profileAvatar: { width: 58, height: 58, borderRadius: 29 },
+  profileAvatarPlaceholder: {
+    width: 58, height: 58, borderRadius: 29,
+    alignItems: "center", justifyContent: "center",
+  },
+  profileVerifiedBadge: {
+    position: "absolute", bottom: 0, right: 0,
+    width: 18, height: 18, borderRadius: 9,
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 2, borderColor: "#fff",
+  },
+  profileInfo: { flex: 1, gap: 3 },
+  profileName: { fontSize: 16, fontFamily: "Manrope_700Bold" },
+  verifiedTag: {
+    paddingHorizontal: 7, paddingVertical: 2,
+    borderRadius: 6,
+  },
+  verifiedTagText: { fontSize: 11, fontFamily: "Manrope_600SemiBold", color: "#16A34A" },
+  profileMetaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  profileMeta: { fontSize: 12, fontFamily: "Manrope_400Regular" },
+  ratingRow: { flexDirection: "row", alignItems: "center", gap: 3, marginTop: 1 },
+  profileActions: { flexDirection: "row", gap: 8, marginLeft: 8 },
+  profileActionBtn: {
+    width: 38, height: 38, borderRadius: 10,
+    alignItems: "center", justifyContent: "center",
+  },
+  viewFullProfileBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 8, paddingVertical: 10, borderRadius: 12, marginBottom: 12,
+  },
+  viewFullProfileText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#fff" },
 
   dropdown: {
     position: "absolute", top: 100, right: 14, zIndex: 99,
