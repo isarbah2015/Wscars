@@ -29,6 +29,7 @@ const CAT_COUPE   = require("@/assets/images/cat-coupe.png");
 const CAT_HATCH   = require("@/assets/images/cat-hatchback.png");
 const CAT_MOTO    = require("@/assets/images/cat-motorcycle.png");
 const CAT_SCOOTER = require("@/assets/images/cat-scooter.png");
+const CAT_ATV     = require("@/assets/images/cat-atv.png");
 const BANNER_CAR  = require("@/assets/images/banner-car.png");
 
 type Condition = "new" | "used" | "moto";
@@ -57,7 +58,7 @@ const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: nu
   moto: [
     { label: "Motorcycle", img: CAT_MOTO,    count: 2 },
     { label: "Scooter",    img: CAT_SCOOTER, count: 0 },
-    { label: "ATV / Quad", img: CAT_PICKUP,  count: 0 },
+    { label: "ATV / Quad", img: CAT_ATV,     count: 0 },
     { label: "Dirt Bike",  img: CAT_MOTO,    count: 0 },
   ],
 };
