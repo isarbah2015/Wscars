@@ -78,7 +78,7 @@ export default function HomeScreen() {
   const CAT_DEFAULT_H  = 150;    // ~75px tabs + ~75px subcats
   const STICKY_DEFAULT = 152;    // ~topPad+8 + ~55px profile + ~10px gap + ~72px search
   // Extra gap between the glass header and the first content card
-  const EXTRA_PAD = 28;
+  const EXTRA_PAD = 6;
   const catMaxH    = useRef(new Animated.Value(CAT_DEFAULT_H)).current;
   const catOpacity = useRef(new Animated.Value(1)).current;
   const scrollPad  = useRef(new Animated.Value(
@@ -211,7 +211,7 @@ export default function HomeScreen() {
         ]}
       >
         {/* ── Sticky section: profile + search (always visible) ── */}
-        <View onLayout={(e) => {
+        <View style={{ gap: 10 }} onLayout={(e) => {
           const h = e.nativeEvent.layout.height + topPad + 8;
           if (h > 0 && stickyH === 0) {
             setStickyH(h);
