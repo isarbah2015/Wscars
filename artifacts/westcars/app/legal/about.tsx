@@ -65,8 +65,7 @@ export default function AboutScreen() {
           style={styles.brandHero}
         >
           <Image source={WC_BADGE} style={styles.logo} resizeMode="contain" />
-          <Text style={[styles.appName, { color: colors.text }]}>WESTCARS</Text>
-          <Text style={[styles.tagline, { color: "#0EB5CA" }]}>Ghana's Trusted Car Marketplace</Text>
+          <Text style={[styles.tagline, { color: "#0098AA" }]}>Ghana's Trusted Car Marketplace</Text>
           <View style={[styles.versionBadge, { backgroundColor: "rgba(14,181,202,0.15)" }]}>
             <Text style={styles.versionText}>Version {APP_VERSION}</Text>
           </View>
@@ -180,9 +179,8 @@ const styles = StyleSheet.create({
     borderRadius: 20, padding: 28,
     alignItems: "center", gap: 6,
   },
-  logo: { width: 80, height: 80, borderRadius: 18, marginBottom: 4 },
-  appName: { fontSize: 24, fontFamily: "Raleway_800ExtraBold", letterSpacing: 2 },
-  tagline: { fontSize: 13, fontFamily: "Manrope_600SemiBold" },
+  logo: { width: 160, height: 160, marginBottom: 2 },
+  tagline: { fontSize: 13, fontFamily: "Manrope_600SemiBold", letterSpacing: 1, textAlign: "center" },
   versionBadge: { borderRadius: 20, paddingHorizontal: 14, paddingVertical: 5, marginTop: 4 },
   versionText: { fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#0EB5CA" },
 

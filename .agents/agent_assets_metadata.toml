@@ -5,16 +5,16 @@ outputs = []
 id = "9Ds4OF2jHzj0F3MXsWu0M"
 uri = "file://artifacts/westcars/assets/images/wc-badge.png"
 type = "image"
-title = "Westcars teal badge logo"
+title = "Westcars badge EDF4F7 background"
 
 [[generated]]
 id = "aNct7PNlKdOwBJihfE_jS"
 uri = "file://artifacts/westcars/assets/images/icon.png"
 type = "image"
-title = "Westcars app icon dark navy"
+title = "New icon matching badge style"
 
 [[generated]]
 id = "WSPceMggtmtDS5dauyTia"
 uri = "file://artifacts/westcars/assets/images/splash-icon.png"
 type = "image"
-title = "Westcars splash icon dark navy"
+title = "New splash icon matching badge style"

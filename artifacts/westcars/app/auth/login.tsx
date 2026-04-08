@@ -59,13 +59,10 @@ export default function LoginScreen() {
           <Feather name="arrow-left" size={20} color="#0F172A" />
         </Pressable>
 
-        {/* WestCars badge + wordmark */}
-        <View style={styles.brandRow}>
+        {/* WestCars badge + motto */}
+        <View style={styles.brandCol}>
           <Image source={WC_BADGE} style={styles.heroBadge} resizeMode="contain" />
-          <View>
-            <Text style={styles.brandName}>WESTCARS</Text>
-            <Text style={styles.tagline}>Ghana's Car Marketplace</Text>
-          </View>
+          <Text style={styles.tagline}>Ghana's Trusted Car Marketplace</Text>
         </View>
 
       </LinearGradient>
@@ -230,16 +227,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 
-  brandRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  heroBadge: { width: 52, height: 52, borderRadius: 12 },
-  brandName: {
-    fontSize: 22, fontFamily: "Raleway_800ExtraBold",
-    color: "#0F172A", letterSpacing: 2,
-  },
+  brandCol: { alignItems: "center", gap: 6 },
+  heroBadge: { width: 140, height: 140 },
   tagline: {
-    fontSize: 10, fontFamily: "Manrope_400Regular",
-    color: "#64748B", letterSpacing: 1.5,
-    marginTop: 2,
+    fontSize: 12, fontFamily: "Manrope_600SemiBold",
+    color: "#0098AA", letterSpacing: 1.2, textAlign: "center",
   },
 
   heroTitle: {

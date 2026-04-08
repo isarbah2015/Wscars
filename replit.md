@@ -1,7 +1,7 @@
 # Westcars — Ghana's Car Marketplace
 
 ## Overview
-A full-featured React Native / Expo mobile app called **Westcars** — Ghana's trusted car marketplace. Built with Expo Router for navigation. Auto.ru-inspired design: white cards, #0066CC blue accent, #E8192C red, information-dense layouts.
+A full-featured React Native / Expo mobile app called **Westcars** — Ghana's trusted car marketplace. Built with Expo Router for navigation. Glassmorphic design: soft teal `#0EB5CA` primary accent, `#EDF4F7` background, white card surfaces.
 
 ## Artifacts
 
@@ -16,11 +16,14 @@ A full-featured React Native / Expo mobile app called **Westcars** — Ghana's t
 - **Port**: 8080
 
 ## Design System
-- **Primary**: #0066CC blue, #E8192C red, #BFFF00 lemon green accent
-- **Fonts**: Manrope (Regular/Medium/SemiBold/Bold/ExtraBold)
+- **Primary accent**: #0EB5CA (teal-cyan), secondary: #0098AA, dark: #004D5A
+- **Background**: #EDF4F7, card surfaces: white with teal glow shadows
+- **Fonts**: Manrope body, Raleway_800ExtraBold for brand wordmarks
+- **Logo**: `wc-badge.png` — teal sports car in hexagonal shield with WESTCARS text + "Ghana's Trusted Car Marketplace" motto
+- **App icon**: `icon.png` — same design on dark navy background
 - **Theme**: Full dark/light mode via `ThemeContext` — all screens themed
 - **Icons**: Feather icons throughout
-- **Key screens**: Home, Search, Sell, Messages, Profile, Car Detail, Favourites, Advertise
+- **Key screens**: Home, Search, Sell, Messages, Profile, Car Detail, Favourites, Advertise, Admin
 
 ## High-Tech Premium Redesign (v4)
 - **Primary accent**: #FF6B00 orange (all gradient headers, active tabs, price badges)

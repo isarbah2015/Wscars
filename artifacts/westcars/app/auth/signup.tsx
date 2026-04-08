@@ -76,13 +76,10 @@ export default function SignupScreen() {
           end={{ x: 0.5, y: 1 }}
           style={[styles.hero, { paddingTop: topPad + 14 }]}
         >
-          {/* Badge + brand */}
-          <View style={styles.brandRow}>
+          {/* Badge + motto */}
+          <View style={styles.brandCol}>
             <Image source={WC_BADGE} style={styles.heroBadge} resizeMode="contain" />
-            <View>
-              <Text style={styles.brandName}>WESTCARS</Text>
-              <Text style={styles.brandSub}>Ghana's Car Marketplace</Text>
-            </View>
+            <Text style={styles.brandSub}>Ghana's Trusted Car Marketplace</Text>
           </View>
 
           <Text style={styles.heroTitle}>Create account</Text>
@@ -322,16 +319,11 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     marginBottom: 4,
   },
-  brandRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  heroBadge: { width: 52, height: 52, borderRadius: 12 },
-  brandName: {
-    fontSize: 22, fontFamily: "Raleway_800ExtraBold",
-    color: "#0EB5CA", letterSpacing: 1.5,
-  },
+  brandCol: { alignItems: "center", gap: 6 },
+  heroBadge: { width: 140, height: 140 },
   brandSub: {
-    fontSize: 11, fontFamily: "Manrope_400Regular",
-    color: "#64748B", letterSpacing: 1,
-    marginTop: 1,
+    fontSize: 12, fontFamily: "Manrope_600SemiBold",
+    color: "#0098AA", letterSpacing: 1.2, textAlign: "center",
   },
   heroTitle: {
     fontSize: 32, fontFamily: "Manrope_800ExtraBold",

@@ -407,16 +407,11 @@ export default function HomeScreen() {
         <Animated.View style={{ height: scrollPad }} />
 
         {/* ── WESTCARS brand strip ── */}
-        <View style={[styles.brandStrip, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
+        <View style={[styles.brandStrip, { backgroundColor: isDark ? "#111827" : "#EDF4F7" }]}>
           <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
-          <View>
-            <Text style={[styles.brandStripName, { color: "#0EB5CA" }]}>
-              WESTCARS
-            </Text>
-            <Text style={[styles.brandStripSub, { color: isDark ? "#475569" : "#94A3B8" }]}>
-              Find your perfect car in Ghana
-            </Text>
-          </View>
+          <Text style={[styles.brandStripSub, { color: isDark ? "#94A3B8" : "#0098AA" }]}>
+            Ghana's Trusted Car Marketplace
+          </Text>
         </View>
 
         {/* ── Sponsored Banner → leads to Advertise ── */}
@@ -708,24 +703,18 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
 
   brandStrip: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 4,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(0,0,0,0.05)",
   },
-  brandStripBadge: { width: 28, height: 28, borderRadius: 6 },
-  brandStripName: {
-    fontSize: 16,
-    fontFamily: "Raleway_800ExtraBold",
-    letterSpacing: 1.5,
-  },
+  brandStripBadge: { width: 110, height: 110 },
   brandStripSub: {
-    fontSize: 11,
-    fontFamily: "Manrope_400Regular",
-    marginTop: 1,
+    fontSize: 12,
+    fontFamily: "Manrope_600SemiBold",
+    letterSpacing: 1.1,
   },
 
   promoBannerWrap: {

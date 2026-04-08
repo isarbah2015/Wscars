@@ -6,48 +6,35 @@ import {
   Easing,
   Image,
   StyleSheet,
+  Text,
   View,
 } from "react-native";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 const WC_BADGE = require("@/assets/images/wc-badge.png");
 
 export default function SplashScreen() {
-  // Background: dark navy fades to light teal
-  const bgOpacity  = useRef(new Animated.Value(0)).current;   // light bg fades in
-
-  // Portal / spotlight: white oval that blooms from center
-  const portalScale   = useRef(new Animated.Value(0)).current;
-  const portalOpacity = useRef(new Animated.Value(0)).current;
-
-  // Badge drops in from above
-  const badgeY       = useRef(new Animated.Value(-50)).current;
-  const badgeOpacity = useRef(new Animated.Value(0)).current;
-  const badgeScale   = useRef(new Animated.Value(0.8)).current;
-
-  // Shimmer line sweeps across badge
-  const shimmerX     = useRef(new Animated.Value(-120)).current;
-  const shimmerAlpha = useRef(new Animated.Value(0)).current;
+  const bgOpacity      = useRef(new Animated.Value(0)).current;
+  const portalScale    = useRef(new Animated.Value(0)).current;
+  const portalOpacity  = useRef(new Animated.Value(0)).current;
+  const badgeY         = useRef(new Animated.Value(-60)).current;
+  const badgeOpacity   = useRef(new Animated.Value(0)).current;
+  const badgeScale     = useRef(new Animated.Value(0.75)).current;
+  const mottoOpacity   = useRef(new Animated.Value(0)).current;
+  const shimmerX       = useRef(new Animated.Value(-BADGE)).current;
+  const shimmerAlpha   = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // 1. Portal burst from center (fast bloom)
-    Animated.sequence([
-      Animated.parallel([
-        Animated.timing(portalOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
-        Animated.spring(portalScale, { toValue: 1, tension: 40, friction: 6, useNativeDriver: true }),
-      ]),
+    Animated.parallel([
+      Animated.timing(portalOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
+      Animated.spring(portalScale, { toValue: 1, tension: 40, friction: 6, useNativeDriver: true }),
     ]).start();
 
-    // 2. Light bg fades in (dark → light world transition)
     Animated.timing(bgOpacity, {
-      toValue: 1,
-      duration: 900,
-      delay: 200,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
+      toValue: 1, duration: 900, delay: 200,
+      easing: Easing.out(Easing.cubic), useNativeDriver: true,
     }).start();
 
-    // 3. Badge drops in from above (after portal)
     setTimeout(() => {
       Animated.parallel([
         Animated.spring(badgeY,       { toValue: 0, tension: 100, friction: 10, useNativeDriver: true }),
@@ -56,51 +43,41 @@ export default function SplashScreen() {
       ]).start();
     }, 300);
 
-    // 4. Portal fades out as bg is established
     setTimeout(() => {
       Animated.timing(portalOpacity, {
         toValue: 0, duration: 600,
-        easing: Easing.in(Easing.quad),
-        useNativeDriver: true,
+        easing: Easing.in(Easing.quad), useNativeDriver: true,
       }).start();
     }, 700);
 
-    // 5. Shimmer sweep across badge
+    setTimeout(() => {
+      Animated.timing(mottoOpacity, { toValue: 1, duration: 500, useNativeDriver: true }).start();
+    }, 900);
+
     setTimeout(() => {
       Animated.sequence([
         Animated.timing(shimmerAlpha, { toValue: 1, duration: 100, useNativeDriver: true }),
-        Animated.timing(shimmerX,     { toValue: 120, duration: 600, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(shimmerX, { toValue: BADGE, duration: 700, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
         Animated.timing(shimmerAlpha, { toValue: 0, duration: 150, useNativeDriver: true }),
       ]).start();
-    }, 900);
+    }, 950);
 
-    const nav = setTimeout(() => router.replace("/auth/login"), 3000);
+    const nav = setTimeout(() => router.replace("/auth/login"), 3200);
     return () => clearTimeout(nav);
   }, []);
 
   return (
     <View style={styles.root}>
-      {/* Dark navy base layer */}
       <View style={[StyleSheet.absoluteFill, styles.darkBg]} />
-
-      {/* Light teal layer fades in on top */}
       <Animated.View style={[StyleSheet.absoluteFill, styles.lightBg, { opacity: bgOpacity }]} />
 
-      {/* White portal burst from center */}
       <Animated.View
-        style={[
-          styles.portal,
-          {
-            opacity: portalOpacity,
-            transform: [{ scale: portalScale }],
-          },
-        ]}
+        style={[styles.portal, { opacity: portalOpacity, transform: [{ scale: portalScale }] }]}
       />
 
-      {/* W Badge */}
       <Animated.View
         style={[
-          styles.badgeCard,
+          styles.badgeWrap,
           {
             opacity: badgeOpacity,
             transform: [{ translateY: badgeY }, { scale: badgeScale }],
@@ -109,67 +86,54 @@ export default function SplashScreen() {
       >
         <Image source={WC_BADGE} style={styles.badge} resizeMode="contain" />
 
-        {/* Shimmer sweep */}
         <Animated.View
-          style={[
-            styles.shimmer,
-            { opacity: shimmerAlpha, transform: [{ translateX: shimmerX }] },
-          ]}
+          style={[styles.shimmer, { opacity: shimmerAlpha, transform: [{ translateX: shimmerX }] }]}
           pointerEvents="none"
         />
       </Animated.View>
+
+      <Animated.Text style={[styles.motto, { opacity: mottoOpacity }]}>
+        Ghana's Trusted Car Marketplace
+      </Animated.Text>
     </View>
   );
 }
 
-const BADGE = 130;
+const BADGE = 260;
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  root: { flex: 1, alignItems: "center", justifyContent: "center", gap: 8 },
 
-  darkBg: {
-    backgroundColor: "#0B1929",
-  },
+  darkBg: { backgroundColor: "#0B1929" },
+  lightBg: { backgroundColor: "#FFFFFF" },
 
-  lightBg: {
-    backgroundColor: "#EDF4F7",
-  },
-
-  /* Radial white portal — large oval that blooms */
   portal: {
     position: "absolute",
-    width: 340,
-    height: 340,
-    borderRadius: 170,
-    backgroundColor: "rgba(255,255,255,0.28)",
+    width: 360, height: 360, borderRadius: 180,
+    backgroundColor: "rgba(255,255,255,0.24)",
   },
 
-  /* Badge wrapper — clips the PNG's built-in white padding */
-  badgeCard: {
-    width: BADGE,
-    height: BADGE,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
+  badgeWrap: {
+    width: BADGE, height: BADGE,
+    alignItems: "center", justifyContent: "center",
+    backgroundColor: "#FFFFFF",
   },
 
-  badge: {
-    width: BADGE * 1.28,
-    height: BADGE * 1.28,
-  },
+  badge: { width: BADGE, height: BADGE },
 
   shimmer: {
     position: "absolute",
-    top: -10,
-    left: -55,
-    width: 55,
-    height: BADGE + 20,
-    backgroundColor: "rgba(255,255,255,0.6)",
+    top: -10, left: -70,
+    width: 60, height: BADGE + 20,
+    backgroundColor: "rgba(255,255,255,0.5)",
     transform: [{ skewX: "-20deg" }],
+  },
+
+  motto: {
+    fontSize: 13,
+    fontFamily: "Manrope_500Medium",
+    color: "#0098AA",
+    letterSpacing: 1.2,
+    marginTop: 4,
   },
 });
