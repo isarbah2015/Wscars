@@ -39,6 +39,11 @@ interface AppContextType {
   getSellerTrustScore: (user: User) => number;
   deleteMessage: (conversationId: string, messageId: string) => void;
   markMessagesRead: (conversationId: string) => void;
+
+  dismissReport: (reportId: string) => void;
+  resolveReport: (reportId: string, action: "dismiss" | "remove") => void;
+  toggleCarVisibility: (carId: string) => void;
+  deleteCar: (carId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -352,6 +357,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // ── Admin Actions ──────────────────────────────────────────────────────
+  const dismissReport = useCallback((reportId: string) => {
+    setReports((prev) => {
+      const next = prev.map((r) => r.id === reportId ? { ...r, status: "dismissed" as const } : r);
+      AsyncStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const resolveReport = useCallback((reportId: string, action: "dismiss" | "remove") => {
+    setReports((prev) => {
+      const report = prev.find((r) => r.id === reportId);
+      const next = prev.map((r) => r.id === reportId ? { ...r, status: "reviewed" as const } : r);
+      AsyncStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(next));
+      if (action === "remove" && report?.targetType === "listing") {
+        setCars((cars) => cars.filter((c) => c.id !== report.targetId));
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleCarVisibility = useCallback((carId: string) => {
+    setCars((prev) => prev.map((c) => c.id === carId ? { ...c, isHidden: !c.isHidden } : c));
+  }, []);
+
+  const deleteCar = useCallback((carId: string) => {
+    setCars((prev) => prev.filter((c) => c.id !== carId));
+  }, []);
+
   // ── Block ──────────────────────────────────────────────────────────────
   const blockUser = useCallback((userId: string) => {
     setBlockedUsers((prev) => {
@@ -395,6 +429,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       startConversation, updateUserProfile, markAsSold, renewListing, submitReview,
       reportItem, blockUser, unblockUser, isBlocked, verifyPhone, verifyId,
       toggleAnonymous, getUserReviews, getSellerTrustScore, deleteMessage, markMessagesRead,
+      dismissReport, resolveReport, toggleCarVisibility, deleteCar,
     }}>
       {children}
     </AppContext.Provider>
