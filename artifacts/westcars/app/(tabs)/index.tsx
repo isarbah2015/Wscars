@@ -1,4 +1,5 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
@@ -8,6 +9,7 @@ import {
   Image,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -66,11 +68,20 @@ const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: nu
 };
 
 export default function HomeScreen() {
-  const { cars, currentUser } = useApp();
+  const { cars, currentUser, conversations } = useApp();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
   const [condition, setCondition] = useState<Condition>("used");
+  const [refreshing, setRefreshing] = useState(false);
+
+  const totalUnread = conversations?.reduce((s: number, c: any) => s + (c.unreadCount || 0), 0) ?? 0;
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setTimeout(() => setRefreshing(false), 1000);
+  };
 
   // catMaxH: controls the height collapse of the categories section (JS thread)
   // catOpacity: smooth fade of categories content (native thread)
@@ -225,7 +236,13 @@ export default function HomeScreen() {
 
         {/* ── Row 1: Profile on LEFT, WC badge on RIGHT ── */}
         <View style={styles.topRow}>
-          <Pressable style={styles.profileLeft} onPress={() => router.push("/(tabs)/profile")}>
+          <Pressable
+            style={styles.profileLeft}
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push("/(tabs)/profile");
+            }}
+          >
             <View style={[styles.avatarRoundedSq, { backgroundColor: "rgba(14,181,202,0.16)" }]}>
               <Text style={[styles.avatarText, { color: "#0098AA" }]}>
                 {currentUser?.name?.[0]?.toUpperCase() || "W"}
@@ -239,6 +256,26 @@ export default function HomeScreen() {
                 Ghana's Car Market
               </Text>
             </View>
+          </Pressable>
+
+          {/* Notification bell */}
+          <Pressable
+            style={[styles.notifBellBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(14,181,202,0.10)" }]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push("/(tabs)/messages");
+            }}
+          >
+            <Ionicons
+              name={totalUnread > 0 ? "notifications" : "notifications-outline"}
+              size={21}
+              color="#0EB5CA"
+            />
+            {totalUnread > 0 && (
+              <View style={[styles.notifBellBadge, { backgroundColor: "#FF4757" }]}>
+                <Text style={styles.notifBellBadgeText}>{totalUnread > 9 ? "9+" : totalUnread}</Text>
+              </View>
+            )}
           </Pressable>
 
         </View>
@@ -357,6 +394,14 @@ export default function HomeScreen() {
         onScroll={handleScroll}
         scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: 100 + (insets.bottom || 0) }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#0EB5CA"
+            colors={["#0EB5CA"]}
+          />
+        }
       >
         {/* Animated spacer — height tracks header height so content starts below it */}
         <Animated.View style={{ height: scrollPad }} />
@@ -531,6 +576,29 @@ const styles = StyleSheet.create({
   profileTextBlock: { gap: 0 },
   userName: { fontSize: 14, fontFamily: "Manrope_700Bold", lineHeight: 17 },
   userSub: { fontSize: 11, fontFamily: "Manrope_500Medium", lineHeight: 14 },
+
+  notifBellBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  notifBellBadge: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 3,
+    borderWidth: 1.5,
+    borderColor: "#fff",
+  },
+  notifBellBadgeText: { fontSize: 9, fontFamily: "Manrope_700Bold", color: "#fff" },
 
   logoBadgeRight: { width: 36, height: 36, borderRadius: 8 },
 

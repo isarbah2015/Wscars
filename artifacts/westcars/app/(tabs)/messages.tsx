@@ -6,7 +6,6 @@ import {
   Image,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -23,46 +22,6 @@ function timeAgo(iso: string) {
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h`;
   return `${Math.floor(hrs / 24)}d`;
-}
-
-function ActiveBubble({
-  conv,
-  colors,
-}: {
-  conv: Conversation;
-  colors: any;
-}) {
-  return (
-    <Pressable
-      style={styles.bubble}
-      onPress={() =>
-        router.push({ pathname: "/conversation/[id]", params: { id: conv.id } })
-      }
-    >
-      <View style={{ position: "relative" }}>
-        {conv.participant.avatar ? (
-          <Image source={{ uri: conv.participant.avatar }} style={styles.bubbleAvatar} />
-        ) : (
-          <View style={[styles.bubbleAvatarPlaceholder, { backgroundColor: colors.accentLight }]}>
-            <Feather name="user" size={16} color={colors.accent} />
-          </View>
-        )}
-        {conv.unreadCount > 0 && (
-          <View style={[styles.bubbleBadge, { backgroundColor: colors.accent }]}>
-            <Text style={styles.bubbleBadgeText}>{conv.unreadCount}</Text>
-          </View>
-        )}
-        {conv.participant.isVerified && (
-          <View style={[styles.bubbleVerified, { backgroundColor: "#22C55E" }]}>
-            <Feather name="check" size={6} color="#fff" />
-          </View>
-        )}
-      </View>
-      <Text style={[styles.bubbleName, { color: colors.textSecondary }]} numberOfLines={1}>
-        {conv.participant.name.split(" ")[0]}
-      </Text>
-    </Pressable>
-  );
 }
 
 function ConversationRow({ conv, colors, isDark }: { conv: Conversation; colors: any; isDark: boolean }) {
@@ -194,24 +153,6 @@ export default function MessagesScreen() {
           </View>
         </View>
       </View>
-
-      {/* ── Active chats bubble strip (authenticated + has conversations) ── */}
-      {isAuthenticated && conversations.length > 0 && (
-        <View style={[styles.bubbleStrip, {
-          backgroundColor: isDark ? "#111827" : "#FFFFFF",
-          borderBottomColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
-        }]}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.bubbleRow}
-          >
-            {conversations.map((conv) => (
-              <ActiveBubble key={conv.id} conv={conv} colors={colors} />
-            ))}
-          </ScrollView>
-        </View>
-      )}
 
       {isAdmin && (
         <View style={[styles.adminBanner, { backgroundColor: isDark ? "#1A2744" : "#EBF4FF", borderColor: isDark ? "#2A3F6B" : "#BFDBFF" }]}>
@@ -374,61 +315,6 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: "Manrope_700Bold",
     color: "#fff",
-  },
-
-  bubbleStrip: {
-    borderBottomWidth: 1,
-    paddingVertical: 12,
-  },
-  bubbleRow: {
-    paddingHorizontal: 16,
-    gap: 16,
-    flexDirection: "row",
-  },
-  bubble: {
-    alignItems: "center",
-    gap: 5,
-    width: 58,
-  },
-  bubbleAvatar: { width: 54, height: 54, borderRadius: 27 },
-  bubbleAvatarPlaceholder: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bubbleBadge: {
-    position: "absolute",
-    top: -2,
-    right: -2,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 3,
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  bubbleBadgeText: { fontSize: 10, fontFamily: "Manrope_700Bold", color: "#fff" },
-  bubbleVerified: {
-    position: "absolute",
-    bottom: 1,
-    right: -1,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  bubbleName: {
-    fontSize: 11,
-    fontFamily: "Manrope_500Medium",
-    textAlign: "center",
-    width: 58,
   },
 
   sectionLabel: {

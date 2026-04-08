@@ -1,9 +1,11 @@
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
@@ -97,6 +99,70 @@ export default function SellScreen() {
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const [vin, setVin] = useState("");
+  const [vinLoading, setVinLoading] = useState(false);
+  const [vinDecoded, setVinDecoded] = useState(false);
+  const [vinError, setVinError] = useState("");
+
+  const decodeVIN = async () => {
+    if (vin.length !== 17) return;
+    setVinLoading(true);
+    setVinDecoded(false);
+    setVinError("");
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      const res = await fetch(
+        `https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`
+      );
+      const data = await res.json();
+      const results: any[] = data.Results || [];
+      const get = (varName: string) =>
+        results.find((r: any) => r.Variable === varName)?.Value || "";
+
+      const make     = get("Make");
+      const mdl      = get("Model");
+      const yr       = get("Model Year");
+      const fuel     = get("Fuel Type - Primary");
+      const trans    = get("Transmission Style");
+
+      if (!make || make === "0") {
+        setVinError("VIN not recognised. Please enter details manually.");
+        setVinLoading(false);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return;
+      }
+
+      const fuelMap: Record<string, string> = {
+        Gasoline: "Petrol", Petrol: "Petrol", Diesel: "Diesel",
+        Electric: "Electric", "Natural Gas": "Hybrid", Hybrid: "Hybrid",
+      };
+      const transMap: Record<string, string> = {
+        Automatic: "Automatic", Manual: "Manual",
+        "Continuously Variable Transmission": "Automatic",
+        CVT: "Automatic",
+      };
+
+      const normalMake = make.charAt(0) + make.slice(1).toLowerCase();
+      const matchedBrand = CAR_BRANDS.find(
+        (b) => b.toUpperCase() === make.toUpperCase()
+      ) || normalMake;
+
+      if (matchedBrand) setBrand(matchedBrand);
+      if (mdl)  setModel(mdl);
+      if (yr)   setYear(yr);
+      if (fuel) setFuelType(fuelMap[fuel] || fuel);
+      if (trans) setTransmission(transMap[trans] || trans);
+
+      setVinDecoded(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch {
+      setVinError("Could not reach the VIN lookup service. Check your connection.");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setVinLoading(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -235,6 +301,73 @@ export default function SellScreen() {
 
         {/* Cards wrapper */}
         <View style={styles.cardsWrapper}>
+
+        {/* ── VIN Lookup ── */}
+        <View style={styles.card}>
+          <View style={styles.vinTitleRow}>
+            <View style={styles.vinIconBg}>
+              <Feather name="search" size={14} color="#0098AA" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.sectionTitle}>VIN Auto-Fill</Text>
+              <Text style={styles.sectionSubtitle}>
+                Enter your 17-digit VIN to auto-fill make, model & year
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.vinRow}>
+            <TextInput
+              style={[
+                styles.vinInput,
+                vinDecoded && { borderColor: "#22C55E" },
+                vinError ? { borderColor: "#EF4444" } : undefined,
+              ]}
+              value={vin}
+              onChangeText={(t) => {
+                setVin(t.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, ""));
+                setVinDecoded(false);
+                setVinError("");
+              }}
+              placeholder="e.g. 1HGCM82633A123456"
+              placeholderTextColor={Colors.light.textTertiary}
+              maxLength={17}
+              autoCapitalize="characters"
+              autoCorrect={false}
+            />
+            <Pressable
+              style={[
+                styles.vinBtn,
+                { opacity: vin.length === 17 && !vinLoading ? 1 : 0.45 },
+              ]}
+              onPress={decodeVIN}
+              disabled={vin.length !== 17 || vinLoading}
+            >
+              {vinLoading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Feather name="zap" size={16} color="#fff" />
+              )}
+            </Pressable>
+          </View>
+
+          <Text style={styles.vinCounter}>{vin.length}/17</Text>
+
+          {vinDecoded && (
+            <View style={styles.vinSuccess}>
+              <Feather name="check-circle" size={15} color="#22C55E" />
+              <Text style={styles.vinSuccessText}>
+                VIN decoded! Fields below have been auto-filled.
+              </Text>
+            </View>
+          )}
+          {!!vinError && (
+            <View style={styles.vinErrorBox}>
+              <Feather name="alert-circle" size={15} color="#EF4444" />
+              <Text style={styles.vinErrorText}>{vinError}</Text>
+            </View>
+          )}
+        </View>
 
         {/* Photo upload */}
         <View style={styles.card}>
@@ -480,6 +613,81 @@ const styles = StyleSheet.create({
     color: Colors.light.textTertiary,
     marginTop: -8,
   },
+
+  vinTitleRow: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
+  vinIconBg: {
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    backgroundColor: "rgba(14,181,202,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  vinRow: { flexDirection: "row", gap: 8, marginTop: 4 },
+  vinInput: {
+    flex: 1,
+    height: 48,
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    fontSize: 13,
+    fontFamily: "Manrope_600SemiBold",
+    color: Colors.light.text,
+    backgroundColor: "#F8FAFC",
+    letterSpacing: 1,
+  },
+  vinBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#0EB5CA",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  vinCounter: {
+    fontSize: 11,
+    fontFamily: "Manrope_400Regular",
+    color: Colors.light.textTertiary,
+    textAlign: "right",
+    marginTop: -6,
+  },
+  vinSuccess: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(34,197,94,0.08)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(34,197,94,0.25)",
+  },
+  vinSuccessText: {
+    fontSize: 12,
+    fontFamily: "Manrope_500Medium",
+    color: "#16A34A",
+    flex: 1,
+  },
+  vinErrorBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(239,68,68,0.07)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(239,68,68,0.2)",
+  },
+  vinErrorText: {
+    fontSize: 12,
+    fontFamily: "Manrope_500Medium",
+    color: "#DC2626",
+    flex: 1,
+  },
+
   imagesRow: {
     flexDirection: "row",
     gap: 10,
