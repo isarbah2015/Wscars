@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -48,13 +47,8 @@ export default function LoginScreen() {
       style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      {/* Gradient hero */}
-      <LinearGradient
-        colors={["rgba(14,181,202,0.14)", "#FFFFFF"]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={[styles.hero, { paddingTop: topPad + 16 }]}
-      >
+      {/* Hero */}
+      <View style={[styles.hero, styles.heroWhite, { paddingTop: topPad + 16 }]}>
         <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
           <Feather name="arrow-left" size={20} color="#0F172A" />
         </Pressable>
@@ -65,7 +59,7 @@ export default function LoginScreen() {
           <Text style={styles.tagline}>Ghana's Trusted Car Marketplace</Text>
         </View>
 
-      </LinearGradient>
+      </View>
 
       {/* Form card */}
       <ScrollView
@@ -220,6 +214,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#EDF4F7" },
 
   hero: { paddingHorizontal: 24, paddingBottom: 28, gap: 12 },
+  heroWhite: { backgroundColor: "#FFFFFF" },
   backBtn: {
     width: 38, height: 38, borderRadius: 19,
     backgroundColor: "rgba(0,0,0,0.05)",

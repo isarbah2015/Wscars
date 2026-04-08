@@ -5,7 +5,7 @@ outputs = []
 id = "9Ds4OF2jHzj0F3MXsWu0M"
 uri = "file://artifacts/westcars/assets/images/wc-badge.png"
 type = "image"
-title = "Westcars badge EDF4F7 background"
+title = "Badge on pure white background"
 
 [[generated]]
 id = "aNct7PNlKdOwBJihfE_jS"

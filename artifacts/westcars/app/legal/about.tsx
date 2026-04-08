@@ -61,7 +61,7 @@ export default function AboutScreen() {
       >
         {/* Brand Hero */}
         <LinearGradient
-          colors={isDark ? ["#0B2030", "#0F2840"] : ["#EDF4F7", "#DFF0F4"]}
+          colors={isDark ? ["#0B2030", "#0F2840"] : ["#FFFFFF", "#F4FBFC"]}
           style={styles.brandHero}
         >
           <Image source={WC_BADGE} style={styles.logo} resizeMode="contain" />

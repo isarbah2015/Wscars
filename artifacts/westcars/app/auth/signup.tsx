@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -69,13 +68,8 @@ export default function SignupScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ flexGrow: 1 }}
       >
-        {/* ── Gradient hero ── */}
-        <LinearGradient
-          colors={["rgba(14,181,202,0.14)", "#FFFFFF"]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={[styles.hero, { paddingTop: topPad + 14 }]}
-        >
+        {/* ── Hero ── */}
+        <View style={[styles.hero, styles.heroWhite, { paddingTop: topPad + 14 }]}>
           {/* Badge + motto */}
           <View style={styles.brandCol}>
             <Image source={WC_BADGE} style={styles.heroBadge} resizeMode="contain" />
@@ -86,7 +80,7 @@ export default function SignupScreen() {
           <Text style={styles.heroSubtitle}>
             Join thousands of buyers &amp; sellers. List your car for free.
           </Text>
-        </LinearGradient>
+        </View>
 
         {/* ── White form sheet ── */}
         <View style={styles.sheet}>
@@ -313,6 +307,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     gap: 12,
   },
+  heroWhite: { backgroundColor: "#FFFFFF" },
   backBtn: {
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: "rgba(0,0,0,0.05)",

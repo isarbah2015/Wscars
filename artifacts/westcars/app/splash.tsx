@@ -36,14 +36,6 @@ export default function SplashScreen() {
     }).start();
 
     setTimeout(() => {
-      Animated.parallel([
-        Animated.spring(badgeY,       { toValue: 0, tension: 100, friction: 10, useNativeDriver: true }),
-        Animated.timing(badgeOpacity, { toValue: 1, duration: 350, useNativeDriver: true }),
-        Animated.spring(badgeScale,   { toValue: 1, tension: 80, friction: 8, useNativeDriver: true }),
-      ]).start();
-    }, 300);
-
-    setTimeout(() => {
       Animated.timing(portalOpacity, {
         toValue: 0, duration: 600,
         easing: Easing.in(Easing.quad), useNativeDriver: true,
@@ -51,8 +43,16 @@ export default function SplashScreen() {
     }, 700);
 
     setTimeout(() => {
+      Animated.parallel([
+        Animated.spring(badgeY,       { toValue: 0, tension: 100, friction: 10, useNativeDriver: true }),
+        Animated.timing(badgeOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.spring(badgeScale,   { toValue: 1, tension: 80, friction: 8, useNativeDriver: true }),
+      ]).start();
+    }, 1150);
+
+    setTimeout(() => {
       Animated.timing(mottoOpacity, { toValue: 1, duration: 500, useNativeDriver: true }).start();
-    }, 900);
+    }, 1400);
 
     setTimeout(() => {
       Animated.sequence([
@@ -60,7 +60,7 @@ export default function SplashScreen() {
         Animated.timing(shimmerX, { toValue: BADGE, duration: 700, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
         Animated.timing(shimmerAlpha, { toValue: 0, duration: 150, useNativeDriver: true }),
       ]).start();
-    }, 950);
+    }, 1650);
 
     const nav = setTimeout(() => router.replace("/auth/login"), 3200);
     return () => clearTimeout(nav);
@@ -116,7 +116,6 @@ const styles = StyleSheet.create({
   badgeWrap: {
     width: BADGE, height: BADGE,
     alignItems: "center", justifyContent: "center",
-    backgroundColor: "#FFFFFF",
   },
 
   badge: { width: BADGE, height: BADGE },
