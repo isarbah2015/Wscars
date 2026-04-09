@@ -410,7 +410,7 @@ export default function HomeScreen() {
         <View style={[styles.brandStrip, { backgroundColor: isDark ? "#0B1120" : "#FFFFFF" }]}>
           {isDark ? (
             <View style={styles.badgeRingDark}>
-              <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
+              <Image source={WC_BADGE} style={styles.brandStripBadgeDark} resizeMode="contain" />
             </View>
           ) : (
             <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
@@ -718,17 +718,23 @@ const styles = StyleSheet.create({
   brandStripBadge: { width: 200, height: 200 },
 
   badgeRingDark: {
+    width: 164,
+    height: 164,
     backgroundColor: "#FFFFFF",
-    borderRadius: 30,
+    borderRadius: 24,
     borderWidth: 2.5,
-    borderColor: "rgba(255,255,255,0.28)",
+    borderColor: "rgba(255,255,255,0.30)",
     shadowColor: "#FFFFFF",
-    shadowOpacity: 0.18,
-    shadowRadius: 24,
+    shadowOpacity: 0.20,
+    shadowRadius: 22,
     shadowOffset: { width: 0, height: 0 },
     elevation: 8,
     overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
   },
+  /* Image zoomed inside the ring so white PNG margins are clipped tight */
+  brandStripBadgeDark: { width: 224, height: 224 },
 
   brandStripSub: {
     fontSize: 12,
