@@ -452,10 +452,10 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     paddingHorizontal: 10,
-    gap: 8,
+    gap: 6,
     marginBottom: 0,
   },
-  halfCard: { flex: 1, marginBottom: 10 },
+  halfCard: { flex: 1, marginBottom: 8 },
 
   empty: {
     alignItems: "center",

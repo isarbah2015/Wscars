@@ -829,12 +829,12 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginHorizontal: -4,
+    marginHorizontal: -3,
   },
   gridItem: {
     width: "50%",
-    paddingHorizontal: 4,
-    marginBottom: 14,
+    paddingHorizontal: 3,
+    marginBottom: 10,
   },
 
   sep: { height: 10 },

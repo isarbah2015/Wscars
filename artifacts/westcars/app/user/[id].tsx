@@ -18,18 +18,20 @@ import { RatingStars } from "@/components/RatingStars";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
+import { useTheme } from "@/context/ThemeContext";
 import { MOCK_ADS, MOCK_USERS } from "@/utils/mockData";
 
 export default function UserProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { cars } = useApp();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
   const user = MOCK_USERS.find((u) => u.id === id);
   if (!user) {
     return (
-      <View style={styles.notFound}>
-        <Text style={styles.notFoundText}>User not found</Text>
+      <View style={[styles.notFound, { backgroundColor: colors.background }]}>
+        <Text style={[styles.notFoundText, { color: colors.textSecondary }]}>User not found</Text>
         <Pressable onPress={() => router.back()}>
           <Text style={styles.backLink}>Go Back</Text>
         </Pressable>
@@ -67,7 +69,7 @@ export default function UserProfileScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
     >
@@ -114,7 +116,6 @@ export default function UserProfileScreen() {
           <Text style={styles.ratingCount}>({user.totalReviews} reviews)</Text>
         </View>
 
-        {/* Stats */}
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{userListings.length}</Text>
@@ -134,26 +135,23 @@ export default function UserProfileScreen() {
       </LinearGradient>
 
       {/* ── Contact action buttons ── */}
-      <View style={styles.actionCard}>
+      <View style={[styles.actionCard, { backgroundColor: colors.card }]}>
         <Pressable style={styles.msgBtn} onPress={handleMessage}>
           <Feather name="message-circle" size={18} color="#FFFFFF" />
           <Text style={styles.msgBtnText}>Message</Text>
         </Pressable>
-        <Pressable style={styles.callBtn} onPress={handleCall}>
+        <Pressable style={[styles.callBtn, { backgroundColor: colors.card, borderColor: "#0EB5CA" }]} onPress={handleCall}>
           <Feather name="phone" size={18} color="#0EB5CA" />
           <Text style={styles.callBtnText}>Call</Text>
         </Pressable>
-        <Pressable style={styles.waBtn} onPress={handleWhatsApp}>
+        <Pressable style={[styles.waBtn, { backgroundColor: colors.card, borderColor: "#25D366" }]} onPress={handleWhatsApp}>
           <Feather name="message-square" size={18} color="#25D366" />
           <Text style={styles.waBtnText}>WhatsApp</Text>
         </Pressable>
       </View>
 
       {/* ── Ad Banner ── */}
-      <Pressable
-        onPress={() => router.push("/advertise")}
-        style={styles.adWrap}
-      >
+      <Pressable onPress={() => router.push("/advertise")} style={styles.adWrap}>
         <LinearGradient
           colors={[ad.color, "#006F80"]}
           start={{ x: 0, y: 0 }}
@@ -176,11 +174,11 @@ export default function UserProfileScreen() {
       </Pressable>
 
       {/* ── Listings section ── */}
-      <View style={styles.section}>
+      <View style={[styles.section, { backgroundColor: colors.card }]}>
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleRow}>
             <View style={styles.sectionAccentBar} />
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
               Cars by {user.name.split(" ")[0]} ({userListings.length})
             </Text>
           </View>
@@ -188,8 +186,8 @@ export default function UserProfileScreen() {
 
         {userListings.length === 0 ? (
           <View style={styles.empty}>
-            <Feather name="truck" size={36} color={Colors.light.textTertiary} />
-            <Text style={styles.emptyText}>No active listings</Text>
+            <Feather name="truck" size={36} color={colors.textTertiary} />
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No active listings</Text>
           </View>
         ) : (
           <View style={styles.grid}>
@@ -204,11 +202,11 @@ export default function UserProfileScreen() {
 
       {/* ── Similar listings section ── */}
       {similarCars.length > 0 && (
-        <View style={[styles.section, { marginTop: 10 }]}>
+        <View style={[styles.section, { backgroundColor: colors.card, marginTop: 10 }]}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleRow}>
               <View style={[styles.sectionAccentBar, { backgroundColor: "#D97706" }]} />
-              <Text style={styles.sectionTitle}>Similar Listings</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Similar Listings</Text>
             </View>
           </View>
           <View style={styles.grid}>
@@ -227,10 +225,7 @@ export default function UserProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.backgroundSecondary,
-  },
+  container: { flex: 1 },
 
   /* ── Hero ── */
   hero: {
@@ -291,9 +286,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: "rgba(255,255,255,0.4)",
   },
-  verifiedRow: {
-    alignItems: "center",
-  },
+  verifiedRow: { alignItems: "center" },
   ratingRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -346,7 +339,6 @@ const styles = StyleSheet.create({
   actionCard: {
     flexDirection: "row",
     gap: 10,
-    backgroundColor: "#FFFFFF",
     padding: 14,
     shadowColor: "#0A1628",
     shadowOpacity: 0.07,
@@ -377,9 +369,7 @@ const styles = StyleSheet.create({
     gap: 7,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: "#FFFFFF",
     borderWidth: 1.5,
-    borderColor: "#0EB5CA",
   },
   callBtnText: {
     fontSize: 13,
@@ -394,9 +384,7 @@ const styles = StyleSheet.create({
     gap: 7,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: "#FFFFFF",
     borderWidth: 1.5,
-    borderColor: "#25D366",
   },
   waBtnText: {
     fontSize: 13,
@@ -469,9 +457,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
 
-  /* ── Section card (matches home page) ── */
+  /* ── Section card (matches home page, theme-aware) ── */
   section: {
-    backgroundColor: "#FFFFFF",
     paddingHorizontal: 12,
     paddingTop: 16,
     paddingBottom: 8,
@@ -504,17 +491,16 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontFamily: "Manrope_700Bold",
-    color: Colors.light.text,
   },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginHorizontal: -4,
+    marginHorizontal: -3,
   },
   gridItem: {
     width: "50%",
-    paddingHorizontal: 4,
-    marginBottom: 14,
+    paddingHorizontal: 3,
+    marginBottom: 10,
   },
   empty: {
     alignItems: "center",
@@ -523,7 +509,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 15,
-    color: Colors.light.textSecondary,
     fontFamily: "Manrope_400Regular",
   },
 
@@ -537,7 +522,6 @@ const styles = StyleSheet.create({
   notFoundText: {
     fontSize: 18,
     fontFamily: "Manrope_600SemiBold",
-    color: Colors.light.textSecondary,
   },
   backLink: {
     fontSize: 14,

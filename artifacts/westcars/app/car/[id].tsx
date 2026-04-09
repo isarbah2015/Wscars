@@ -808,9 +808,9 @@ const styles = StyleSheet.create({
   recsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    gap: 6,
   },
-  recCell: { width: "47%", backgroundColor: "#fff" },
+  recCell: { width: "47%", backgroundColor: "transparent" },
   recImgWrap: {
     position: "relative",
     height: 120,
