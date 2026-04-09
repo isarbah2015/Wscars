@@ -61,16 +61,14 @@ export function SponsoredCard({ car }: SponsoredCardProps) {
           <View style={[styles.metaChip, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
             <Text style={[styles.metaChipText, { color: colors.textSecondary }]}>{car.year}</Text>
           </View>
-          {car.mileage > 0 && (
-            <View style={[styles.metaChip, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
-              <Feather name="activity" size={9} color={colors.textTertiary} />
-              <Text style={[styles.metaChipText, { color: colors.textSecondary }]}>
-                {(car.mileage / 1000).toFixed(0)}k km
-              </Text>
-            </View>
-          )}
+          <View style={[styles.metaChip, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
+            <Feather name="activity" size={9} color={colors.textTertiary} />
+            <Text style={[styles.metaChipText, { color: colors.textSecondary }]}>
+              {car.mileage === 0 ? "Brand New" : `${(car.mileage / 1000).toFixed(0)}k km`}
+            </Text>
+          </View>
           {car.location && (
-            <View style={[styles.metaChip, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
+            <View style={[styles.metaChip, styles.metaChipLoc, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
               <Feather name="map-pin" size={9} color={colors.textTertiary} />
               <Text style={[styles.metaChipText, { color: colors.textSecondary }]} numberOfLines={1}>
                 {car.location.split(",")[0]}
@@ -112,16 +110,17 @@ const styles = StyleSheet.create({
   },
   imgWrap: {
     width: 110,
-    height: "100%" as any,
-    minHeight: 90,
+    alignSelf: "stretch",
+    minHeight: 100,
   },
-  image: { width: "100%", height: "100%" },
-  imgFallback: { alignItems: "center", justifyContent: "center" },
+  image: { width: "100%", height: "100%", minHeight: 100 },
+  imgFallback: { alignItems: "center", justifyContent: "center", flex: 1 },
 
   info: {
     flex: 1,
     padding: 10,
     gap: 3,
+    minWidth: 0,
   },
   sponsoredBadge: {
     alignSelf: "flex-start",
@@ -147,7 +146,8 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: "row",
     gap: 4,
-    flexWrap: "wrap",
+    flexWrap: "nowrap",
+    overflow: "hidden",
     marginTop: 1,
   },
   metaChip: {
@@ -157,10 +157,16 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 6,
     paddingVertical: 2,
+    flexShrink: 0,
+  },
+  metaChipLoc: {
+    flexShrink: 1,
+    minWidth: 0,
   },
   metaChipText: {
     fontSize: 10,
     fontFamily: "Manrope_500Medium",
+    flexShrink: 1,
   },
   sellerRow: {
     flexDirection: "row",

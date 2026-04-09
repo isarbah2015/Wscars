@@ -132,11 +132,11 @@ export function CarCard({ car, style }: CarCardProps) {
             <View style={styles.metaChip}>
               <Text style={[styles.metaChipText, { color: colors.textSecondary }]}>{car.year}</Text>
             </View>
-            {car.mileage !== undefined && car.mileage > 0 && (
+            {car.mileage !== undefined && (
               <View style={styles.metaChip}>
                 <Feather name="activity" size={9} color={colors.textTertiary} />
                 <Text style={[styles.metaChipText, { color: colors.textSecondary }]}>
-                  {(car.mileage / 1000).toFixed(0)}k km
+                  {car.mileage === 0 ? "Brand New" : `${(car.mileage / 1000).toFixed(0)}k km`}
                 </Text>
               </View>
             )}
