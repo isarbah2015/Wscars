@@ -20,8 +20,9 @@ import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 
-const WC_BADGE      = require("@/assets/images/wc-badge.png");
-const WC_LOGOMARK   = require("@/assets/images/wc-logomark.png");
+const WC_BADGE           = require("@/assets/images/wc-badge.png");
+const WC_LOGOMARK        = require("@/assets/images/wc-logomark.png");
+const LOGO_TRANSPARENT   = require("@/assets/images/logo_transparent.png");
 const CAR_NEW     = require("@/assets/images/car-new.png");
 const CAR_USED    = require("@/assets/images/car-used.png");
 const CAR_MOTO    = require("@/assets/images/car-moto.png");
@@ -407,9 +408,9 @@ export default function HomeScreen() {
         {/* Animated spacer — height tracks header height so content starts below it */}
         <Animated.View style={{ height: scrollPad }} />
 
-        {/* ── WESTCARS brand strip — mirrors login/signup hero ── */}
-        <View style={[styles.brandStrip, { backgroundColor: isDark ? "#131C2E" : "#FFFFFF" }]}>
-          <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
+        {/* ── WESTCARS brand strip — transparent logo works on any theme ── */}
+        <View style={styles.brandStrip}>
+          <Image source={LOGO_TRANSPARENT} style={styles.brandStripBadge} resizeMode="contain" />
           <Text style={[styles.brandStripSub, { color: isDark ? "#0EB5CA" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
