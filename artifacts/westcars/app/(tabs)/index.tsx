@@ -408,7 +408,13 @@ export default function HomeScreen() {
 
         {/* ── WESTCARS brand strip ── */}
         <View style={[styles.brandStrip, { backgroundColor: isDark ? "#0B1120" : "#FFFFFF" }]}>
-          <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
+          {isDark ? (
+            <View style={styles.badgeRingDark}>
+              <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
+            </View>
+          ) : (
+            <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
+          )}
           <Text style={[styles.brandStripSub, { color: isDark ? "#94A3B8" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
@@ -710,6 +716,20 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   brandStripBadge: { width: 200, height: 200 },
+
+  badgeRingDark: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 30,
+    borderWidth: 2.5,
+    borderColor: "rgba(255,255,255,0.28)",
+    shadowColor: "#FFFFFF",
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 8,
+    overflow: "hidden",
+  },
+
   brandStripSub: {
     fontSize: 12,
     fontFamily: "Manrope_600SemiBold",
