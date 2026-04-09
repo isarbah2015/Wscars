@@ -1,0 +1,31 @@
+kind = "video"
+previewPath = "/westcars-promo/"
+title = "WestCars Promo Video"
+version = "1.0.0"
+id = "artifacts/westcars-promo"
+router = "path"
+
+[[integratedSkills]]
+name = "video-js"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/westcars-promo/" ]
+localPort = 20399
+
+[services.development]
+run = "pnpm --filter @workspace/westcars-promo run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/westcars-promo", "run", "build" ]
+publicDir = "artifacts/westcars-promo/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20399"
+BASE_PATH = "/westcars-promo/"

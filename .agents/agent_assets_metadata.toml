@@ -18,3 +18,15 @@ id = "WSPceMggtmtDS5dauyTia"
 uri = "file://artifacts/westcars/assets/images/splash-icon.png"
 type = "image"
 title = "New splash icon matching badge style"
+
+[[generated]]
+id = "RwENcsFL8e8GEXJDClzU9"
+uri = "file://artifacts/westcars-promo/public/images/market.png"
+type = "image"
+title = "Busy market street"
+
+[[generated]]
+id = "8ZQnrtWb0lnafcPUbp86d"
+uri = "file://artifacts/westcars-promo/public/images/clean-car.png"
+type = "image"
+title = "Clean white car"
