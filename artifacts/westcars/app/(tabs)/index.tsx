@@ -410,7 +410,9 @@ export default function HomeScreen() {
 
         {/* ── WESTCARS brand strip — transparent logo works on any theme ── */}
         <View style={styles.brandStrip}>
-          <Image source={LOGO_TRANSPARENT} style={styles.brandStripBadge} resizeMode="contain" />
+          <View style={[styles.logoBorder, { borderColor: isDark ? "rgba(14,181,202,0.45)" : "rgba(14,181,202,0.55)" }]}>
+            <Image source={LOGO_TRANSPARENT} style={styles.brandStripBadge} resizeMode="contain" />
+          </View>
           <Text style={[styles.brandStripSub, { color: isDark ? "#0EB5CA" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
@@ -710,6 +712,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 24,
     paddingBottom: 16,
+  },
+  logoBorder: {
+    borderWidth: 2,
+    borderRadius: 22,
+    padding: 8,
   },
   brandStripBadge: { width: 140, height: 140 },
 
