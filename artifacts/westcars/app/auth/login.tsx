@@ -3,7 +3,6 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,8 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
-
-const WC_BADGE = require("@/assets/images/wc-badge.png");
+import { WestcarsBadge } from "@/components/WestcarsBadge";
 
 export default function LoginScreen() {
   const { login } = useApp();
@@ -55,7 +53,7 @@ export default function LoginScreen() {
 
         {/* WestCars badge + motto */}
         <View style={styles.brandCol}>
-          <Image source={WC_BADGE} style={styles.heroBadge} resizeMode="contain" />
+          <WestcarsBadge size={150} textColor="#0F172A" />
           <Text style={styles.tagline}>Ghana's Trusted Car Marketplace</Text>
         </View>
 
