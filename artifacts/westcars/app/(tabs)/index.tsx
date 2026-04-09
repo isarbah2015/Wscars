@@ -407,18 +407,12 @@ export default function HomeScreen() {
         <Animated.View style={{ height: scrollPad }} />
 
         {/* ── WESTCARS brand strip ── */}
-        <LinearGradient
-          colors={isDark
-            ? ["#1E293B", "#1E293B", colors.background]
-            : ["#FFFFFF", "#FFFFFF", colors.background]}
-          locations={[0, 0.65, 1]}
-          style={styles.brandStrip}
-        >
+        <View style={styles.brandStrip}>
           <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
           <Text style={[styles.brandStripSub, { color: isDark ? "#94A3B8" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
-        </LinearGradient>
+        </View>
 
         {/* ── Sponsored Banner → leads to Advertise ── */}
         <Pressable onPress={() => router.push("/advertise")} style={styles.promoBannerWrap}>
