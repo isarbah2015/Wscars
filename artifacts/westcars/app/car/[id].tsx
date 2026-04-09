@@ -505,20 +505,45 @@ export default function CarDetailScreen() {
         onClose={() => setShowReport(false)}
       />
 
-      {/* ── Bottom Sticky Bar — green Call + green chat (auto.ru style) ── */}
+      {/* ── Bottom Sticky Bar ── */}
       <View
         style={[
           styles.stickyBar,
-          { paddingBottom: (insets.bottom || 0) + (Platform.OS === "web" ? 28 : 8),
-            backgroundColor: colors.card, borderTopColor: colors.border },
+          {
+            paddingBottom: (insets.bottom || 0) + (Platform.OS === "web" ? 28 : 8),
+            backgroundColor: colors.card,
+            borderTopColor: colors.border,
+          },
         ]}
       >
-        <Pressable style={styles.callBtn} onPress={handleCall}>
-          <Text style={styles.callBtnLabel}>Call</Text>
-          <Text style={styles.callBtnSub}>9:00 – 21:00</Text>
+        {/* Call button */}
+        <Pressable
+          style={({ pressed }) => [styles.stickyBtn, styles.callBtn, pressed && { opacity: 0.88 }]}
+          onPress={handleCall}
+          android_ripple={{ color: "rgba(255,255,255,0.2)" }}
+        >
+          <View style={styles.stickyBtnIcon}>
+            <Feather name="phone" size={18} color="#fff" />
+          </View>
+          <View style={styles.stickyBtnText}>
+            <Text style={styles.stickyBtnLabel}>Call Seller</Text>
+            <Text style={styles.stickyBtnSub}>9:00 – 21:00</Text>
+          </View>
         </Pressable>
-        <Pressable style={styles.chatBtn} onPress={() => handleMessage()}>
-          <Feather name="message-circle" size={24} color="#fff" />
+
+        {/* Chat button */}
+        <Pressable
+          style={({ pressed }) => [styles.stickyBtn, styles.chatBtn, pressed && { opacity: 0.88 }]}
+          onPress={() => handleMessage()}
+          android_ripple={{ color: "rgba(255,255,255,0.2)" }}
+        >
+          <View style={styles.stickyBtnIcon}>
+            <Feather name="message-circle" size={18} color="#fff" />
+          </View>
+          <View style={styles.stickyBtnText}>
+            <Text style={styles.stickyBtnLabel}>Chat</Text>
+            <Text style={styles.stickyBtnSub}>Usually fast</Text>
+          </View>
         </Pressable>
       </View>
     </View>
@@ -790,33 +815,62 @@ const styles = StyleSheet.create({
   },
   mapPlaceholderText: { fontSize: 13, color: "#BDBDBD", fontFamily: "Manrope_400Regular" },
 
-  // Bottom bar — auto.ru green style
+  // Bottom sticky bar
   stickyBar: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingTop: 12,
-    backgroundColor: "#fff",
     borderTopWidth: 1,
-    borderTopColor: "#EEEEEE",
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: -3 },
+    elevation: 8,
+  },
+  // Shared base for both buttons — flex:1 makes them equal width
+  stickyBtn: {
+    flex: 1,
+    height: 56,
+    borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingHorizontal: 14,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 5,
   },
   callBtn: {
-    flex: 1,
-    height: 52,
+    backgroundColor: "#22C55E",
+    shadowColor: "#22C55E",
+  },
+  chatBtn: {
+    backgroundColor: "#0EB5CA",
+    shadowColor: "#0EB5CA",
+  },
+  stickyBtnIcon: {
+    width: 34,
+    height: 34,
     borderRadius: 10,
-    backgroundColor: "#27AE60",
+    backgroundColor: "rgba(255,255,255,0.18)",
     alignItems: "center",
     justifyContent: "center",
   },
-  callBtnLabel: { fontSize: 16, fontFamily: "Manrope_700Bold", color: "#fff" },
-  callBtnSub: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "rgba(255,255,255,0.85)" },
-  chatBtn: {
-    width: 52, height: 52,
-    borderRadius: 10,
-    backgroundColor: "#27AE60",
-    alignItems: "center",
-    justifyContent: "center",
+  stickyBtnText: { gap: 1 },
+  stickyBtnLabel: {
+    fontSize: 14,
+    fontFamily: "Manrope_700Bold",
+    color: "#fff",
+    letterSpacing: 0.1,
+  },
+  stickyBtnSub: {
+    fontSize: 10,
+    fontFamily: "Manrope_400Regular",
+    color: "rgba(255,255,255,0.80)",
   },
 
   // More dropdown
