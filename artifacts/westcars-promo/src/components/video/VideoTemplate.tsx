@@ -7,71 +7,54 @@ import { Scene4 } from './video_scenes/Scene4';
 import { Scene5 } from './video_scenes/Scene5';
 
 const SCENE_DURATIONS = {
-  scene1: 4000,
-  scene2: 3500,
-  scene3: 4500,
-  scene4: 4000,
-  scene5: 4500,
+  intro: 4500,
+  home: 5000,
+  search: 4500,
+  detail: 5000,
+  close: 5000,
 };
-
-const ACCENT_X = ['45vw', '8vw', '70vw', '20vw', '50vw'];
-const ACCENT_Y = ['42vh', '15vh', '55vh', '75vh', '30vh'];
-const ACCENT_SCALE = [2.8, 0.8, 1.5, 0.6, 2.0];
-const ACCENT_OPACITY = [0.7, 0.5, 0.6, 0.4, 0.8];
 
 export default function VideoTemplate() {
   const { currentScene } = useVideoPlayer({ durations: SCENE_DURATIONS });
-  const isDark = currentScene === 0 || currentScene === 1 || currentScene === 3 || currentScene === 4;
+  const isDark = currentScene === 0 || currentScene === 4;
 
   return (
-    <div className="relative w-full h-screen overflow-hidden" style={{ background: '#060e1a' }}>
+    <div className="relative w-full h-screen overflow-hidden" style={{ background: isDark ? '#060e1a' : '#fff' }}>
 
-      {/* Persistent video background — Scenes 0 & 1 */}
+      {/* Persistent video background — dark scenes only */}
       <motion.div
         className="absolute inset-0 z-0 pointer-events-none"
-        animate={{ opacity: currentScene <= 1 ? 1 : 0 }}
-        transition={{ duration: 0.6 }}
+        animate={{ opacity: isDark ? 1 : 0 }}
+        transition={{ duration: 0.8 }}
       >
         <video
           src={`${import.meta.env.BASE_URL}videos/hero-bg.mp4`}
           autoPlay loop muted playsInline
           className="w-full h-full object-cover"
         />
+        <div className="absolute inset-0 bg-[#060e1a]/75" />
       </motion.div>
 
-      {/* Persistent floating accent orb — morphs position/scale across scenes */}
+      {/* Persistent teal glow orb — morphs across scenes */}
       <motion.div
-        className="absolute rounded-full blur-[80px] pointer-events-none z-0"
-        style={{ background: 'radial-gradient(circle, #0EB5CA55, transparent 70%)', width: '30vw', height: '30vw' }}
+        className="absolute rounded-full blur-[100px] pointer-events-none z-0"
+        style={{ width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(14,181,202,0.25), transparent 70%)' }}
         animate={{
-          x: ACCENT_X[currentScene],
-          y: ACCENT_Y[currentScene],
-          scale: ACCENT_SCALE[currentScene],
-          opacity: isDark ? ACCENT_OPACITY[currentScene] : 0.15,
+          x: ['-10vw', '60vw', '-5vw', '65vw', '30vw'][currentScene],
+          y: ['10vh', '5vh', '60vh', '20vh', '30vh'][currentScene],
+          opacity: isDark ? 0.8 : 0.15,
+          scale: [1.5, 0.8, 1.2, 0.7, 1.0][currentScene],
         }}
-        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
       />
 
-      {/* Persistent thin teal accent line — travels across scenes */}
-      <motion.div
-        className="absolute h-[2px] pointer-events-none z-0"
-        style={{ background: 'linear-gradient(90deg, transparent, #0EB5CA, transparent)' }}
-        animate={{
-          left: ['10%', '5%', '50%', '30%', '20%'][currentScene],
-          width: ['40%', '60%', '30%', '50%', '45%'][currentScene],
-          top: ['50%', '12%', '88%', '25%', '68%'][currentScene],
-          opacity: currentScene === 2 ? 0 : 0.6,
-        }}
-        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      />
-
-      {/* Scene-specific foreground */}
+      {/* Scene content */}
       <AnimatePresence mode="popLayout">
-        {currentScene === 0 && <Scene1 key="s1" />}
-        {currentScene === 1 && <Scene2 key="s2" />}
-        {currentScene === 2 && <Scene3 key="s3" />}
-        {currentScene === 3 && <Scene4 key="s4" />}
-        {currentScene === 4 && <Scene5 key="s5" />}
+        {currentScene === 0 && <Scene1 key="intro" />}
+        {currentScene === 1 && <Scene2 key="home" />}
+        {currentScene === 2 && <Scene3 key="search" />}
+        {currentScene === 3 && <Scene4 key="detail" />}
+        {currentScene === 4 && <Scene5 key="close" />}
       </AnimatePresence>
     </div>
   );

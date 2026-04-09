@@ -1,73 +1,92 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { PhoneFrame } from '../PhoneFrame';
 
-function PhoneScreen() {
-  const [scroll, setScroll] = useState(false);
+const CHIPS = [
+  { label: 'All', color: '#0EB5CA' },
+  { label: 'SUV', color: '#818CF8' },
+  { label: 'Sedan', color: '#F472B6' },
+  { label: 'Tokunbo', color: '#22C55E' },
+  { label: 'Budget', color: '#F59E0B' },
+  { label: 'Luxury', color: '#A855F7' },
+];
+
+const LISTINGS = [
+  { brand: 'Mercedes-Benz GLE', year: 2022, price: 'GH₵ 480,000', loc: 'Airport, Accra', km: '22,000 km', tag: 'Luxury', tagColor: '#A855F7', rating: '4.9' },
+  { brand: 'Toyota Land Cruiser', year: 2021, price: 'GH₵ 620,000', loc: 'East Legon', km: '35,000 km', tag: 'Tokunbo', tagColor: '#22C55E', rating: '4.7' },
+  { brand: 'Ford Ranger Raptor', year: 2023, price: 'GH₵ 340,000', loc: 'Tema', km: '8,500 km', tag: 'New', tagColor: '#3B82F6', rating: '4.8' },
+];
+
+function SearchScreen() {
+  const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
-    const t = setTimeout(() => setScroll(true), 1200);
+    const t = setTimeout(() => setScrollY(1), 1000);
     return () => clearTimeout(t);
   }, []);
 
-  const cars = [
-    { name: 'Toyota Camry 2023', price: 'GH₵ 185,000', fuel: 'Petrol', km: '12,500 km', badge: 'Verified', color: '#0EB5CA' },
-    { name: 'Honda CR-V 2022', price: 'GH₵ 240,000', fuel: 'Hybrid', km: '8,200 km', badge: 'Premium', color: '#F59E0B' },
-    { name: 'Hyundai Tucson 2023', price: 'GH₵ 210,000', fuel: 'Petrol', km: '5,100 km', badge: 'New', color: '#10B981' },
-    { name: 'Kia Sportage 2022', price: 'GH₵ 195,000', fuel: 'Petrol', km: '18,000 km', badge: 'Verified', color: '#0EB5CA' },
-  ];
-
   return (
-    <div className="w-full h-full bg-[#EDF4F7] overflow-hidden flex flex-col">
-      {/* App Header */}
-      <div className="bg-white px-3 pt-8 pb-3 flex-shrink-0 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <img src={`${import.meta.env.BASE_URL}wc-badge.png`} alt="WestCars" className="h-7 object-contain" />
-          <div className="flex gap-2">
-            <div className="w-7 h-7 rounded-full bg-[#EDF4F7] flex items-center justify-center">
-              <div className="w-3 h-3 rounded-full border-2 border-[#0EB5CA]" />
-            </div>
+    <div className="absolute inset-0 flex flex-col overflow-hidden" style={{ background: '#EDF4F7', paddingTop: '8%' }}>
+      {/* Header */}
+      <div className="flex-shrink-0 bg-white px-3 pt-1 pb-2 shadow-sm">
+        <div className="text-[10px] font-black text-gray-900 mb-2" style={{ fontFamily: 'var(--font-display)' }}>Browse Cars</div>
+        {/* Search input */}
+        <div className="flex items-center gap-2 bg-[#EDF4F7] rounded-xl px-3 py-2 border border-[#0EB5CA]/20 mb-2">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0EB5CA" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <span className="text-[8px] text-gray-400">Search brand, model, location…</span>
+          <div className="ml-auto bg-[#0EB5CA] rounded-lg px-2 py-0.5">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/></svg>
           </div>
         </div>
-        {/* Search bar */}
-        <div className="bg-[#EDF4F7] rounded-xl px-3 py-2 flex items-center gap-2 border border-[#0EB5CA]/20">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0EB5CA" strokeWidth="2.5">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-          </svg>
-          <span className="text-[10px] text-gray-400">Search cars, brands, models...</span>
-        </div>
-        {/* Category pills */}
-        <div className="flex gap-2 mt-2 overflow-hidden">
-          {['All Cars', 'SUV', 'Sedan', 'Pickup'].map((c, i) => (
-            <div key={c} className={`px-3 py-1 rounded-full text-[9px] font-bold whitespace-nowrap flex-shrink-0 ${i === 0 ? 'bg-[#0EB5CA] text-white' : 'bg-white text-gray-500 border border-gray-200'}`}>
-              {c}
+        {/* Quick filter chips */}
+        <div className="flex gap-1.5 overflow-hidden">
+          {CHIPS.map((chip, i) => (
+            <div
+              key={chip.label}
+              className="flex-shrink-0 px-2.5 py-0.5 rounded-full text-[7px] font-bold"
+              style={i === 0
+                ? { background: chip.color, color: 'white' }
+                : { background: chip.color + '18', color: chip.color, border: `1px solid ${chip.color}40` }
+              }
+            >
+              {chip.label}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Listing cards */}
+      {/* Results label */}
+      <div className="flex items-center justify-between px-3 py-1.5 flex-shrink-0">
+        <span className="text-[7px] text-gray-500 font-medium">2,840 results</span>
+        <div className="flex items-center gap-1 text-[7px] text-[#0EB5CA] font-bold">
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#0EB5CA" strokeWidth="2"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+          Sort
+        </div>
+      </div>
+
+      {/* Listing cards — full width */}
       <motion.div
-        className="flex-1 overflow-hidden px-3 py-2 flex flex-col gap-3"
-        animate={scroll ? { y: '-28%' } : { y: 0 }}
-        transition={{ duration: 2.2, ease: 'easeInOut', delay: 0.3 }}
+        className="flex-1 overflow-hidden px-3 flex flex-col gap-2.5"
+        animate={scrollY ? { y: '-35%' } : { y: 0 }}
+        transition={{ duration: 2.8, ease: 'easeInOut', delay: 0.4 }}
       >
-        {cars.map((car) => (
-          <div key={car.name} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex-shrink-0">
-            <div className="h-[70px] bg-gradient-to-br from-[#EDF4F7] to-[#d4eaf0] relative overflow-hidden">
-              <img
-                src={`${import.meta.env.BASE_URL}images/clean-car.png`}
-                className="absolute inset-0 w-full h-full object-cover"
-                alt=""
-              />
-              <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[8px] font-bold text-white" style={{ background: car.color }}>
-                {car.badge}
-              </div>
+        {LISTINGS.map((car) => (
+          <div key={car.brand} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-shrink-0">
+            {/* Car image */}
+            <div className="relative flex-shrink-0" style={{ width: '35%', minHeight: 80 }}>
+              <img src={`${import.meta.env.BASE_URL}images/clean-car.png`} className="w-full h-full object-cover" alt="" />
+              <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full text-white text-[6px] font-bold" style={{ background: car.tagColor }}>{car.tag}</div>
             </div>
-            <div className="px-3 py-2">
-              <div className="text-[11px] font-bold text-gray-900">{car.name}</div>
-              <div className="text-[12px] font-black text-[#0EB5CA] mt-0.5">{car.price}</div>
-              <div className="flex gap-2 mt-1.5">
-                <span className="text-[8px] text-gray-400 bg-[#EDF4F7] px-2 py-0.5 rounded-full">{car.fuel}</span>
-                <span className="text-[8px] text-gray-400 bg-[#EDF4F7] px-2 py-0.5 rounded-full">{car.km}</span>
+            {/* Details */}
+            <div className="flex-1 px-2.5 py-2">
+              <div className="text-[8px] font-bold text-gray-900 leading-tight">{car.brand}</div>
+              <div className="text-[7px] text-gray-400 mb-1">{car.year} · {car.km}</div>
+              <div className="text-[10px] font-black text-[#0EB5CA]">{car.price}</div>
+              <div className="flex items-center gap-1 mt-1.5">
+                <svg width="7" height="7" viewBox="0 0 24 24" fill="#F59E0B" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span className="text-[7px] text-gray-500">{car.rating}</span>
+                <span className="text-[6px] text-gray-300 mx-0.5">·</span>
+                <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>
+                <span className="text-[7px] text-gray-400">{car.loc}</span>
               </div>
             </div>
           </div>
@@ -75,17 +94,16 @@ function PhoneScreen() {
       </motion.div>
 
       {/* Bottom nav */}
-      <div className="bg-white border-t border-gray-100 px-4 py-2 flex justify-around flex-shrink-0">
+      <div className="bg-white border-t border-gray-100 flex justify-around py-2 flex-shrink-0">
         {[
-          { icon: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', active: true },
-          { icon: 'M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z', active: false },
-          { icon: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2', active: false },
-        ].map((nav, i) => (
-          <div key={i} className="flex flex-col items-center gap-1">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={nav.active ? '#0EB5CA' : '#9CA3AF'} strokeWidth="2">
-              <path d={nav.icon} />
-            </svg>
-            {nav.active && <div className="w-1 h-1 rounded-full bg-[#0EB5CA]" />}
+          { d: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', active: false },
+          { d: 'M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z', active: true },
+          { d: 'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z', active: false },
+          { d: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2', active: false },
+        ].map((n, i) => (
+          <div key={i} className="flex flex-col items-center gap-0.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={n.active ? '#0EB5CA' : '#9CA3AF'} strokeWidth="2"><path d={n.d} /></svg>
+            {n.active && <div className="w-1 h-1 rounded-full bg-[#0EB5CA]" />}
           </div>
         ))}
       </div>
@@ -95,100 +113,77 @@ function PhoneScreen() {
 
 export function Scene3() {
   const [phase, setPhase] = useState(0);
-
   useEffect(() => {
-    const timers = [
+    const t = [
       setTimeout(() => setPhase(1), 100),
-      setTimeout(() => setPhase(2), 500),
-      setTimeout(() => setPhase(3), 900),
+      setTimeout(() => setPhase(2), 450),
+      setTimeout(() => setPhase(3), 850),
     ];
-    return () => timers.forEach(t => clearTimeout(t));
+    return () => t.forEach(clearTimeout);
   }, []);
 
   return (
     <motion.div
-      className="absolute inset-0 flex items-center justify-between px-[8vw] bg-white z-10"
-      initial={{ opacity: 0, scale: 1.04 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, x: '-8vw' }}
-      transition={{ duration: 0.5, ease: 'circOut' }}
+      className="absolute inset-0 flex items-center z-10"
+      style={{ background: '#f8fafc' }}
+      initial={{ clipPath: 'inset(0 100% 0 0)' }}
+      animate={{ clipPath: 'inset(0 0% 0 0)' }}
+      exit={{ clipPath: 'inset(0 0 0 100%)' }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
-      {/* Left: headline copy */}
-      <div className="flex-1 pr-[4vw]">
+      {/* Soft gradient bg */}
+      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 30% 50%, rgba(14,181,202,0.06) 0%, transparent 60%)' }} />
+
+      {/* Left: copy */}
+      <div className="flex-1 flex flex-col justify-center pl-[8vw]">
         <motion.div
-          className="inline-block bg-[#0EB5CA]/10 text-[#0EB5CA] text-[1.2vw] font-bold tracking-[0.2em] uppercase px-4 py-2 rounded-full mb-6"
-          initial={{ opacity: 0, y: -20 }}
-          animate={phase >= 1 ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
+          className="inline-block bg-[#0EB5CA]/10 text-[#0EB5CA] text-[1vw] font-bold tracking-[0.2em] uppercase px-3 py-1.5 rounded-full mb-5 self-start"
+          initial={{ opacity: 0, y: -15 }}
+          animate={phase >= 2 ? { opacity: 1, y: 0 } : { opacity: 0, y: -15 }}
           transition={{ type: 'spring', stiffness: 500, damping: 25 }}
         >
-          The Solution
+          Search & Browse
         </motion.div>
 
         <motion.h2
-          className="text-[5vw] font-black text-gray-900 leading-[1.05] tracking-tight mb-6"
+          className="text-[4.2vw] font-black text-gray-900 leading-[1.05] mb-5"
           style={{ fontFamily: 'var(--font-display)' }}
-          initial={{ opacity: 0, y: 30 }}
-          animate={phase >= 2 ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+          initial={{ opacity: 0, y: 25 }}
+          animate={phase >= 2 ? { opacity: 1, y: 0 } : { opacity: 0, y: 25 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.04 }}
         >
-          Find your<br />
-          <span className="text-[#0EB5CA]">perfect car</span><br />
-          in minutes.
+          Find exactly<br />what you're<br /><span className="text-[#0EB5CA]">looking for.</span>
         </motion.h2>
 
         <motion.div
           className="flex flex-col gap-3"
-          initial={{ opacity: 0 }}
-          animate={phase >= 3 ? { opacity: 1 } : { opacity: 0 }}
-          transition={{ duration: 0.4 }}
+          initial={{ opacity: 0, y: 15 }}
+          animate={phase >= 3 ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
         >
-          {['Browse thousands of listings', 'Filter by brand, price & location', 'Message sellers instantly'].map((feat, i) => (
-            <motion.div
-              key={feat}
-              className="flex items-center gap-3"
-              initial={{ opacity: 0, x: -20 }}
-              animate={phase >= 3 ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 25, delay: i * 0.08 }}
-            >
-              <div className="w-5 h-5 rounded-full bg-[#0EB5CA] flex items-center justify-center flex-shrink-0">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+          {['Smart filters: brand, city, price', 'Colorful quick-tags (SUV, Luxury…)', 'Sort by date, price or mileage'].map((txt) => (
+            <div key={txt} className="flex items-center gap-2.5">
+              <div className="w-[18px] h-[18px] rounded-full bg-[#0EB5CA] flex items-center justify-center flex-shrink-0">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5"><polyline points="20 6 9 17 4 12" /></svg>
               </div>
-              <span className="text-[1.5vw] text-gray-600" style={{ fontFamily: 'var(--font-body)' }}>{feat}</span>
-            </motion.div>
+              <span className="text-[1.35vw] text-gray-600" style={{ fontFamily: 'var(--font-body)' }}>{txt}</span>
+            </div>
           ))}
         </motion.div>
       </div>
 
-      {/* Right: Phone mockup */}
-      <motion.div
-        className="flex-shrink-0"
-        initial={{ x: '30vw', opacity: 0, rotate: 8 }}
-        animate={phase >= 1 ? { x: 0, opacity: 1, rotate: -3 } : { x: '30vw', opacity: 0, rotate: 8 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-      >
-        {/* Phone shell */}
-        <div
-          className="relative overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.25)]"
-          style={{
-            width: '22vw',
-            height: '44vw',
-            borderRadius: '3.5vw',
-            border: '0.6vw solid #1a1a2e',
-            background: '#1a1a2e',
-          }}
+      {/* Right: phone */}
+      <div className="flex-1 flex items-center justify-center pr-[6vw]">
+        <motion.div
+          initial={{ x: '25vw', opacity: 0, rotate: 6 }}
+          animate={phase >= 1 ? { x: 0, opacity: 1, rotate: -2 } : { x: '25vw', opacity: 0, rotate: 6 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 24 }}
         >
-          {/* Notch */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[35%] h-[3%] bg-[#1a1a2e] rounded-b-full z-20" />
-          {/* Screen */}
-          <div className="absolute inset-[0.3vw] rounded-[3vw] overflow-hidden bg-[#EDF4F7]">
-            <PhoneScreen />
-          </div>
-          {/* Screen glare */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-[3vw] pointer-events-none z-10" />
-        </div>
-      </motion.div>
+          <PhoneFrame>
+            <SearchScreen />
+          </PhoneFrame>
+        </motion.div>
+      </div>
     </motion.div>
   );
 }
