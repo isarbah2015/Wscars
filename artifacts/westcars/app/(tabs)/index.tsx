@@ -407,8 +407,10 @@ export default function HomeScreen() {
         <Animated.View style={{ height: scrollPad }} />
 
         {/* ── WESTCARS brand strip ── */}
-        <View style={[styles.brandStrip, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
-          <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
+        <View style={styles.brandStrip}>
+          <View style={[styles.badgeCard, { backgroundColor: isDark ? "#1E293B" : "#FFFFFF", shadowColor: isDark ? "#000" : "#0EB5CA" }]}>
+            <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
+          </View>
           <Text style={[styles.brandStripSub, { color: isDark ? "#94A3B8" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
@@ -704,13 +706,19 @@ const styles = StyleSheet.create({
 
   brandStrip: {
     alignItems: "center",
-    gap: 4,
+    gap: 8,
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.05)",
+    paddingVertical: 20,
   },
-  brandStripBadge: { width: 110, height: 110 },
+  badgeCard: {
+    borderRadius: 24,
+    padding: 10,
+    shadowOpacity: 0.10,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  brandStripBadge: { width: 120, height: 120 },
   brandStripSub: {
     fontSize: 12,
     fontFamily: "Manrope_600SemiBold",
