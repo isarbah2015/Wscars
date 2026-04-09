@@ -474,33 +474,7 @@ export default function HomeScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.offersRow}>
               {specialOffers.map((car) => (
-                <Pressable
-                  key={`special_${car.id}`}
-                  style={[styles.offerCard, { backgroundColor: colors.card }]}
-                  onPress={() =>
-                    router.push({ pathname: "/car/[id]", params: { id: car.id } })
-                  }
-                >
-                  <View style={styles.offerImgWrap}>
-                    <Image
-                      source={{ uri: car.images[0] }}
-                      style={styles.offerImg}
-                      resizeMode="cover"
-                    />
-                    <View style={styles.offerHeart}>
-                      <Feather name="heart" size={18} color="rgba(255,255,255,0.9)" />
-                    </View>
-                  </View>
-                  <View style={styles.offerInfo}>
-                    <Text style={[styles.offerPrice, { color: colors.text }]}>
-                      from {car.price >= 1000 ? `GHS ${car.price.toLocaleString()}` : `GHS ${car.price}`}
-                    </Text>
-                    <Text style={[styles.offerName, { color: colors.textSecondary }]} numberOfLines={1}>
-                      {car.brand} {car.model}
-                    </Text>
-                    <Text style={[styles.offerYear, { color: colors.textTertiary }]}>{car.year}</Text>
-                  </View>
-                </Pressable>
+                <CarCard key={`special_${car.id}`} car={car} style={styles.offerCarCard} />
               ))}
             </View>
           </ScrollView>
@@ -835,24 +809,7 @@ const styles = StyleSheet.create({
   sep: { height: 10 },
 
   offersRow: { flexDirection: "row", gap: 10, paddingRight: 12, paddingBottom: 12 },
-  offerCard: {
-    width: 180,
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    overflow: "hidden",
-    shadowColor: "#0A1628",
-    shadowOpacity: 0.10,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  offerImgWrap: { height: 115, position: "relative" },
-  offerImg: { width: "100%", height: "100%" },
-  offerHeart: { position: "absolute", top: 6, right: 6 },
-  offerInfo: { padding: 10, gap: 2 },
-  offerPrice: { fontSize: 14, fontFamily: "Manrope_700Bold" },
-  offerName: { fontSize: 12, fontFamily: "Manrope_400Regular" },
-  offerYear: { fontSize: 11, fontFamily: "Manrope_400Regular" },
+  offerCarCard: { width: 180 },
 
   adBannerWrap: {
     marginHorizontal: 10,

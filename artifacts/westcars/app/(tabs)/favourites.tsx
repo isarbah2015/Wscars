@@ -158,40 +158,49 @@ export default function FavouritesScreen() {
 
                 {/* ── Details (below image) ── */}
                 <View style={styles.favDetails}>
-                  {/* Name + year */}
-                  <View style={styles.nameRow}>
-                    <Text style={[styles.favName, { color: colors.text }]}>
-                      {car.brand} {car.model}
-                    </Text>
-                    <Text style={[styles.favYear, { color: colors.textTertiary }]}>{car.year}</Text>
-                  </View>
+                  {/* Car name — full width */}
+                  <Text style={[styles.favName, { color: colors.text }]} numberOfLines={1}>
+                    {car.brand} {car.model}
+                  </Text>
 
-                  {/* Meta chips */}
+                  {/* Year · Mileage · Location — consistent with CarCard */}
                   <View style={styles.metaChips}>
+                    <View style={[styles.metaChip, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
+                      <Text style={[styles.metaChipText, { color: colors.textSecondary }]}>{car.year}</Text>
+                    </View>
                     {car.mileage > 0 && (
-                      <View style={[styles.metaChip, { backgroundColor: isDark ? "#132313" : "#DCFCE7" }]}>
-                        <Feather name="activity" size={11} color="#22C55E" />
-                        <Text style={[styles.metaChipText, { color: "#22C55E" }]}>
+                      <View style={[styles.metaChip, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
+                        <Feather name="activity" size={11} color={colors.textTertiary} />
+                        <Text style={[styles.metaChipText, { color: colors.textSecondary }]}>
                           {(car.mileage / 1000).toFixed(0)}k km
                         </Text>
                       </View>
                     )}
-                    <View style={[styles.metaChip, { backgroundColor: isDark ? "#2A1F0A" : "#FFF3E0" }]}>
-                      <Feather name="zap" size={11} color="#F59E0B" />
-                      <Text style={[styles.metaChipText, { color: "#F59E0B" }]}>{car.fuelType}</Text>
-                    </View>
-                    <View style={[styles.metaChip, { backgroundColor: isDark ? "#1A2D44" : "#EDF4FF" }]}>
-                      <Feather name="settings" size={11} color="#3B9EFF" />
-                      <Text style={[styles.metaChipText, { color: "#3B9EFF" }]}>{car.transmission}</Text>
-                    </View>
+                    {car.location && (
+                      <View style={[styles.metaChip, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
+                        <Feather name="map-pin" size={11} color={colors.textTertiary} />
+                        <Text style={[styles.metaChipText, { color: colors.textSecondary }]} numberOfLines={1}>
+                          {car.location.split(",")[0]}
+                        </Text>
+                      </View>
+                    )}
                   </View>
 
-                  {/* Location */}
-                  <View style={[styles.locationRow, { borderTopColor: colors.border }]}>
-                    <View style={styles.locationInner}>
-                      <Feather name="map-pin" size={12} color={colors.textTertiary} />
-                      <Text style={[styles.locationText, { color: colors.textTertiary }]}>{car.location}</Text>
-                    </View>
+                  {/* Seller name + action button */}
+                  <View style={styles.sellerActionRow}>
+                    {car.seller?.name ? (
+                      <View style={styles.sellerInner}>
+                        <Feather name="user" size={12} color={colors.textTertiary} />
+                        <Text style={[styles.sellerName, { color: colors.textSecondary }]} numberOfLines={1}>
+                          {car.seller.name}
+                        </Text>
+                        {car.seller?.isVerified && (
+                          <Feather name="check-circle" size={12} color="#1565C0" />
+                        )}
+                      </View>
+                    ) : (
+                      <View />
+                    )}
                     <Pressable
                       style={[styles.contactBtn, { backgroundColor: colors.accent }]}
                       onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
@@ -341,55 +350,45 @@ const styles = StyleSheet.create({
   /* ── Details section ── */
   favDetails: {
     padding: 14,
-    gap: 10,
-  },
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    gap: 8,
   },
   favName: {
     fontSize: 16,
     fontFamily: "Manrope_700Bold",
-    flex: 1,
-  },
-  favYear: {
-    fontSize: 14,
-    fontFamily: "Manrope_500Medium",
-    marginLeft: 8,
   },
   metaChips: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: 6,
   },
   metaChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 7,
   },
   metaChipText: {
     fontSize: 12,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "Manrope_500Medium",
   },
-  locationRow: {
+  sellerActionRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingTop: 10,
-    borderTopWidth: 1,
+    marginTop: 2,
   },
-  locationInner: {
+  sellerInner: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
+    flex: 1,
   },
-  locationText: {
+  sellerName: {
     fontSize: 12,
-    fontFamily: "Manrope_400Regular",
+    fontFamily: "Manrope_500Medium",
+    flex: 1,
   },
   contactBtn: {
     flexDirection: "row",
