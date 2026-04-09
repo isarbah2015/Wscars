@@ -407,14 +407,15 @@ export default function HomeScreen() {
         <Animated.View style={{ height: scrollPad }} />
 
         {/* ── WESTCARS brand strip ── */}
-        <View style={[styles.brandStrip, { backgroundColor: isDark ? "#0B1120" : "#FFFFFF" }]}>
-          {isDark ? (
-            <View style={styles.badgeRingDark}>
-              <Image source={WC_BADGE} style={styles.brandStripBadgeDark} resizeMode="contain" />
-            </View>
-          ) : (
-            <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
-          )}
+        <View style={[styles.brandStrip, { backgroundColor: isDark ? "transparent" : "#FFFFFF" }]}>
+          <Image
+            source={WC_BADGE}
+            style={[
+              styles.brandStripBadge,
+              isDark && { tintColor: "#CBD5E1" },
+            ]}
+            resizeMode="contain"
+          />
           <Text style={[styles.brandStripSub, { color: isDark ? "#94A3B8" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
@@ -715,7 +716,7 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 16,
   },
-  brandStripBadge: { width: 200, height: 200 },
+  brandStripBadge: { width: 155, height: 155 },
 
   badgeRingDark: {
     width: 164,
