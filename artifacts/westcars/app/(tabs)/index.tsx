@@ -20,7 +20,8 @@ import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 
-const WC_BADGE    = require("@/assets/images/wc-badge.png");
+const WC_BADGE      = require("@/assets/images/wc-badge.png");
+const WC_LOGOMARK   = require("@/assets/images/wc-logomark.png");
 const CAR_NEW     = require("@/assets/images/car-new.png");
 const CAR_USED    = require("@/assets/images/car-used.png");
 const CAR_MOTO    = require("@/assets/images/car-moto.png");
@@ -407,15 +408,18 @@ export default function HomeScreen() {
         <Animated.View style={{ height: scrollPad }} />
 
         {/* ── WESTCARS brand strip ── */}
-        <View style={[styles.brandStrip, { backgroundColor: isDark ? "transparent" : "#FFFFFF" }]}>
+        <View style={styles.brandStrip}>
           <Image
-            source={WC_BADGE}
+            source={WC_LOGOMARK}
             style={[
               styles.brandStripBadge,
-              isDark && { tintColor: "#CBD5E1" },
+              isDark && { tintColor: "#E2E8F0" },
             ]}
             resizeMode="contain"
           />
+          <Text style={[styles.brandStripName, { color: isDark ? "#E2E8F0" : "#0F172A" }]}>
+            WESTCARS
+          </Text>
           <Text style={[styles.brandStripSub, { color: isDark ? "#94A3B8" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
@@ -716,32 +720,20 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 16,
   },
-  brandStripBadge: { width: 155, height: 155 },
+  brandStripBadge: { width: 120, height: 120 },
 
-  badgeRingDark: {
-    width: 164,
-    height: 164,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    borderWidth: 2.5,
-    borderColor: "rgba(255,255,255,0.30)",
-    shadowColor: "#FFFFFF",
-    shadowOpacity: 0.20,
-    shadowRadius: 22,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 8,
-    overflow: "hidden",
-    alignItems: "center",
-    justifyContent: "center",
+  brandStripName: {
+    fontFamily: "Raleway_800ExtraBold",
+    fontSize: 24,
+    letterSpacing: 2.5,
+    marginTop: 0,
   },
-  /* Image zoomed inside the ring so white PNG margins are clipped tight */
-  brandStripBadgeDark: { width: 224, height: 224 },
 
   brandStripSub: {
     fontSize: 12,
     fontFamily: "Manrope_600SemiBold",
     letterSpacing: 1.3,
-    marginTop: -4,
+    marginTop: 2,
   },
 
   promoBannerWrap: {
