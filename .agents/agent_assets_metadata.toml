@@ -5,7 +5,7 @@ outputs = []
 id = "9Ds4OF2jHzj0F3MXsWu0M"
 uri = "file://artifacts/westcars/assets/images/wc-badge.png"
 type = "image"
-title = "westcars original style badge light"
+title = "westcars badge clean hexagon light"
 
 [[generated]]
 id = "aNct7PNlKdOwBJihfE_jS"
@@ -35,4 +35,4 @@ title = "Clean white car"
 id = "8Fv2GJ48nnKLM3z3pgvUq"
 uri = "file://artifacts/westcars/assets/images/wc-badge-home.png"
 type = "image"
-title = "westcars original style badge dark"
+title = "westcars badge clean hexagon dark"
