@@ -407,14 +407,18 @@ export default function HomeScreen() {
         <Animated.View style={{ height: scrollPad }} />
 
         {/* ── WESTCARS brand strip ── */}
-        <View style={styles.brandStrip}>
-          <View style={[styles.badgeCard, { backgroundColor: isDark ? "#1E293B" : "#FFFFFF", shadowColor: isDark ? "#000" : "#0EB5CA" }]}>
-            <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
-          </View>
+        <LinearGradient
+          colors={isDark
+            ? ["#1E293B", "#1E293B", colors.background]
+            : ["#FFFFFF", "#FFFFFF", colors.background]}
+          locations={[0, 0.65, 1]}
+          style={styles.brandStrip}
+        >
+          <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
           <Text style={[styles.brandStripSub, { color: isDark ? "#94A3B8" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
-        </View>
+        </LinearGradient>
 
         {/* ── Sponsored Banner → leads to Advertise ── */}
         <Pressable onPress={() => router.push("/advertise")} style={styles.promoBannerWrap}>
@@ -709,14 +713,6 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 20,
-  },
-  badgeCard: {
-    borderRadius: 24,
-    padding: 10,
-    shadowOpacity: 0.10,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
   },
   brandStripBadge: { width: 120, height: 120 },
   brandStripSub: {
