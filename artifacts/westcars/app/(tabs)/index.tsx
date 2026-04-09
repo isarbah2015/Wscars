@@ -21,6 +21,7 @@ import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 
 const WC_BADGE      = require("@/assets/images/wc-badge.png");
+const WC_BADGE_TR   = require("@/assets/images/wc-badge-transparent.png");
 const WC_LOGOMARK   = require("@/assets/images/wc-logomark.png");
 const CAR_NEW     = require("@/assets/images/car-new.png");
 const CAR_USED    = require("@/assets/images/car-used.png");
@@ -407,9 +408,13 @@ export default function HomeScreen() {
         {/* Animated spacer — height tracks header height so content starts below it */}
         <Animated.View style={{ height: scrollPad }} />
 
-        {/* ── WESTCARS brand strip — mirrors login/signup hero ── */}
-        <View style={[styles.brandStrip, { backgroundColor: isDark ? "#131C2E" : "#FFFFFF" }]}>
-          <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
+        {/* ── WESTCARS brand strip ── */}
+        <View style={[styles.brandStrip, { backgroundColor: isDark ? "transparent" : "#FFFFFF" }]}>
+          <Image
+            source={WC_BADGE}
+            style={[styles.brandStripBadge, isDark && { tintColor: "#D1E8F0" }]}
+            resizeMode="contain"
+          />
           <Text style={[styles.brandStripSub, { color: isDark ? "#0EB5CA" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
