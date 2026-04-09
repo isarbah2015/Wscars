@@ -141,7 +141,7 @@ export function CarCard({ car, style }: CarCardProps) {
               </View>
             )}
             {car.location && (
-              <View style={styles.metaChip}>
+              <View style={[styles.metaChip, styles.metaChipLoc]}>
                 <Feather name="map-pin" size={9} color={colors.textTertiary} />
                 <Text style={[styles.metaChipText, { color: colors.textSecondary }]} numberOfLines={1}>
                   {car.location.split(",")[0]}
@@ -307,7 +307,8 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: "row",
     gap: 5,
-    flexWrap: "wrap",
+    flexWrap: "nowrap",
+    overflow: "hidden",
   },
   metaChip: {
     flexDirection: "row",
@@ -317,10 +318,17 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 7,
     paddingVertical: 2,
+    flexShrink: 0,
+  },
+  // Location chip: absorbs leftover space and lets its text truncate
+  metaChipLoc: {
+    flexShrink: 1,
+    minWidth: 0,
   },
   metaChipText: {
     fontSize: 10,
     fontFamily: "Manrope_500Medium",
+    flexShrink: 1,
   },
   sellerRow: {
     flexDirection: "row",
