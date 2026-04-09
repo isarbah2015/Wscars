@@ -20,7 +20,8 @@ import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 
-const WC_BADGE    = require("@/assets/images/wc-badge.png");
+const WC_BADGE      = require("@/assets/images/wc-badge.png");
+const WC_BADGE_HOME = require("@/assets/images/wc-badge-home.png");
 const CAR_NEW     = require("@/assets/images/car-new.png");
 const CAR_USED    = require("@/assets/images/car-used.png");
 const CAR_MOTO    = require("@/assets/images/car-moto.png");
@@ -407,12 +408,17 @@ export default function HomeScreen() {
         <Animated.View style={{ height: scrollPad }} />
 
         {/* ── WESTCARS brand strip ── */}
-        <View style={styles.brandStrip}>
-          <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
-          <Text style={[styles.brandStripSub, { color: isDark ? "#94A3B8" : "#0098AA" }]}>
+        <LinearGradient
+          colors={["#0EB5CA", "#007A8C"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.brandStrip}
+        >
+          <Image source={WC_BADGE_HOME} style={styles.brandStripBadge} resizeMode="contain" />
+          <Text style={[styles.brandStripSub, { color: "#FFFFFF" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
-        </View>
+        </LinearGradient>
 
         {/* ── Sponsored Banner → leads to Advertise ── */}
         <Pressable onPress={() => router.push("/advertise")} style={styles.promoBannerWrap}>
@@ -706,7 +712,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingVertical: 24,
+    marginHorizontal: 10,
+    marginTop: 8,
+    borderRadius: 20,
+    overflow: "hidden",
   },
   brandStripBadge: { width: 120, height: 120 },
   brandStripSub: {
