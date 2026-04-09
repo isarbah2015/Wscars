@@ -89,8 +89,6 @@ export default function MessagesScreen() {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 10 : insets.top;
-  const isAdmin = currentUser?.isAdmin === true;
-
   const totalUnread = conversations.reduce((s, c) => s + (c.unreadCount || 0), 0);
 
   return (
@@ -124,7 +122,7 @@ export default function MessagesScreen() {
             </View>
             <View>
               <Text style={[styles.headerTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>
-                {isAdmin ? "Support Inbox" : "Messages"}
+                Messages
               </Text>
               <Text style={[styles.headerSub, { color: isDark ? "#94A3B8" : "#64748B" }]}>
                 {currentUser?.name?.split(" ")[0] || "Guest"}
@@ -133,12 +131,6 @@ export default function MessagesScreen() {
           </Pressable>
 
           <View style={styles.headerRight}>
-            {isAdmin && (
-              <View style={styles.adminHeaderBadge}>
-                <Feather name="shield" size={11} color="#FFFFFF" />
-                <Text style={styles.adminHeaderBadgeText}>ADMIN</Text>
-              </View>
-            )}
             <Pressable
               style={[styles.notifBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "#F1F5F9" }]}
               onPress={() => {}}
@@ -153,15 +145,6 @@ export default function MessagesScreen() {
           </View>
         </View>
       </View>
-
-      {isAdmin && (
-        <View style={[styles.adminBanner, { backgroundColor: isDark ? "#1A2744" : "#EBF4FF", borderColor: isDark ? "#2A3F6B" : "#BFDBFF" }]}>
-          <Feather name="info" size={14} color={colors.accent} />
-          <Text style={[styles.adminBannerText, { color: colors.accent }]}>
-            Viewing all {conversations.length} user conversation{conversations.length !== 1 ? "s" : ""}
-          </Text>
-        </View>
-      )}
 
       {!isAuthenticated ? (
         <View style={[styles.emptyState, { backgroundColor: colors.background }]}>
@@ -273,23 +256,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  adminHeaderBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(14,181,202,0.15)",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#0EB5CA",
-  },
-  adminHeaderBadgeText: {
-    fontSize: 10,
-    fontFamily: "Manrope_700Bold",
-    color: "#0EB5CA",
-    letterSpacing: 0.5,
-  },
   notifBtn: {
     width: 42,
     height: 42,
@@ -334,19 +300,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Manrope_600SemiBold",
   },
-
-  adminBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginHorizontal: 14,
-    marginTop: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  adminBannerText: { fontSize: 13, fontFamily: "Manrope_500Medium" },
 
   convRow: {
     flexDirection: "row",

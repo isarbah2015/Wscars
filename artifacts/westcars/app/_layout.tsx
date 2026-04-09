@@ -40,7 +40,6 @@ function RootLayoutNav() {
       <Stack.Screen name="advertise"         options={{ presentation: "card" }} />
       <Stack.Screen name="full-specs/[id]"   options={{ presentation: "card" }} />
       <Stack.Screen name="advertise-book"    options={{ presentation: "card" }} />
-      <Stack.Screen name="admin/index"       options={{ presentation: "card" }} />
     </Stack>
   );
 }

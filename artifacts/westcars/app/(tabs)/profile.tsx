@@ -504,19 +504,6 @@ export default function ProfileScreen() {
 
             <Pressable
               style={[styles.settingRow, { borderTopColor: colors.border }]}
-              onPress={() => router.push("/admin/index")}
-            >
-              <View style={styles.settingLeft}>
-                <Feather name="terminal" size={18} color={Colors.primary} />
-                <Text style={[styles.settingLabel, { color: colors.text }]}>Admin Dashboard</Text>
-              </View>
-              <View style={[styles.adminBadge, {}]}>
-                <Text style={styles.adminBadgeText}>ADMIN</Text>
-              </View>
-            </Pressable>
-
-            <Pressable
-              style={[styles.settingRow, { borderTopColor: colors.border }]}
               onPress={() => router.push("/advertise")}
             >
               <View style={styles.settingLeft}>
@@ -722,13 +709,6 @@ const styles = StyleSheet.create({
   veriSub: { fontSize: 11, fontFamily: "Manrope_400Regular" },
   veriBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
   veriBadgeText: { fontSize: 12, fontFamily: "Manrope_600SemiBold" },
-
-  // Admin badge
-  adminBadge: {
-    backgroundColor: "#E53935",
-    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6,
-  },
-  adminBadgeText: { fontSize: 10, fontFamily: "Manrope_700Bold", color: "#fff", letterSpacing: 1 },
 
   // Logout
   logoutCard: {

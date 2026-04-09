@@ -26,7 +26,6 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -149,48 +148,6 @@ export default function LoginScreen() {
           </Pressable>
         </View>
 
-        {/* ── Admin / Support Access ── */}
-        <Pressable
-          style={styles.adminToggle}
-          onPress={() => setShowAdminPanel(!showAdminPanel)}
-        >
-          <Feather name="settings" size={13} color="#9E9E9E" />
-          <Text style={styles.adminToggleText}>Staff / Support Login</Text>
-          <Feather name={showAdminPanel ? "chevron-up" : "chevron-down"} size={13} color="#9E9E9E" />
-        </Pressable>
-
-        {showAdminPanel && (
-          <View style={styles.adminPanel}>
-            <View style={styles.adminPanelHeader}>
-              <View style={styles.adminBadge}>
-                <Feather name="shield" size={12} color="#fff" />
-                <Text style={styles.adminBadgeText}>ADMIN</Text>
-              </View>
-              <Text style={styles.adminPanelTitle}>Westcars Support Access</Text>
-            </View>
-            <Text style={styles.adminPanelSub}>
-              Use these credentials to respond to user support messages and manage the marketplace.
-            </Text>
-            <View style={styles.adminCredRow}>
-              <View style={styles.adminCredItem}>
-                <Text style={styles.adminCredLabel}>Email</Text>
-                <Text style={styles.adminCredVal}>admin@westcars.gh</Text>
-              </View>
-              <View style={styles.adminCredItem}>
-                <Text style={styles.adminCredLabel}>Password</Text>
-                <Text style={styles.adminCredVal}>any password</Text>
-              </View>
-            </View>
-            <Pressable
-              style={styles.adminAutoFill}
-              onPress={() => { setEmail("admin@westcars.gh"); setPassword("admin2024"); }}
-            >
-              <Feather name="zap" size={14} color="#0066CC" />
-              <Text style={styles.adminAutoFillText}>Auto-fill credentials</Text>
-            </Pressable>
-          </View>
-        )}
-
         <View style={styles.trustRow}>
           {[
             { icon: "shield",       text: "Secure login" },
@@ -310,40 +267,4 @@ const styles = StyleSheet.create({
   trustItem: { flexDirection: "row", alignItems: "center", gap: 5 },
   trustText: { fontSize: 11, color: "#BDBDBD", fontFamily: "Manrope_400Regular" },
 
-  adminToggle: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 6, marginTop: 16, paddingVertical: 8,
-  },
-  adminToggleText: { fontSize: 12, color: "#BDBDBD", fontFamily: "Manrope_400Regular" },
-
-  adminPanel: {
-    marginHorizontal: 0, marginTop: 6, borderRadius: 14,
-    borderWidth: 1, borderColor: "#D0E4FF",
-    backgroundColor: "#F0F7FF", padding: 16, gap: 10,
-  },
-  adminPanelHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
-  adminBadge: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    backgroundColor: "#0EB5CA", borderRadius: 6,
-    paddingHorizontal: 7, paddingVertical: 3,
-  },
-  adminBadgeText: { fontSize: 10, fontFamily: "Manrope_700Bold", color: "#FFFFFF", letterSpacing: 0.5 },
-  adminPanelTitle: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#0F172A" },
-  adminPanelSub: {
-    fontSize: 12, fontFamily: "Manrope_400Regular",
-    color: "#64748B", lineHeight: 18,
-  },
-  adminCredRow: { flexDirection: "row", gap: 12 },
-  adminCredItem: {
-    flex: 1, backgroundColor: "#fff", borderRadius: 10,
-    borderWidth: 1, borderColor: "rgba(14,181,202,0.32)", padding: 10, gap: 2,
-  },
-  adminCredLabel: { fontSize: 10, fontFamily: "Manrope_600SemiBold", color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.4 },
-  adminCredVal: { fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#0F172A" },
-  adminAutoFill: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
-    height: 38, backgroundColor: "#fff", borderRadius: 10,
-    borderWidth: 1.5, borderColor: "rgba(14,181,202,0.45)",
-  },
-  adminAutoFillText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#0098AA" },
 });
