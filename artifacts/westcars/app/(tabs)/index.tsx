@@ -297,7 +297,7 @@ export default function HomeScreen() {
           />
           <View style={styles.searchBoxText}>
             <Text style={[styles.searchBoxLabel, { color: isDark ? "#CBD5E1" : "#334155" }]}>Brand, model, location…</Text>
-            <Text style={[styles.searchBoxCount, { color: isDark ? "#475569" : "#94A3B8" }]}>
+            <Text style={[styles.searchBoxCount, { color: isDark ? "#64748B" : "#94A3B8" }]}>
               {totalCount.toLocaleString()} listings available
             </Text>
           </View>
@@ -344,7 +344,7 @@ export default function HomeScreen() {
                     styles.mainTabLabel,
                     active
                       ? { color: "#FFFFFF", fontFamily: "Manrope_800ExtraBold" }
-                      : { color: isDark ? "#64748B" : "#94A3B8", fontFamily: "Manrope_600SemiBold" },
+                      : { color: isDark ? "#94A3B8" : "#64748B", fontFamily: "Manrope_600SemiBold" },
                   ]}>
                     {tab.label}
                   </Text>

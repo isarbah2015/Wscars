@@ -246,17 +246,17 @@ export default function SearchScreen() {
           backgroundColor: isDark ? "#1E293B" : "#F1F5F9",
           borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
         }]}>
-          <Feather name="search" size={18} color={isDark ? "#64748B" : "#94A3B8"} />
+          <Feather name="search" size={18} color={isDark ? "#94A3B8" : "#64748B"} />
           <TextInput
             style={[styles.searchInput, { color: isDark ? "#F1F5F9" : "#0F172A" }]}
             placeholder="Brand, model, location..."
-            placeholderTextColor={isDark ? "#475569" : "#94A3B8"}
+            placeholderTextColor={isDark ? "#64748B" : "#94A3B8"}
             value={query}
             onChangeText={setQuery}
           />
           {query.length > 0 && (
             <Pressable onPress={() => setQuery("")} hitSlop={8}>
-              <Feather name="x" size={16} color={isDark ? "#64748B" : "#94A3B8"} />
+              <Feather name="x" size={16} color={isDark ? "#94A3B8" : "#64748B"} />
             </Pressable>
           )}
           <Pressable

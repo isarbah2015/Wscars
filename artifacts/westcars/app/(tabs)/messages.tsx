@@ -126,7 +126,7 @@ export default function MessagesScreen() {
               <Text style={[styles.headerTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>
                 {isAdmin ? "Support Inbox" : "Messages"}
               </Text>
-              <Text style={[styles.headerSub, { color: isDark ? "#64748B" : "#94A3B8" }]}>
+              <Text style={[styles.headerSub, { color: isDark ? "#94A3B8" : "#64748B" }]}>
                 {currentUser?.name?.split(" ")[0] || "Guest"}
               </Text>
             </View>
