@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
+import { formatPrice } from "@/utils/ghanaData";
 
 const WC_BADGE           = require("@/assets/images/wc-badge.png");
 const WC_LOGOMARK        = require("@/assets/images/wc-logomark.png");
@@ -190,6 +191,11 @@ export default function HomeScreen() {
     .filter((c) => c.isSponsored || c.isFeatured)
     .filter((car, i, arr) => arr.findIndex((c) => c.id === car.id) === i)
     .slice(0, 5);
+
+  // Featured = top cars by views (1×1 full-width showcase)
+  const featuredCars = [...cars]
+    .sort((a, b) => (b.views || 0) - (a.views || 0))
+    .slice(0, 4);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -440,6 +446,98 @@ export default function HomeScreen() {
             <Image source={BANNER_CAR} style={styles.bannerCarImg} resizeMode="contain" />
           </LinearGradient>
         </Pressable>
+
+        {/* ── Featured Listings (1×1 full-width grid) ── */}
+        {featuredCars.length > 0 && (
+          <View style={[styles.section, { backgroundColor: colors.card }]}>
+            <View style={styles.sectionRow}>
+              <View style={styles.sectionTitleRow}>
+                <View style={[styles.sectionAccentBar, { backgroundColor: "#22C55E" }]} />
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Featured Listings</Text>
+              </View>
+              <Pressable onPress={() => router.push("/(tabs)/search")}>
+                <Text style={[styles.seeAll, { color: colors.accent }]}>See all</Text>
+              </Pressable>
+            </View>
+            <View style={styles.featuredList}>
+              {featuredCars.map((car) => (
+                <Pressable
+                  key={`feat_${car.id}`}
+                  style={[styles.featCard, { backgroundColor: colors.card, borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)" }]}
+                  onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
+                >
+                  {/* Image with price overlay */}
+                  <View style={styles.featImgWrap}>
+                    <Image source={{ uri: car.images[0] }} style={styles.featImg} resizeMode="cover" />
+                    <LinearGradient
+                      colors={["transparent", "rgba(0,0,0,0.70)"]}
+                      style={styles.featScrim}
+                      pointerEvents="none"
+                    />
+                    {(car.condition === "New" || car.condition === "Foreign Used") && (
+                      <View style={[styles.featCondBadge, { backgroundColor: car.condition === "New" ? "#FF6B00" : "#1565C0" }]}>
+                        <Text style={styles.featCondText}>{car.condition === "New" ? "New" : "Foreign"}</Text>
+                      </View>
+                    )}
+                    <View style={styles.featPriceBadge}>
+                      <Text style={styles.featPriceText}>{formatPrice(car.price)}</Text>
+                    </View>
+                    {car.views !== undefined && car.views > 0 && (
+                      <View style={styles.featViewsTag}>
+                        <Feather name="eye" size={10} color="rgba(255,255,255,0.88)" />
+                        <Text style={styles.featViewsText}>
+                          {car.views >= 1000 ? `${(car.views / 1000).toFixed(1)}k` : car.views}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                  {/* Info block */}
+                  <View style={styles.featInfo}>
+                    <Text style={[styles.featName, { color: colors.text }]} numberOfLines={1}>
+                      {car.brand} {car.model}
+                    </Text>
+                    {/* Year · Mileage · Location — all on one row */}
+                    <View style={styles.featMetaRow}>
+                      <View style={[styles.featChip, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
+                        <Text style={[styles.featChipText, { color: colors.textSecondary }]}>{car.year}</Text>
+                      </View>
+                      {car.mileage > 0 && (
+                        <View style={[styles.featChip, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
+                          <Feather name="activity" size={10} color={colors.textTertiary} />
+                          <Text style={[styles.featChipText, { color: colors.textSecondary }]}>
+                            {(car.mileage / 1000).toFixed(0)}k km
+                          </Text>
+                        </View>
+                      )}
+                      {car.location && (
+                        <View style={[styles.featChip, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
+                          <Feather name="map-pin" size={10} color={colors.textTertiary} />
+                          <Text style={[styles.featChipText, { color: colors.textSecondary }]} numberOfLines={1}>
+                            {car.location.split(",")[0]}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    {/* Seller name */}
+                    {car.seller?.name && (
+                      <View style={styles.featSellerRow}>
+                        <Feather name="user" size={11} color={colors.textTertiary} />
+                        <Text style={[styles.featSellerName, { color: colors.textSecondary }]} numberOfLines={1}>
+                          {car.seller.name}
+                        </Text>
+                        {car.seller?.isVerified && (
+                          <Feather name="check-circle" size={11} color="#1565C0" />
+                        )}
+                      </View>
+                    )}
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        )}
+
+        <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── "Personally for you" section ── */}
         <View style={[styles.section, { backgroundColor: colors.card }]}>
@@ -810,6 +908,52 @@ const styles = StyleSheet.create({
 
   offersRow: { flexDirection: "row", gap: 10, paddingRight: 12, paddingBottom: 12 },
   offerCarCard: { width: 180 },
+
+  /* ── Featured Listings (1×1) ── */
+  featuredList: { gap: 12 },
+  featCard: {
+    borderRadius: 18,
+    overflow: "hidden",
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  featImgWrap: { height: 180, position: "relative" },
+  featImg: { width: "100%", height: "100%" },
+  featScrim: { position: "absolute", bottom: 0, left: 0, right: 0, height: 100 },
+  featCondBadge: {
+    position: "absolute", top: 12, left: 12,
+    borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4,
+  },
+  featCondText: { color: "#fff", fontSize: 11, fontFamily: "Manrope_700Bold" },
+  featPriceBadge: {
+    position: "absolute", bottom: 12, left: 12,
+    backgroundColor: "#0EB5CA",
+    borderRadius: 10, paddingHorizontal: 12, paddingVertical: 5,
+    shadowColor: "#0EB5CA", shadowOpacity: 0.6, shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 }, elevation: 4,
+  },
+  featPriceText: { color: "#fff", fontSize: 16, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.3 },
+  featViewsTag: {
+    position: "absolute", bottom: 14, right: 12,
+    flexDirection: "row", alignItems: "center", gap: 4,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6,
+  },
+  featViewsText: { color: "rgba(255,255,255,0.9)", fontSize: 10, fontFamily: "Manrope_500Medium" },
+  featInfo: { padding: 14, gap: 7 },
+  featName: { fontSize: 16, fontFamily: "Manrope_700Bold" },
+  featMetaRow: { flexDirection: "row", gap: 6, flexWrap: "wrap" },
+  featChip: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    borderRadius: 8, paddingHorizontal: 9, paddingVertical: 4,
+  },
+  featChipText: { fontSize: 12, fontFamily: "Manrope_500Medium" },
+  featSellerRow: { flexDirection: "row", alignItems: "center", gap: 5 },
+  featSellerName: { fontSize: 12, fontFamily: "Manrope_500Medium", flex: 1 },
 
   adBannerWrap: {
     marginHorizontal: 10,

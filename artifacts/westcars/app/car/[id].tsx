@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { CarCard } from "@/components/CarCard";
 import { EquipmentModal } from "@/components/EquipmentModal";
 import { LocationMap } from "@/components/LocationMap";
 import { ReportModal } from "@/components/ReportModal";
@@ -471,40 +472,7 @@ export default function CarDetailScreen() {
             <Text style={[styles.cardTitle, { color: colors.text }]}>We recommend</Text>
             <View style={styles.recsGrid}>
               {related.slice(0, 4).map((rc) => (
-                <Pressable
-                  key={rc.id}
-                  style={[styles.recCell, { backgroundColor: colors.card }]}
-                  onPress={() =>
-                    router.push({ pathname: "/car/[id]", params: { id: rc.id } })
-                  }
-                >
-                  <View style={styles.recImgWrap}>
-                    <Image source={{ uri: rc.images[0] }} style={styles.recImg} resizeMode="cover" />
-                    {(rc.condition === "New" || rc.condition === "Foreign Used") && (
-                      <View style={styles.recBadge}>
-                        <Text style={styles.recBadgeText}>
-                          {rc.condition === "New" ? "New" : "Foreign"}
-                        </Text>
-                      </View>
-                    )}
-                    <View style={styles.recHeart}>
-                      <Feather name="heart" size={16} color="rgba(255,255,255,0.9)" />
-                    </View>
-                    {rc.seller?.rating && rc.seller.rating >= 4.0 && (
-                      <View style={styles.recRating}>
-                        <Feather name="star" size={10} color="#F4B400" />
-                        <Text style={styles.recRatingText}>{rc.seller.rating.toFixed(1)}</Text>
-                      </View>
-                    )}
-                  </View>
-                  <Text style={[styles.recPrice, { color: colors.text }]}>
-                    from {formatPrice(rc.price)}
-                  </Text>
-                  <Text style={[styles.recName, { color: colors.textSecondary }]} numberOfLines={1}>
-                    {rc.brand} {rc.model}
-                  </Text>
-                  <Text style={[styles.recYear, { color: colors.textTertiary }]}>{rc.year}</Text>
-                </Pressable>
+                <CarCard key={rc.id} car={rc} style={styles.recCarCard} />
               ))}
             </View>
           </View>
@@ -810,34 +778,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 12,
   },
-  recCell: { width: "47%", backgroundColor: "#fff" },
-  recImgWrap: {
-    position: "relative",
-    height: 120,
-    backgroundColor: "#F0F0F0",
-    borderRadius: 8,
-    overflow: "hidden",
-  },
-  recImg: { width: "100%", height: "100%" },
-  recBadge: {
-    position: "absolute", top: 6, left: 6,
-    backgroundColor: "#27AE60",
-    borderRadius: 20,
-    paddingHorizontal: 10, paddingVertical: 3,
-  },
-  recBadgeText: { fontSize: 11, fontFamily: "Manrope_600SemiBold", color: "#fff" },
-  recHeart: { position: "absolute", top: 4, right: 6 },
-  recRating: {
-    position: "absolute", bottom: 6, right: 6,
-    flexDirection: "row", alignItems: "center", gap: 2,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    paddingHorizontal: 6, paddingVertical: 2,
-    borderRadius: 4,
-  },
-  recRatingText: { fontSize: 10, color: "#fff", fontFamily: "Manrope_500Medium" },
-  recPrice: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#1A1A1A", marginTop: 6 },
-  recName: { fontSize: 13, fontFamily: "Manrope_400Regular", color: "#6B6B6B", marginTop: 2 },
-  recYear: { fontSize: 12, fontFamily: "Manrope_400Regular", color: "#9E9E9E", marginTop: 1 },
+  recCarCard: { width: "47%" },
 
   // Location
   locationRow: { flexDirection: "row", alignItems: "center", gap: 8 },
