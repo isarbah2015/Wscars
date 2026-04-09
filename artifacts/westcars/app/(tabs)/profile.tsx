@@ -245,7 +245,22 @@ export default function ProfileScreen() {
 
       {/* ── Listings Tab ── */}
       {activeTab === "listings" && (
-        <View style={styles.tabContent}>
+        <View style={[styles.tabContent, { backgroundColor: colors.background }]}>
+          {/* Ad Boost Banner */}
+          <Pressable
+            style={[styles.adBoostBanner, { backgroundColor: isDark ? "#1E293B" : "#FFF7ED", borderColor: isDark ? "rgba(255,107,0,0.18)" : "rgba(255,107,0,0.20)" }]}
+            onPress={() => router.push("/advertise")}
+          >
+            <View style={styles.adBoostIconBox}>
+              <Feather name="trending-up" size={20} color="#E65100" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.adBoostTitle, { color: isDark ? "#FED7AA" : "#C2410C" }]}>Boost Your Listings</Text>
+              <Text style={[styles.adBoostSub, { color: isDark ? "#94A3B8" : "#78350F" }]}>Reach 10× more buyers with sponsored placement</Text>
+            </View>
+            <Feather name="arrow-right" size={16} color="#E65100" />
+          </Pressable>
+
           {myListings.length === 0 ? (
             <View style={styles.emptyState}>
               <Feather name="truck" size={40} color={colors.textTertiary} />
@@ -281,7 +296,7 @@ export default function ProfileScreen() {
 
       {/* ── Saved Tab ── */}
       {activeTab === "saved" && (
-        <View style={styles.tabContent}>
+        <View style={[styles.tabContent, { backgroundColor: colors.background }]}>
           {savedCars.length === 0 ? (
             <View style={styles.emptyState}>
               <Feather name="heart" size={40} color={colors.textTertiary} />
@@ -304,7 +319,7 @@ export default function ProfileScreen() {
 
       {/* ── Reviews Tab ── */}
       {activeTab === "reviews" && (
-        <View style={styles.tabContent}>
+        <View style={[styles.tabContent, { backgroundColor: colors.background }]}>
           {myReviews.length === 0 ? (
             <View style={styles.emptyState}>
               <Feather name="star" size={40} color={colors.textTertiary} />
@@ -326,7 +341,7 @@ export default function ProfileScreen() {
 
       {/* ── Settings Tab ── */}
       {activeTab === "settings" && (
-        <View style={styles.tabContent}>
+        <View style={[styles.tabContent, { backgroundColor: colors.background }]}>
 
           {/* Preferences */}
           <View style={[styles.settingsCard, { backgroundColor: colors.card }]}>
@@ -642,6 +657,20 @@ const styles = StyleSheet.create({
 
   // Tab content
   tabContent: { padding: 14, gap: 12 },
+
+  // Ad boost banner
+  adBoostBanner: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    borderRadius: 14, borderWidth: 1,
+    paddingHorizontal: 14, paddingVertical: 12,
+  },
+  adBoostIconBox: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: "rgba(255,107,0,0.12)",
+    alignItems: "center", justifyContent: "center",
+  },
+  adBoostTitle: { fontSize: 13, fontFamily: "Manrope_700Bold" },
+  adBoostSub: { fontSize: 11, fontFamily: "Manrope_400Regular", marginTop: 2 },
   gridRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   halfCard: { width: "47%", position: "relative" },
   soldOverlay: {

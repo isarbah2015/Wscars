@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
 
   imageWrap: {
     position: "relative",
-    height: 155,
+    height: 108,
     backgroundColor: "#1A2340",
   },
   image: { width: "100%", height: "100%" },
@@ -294,13 +294,13 @@ const styles = StyleSheet.create({
   },
 
   info: {
-    paddingHorizontal: 11,
-    paddingTop: 9,
-    paddingBottom: 10,
-    gap: 5,
+    paddingHorizontal: 9,
+    paddingTop: 7,
+    paddingBottom: 7,
+    gap: 3,
   },
   carName: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Manrope_700Bold",
     letterSpacing: 0.1,
   },
