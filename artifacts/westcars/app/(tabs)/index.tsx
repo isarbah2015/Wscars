@@ -407,20 +407,10 @@ export default function HomeScreen() {
         {/* Animated spacer — height tracks header height so content starts below it */}
         <Animated.View style={{ height: scrollPad }} />
 
-        {/* ── WESTCARS brand strip ── */}
-        <View style={styles.brandStrip}>
-          <Image
-            source={WC_LOGOMARK}
-            style={[
-              styles.brandStripBadge,
-              isDark && { tintColor: "#E2E8F0" },
-            ]}
-            resizeMode="contain"
-          />
-          <Text style={[styles.brandStripName, { color: isDark ? "#E2E8F0" : "#0F172A" }]}>
-            WESTCARS
-          </Text>
-          <Text style={[styles.brandStripSub, { color: isDark ? "#94A3B8" : "#0098AA" }]}>
+        {/* ── WESTCARS brand strip — mirrors login/signup hero ── */}
+        <View style={[styles.brandStrip, { backgroundColor: isDark ? "#131C2E" : "#FFFFFF" }]}>
+          <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
+          <Text style={[styles.brandStripSub, { color: isDark ? "#0EB5CA" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
         </View>
@@ -720,14 +710,7 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 16,
   },
-  brandStripBadge: { width: 120, height: 120 },
-
-  brandStripName: {
-    fontFamily: "Raleway_800ExtraBold",
-    fontSize: 24,
-    letterSpacing: 2.5,
-    marginTop: 0,
-  },
+  brandStripBadge: { width: 140, height: 140 },
 
   brandStripSub: {
     fontSize: 12,
