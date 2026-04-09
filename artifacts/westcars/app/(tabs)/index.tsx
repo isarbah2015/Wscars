@@ -20,8 +20,7 @@ import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 
-const WC_BADGE      = require("@/assets/images/wc-badge.png");
-const WC_BADGE_HOME = require("@/assets/images/wc-badge-home.png");
+const WC_BADGE    = require("@/assets/images/wc-badge.png");
 const CAR_NEW     = require("@/assets/images/car-new.png");
 const CAR_USED    = require("@/assets/images/car-used.png");
 const CAR_MOTO    = require("@/assets/images/car-moto.png");
@@ -408,17 +407,14 @@ export default function HomeScreen() {
         <Animated.View style={{ height: scrollPad }} />
 
         {/* ── WESTCARS brand strip ── */}
-        <LinearGradient
-          colors={["#0EB5CA", "#007A8C"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.brandStrip}
-        >
-          <Image source={WC_BADGE_HOME} style={styles.brandStripBadge} resizeMode="contain" />
-          <Text style={[styles.brandStripSub, { color: "#FFFFFF" }]}>
+        <View style={styles.brandStrip}>
+          <View style={[styles.badgeCard, { backgroundColor: isDark ? "#1E293B" : "#FFFFFF", shadowColor: isDark ? "#000" : "#0EB5CA" }]}>
+            <Image source={WC_BADGE} style={styles.brandStripBadge} resizeMode="contain" />
+          </View>
+          <Text style={[styles.brandStripSub, { color: isDark ? "#94A3B8" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
-        </LinearGradient>
+        </View>
 
         {/* ── Sponsored Banner → leads to Advertise ── */}
         <Pressable onPress={() => router.push("/advertise")} style={styles.promoBannerWrap}>
@@ -712,11 +708,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     paddingHorizontal: 16,
-    paddingVertical: 24,
-    marginHorizontal: 10,
-    marginTop: 8,
-    borderRadius: 20,
-    overflow: "hidden",
+    paddingVertical: 20,
+  },
+  badgeCard: {
+    borderRadius: 24,
+    padding: 10,
+    shadowOpacity: 0.10,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
   brandStripBadge: { width: 120, height: 120 },
   brandStripSub: {
@@ -829,12 +829,12 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginHorizontal: -3,
+    marginHorizontal: -4,
   },
   gridItem: {
     width: "50%",
-    paddingHorizontal: 3,
-    marginBottom: 10,
+    paddingHorizontal: 4,
+    marginBottom: 14,
   },
 
   sep: { height: 10 },

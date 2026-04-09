@@ -1,10 +1,8 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import {
   Image,
-  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -13,25 +11,24 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { CarCard } from "@/components/CarCard";
 import { RatingStars } from "@/components/RatingStars";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
-import { useTheme } from "@/context/ThemeContext";
-import { MOCK_ADS, MOCK_USERS } from "@/utils/mockData";
+import { MOCK_USERS } from "@/utils/mockData";
 
 export default function UserProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { cars } = useApp();
-  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
   const user = MOCK_USERS.find((u) => u.id === id);
   if (!user) {
     return (
-      <View style={[styles.notFound, { backgroundColor: colors.background }]}>
-        <Text style={[styles.notFoundText, { color: colors.textSecondary }]}>User not found</Text>
+      <View style={styles.notFound}>
+        <Text style={styles.notFoundText}>User not found</Text>
         <Pressable onPress={() => router.back()}>
           <Text style={styles.backLink}>Go Back</Text>
         </Pressable>
@@ -41,49 +38,25 @@ export default function UserProfileScreen() {
 
   const userListings = cars.filter((c) => c.sellerId === user.id);
 
-  const similarCars = cars
-    .filter(
-      (c) =>
-        c.sellerId !== user.id &&
-        userListings.some((u) => u.brand === c.brand || u.category === c.category)
-    )
-    .slice(0, 6);
-
-  const ad = MOCK_ADS[0];
-
-  const handleMessage = () => {
-    const convId = `conv_${user.id}`;
-    router.push({ pathname: "/conversation/[id]", params: { id: convId } });
-  };
-
-  const handleCall = () => {
-    if (user.phone) Linking.openURL(`tel:${user.phone.replace(/\s/g, "")}`);
-  };
-
-  const handleWhatsApp = () => {
-    if (user.phone) {
-      const num = user.phone.replace(/\s|\+/g, "");
-      Linking.openURL(`https://wa.me/${num}`);
-    }
-  };
-
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={styles.container}
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
     >
-      {/* ── Hero header ── */}
-      <LinearGradient
-        colors={["#0EB5CA", "#007A8C"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.hero, { paddingTop: (insets.top || (Platform.OS === "web" ? 67 : 0)) + 16 }]}
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: (insets.top || (Platform.OS === "web" ? 67 : 0)) + 16,
+            backgroundColor: "#FFFFFF",
+            borderBottomWidth: 1,
+            borderBottomColor: "rgba(0,0,0,0.07)",
+          },
+        ]}
       >
         <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <View style={styles.backBtnInner}>
-            <Feather name="arrow-left" size={20} color="#FFFFFF" />
-          </View>
+          <Feather name="arrow-left" size={22} color="#0F172A" />
         </Pressable>
 
         {user.avatar ? (
@@ -93,131 +66,77 @@ export default function UserProfileScreen() {
             <Feather name="user" size={36} color="#FFFFFF" />
           </View>
         )}
-
-        <Text style={styles.userName}>{user.name}</Text>
-
+        <Text style={[styles.userName, { color: "#0F172A" }]}>{user.name}</Text>
         <View style={styles.metaRow}>
-          <Feather name="map-pin" size={12} color="rgba(255,255,255,0.75)" />
-          <Text style={styles.metaText}>{user.location}</Text>
-          <View style={styles.dot} />
-          <Feather name="calendar" size={12} color="rgba(255,255,255,0.75)" />
-          <Text style={styles.metaText}>Joined {user.memberSince.slice(0, 7)}</Text>
+          <Feather name="map-pin" size={12} color="#64748B" />
+          <Text style={[styles.metaText, { color: "#64748B" }]}>{user.location}</Text>
+          <View style={[styles.dot, { backgroundColor: "#CBD5E1" }]} />
+          <Feather name="calendar" size={12} color="#64748B" />
+          <Text style={[styles.metaText, { color: "#64748B" }]}>Joined {user.memberSince.slice(0, 7)}</Text>
         </View>
 
-        {user.isVerified && (
-          <View style={styles.verifiedRow}>
-            <VerifiedBadge />
-          </View>
-        )}
+        {user.isVerified && <VerifiedBadge />}
 
         <View style={styles.ratingRow}>
           <RatingStars rating={user.rating} size={14} />
-          <Text style={styles.ratingNum}>{user.rating.toFixed(1)}</Text>
-          <Text style={styles.ratingCount}>({user.totalReviews} reviews)</Text>
+          <Text style={[styles.ratingNum, { color: "#0F172A" }]}>{user.rating.toFixed(1)}</Text>
+          <Text style={[styles.ratingCount, { color: "#64748B" }]}>({user.totalReviews} reviews)</Text>
         </View>
 
-        <View style={styles.statsRow}>
+        <View style={[styles.statsRow, { backgroundColor: "rgba(0,0,0,0.04)", borderColor: "rgba(0,0,0,0.06)" }]}>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{userListings.length}</Text>
-            <Text style={styles.statLabel}>Listings</Text>
+            <Text style={[styles.statValue, { color: "#0F172A" }]}>{userListings.length}</Text>
+            <Text style={[styles.statLabel, { color: "#64748B" }]}>Listings</Text>
           </View>
-          <View style={styles.statDivider} />
+          <View style={[styles.statDivider, { backgroundColor: "rgba(0,0,0,0.1)" }]} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{user.totalReviews}</Text>
-            <Text style={styles.statLabel}>Reviews</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{user.rating.toFixed(1)}</Text>
-            <Text style={styles.statLabel}>Rating</Text>
+            <Text style={[styles.statValue, { color: "#0F172A" }]}>{user.totalReviews}</Text>
+            <Text style={[styles.statLabel, { color: "#64748B" }]}>Reviews</Text>
           </View>
         </View>
-      </LinearGradient>
+      </View>
 
-      {/* ── Contact action buttons ── */}
-      <View style={[styles.actionCard, { backgroundColor: colors.card }]}>
-        <Pressable style={styles.msgBtn} onPress={handleMessage}>
-          <Feather name="message-circle" size={18} color="#FFFFFF" />
-          <Text style={styles.msgBtnText}>Message</Text>
+      {/* Action Buttons */}
+      <View style={styles.actionRow}>
+        <Pressable
+          style={styles.messageBtn}
+          onPress={() => {
+            if (userListings.length > 0) {
+              const convId = `conv_${user.id}`;
+              router.push({
+                pathname: "/conversation/[id]",
+                params: { id: convId },
+              });
+            }
+          }}
+        >
+          <Feather name="mail" size={18} color={Colors.primary} />
+          <Text style={styles.messageBtnText}>Message</Text>
         </Pressable>
-        <Pressable style={[styles.callBtn, { backgroundColor: colors.card, borderColor: "#0EB5CA" }]} onPress={handleCall}>
-          <Feather name="phone" size={18} color="#0EB5CA" />
-          <Text style={styles.callBtnText}>Call</Text>
-        </Pressable>
-        <Pressable style={[styles.waBtn, { backgroundColor: colors.card, borderColor: "#25D366" }]} onPress={handleWhatsApp}>
-          <Feather name="message-square" size={18} color="#25D366" />
-          <Text style={styles.waBtnText}>WhatsApp</Text>
+        <Pressable style={styles.followBtn}>
+          <Feather name="plus" size={18} color="#fff" />
+          <Text style={styles.followBtnText}>Follow</Text>
         </Pressable>
       </View>
 
-      {/* ── Ad Banner ── */}
-      <Pressable onPress={() => router.push("/advertise")} style={styles.adWrap}>
-        <LinearGradient
-          colors={[ad.color, "#006F80"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.adBanner}
-        >
-          <View style={styles.adLeft}>
-            <View style={styles.adBadge}>
-              <Text style={styles.adBadgeText}>SPONSORED</Text>
-            </View>
-            <Text style={styles.adTitle} numberOfLines={1}>{ad.title}</Text>
-            <Text style={styles.adSub} numberOfLines={2}>{ad.subtitle}</Text>
-            <View style={styles.adCta}>
-              <Text style={styles.adCtaText}>{ad.ctaText}</Text>
-              <Feather name="arrow-right" size={11} color="#FFFFFF" />
-            </View>
-          </View>
-          <Image source={{ uri: ad.image }} style={styles.adImg} resizeMode="cover" />
-        </LinearGradient>
-      </Pressable>
-
-      {/* ── Listings section ── */}
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
-        <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleRow}>
-            <View style={styles.sectionAccentBar} />
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Cars by {user.name.split(" ")[0]} ({userListings.length})
-            </Text>
-          </View>
-        </View>
-
+      {/* Listings */}
+      <View style={styles.listingsSection}>
+        <Text style={styles.sectionTitle}>
+          Cars by {user.name.split(" ")[0]} ({userListings.length})
+        </Text>
         {userListings.length === 0 ? (
           <View style={styles.empty}>
-            <Feather name="truck" size={36} color={colors.textTertiary} />
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No active listings</Text>
+            <Feather name="truck" size={36} color={Colors.light.textTertiary} />
+            <Text style={styles.emptyText}>No active listings</Text>
           </View>
         ) : (
-          <View style={styles.grid}>
+          <View style={styles.gridRow}>
             {userListings.map((car) => (
-              <View key={car.id} style={styles.gridItem}>
-                <CarCard car={car} />
-              </View>
+              <CarCard key={car.id} car={car} style={styles.halfCard} />
             ))}
           </View>
         )}
       </View>
-
-      {/* ── Similar listings section ── */}
-      {similarCars.length > 0 && (
-        <View style={[styles.section, { backgroundColor: colors.card, marginTop: 10 }]}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleRow}>
-              <View style={[styles.sectionAccentBar, { backgroundColor: "#D97706" }]} />
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Similar Listings</Text>
-            </View>
-          </View>
-          <View style={styles.grid}>
-            {similarCars.map((car) => (
-              <View key={car.id} style={styles.gridItem}>
-                <CarCard car={car} />
-              </View>
-            ))}
-          </View>
-        </View>
-      )}
 
       <View style={{ height: 60 + insets.bottom }} />
     </ScrollView>
@@ -225,50 +144,44 @@ export default function UserProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-
-  /* ── Hero ── */
-  hero: {
+  container: {
+    flex: 1,
+    backgroundColor: Colors.light.backgroundSecondary,
+  },
+  header: {
     alignItems: "center",
-    paddingBottom: 28,
+    paddingBottom: 24,
     gap: 8,
   },
   backBtn: {
     position: "absolute",
     top: 60,
     left: 16,
-  },
-  backBtnInner: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    width: 40,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
   },
   avatar: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     borderWidth: 3,
-    borderColor: "rgba(255,255,255,0.6)",
-    marginTop: 8,
+    borderColor: "#0EB5CA",
   },
   avatarPlaceholder: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: "rgba(14,181,202,0.10)",
     borderWidth: 3,
-    borderColor: "rgba(255,255,255,0.4)",
+    borderColor: "#0EB5CA",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 8,
   },
   userName: {
     fontSize: 22,
     fontFamily: "Manrope_700Bold",
-    color: "#FFFFFF",
   },
   metaRow: {
     flexDirection: "row",
@@ -278,15 +191,12 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 12,
     fontFamily: "Manrope_400Regular",
-    color: "rgba(255,255,255,0.82)",
   },
   dot: {
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.4)",
   },
-  verifiedRow: { alignItems: "center" },
   ratingRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -295,212 +205,89 @@ const styles = StyleSheet.create({
   ratingNum: {
     fontSize: 14,
     fontFamily: "Manrope_700Bold",
-    color: "#FFFFFF",
   },
   ratingCount: {
     fontSize: 12,
     fontFamily: "Manrope_400Regular",
-    color: "rgba(255,255,255,0.75)",
   },
   statsRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    gap: 28,
-    marginTop: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    gap: 32,
+    marginTop: 4,
   },
   statItem: {
     alignItems: "center",
-    minWidth: 48,
   },
   statValue: {
     fontSize: 18,
-    fontFamily: "Manrope_800ExtraBold",
-    color: "#FFFFFF",
+    fontFamily: "Manrope_700Bold",
   },
   statLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: "Manrope_400Regular",
-    color: "rgba(255,255,255,0.75)",
-    marginTop: 1,
   },
   statDivider: {
     width: 1,
-    height: 32,
-    backgroundColor: "rgba(255,255,255,0.25)",
+    height: 30,
   },
-
-  /* ── Action buttons ── */
-  actionCard: {
+  actionRow: {
     flexDirection: "row",
-    gap: 10,
-    padding: 14,
-    shadowColor: "#0A1628",
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
+    gap: 12,
+    padding: 16,
+    backgroundColor: "#fff",
   },
-  msgBtn: {
+  messageBtn: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 7,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: "#0EB5CA",
-  },
-  msgBtnText: {
-    fontSize: 13,
-    fontFamily: "Manrope_700Bold",
-    color: "#FFFFFF",
-  },
-  callBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1.5,
-  },
-  callBtnText: {
-    fontSize: 13,
-    fontFamily: "Manrope_700Bold",
-    color: "#0EB5CA",
-  },
-  waBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1.5,
-  },
-  waBtnText: {
-    fontSize: 13,
-    fontFamily: "Manrope_700Bold",
-    color: "#25D366",
-  },
-
-  /* ── Ad Banner ── */
-  adWrap: {
-    marginHorizontal: 10,
-    marginTop: 12,
-    borderRadius: 18,
-    overflow: "hidden",
-  },
-  adBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-    paddingLeft: 16,
-    minHeight: 100,
-  },
-  adLeft: {
-    flex: 1,
-    gap: 4,
-    paddingRight: 8,
-  },
-  adBadge: {
-    alignSelf: "flex-start",
-    backgroundColor: "rgba(255,255,255,0.25)",
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  adBadgeText: {
-    fontSize: 9,
-    fontFamily: "Manrope_700Bold",
-    color: "#FFFFFF",
-    letterSpacing: 0.8,
-  },
-  adTitle: {
-    fontSize: 14,
-    fontFamily: "Manrope_700Bold",
-    color: "#FFFFFF",
-  },
-  adSub: {
-    fontSize: 11,
-    fontFamily: "Manrope_400Regular",
-    color: "rgba(255,255,255,0.82)",
-  },
-  adCta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignSelf: "flex-start",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginTop: 4,
-  },
-  adCtaText: {
-    fontSize: 11,
-    fontFamily: "Manrope_700Bold",
-    color: "#FFFFFF",
-  },
-  adImg: {
-    width: 110,
-    height: 90,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-
-  /* ── Section card (matches home page, theme-aware) ── */
-  section: {
-    paddingHorizontal: 12,
-    paddingTop: 16,
-    paddingBottom: 8,
-    marginHorizontal: 10,
-    marginTop: 12,
-    borderRadius: 18,
-    shadowColor: "#0A1628",
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  sectionTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
     gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "rgba(14,181,202,0.45)",
   },
-  sectionAccentBar: {
-    width: 4,
-    height: 20,
-    borderRadius: 2,
+  messageBtnText: {
+    fontSize: 14,
+    fontFamily: "Manrope_600SemiBold",
+    color: "#FFFFFF",
+  },
+  followBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
     backgroundColor: "#0EB5CA",
+  },
+  followBtnText: {
+    fontSize: 14,
+    fontFamily: "Manrope_600SemiBold",
+    color: "#FFFFFF",
+  },
+  listingsSection: {
+    padding: 16,
+    gap: 12,
   },
   sectionTitle: {
     fontSize: 17,
     fontFamily: "Manrope_700Bold",
+    color: Colors.light.text,
   },
-  grid: {
+  gridRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginHorizontal: -3,
+    gap: 10,
   },
-  gridItem: {
-    width: "50%",
-    paddingHorizontal: 3,
-    marginBottom: 10,
+  halfCard: {
+    width: "47%",
   },
   empty: {
     alignItems: "center",
@@ -509,10 +296,9 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 15,
+    color: Colors.light.textSecondary,
     fontFamily: "Manrope_400Regular",
   },
-
-  /* ── Misc ── */
   notFound: {
     flex: 1,
     alignItems: "center",
@@ -522,6 +308,7 @@ const styles = StyleSheet.create({
   notFoundText: {
     fontSize: 18,
     fontFamily: "Manrope_600SemiBold",
+    color: Colors.light.textSecondary,
   },
   backLink: {
     fontSize: 14,

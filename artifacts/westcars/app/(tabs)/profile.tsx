@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
 
   // Tab content
   tabContent: { padding: 14, gap: 12 },
-  gridRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  gridRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   halfCard: { width: "47%", position: "relative" },
   soldOverlay: {
     position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
