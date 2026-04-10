@@ -84,7 +84,7 @@ export default function SplashScreen() {
         <Animated.View
           style={[styles.halfWrap, styles.topHalf, { opacity, transform: [{ translateY: topY }] }]}
         >
-          <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
+          <Image source={LOGO} style={styles.logoImg} resizeMode="contain" tintColor="#0EB5CA" />
         </Animated.View>
 
         {/* Bottom half slides from below */}
@@ -95,6 +95,7 @@ export default function SplashScreen() {
             source={LOGO}
             style={[styles.logoImg, { marginTop: -(LOGO_H / 2) }]}
             resizeMode="contain"
+            tintColor="#0EB5CA"
           />
         </Animated.View>
 

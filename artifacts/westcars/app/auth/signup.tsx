@@ -71,7 +71,7 @@ export default function SignupScreen() {
         <View style={[styles.hero, styles.heroWhite, { paddingTop: topPad + 14 }]}>
           {/* Badge + motto */}
           <View style={styles.brandCol}>
-            <Image source={WC_LOGO} style={styles.heroBadge} resizeMode="contain" />
+            <Image source={WC_LOGO} style={styles.heroBadge} resizeMode="contain" tintColor="#0EB5CA" />
             <Text style={styles.brandSub}>Ghana's Trusted Car Marketplace</Text>
           </View>
 

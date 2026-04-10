@@ -122,7 +122,7 @@ export default function MessagesScreen() {
                   <Text style={[styles.userAvatarInitial, { color: "#0098AA" }]}>{currentUser.name[0].toUpperCase()}</Text>
                 </View>
               ) : (
-                <Image source={WC_LOGO} style={{ width: "100%", height: "100%" }} resizeMode="contain" />
+                <Image source={WC_LOGO} style={{ width: "100%", height: "100%" }} resizeMode="contain" tintColor="#0EB5CA" />
               )}
             </View>
             <View>

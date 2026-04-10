@@ -64,7 +64,7 @@ export default function AboutScreen() {
           colors={isDark ? ["#0B2030", "#0F2840"] : ["#FFFFFF", "#F4FBFC"]}
           style={styles.brandHero}
         >
-          <Image source={WC_LOGO} style={styles.logo} resizeMode="contain" />
+          <Image source={WC_LOGO} style={styles.logo} resizeMode="contain" tintColor="#0EB5CA" />
           <Text style={[styles.tagline, { color: "#0098AA" }]}>Ghana's Trusted Car Marketplace</Text>
           <View style={[styles.versionBadge, { backgroundColor: "rgba(14,181,202,0.15)" }]}>
             <Text style={styles.versionText}>Version {APP_VERSION}</Text>

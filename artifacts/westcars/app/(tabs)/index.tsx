@@ -255,7 +255,7 @@ export default function HomeScreen() {
               router.push("/(tabs)/profile");
             }}
           >
-            <View style={[styles.avatarRoundedSq, { backgroundColor: "#000", overflow: "hidden" }]}>
+            <View style={[styles.avatarRoundedSq, { backgroundColor: "rgba(14,181,202,0.12)", overflow: "hidden" }]}>
               {currentUser?.avatar ? (
                 <Image source={{ uri: currentUser.avatar }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
               ) : currentUser?.name ? (
@@ -585,6 +585,27 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
 
+  stickySearchBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    elevation: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    shadowColor: "#0EB5CA",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+  },
+
+  profileScrollRow: {
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+
   topRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -636,10 +657,10 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 12,
     borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
     borderWidth: 1,
   },
   searchBoxText: { flex: 1 },

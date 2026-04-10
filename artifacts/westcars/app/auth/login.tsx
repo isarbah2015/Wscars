@@ -54,7 +54,7 @@ export default function LoginScreen() {
 
         {/* WestCars badge + motto */}
         <View style={styles.brandCol}>
-          <Image source={WC_LOGO} style={styles.heroBadge} resizeMode="contain" />
+          <Image source={WC_LOGO} style={styles.heroBadge} resizeMode="contain" tintColor="#0EB5CA" />
           <Text style={styles.tagline}>Ghana's Trusted Car Marketplace</Text>
         </View>
 
