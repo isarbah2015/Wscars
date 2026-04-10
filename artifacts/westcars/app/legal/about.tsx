@@ -17,7 +17,7 @@ import { useTheme } from "@/context/ThemeContext";
 
 const CONTACT_EMAIL = "westcarsgh@gmail.com";
 const APP_VERSION   = "2.0.0";
-const WC_NEW_LOGO   = require("@/assets/images/wc-new-logo.jpg");
+const WC_LOGO = require("@/assets/images/logo_transparent.png");
 
 const FEATURES = [
   { icon: "user-check" as const, label: "Verified Sellers", desc: "ID verification powered by Kora" },
@@ -64,9 +64,7 @@ export default function AboutScreen() {
           colors={isDark ? ["#0B2030", "#0F2840"] : ["#FFFFFF", "#F4FBFC"]}
           style={styles.brandHero}
         >
-          <View style={styles.logoWrap}>
-            <Image source={WC_NEW_LOGO} style={styles.logo} resizeMode="contain" />
-          </View>
+          <Image source={WC_LOGO} style={styles.logo} resizeMode="contain" />
           <Text style={[styles.tagline, { color: "#0098AA" }]}>Ghana's Trusted Car Marketplace</Text>
           <View style={[styles.versionBadge, { backgroundColor: "rgba(14,181,202,0.15)" }]}>
             <Text style={styles.versionText}>Version {APP_VERSION}</Text>
@@ -180,19 +178,6 @@ const styles = StyleSheet.create({
   brandHero: {
     borderRadius: 20, padding: 28,
     alignItems: "center", gap: 6,
-  },
-  logoWrap: {
-    width: 160,
-    height: 160,
-    borderRadius: 24,
-    overflow: "hidden",
-    backgroundColor: "#000",
-    shadowColor: "#0EB5CA",
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 8,
-    marginBottom: 2,
   },
   logo: { width: 160, height: 160 },
   tagline: { fontSize: 13, fontFamily: "Manrope_600SemiBold", letterSpacing: 1, textAlign: "center" },

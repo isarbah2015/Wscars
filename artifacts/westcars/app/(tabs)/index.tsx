@@ -21,7 +21,7 @@ import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { formatPrice } from "@/utils/ghanaData";
 
-const WC_NEW_LOGO        = require("@/assets/images/wc-new-logo.jpg");
+const WC_LOGO = require("@/assets/images/logo_transparent.png");
 const CAR_NEW     = require("@/assets/images/car-new.png");
 const CAR_USED    = require("@/assets/images/car-used.png");
 const CAR_MOTO    = require("@/assets/images/car-moto.png");
@@ -257,7 +257,7 @@ export default function HomeScreen() {
                   <Text style={[styles.avatarText, { color: "#0098AA" }]}>{currentUser.name[0].toUpperCase()}</Text>
                 </View>
               ) : (
-                <Image source={WC_NEW_LOGO} style={{ width: "100%", height: "100%" }} resizeMode="contain" />
+                <Image source={WC_LOGO} style={{ width: "100%", height: "100%" }} resizeMode="contain" />
               )}
             </View>
             <View style={styles.profileTextBlock}>

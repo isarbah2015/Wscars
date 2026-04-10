@@ -16,7 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 
-const WC_NEW_LOGO = require("@/assets/images/wc-new-logo.jpg");
+const WC_LOGO = require("@/assets/images/logo_transparent.png");
 
 export default function LoginScreen() {
   const { login } = useApp();
@@ -54,9 +54,7 @@ export default function LoginScreen() {
 
         {/* WestCars badge + motto */}
         <View style={styles.brandCol}>
-          <View style={styles.heroBadgeWrap}>
-            <Image source={WC_NEW_LOGO} style={styles.heroBadge} resizeMode="contain" />
-          </View>
+          <Image source={WC_LOGO} style={styles.heroBadge} resizeMode="contain" />
           <Text style={styles.tagline}>Ghana's Trusted Car Marketplace</Text>
         </View>
 
@@ -182,18 +180,6 @@ const styles = StyleSheet.create({
   },
 
   brandCol: { alignItems: "center", gap: 6 },
-  heroBadgeWrap: {
-    width: 140,
-    height: 140,
-    borderRadius: 22,
-    overflow: "hidden",
-    backgroundColor: "#000",
-    shadowColor: "#0EB5CA",
-    shadowOpacity: 0.3,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 10,
-  },
   heroBadge: { width: 140, height: 140 },
   tagline: {
     fontSize: 12, fontFamily: "Manrope_600SemiBold",

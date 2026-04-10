@@ -4,92 +4,111 @@ import {
   Animated,
   Easing,
   Image,
+  Platform,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 
-const WC_NEW_LOGO = require("@/assets/images/wc-new-logo.jpg");
-const LOGO_SIZE = 220;
+const LOGO  = require("@/assets/images/logo_transparent.png");
+const LOGO_W = 260;
+const LOGO_H = 260;
+
+function goToLogin() {
+  if (Platform.OS === "web") {
+    // On web, use the Expo router but also ensure we push to the auth route
+    try { router.replace("/auth/login"); } catch (_) {}
+  } else {
+    router.replace("/auth/login");
+  }
+}
 
 export default function SplashScreen() {
-  // W slides in from left, C from right
-  const wX        = useRef(new Animated.Value(-260)).current;
-  const cX        = useRef(new Animated.Value(260)).current;
-  const lettersOp = useRef(new Animated.Value(0)).current;
+  // Top half slides in from above; bottom half from below
+  const topY    = useRef(new Animated.Value(-(LOGO_H / 2 + 40))).current;
+  const botY    = useRef(new Animated.Value(LOGO_H / 2 + 40)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
 
-  // Logo image reveals after letters meet
-  const logoScale = useRef(new Animated.Value(0.5)).current;
-  const logoOp    = useRef(new Animated.Value(0)).current;
-
-  // Motto
-  const mottoOp = useRef(new Animated.Value(0)).current;
-
-  // Shimmer on logo
-  const shimmerX     = useRef(new Animated.Value(-LOGO_SIZE)).current;
-  const shimmerAlpha = useRef(new Animated.Value(0)).current;
+  // Motto + shimmer
+  const mottoOp   = useRef(new Animated.Value(0)).current;
+  const shimmerX  = useRef(new Animated.Value(-LOGO_W - 60)).current;
+  const shimmerOp = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Step 1: Fade in W and C
-    Animated.timing(lettersOp, {
-      toValue: 1, duration: 180, useNativeDriver: true,
+    // useNativeDriver:false works on both native and web
+    Animated.timing(opacity, {
+      toValue: 1, duration: 200, useNativeDriver: false,
     }).start();
 
-    // Step 2: Slide W from left and C from right simultaneously
     Animated.parallel([
-      Animated.spring(wX, { toValue: 0, tension: 120, friction: 10, useNativeDriver: true }),
-      Animated.spring(cX, { toValue: 0, tension: 120, friction: 10, useNativeDriver: true }),
+      Animated.timing(topY, {
+        toValue: 0, duration: 600,
+        easing: Easing.out(Easing.back(1.4)),
+        useNativeDriver: false,
+      }),
+      Animated.timing(botY, {
+        toValue: 0, duration: 600,
+        easing: Easing.out(Easing.back(1.4)),
+        useNativeDriver: false,
+      }),
     ]).start(() => {
-      // Step 3: Letters met — fade out letters, reveal logo
-      Animated.parallel([
-        Animated.timing(lettersOp, { toValue: 0, duration: 220, useNativeDriver: true }),
-        Animated.timing(logoOp,    { toValue: 1, duration: 350, useNativeDriver: true }),
-        Animated.spring(logoScale, { toValue: 1, tension: 80, friction: 8, useNativeDriver: true }),
+      // Shimmer after halves meet
+      Animated.sequence([
+        Animated.timing(shimmerOp, { toValue: 1, duration: 80, useNativeDriver: false }),
+        Animated.timing(shimmerX, {
+          toValue: LOGO_W + 60, duration: 650,
+          easing: Easing.inOut(Easing.quad), useNativeDriver: false,
+        }),
+        Animated.timing(shimmerOp, { toValue: 0, duration: 180, useNativeDriver: false }),
       ]).start();
-
-      // Step 4: Motto fade
-      setTimeout(() => {
-        Animated.timing(mottoOp, { toValue: 1, duration: 500, useNativeDriver: true }).start();
-      }, 300);
-
-      // Step 5: Shimmer over logo
-      setTimeout(() => {
-        Animated.sequence([
-          Animated.timing(shimmerAlpha, { toValue: 1, duration: 80, useNativeDriver: true }),
-          Animated.timing(shimmerX, { toValue: LOGO_SIZE, duration: 700, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-          Animated.timing(shimmerAlpha, { toValue: 0, duration: 150, useNativeDriver: true }),
-        ]).start();
-      }, 500);
     });
 
-    const nav = setTimeout(() => router.replace("/auth/login"), 3200);
-    return () => clearTimeout(nav);
+    // Motto fades in 300ms after halves meet
+    const mottoTimer = setTimeout(() => {
+      Animated.timing(mottoOp, { toValue: 1, duration: 500, useNativeDriver: false }).start();
+    }, 700);
+
+    // Navigate away — belt-and-suspenders
+    const navTimer = setTimeout(goToLogin, 2600);
+
+    return () => {
+      clearTimeout(mottoTimer);
+      clearTimeout(navTimer);
+    };
   }, []);
 
   return (
     <View style={styles.root}>
-      {/* Animated W + C letters (visible during slide-in phase) */}
-      <Animated.View style={[styles.lettersRow, { opacity: lettersOp }]}>
-        <Animated.Text style={[styles.letter, { transform: [{ translateX: wX }] }]}>
-          W
-        </Animated.Text>
-        <Animated.Text style={[styles.letter, { transform: [{ translateX: cX }] }]}>
-          C
-        </Animated.Text>
-      </Animated.View>
-
-      {/* Logo image (reveals after letters meet) */}
-      <Animated.View style={[
-        styles.logoWrap,
-        { opacity: logoOp, transform: [{ scale: logoScale }] }
-      ]}>
-        <Image source={WC_NEW_LOGO} style={styles.logo} resizeMode="contain" />
+      {/* Logo — top half slides from above */}
+      <View style={styles.logoContainer}>
         <Animated.View
-          style={[styles.shimmer, { opacity: shimmerAlpha, transform: [{ translateX: shimmerX }] }]}
-          pointerEvents="none"
-        />
-      </Animated.View>
+          style={[styles.halfWrap, styles.topHalf, { opacity, transform: [{ translateY: topY }] }]}
+        >
+          <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
+        </Animated.View>
 
+        {/* Bottom half slides from below */}
+        <Animated.View
+          style={[styles.halfWrap, styles.botHalf, { opacity, transform: [{ translateY: botY }] }]}
+        >
+          <Image
+            source={LOGO}
+            style={[styles.logoImg, { marginTop: -(LOGO_H / 2) }]}
+            resizeMode="contain"
+          />
+        </Animated.View>
+
+        {/* Shimmer sweep */}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.shimmer,
+            { opacity: shimmerOp, transform: [{ translateX: shimmerX }] },
+          ]}
+        />
+      </View>
+
+      {/* Tagline */}
       <Animated.Text style={[styles.motto, { opacity: mottoOp }]}>
         Ghana's Trusted Car Marketplace
       </Animated.Text>
@@ -103,49 +122,41 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-    gap: 16,
+    gap: 20,
   },
-  lettersRow: {
-    position: "absolute",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 0,
-  },
-  letter: {
-    fontSize: 120,
-    fontFamily: "Manrope_800ExtraBold",
-    color: "#0EB5CA",
-    fontStyle: "italic",
-    letterSpacing: -6,
-    lineHeight: 130,
-  },
-  logoWrap: {
-    width: LOGO_SIZE,
-    height: LOGO_SIZE,
-    borderRadius: 28,
+  logoContainer: {
+    width: LOGO_W,
+    height: LOGO_H,
     overflow: "hidden",
-    backgroundColor: "#000",
-    shadowColor: "#0EB5CA",
-    shadowOpacity: 0.35,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 12,
+    position: "relative",
   },
-  logo: { width: LOGO_SIZE, height: LOGO_SIZE },
+  halfWrap: {
+    position: "absolute",
+    left: 0,
+    width: LOGO_W,
+    height: LOGO_H / 2,
+    overflow: "hidden",
+  },
+  topHalf: { top: 0 },
+  botHalf: { top: LOGO_H / 2 },
+  logoImg: {
+    width: LOGO_W,
+    height: LOGO_H,
+  },
   shimmer: {
     position: "absolute",
     top: -10,
-    left: -70,
-    width: 60,
-    height: LOGO_SIZE + 20,
-    backgroundColor: "rgba(255,255,255,0.4)",
-    transform: [{ skewX: "-20deg" }],
+    left: -60,
+    width: 50,
+    height: LOGO_H + 20,
+    backgroundColor: "rgba(255,255,255,0.5)",
+    transform: [{ skewX: "-18deg" }],
   },
   motto: {
     fontSize: 13,
     fontFamily: "Manrope_600SemiBold",
     color: "#0098AA",
-    letterSpacing: 1.3,
-    marginTop: 4,
+    letterSpacing: 1.4,
+    textAlign: "center",
   },
 });

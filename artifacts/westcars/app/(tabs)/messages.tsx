@@ -16,7 +16,7 @@ import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Conversation } from "@/types";
 
-const WC_NEW_LOGO = require("@/assets/images/wc-new-logo.jpg");
+const WC_LOGO = require("@/assets/images/logo_transparent.png");
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -122,7 +122,7 @@ export default function MessagesScreen() {
                   <Text style={[styles.userAvatarInitial, { color: "#0098AA" }]}>{currentUser.name[0].toUpperCase()}</Text>
                 </View>
               ) : (
-                <Image source={WC_NEW_LOGO} style={{ width: "100%", height: "100%" }} resizeMode="contain" />
+                <Image source={WC_LOGO} style={{ width: "100%", height: "100%" }} resizeMode="contain" />
               )}
             </View>
             <View>
