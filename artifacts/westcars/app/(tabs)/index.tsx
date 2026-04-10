@@ -325,7 +325,13 @@ export default function HomeScreen() {
         </Animated.View>{/* end outer maxHeight Animated.View */}
         {/* ── WESTCARS brand strip ── */}
         <View style={styles.brandStrip}>
-          <Image source={WC_LOGO_FULL} style={styles.brandStripBadge} resizeMode="contain" />
+          <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#0EB5CA" />
+          <Text style={[styles.brandStripName, { color: isDark ? "#0EB5CA" : "#0098AA" }]}>
+            WESTCARS
+          </Text>
+          <Text style={[styles.brandStripSub, { color: isDark ? "rgba(14,181,202,0.7)" : "#0098AA" }]}>
+            Ghana's Trusted Car Marketplace
+          </Text>
         </View>
 
         {/* ── Sponsored Banner → leads to Advertise ── */}
@@ -709,13 +715,13 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 8,
   },
-  brandStripBadge: { width: 220, height: 143 },
+  brandStripBadge: { width: 180, height: 90 },
 
   brandStripName: {
     fontSize: 22,
     fontFamily: "Manrope_800ExtraBold",
     letterSpacing: 4,
-    marginTop: -4,
+    marginTop: -10,
     textAlign: "center",
     width: 180,
   },
@@ -724,7 +730,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: "Manrope_600SemiBold",
     letterSpacing: 1.3,
-    marginTop: 2,
+    marginTop: 0,
     textAlign: "center",
   },
 
