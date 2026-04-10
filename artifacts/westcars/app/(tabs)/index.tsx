@@ -182,15 +182,16 @@ export default function HomeScreen() {
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
 
-      {/* ── Sticky search bar only (96% opacity so content scrolls visibly beneath) ── */}
+      {/* ── Sticky search bar — covers from top of screen so nothing peeks above ── */}
       <View
         style={[
           styles.stickySearchBar,
           {
-            top: topPad + 6,
+            top: 0,
+            paddingTop: topPad + 8,
             backgroundColor: isDark
-              ? "rgba(17,24,39,0.96)"
-              : "rgba(255,255,255,0.96)",
+              ? "rgba(17,24,39,0.97)"
+              : "rgba(255,255,255,0.97)",
             borderBottomColor: isDark
               ? "rgba(255,255,255,0.07)"
               : "rgba(14,181,202,0.12)",
@@ -200,7 +201,7 @@ export default function HomeScreen() {
           },
         ]}
         onLayout={(e) => {
-          const h = e.nativeEvent.layout.height + topPad + 6;
+          const h = e.nativeEvent.layout.height;
           if (h > 0 && stickyH === 0) setStickyH(h);
         }}
       >
@@ -766,13 +767,13 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 8,
   },
-  brandStripBadge: { width: 100, height: 50 },
+  brandStripBadge: { width: 140, height: 140 },
 
   brandStripSub: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: "Manrope_600SemiBold",
     letterSpacing: 1.3,
-    marginTop: 2,
+    marginTop: -6,
   },
 
   promoBannerWrap: {

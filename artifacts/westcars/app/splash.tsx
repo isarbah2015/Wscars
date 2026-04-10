@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-    gap: 20,
+    gap: 4,
   },
   logoContainer: {
     width: LOGO_W,
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     transform: [{ skewX: "-18deg" }],
   },
   motto: {
-    fontSize: 13,
+    fontSize: 10,
     fontFamily: "Manrope_600SemiBold",
     color: "#0098AA",
     letterSpacing: 1.4,

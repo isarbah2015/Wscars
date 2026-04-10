@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     alignItems: "center", gap: 6,
   },
   logo: { width: 160, height: 160 },
-  tagline: { fontSize: 13, fontFamily: "Manrope_600SemiBold", letterSpacing: 1, textAlign: "center" },
+  tagline: { fontSize: 10, fontFamily: "Manrope_600SemiBold", letterSpacing: 1, textAlign: "center" },
   versionBadge: { borderRadius: 20, paddingHorizontal: 14, paddingVertical: 5, marginTop: 4 },
   versionText: { fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#0EB5CA" },
 
