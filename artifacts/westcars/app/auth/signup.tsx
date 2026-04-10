@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 import { COUNTRY_CODE } from "@/utils/ghanaData";
 
-const WC_LOGO = require("@/assets/images/logo_transparent.png");
+const WC_LOGO = require("@/assets/images/wc-logo.png");
 
 export default function SignupScreen() {
   const { signup } = useApp();

@@ -17,7 +17,7 @@ import { useTheme } from "@/context/ThemeContext";
 
 const CONTACT_EMAIL = "westcarsgh@gmail.com";
 const APP_VERSION   = "2.0.0";
-const WC_LOGO = require("@/assets/images/logo_transparent.png");
+const WC_LOGO = require("@/assets/images/wc-logo.png");
 
 const FEATURES = [
   { icon: "user-check" as const, label: "Verified Sellers", desc: "ID verification powered by Kora" },

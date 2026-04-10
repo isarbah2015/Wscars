@@ -16,7 +16,7 @@ import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Conversation } from "@/types";
 
-const WC_LOGO = require("@/assets/images/logo_transparent.png");
+const WC_LOGO = require("@/assets/images/wc-logo.png");
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();

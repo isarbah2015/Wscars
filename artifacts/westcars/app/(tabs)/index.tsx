@@ -21,7 +21,7 @@ import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { formatPrice } from "@/utils/ghanaData";
 
-const WC_LOGO = require("@/assets/images/logo_transparent.png");
+const WC_LOGO = require("@/assets/images/wc-logo.png");
 const CAR_NEW     = require("@/assets/images/car-new.png");
 const CAR_USED    = require("@/assets/images/car-used.png");
 const CAR_MOTO    = require("@/assets/images/car-moto.png");
@@ -420,7 +420,7 @@ export default function HomeScreen() {
 
         {/* ── WESTCARS brand strip — transparent logo works on any theme ── */}
         <View style={styles.brandStrip}>
-          <Image source={LOGO_TRANSPARENT} style={styles.brandStripBadge} resizeMode="contain" />
+          <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" />
           <Text style={[styles.brandStripSub, { color: isDark ? "#0EB5CA" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>

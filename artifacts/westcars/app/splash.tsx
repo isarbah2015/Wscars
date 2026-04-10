@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 
-const LOGO  = require("@/assets/images/logo_transparent.png");
+const LOGO  = require("@/assets/images/wc-logo.png");
 const LOGO_W = 260;
 const LOGO_H = 260;
 
