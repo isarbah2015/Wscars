@@ -6,13 +6,12 @@ import {
   Image,
   Platform,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 
-const LOGO  = require("@/assets/images/wc-logo.png");
+const LOGO   = require("@/assets/images/wc-logo-full.png");
 const LOGO_W = 260;
-const LOGO_H = 170;
+const LOGO_H = 210;
 
 function goToLogin() {
   if (Platform.OS === "web") {
@@ -29,8 +28,7 @@ export default function SplashScreen() {
   const botY    = useRef(new Animated.Value(LOGO_H / 2 + 40)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
-  // Motto + shimmer
-  const mottoOp   = useRef(new Animated.Value(0)).current;
+  // Shimmer
   const shimmerX  = useRef(new Animated.Value(-LOGO_W - 60)).current;
   const shimmerOp = useRef(new Animated.Value(0)).current;
 
@@ -63,16 +61,10 @@ export default function SplashScreen() {
       ]).start();
     });
 
-    // Motto fades in 300ms after halves meet
-    const mottoTimer = setTimeout(() => {
-      Animated.timing(mottoOp, { toValue: 1, duration: 500, useNativeDriver: false }).start();
-    }, 700);
-
-    // Navigate away — belt-and-suspenders
+    // Navigate away
     const navTimer = setTimeout(goToLogin, 2600);
 
     return () => {
-      clearTimeout(mottoTimer);
       clearTimeout(navTimer);
     };
   }, []);
@@ -84,7 +76,7 @@ export default function SplashScreen() {
         <Animated.View
           style={[styles.halfWrap, styles.topHalf, { opacity, transform: [{ translateY: topY }] }]}
         >
-          <Image source={LOGO} style={styles.logoImg} resizeMode="contain" tintColor="#0EB5CA" />
+          <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
         </Animated.View>
 
         {/* Bottom half slides from below */}
@@ -95,7 +87,6 @@ export default function SplashScreen() {
             source={LOGO}
             style={[styles.logoImg, { marginTop: -(LOGO_H / 2) }]}
             resizeMode="contain"
-            tintColor="#0EB5CA"
           />
         </Animated.View>
 
@@ -109,10 +100,6 @@ export default function SplashScreen() {
         />
       </View>
 
-      {/* Tagline */}
-      <Animated.Text style={[styles.motto, { opacity: mottoOp }]}>
-        Ghana's Trusted Car Marketplace
-      </Animated.Text>
     </View>
   );
 }
@@ -152,12 +139,5 @@ const styles = StyleSheet.create({
     height: LOGO_H + 20,
     backgroundColor: "rgba(255,255,255,0.5)",
     transform: [{ skewX: "-18deg" }],
-  },
-  motto: {
-    fontSize: 10,
-    fontFamily: "Manrope_600SemiBold",
-    color: "#0098AA",
-    letterSpacing: 1.4,
-    textAlign: "center",
   },
 });

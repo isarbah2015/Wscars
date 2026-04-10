@@ -17,7 +17,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 import { COUNTRY_CODE } from "@/utils/ghanaData";
 
-const WC_LOGO = require("@/assets/images/wc-logo.png");
+const WC_LOGO      = require("@/assets/images/wc-logo.png");
+const WC_LOGO_FULL = require("@/assets/images/wc-logo-full.png");
 
 export default function SignupScreen() {
   const { signup } = useApp();
@@ -71,9 +72,7 @@ export default function SignupScreen() {
         <View style={[styles.hero, styles.heroWhite, { paddingTop: topPad + 14 }]}>
           {/* Badge + motto */}
           <View style={styles.brandCol}>
-            <Image source={WC_LOGO} style={styles.heroBadge} resizeMode="contain" tintColor="#0EB5CA" />
-            <Text style={styles.brandName}>WESTCARS</Text>
-            <Text style={styles.brandSub}>Ghana's Trusted Car Marketplace</Text>
+            <Image source={WC_LOGO_FULL} style={styles.heroBadge} resizeMode="contain" />
           </View>
 
           <Text style={styles.heroTitle}>Create account</Text>
@@ -273,7 +272,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   brandCol: { alignItems: "center", gap: 0 },
-  heroBadge: { width: 180, height: 110 },
+  heroBadge: { width: 220, height: 143 },
   brandName: {
     fontSize: 22, fontFamily: "Manrope_800ExtraBold",
     color: "#0098AA", letterSpacing: 4, textAlign: "center",

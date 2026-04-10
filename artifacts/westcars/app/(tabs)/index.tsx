@@ -21,7 +21,8 @@ import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { formatPrice } from "@/utils/ghanaData";
 
-const WC_LOGO = require("@/assets/images/wc-logo.png");
+const WC_LOGO      = require("@/assets/images/wc-logo.png");
+const WC_LOGO_FULL = require("@/assets/images/wc-logo-full.png");
 const CAR_NEW     = require("@/assets/images/car-new.png");
 const CAR_USED    = require("@/assets/images/car-used.png");
 const CAR_MOTO    = require("@/assets/images/car-moto.png");
@@ -324,13 +325,7 @@ export default function HomeScreen() {
         </Animated.View>{/* end outer maxHeight Animated.View */}
         {/* ── WESTCARS brand strip ── */}
         <View style={styles.brandStrip}>
-          <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#0EB5CA" />
-          <Text style={[styles.brandStripName, { color: isDark ? "#0EB5CA" : "#0098AA" }]}>
-            WESTCARS
-          </Text>
-          <Text style={[styles.brandStripSub, { color: isDark ? "rgba(14,181,202,0.7)" : "#0098AA" }]}>
-            Ghana's Trusted Car Marketplace
-          </Text>
+          <Image source={WC_LOGO_FULL} style={styles.brandStripBadge} resizeMode="contain" />
         </View>
 
         {/* ── Sponsored Banner → leads to Advertise ── */}
@@ -714,7 +709,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 8,
   },
-  brandStripBadge: { width: 180, height: 90 },
+  brandStripBadge: { width: 220, height: 143 },
 
   brandStripName: {
     fontSize: 22,
