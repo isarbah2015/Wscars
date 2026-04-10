@@ -76,8 +76,10 @@ const sellStyles = StyleSheet.create({
 
 export default function TabLayout() {
   const { isDark, colors } = useTheme();
-  const { conversations } = useApp();
+  const { conversations, favorites, isAuthenticated } = useApp();
   const totalUnread = conversations?.reduce((s, c) => s + (c.unreadCount || 0), 0) ?? 0;
+  const favCount = favorites?.length ?? 0;
+  const profileBadge = !isAuthenticated ? 1 : undefined;
   const isIOS = Platform.OS === "ios";
 
   const inactiveColor = isDark ? "#4A5E7A" : "#8A9AB5";
@@ -151,6 +153,8 @@ export default function TabLayout() {
         name="favourites"
         options={{
           title: "Saved",
+          tabBarBadge: favCount > 0 ? favCount : undefined,
+          tabBarBadgeStyle: { backgroundColor: "#E8192C", fontSize: 10, minWidth: 16, height: 16, borderRadius: 8 },
           tabBarIcon: ({ focused, color }) => (
             <TabIcon name="heart" focused={focused} color={color} activeColor="#E8192C" activeBg="#FFEDEE" />
           ),
@@ -178,6 +182,8 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
+          tabBarBadge: profileBadge,
+          tabBarBadgeStyle: { backgroundColor: "#FF6B00", fontSize: 10, minWidth: 16, height: 16, borderRadius: 8 },
           tabBarIcon: ({ focused, color }) => (
             <TabIcon name="user" focused={focused} color={color} activeColor={colors.accent} activeBg={colors.accentLight} />
           ),
