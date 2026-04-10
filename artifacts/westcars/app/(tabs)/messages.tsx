@@ -10,10 +10,13 @@ import {
   Text,
   View,
 } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Conversation } from "@/types";
+
+const WC_NEW_LOGO = require("@/assets/images/wc-new-logo.jpg");
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -111,13 +114,15 @@ export default function MessagesScreen() {
             style={styles.userProfileLeft}
             onPress={() => router.push("/(tabs)/profile")}
           >
-            <View style={[styles.userAvatarBox, { backgroundColor: "rgba(14,181,202,0.16)" }]}>
+            <View style={[styles.userAvatarBox, { backgroundColor: "#000", overflow: "hidden" }]}>
               {currentUser?.avatar ? (
                 <Image source={{ uri: currentUser.avatar }} style={styles.userAvatarImg} />
+              ) : currentUser?.name ? (
+                <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(14,181,202,0.16)" }}>
+                  <Text style={[styles.userAvatarInitial, { color: "#0098AA" }]}>{currentUser.name[0].toUpperCase()}</Text>
+                </View>
               ) : (
-                <Text style={[styles.userAvatarInitial, { color: "#0098AA" }]}>
-                  {currentUser?.name?.[0]?.toUpperCase() || "W"}
-                </Text>
+                <Image source={WC_NEW_LOGO} style={{ width: "100%", height: "100%" }} resizeMode="contain" />
               )}
             </View>
             <View>

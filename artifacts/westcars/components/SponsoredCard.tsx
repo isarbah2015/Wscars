@@ -102,6 +102,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginHorizontal: 16,
     marginBottom: 12,
+    height: 116,
     shadowColor: "#000",
     shadowOpacity: 0.07,
     shadowRadius: 8,
@@ -109,11 +110,11 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   imgWrap: {
-    width: 110,
-    alignSelf: "stretch",
-    minHeight: 100,
+    width: 116,
+    height: 116,
+    flexShrink: 0,
   },
-  image: { width: "100%", height: "100%", minHeight: 100 },
+  image: { width: 116, height: 116 },
   imgFallback: { alignItems: "center", justifyContent: "center", flex: 1 },
 
   info: {

@@ -19,8 +19,8 @@ function TabIcon({
   activeBg: string;
 }) {
   return (
-    <View style={[tabIconStyles.wrap, focused && { backgroundColor: activeBg, paddingHorizontal: 18 }]}>
-      <Feather name={name} size={23} color={focused ? activeColor : color} />
+    <View style={[tabIconStyles.wrap, focused && { backgroundColor: activeBg, width: 52 }]}>
+      <Feather name={name} size={22} color={focused ? activeColor : color} />
     </View>
   );
 }

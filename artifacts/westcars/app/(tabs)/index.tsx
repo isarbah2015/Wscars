@@ -21,9 +21,7 @@ import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { formatPrice } from "@/utils/ghanaData";
 
-const WC_BADGE           = require("@/assets/images/wc-badge.png");
-const WC_LOGOMARK        = require("@/assets/images/wc-logomark.png");
-const LOGO_TRANSPARENT   = require("@/assets/images/logo_transparent.png");
+const WC_NEW_LOGO        = require("@/assets/images/wc-new-logo.jpg");
 const CAR_NEW     = require("@/assets/images/car-new.png");
 const CAR_USED    = require("@/assets/images/car-used.png");
 const CAR_MOTO    = require("@/assets/images/car-moto.png");
@@ -213,8 +211,8 @@ export default function HomeScreen() {
             elevation: 12,
             paddingTop: topPad + 8,
             backgroundColor: isDark
-              ? "rgba(17,24,39,0.86)"
-              : "rgba(255,255,255,0.84)",
+              ? "rgba(17,24,39,0.97)"
+              : "rgba(255,255,255,0.97)",
             borderBottomColor: isDark
               ? "rgba(255,255,255,0.07)"
               : "rgba(14,181,202,0.12)",
@@ -251,10 +249,16 @@ export default function HomeScreen() {
               router.push("/(tabs)/profile");
             }}
           >
-            <View style={[styles.avatarRoundedSq, { backgroundColor: "rgba(14,181,202,0.16)" }]}>
-              <Text style={[styles.avatarText, { color: "#0098AA" }]}>
-                {currentUser?.name?.[0]?.toUpperCase() || "W"}
-              </Text>
+            <View style={[styles.avatarRoundedSq, { backgroundColor: "#000", overflow: "hidden" }]}>
+              {currentUser?.avatar ? (
+                <Image source={{ uri: currentUser.avatar }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+              ) : currentUser?.name ? (
+                <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(14,181,202,0.16)" }}>
+                  <Text style={[styles.avatarText, { color: "#0098AA" }]}>{currentUser.name[0].toUpperCase()}</Text>
+                </View>
+              ) : (
+                <Image source={WC_NEW_LOGO} style={{ width: "100%", height: "100%" }} resizeMode="contain" />
+              )}
             </View>
             <View style={styles.profileTextBlock}>
               <Text style={[styles.userName, { color: isDark ? "#CBD5E1" : "#0F172A" }]} numberOfLines={1}>

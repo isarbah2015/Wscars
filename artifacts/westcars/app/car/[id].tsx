@@ -306,7 +306,7 @@ export default function CarDetailScreen() {
               >
                 {/* Colored icon bubble */}
                 <View style={[styles.specIconBubble, { backgroundColor: sc.iconBg }]}>
-                  <Feather name={sc.icon as any} size={17} color={sc.iconColor} />
+                  <Feather name={sc.icon as any} size={20} color={sc.iconColor} />
                 </View>
                 <Text style={[styles.iconSpecValue, { color: colors.text }]}>{sc.value}</Text>
                 <Text style={[styles.iconSpecLabel, { color: colors.textTertiary }]}>{sc.label}</Text>
@@ -662,33 +662,33 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 18,
     overflow: "hidden",
     marginBottom: 14,
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 5,
   },
   iconSpecCell: {
     width: "33.33%",
     alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 18,
+    paddingHorizontal: 6,
+    paddingVertical: 22,
     borderRightWidth: 1,
     borderBottomWidth: 1,
-    gap: 4,
+    gap: 6,
   },
   specIconBubble: {
-    width: 42,
-    height: 42,
-    borderRadius: 13,
+    width: 52,
+    height: 52,
+    borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  iconSpecValue: { fontSize: 13, fontFamily: "Manrope_700Bold", textAlign: "center" },
-  iconSpecLabel: { fontSize: 11, fontFamily: "Manrope_400Regular", textAlign: "center" },
+  iconSpecValue: { fontSize: 14, fontFamily: "Manrope_700Bold", textAlign: "center" },
+  iconSpecLabel: { fontSize: 11, fontFamily: "Manrope_400Regular", textAlign: "center", opacity: 0.6 },
 
   // Extra row specs
   extraSpecsList: {
