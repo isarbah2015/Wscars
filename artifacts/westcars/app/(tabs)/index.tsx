@@ -93,19 +93,15 @@ export default function HomeScreen() {
   const EXTRA_PAD = 6;
   const catMaxH    = useRef(new Animated.Value(CAT_DEFAULT_H)).current;
   const catOpacity = useRef(new Animated.Value(1)).current;
-  const scrollPad  = useRef(new Animated.Value(
-    STICKY_DEFAULT + CAT_DEFAULT_H + EXTRA_PAD + (Platform.OS === "web" ? 4 : insets.top || 0) + 8
-  )).current;
   const lastScrollY = useRef(0);
   const catOpen     = useRef(true);
   const [stickyH,  setStickyH]  = useState(0);
   const [catMeasH, setCatMeasH] = useState(0);
 
-  // Stop all three animated values immediately so direction can reverse mid-animation
+  // Stop animated values immediately so direction can reverse mid-animation
   const stopAll = () => {
     catMaxH.stopAnimation();
     catOpacity.stopAnimation();
-    scrollPad.stopAnimation();
   };
 
   const showCat = () => {
@@ -126,12 +122,6 @@ export default function HomeScreen() {
         easing: Easing.out(Easing.quad),
         useNativeDriver: true,
       }),
-      Animated.timing(scrollPad, {
-        toValue: stickyH + catH + EXTRA_PAD,
-        duration: 300,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: false,
-      }),
     ]).start();
   };
 
@@ -151,12 +141,6 @@ export default function HomeScreen() {
         duration: 150,
         easing: Easing.in(Easing.quad),
         useNativeDriver: true,
-      }),
-      Animated.timing(scrollPad, {
-        toValue: stickyH + EXTRA_PAD,
-        duration: 260,
-        easing: Easing.in(Easing.cubic),
-        useNativeDriver: false,
       }),
     ]).start();
   };
@@ -198,49 +182,71 @@ export default function HomeScreen() {
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
 
-      {/* ── Glassmorphic Absolute Header ── */}
+      {/* ── Sticky search bar only (96% opacity so content scrolls visibly beneath) ── */}
       <View
         style={[
-          styles.header,
+          styles.stickySearchBar,
           {
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 100,
-            elevation: 12,
-            paddingTop: topPad + 8,
+            top: topPad + 6,
             backgroundColor: isDark
-              ? "rgba(17,24,39,0.97)"
-              : "rgba(255,255,255,0.97)",
+              ? "rgba(17,24,39,0.96)"
+              : "rgba(255,255,255,0.96)",
             borderBottomColor: isDark
               ? "rgba(255,255,255,0.07)"
               : "rgba(14,181,202,0.12)",
-            borderBottomWidth: 1,
-            shadowColor: "#0EB5CA",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.08,
-            shadowRadius: 16,
             ...(Platform.OS === "web"
-              ? ({ backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" } as any)
+              ? ({ backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)" } as any)
               : {}),
           },
         ]}
+        onLayout={(e) => {
+          const h = e.nativeEvent.layout.height + topPad + 6;
+          if (h > 0 && stickyH === 0) setStickyH(h);
+        }}
       >
-        {/* ── Sticky section: profile + search (always visible) ── */}
-        <View style={{ gap: 10 }} onLayout={(e) => {
-          const h = e.nativeEvent.layout.height + topPad + 8;
-          if (h > 0 && stickyH === 0) {
-            setStickyH(h);
-            if (!catOpen.current) {
-              scrollPad.setValue(h + EXTRA_PAD);
-            } else {
-              scrollPad.setValue(h + (catMeasH || CAT_DEFAULT_H) + EXTRA_PAD);
-            }
-          }
-        }}>
+        <Pressable
+          style={[styles.searchBox, {
+            backgroundColor: isDark ? "#1E293B" : "#F1F5F9",
+            borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+          }]}
+          onPress={() => router.push("/(tabs)/search")}
+        >
+          <Ionicons name="car-sport-outline" size={26} color={isDark ? "#0EB5CA" : "#0098AA"} />
+          <View style={styles.searchBoxText}>
+            <Text style={[styles.searchBoxLabel, { color: isDark ? "#CBD5E1" : "#334155" }]}>Brand, model, location…</Text>
+            <Text style={[styles.searchBoxCount, { color: isDark ? "#64748B" : "#94A3B8" }]}>
+              {totalCount.toLocaleString()} listings available
+            </Text>
+          </View>
+          <View style={[styles.filterBtn, { backgroundColor: "#0EB5CA" }]}>
+            <Feather name="sliders" size={17} color="#FFFFFF" />
+          </View>
+        </Pressable>
+      </View>
 
-        {/* ── Row 1: Profile on LEFT, WC badge on RIGHT ── */}
+      {/* ── Scrollable body ── */}
+      <ScrollView
+        style={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ paddingBottom: 100 + (insets.bottom || 0) }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#0EB5CA"
+            colors={["#0EB5CA"]}
+          />
+        }
+      >
+        {/* Spacer — clears the sticky search bar */}
+        <View style={{ height: (stickyH || 70) + 10 }} />
+
+        {/* ── Profile row — scrolls away normally ── */}
+        <View style={[styles.profileScrollRow, {
+          backgroundColor: isDark ? "rgba(17,24,39,0)" : "rgba(255,255,255,0)",
+        }]}>
         <View style={styles.topRow}>
           <Pressable
             style={styles.profileLeft}
@@ -257,7 +263,7 @@ export default function HomeScreen() {
                   <Text style={[styles.avatarText, { color: "#0098AA" }]}>{currentUser.name[0].toUpperCase()}</Text>
                 </View>
               ) : (
-                <Image source={WC_LOGO} style={{ width: "100%", height: "100%" }} resizeMode="contain" />
+                <Image source={WC_LOGO} style={{ width: "100%", height: "100%" }} resizeMode="contain" tintColor="#0EB5CA" />
               )}
             </View>
             <View style={styles.profileTextBlock}>
@@ -290,36 +296,10 @@ export default function HomeScreen() {
             )}
           </Pressable>
 
-        </View>
+        </View>{/* close topRow */}
+        </View>{/* close profileScrollRow */}
 
-        {/* ── Row 2: Search bar ── */}
-        <Pressable
-          style={[styles.searchBox, {
-            backgroundColor: isDark ? "#1E293B" : "#F1F5F9",
-            borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
-          }]}
-          onPress={() => router.push("/(tabs)/search")}
-        >
-          <Ionicons
-            name="car-sport-outline"
-            size={26}
-            color={isDark ? "#0EB5CA" : "#0098AA"}
-          />
-          <View style={styles.searchBoxText}>
-            <Text style={[styles.searchBoxLabel, { color: isDark ? "#CBD5E1" : "#334155" }]}>Brand, model, location…</Text>
-            <Text style={[styles.searchBoxCount, { color: isDark ? "#64748B" : "#94A3B8" }]}>
-              {totalCount.toLocaleString()} listings available
-            </Text>
-          </View>
-          <View style={[styles.filterBtn, { backgroundColor: "#0EB5CA" }]}>
-            <Feather name="sliders" size={17} color="#FFFFFF" />
-          </View>
-        </Pressable>
-
-        </View>{/* end sticky section */}
-
-        {/* ── Collapsible: Main condition tabs + Sub-categories ── */}
-        {/* maxHeight collapses smoothly; inner opacity fades simultaneously */}
+        {/* ── Collapsible: condition tabs + sub-categories ── */}
         <Animated.View style={{ maxHeight: catMaxH, overflow: "hidden" }}>
         <Animated.View
           style={{ opacity: catOpacity }}
@@ -328,7 +308,6 @@ export default function HomeScreen() {
             if (h > 0 && catMeasH === 0) {
               setCatMeasH(h);
               catMaxH.setValue(h);
-              scrollPad.setValue((stickyH || (STICKY_DEFAULT + topPad + 8)) + h + EXTRA_PAD);
             }
           }}
         >
@@ -397,30 +376,9 @@ export default function HomeScreen() {
           </View>
         </Animated.View>{/* end inner opacity Animated.View */}
         </Animated.View>{/* end outer maxHeight Animated.View */}
-      </View>{/* end absolute header */}
-
-      {/* ── Scrollable body — starts from y:0, spacer pushes content below header ── */}
-      <ScrollView
-        style={styles.scroll}
-        showsVerticalScrollIndicator={false}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        contentContainerStyle={{ paddingBottom: 100 + (insets.bottom || 0) }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#0EB5CA"
-            colors={["#0EB5CA"]}
-          />
-        }
-      >
-        {/* Animated spacer — height tracks header height so content starts below it */}
-        <Animated.View style={{ height: scrollPad }} />
-
-        {/* ── WESTCARS brand strip — transparent logo works on any theme ── */}
+        {/* ── WESTCARS brand strip ── */}
         <View style={styles.brandStrip}>
-          <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" />
+          <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#0EB5CA" />
           <Text style={[styles.brandStripSub, { color: isDark ? "#0EB5CA" : "#0098AA" }]}>
             Ghana's Trusted Car Marketplace
           </Text>
@@ -782,12 +740,12 @@ const styles = StyleSheet.create({
 
   brandStrip: {
     alignItems: "center",
-    gap: 4,
+    gap: 0,
     paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 16,
+    paddingTop: 10,
+    paddingBottom: 8,
   },
-  brandStripBadge: { width: 140, height: 140 },
+  brandStripBadge: { width: 100, height: 50 },
 
   brandStripSub: {
     fontSize: 12,
