@@ -3,6 +3,7 @@ import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
 import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
+import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 
 function TabIcon({
@@ -75,6 +76,8 @@ const sellStyles = StyleSheet.create({
 
 export default function TabLayout() {
   const { isDark, colors } = useTheme();
+  const { conversations } = useApp();
+  const totalUnread = conversations?.reduce((s, c) => s + (c.unreadCount || 0), 0) ?? 0;
   const isIOS = Platform.OS === "ios";
 
   const inactiveColor = isDark ? "#4A5E7A" : "#8A9AB5";
@@ -164,6 +167,8 @@ export default function TabLayout() {
         name="messages"
         options={{
           title: "Messages",
+          tabBarBadge: totalUnread > 0 ? totalUnread : undefined,
+          tabBarBadgeStyle: { backgroundColor: "#FF4757", fontSize: 10, minWidth: 16, height: 16, borderRadius: 8 },
           tabBarIcon: ({ focused, color }) => (
             <TabIcon name="message-square" focused={focused} color={color} activeColor="#7C3AED" activeBg="#F3EEFF" />
           ),

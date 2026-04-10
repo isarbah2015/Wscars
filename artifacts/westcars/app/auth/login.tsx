@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   },
 
   brandCol: { alignItems: "center", gap: 2 },
-  heroBadge: { width: 140, height: 140 },
+  heroBadge: { width: 140, height: 88 },
   tagline: {
     fontSize: 10, fontFamily: "Manrope_600SemiBold",
     color: "#0098AA", letterSpacing: 1.2, textAlign: "center",

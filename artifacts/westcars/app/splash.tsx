@@ -12,7 +12,7 @@ import {
 
 const LOGO  = require("@/assets/images/wc-logo.png");
 const LOGO_W = 260;
-const LOGO_H = 260;
+const LOGO_H = 170;
 
 function goToLogin() {
   if (Platform.OS === "web") {
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-    gap: 4,
+    gap: 2,
   },
   logoContainer: {
     width: LOGO_W,

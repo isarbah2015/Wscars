@@ -244,61 +244,6 @@ export default function HomeScreen() {
         {/* Spacer — clears the sticky search bar */}
         <View style={{ height: (stickyH || 70) + 10 }} />
 
-        {/* ── Profile row — scrolls away normally ── */}
-        <View style={[styles.profileScrollRow, {
-          backgroundColor: isDark ? "rgba(17,24,39,0)" : "rgba(255,255,255,0)",
-        }]}>
-        <View style={styles.topRow}>
-          <Pressable
-            style={styles.profileLeft}
-            onPress={() => {
-              Haptics.selectionAsync();
-              router.push("/(tabs)/profile");
-            }}
-          >
-            <View style={[styles.avatarRoundedSq, { backgroundColor: "rgba(14,181,202,0.12)", overflow: "hidden" }]}>
-              {currentUser?.avatar ? (
-                <Image source={{ uri: currentUser.avatar }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
-              ) : currentUser?.name ? (
-                <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(14,181,202,0.16)" }}>
-                  <Text style={[styles.avatarText, { color: "#0098AA" }]}>{currentUser.name[0].toUpperCase()}</Text>
-                </View>
-              ) : (
-                <Image source={WC_LOGO} style={{ width: "100%", height: "100%" }} resizeMode="contain" tintColor="#0EB5CA" />
-              )}
-            </View>
-            <View style={styles.profileTextBlock}>
-              <Text style={[styles.userName, { color: isDark ? "#CBD5E1" : "#0F172A" }]} numberOfLines={1}>
-                {currentUser?.name?.split(" ")[0] || "Guest"}
-              </Text>
-              <Text style={[styles.userSub, { color: "#0EB5CA" }]}>
-                Ghana's Car Market
-              </Text>
-            </View>
-          </Pressable>
-
-          {/* Notification bell */}
-          <Pressable
-            style={[styles.notifBellBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(14,181,202,0.10)" }]}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push("/(tabs)/messages");
-            }}
-          >
-            <Ionicons
-              name={totalUnread > 0 ? "notifications" : "notifications-outline"}
-              size={21}
-              color="#0EB5CA"
-            />
-            {totalUnread > 0 && (
-              <View style={[styles.notifBellBadge, { backgroundColor: "#FF4757" }]}>
-                <Text style={styles.notifBellBadgeText}>{totalUnread > 9 ? "9+" : totalUnread}</Text>
-              </View>
-            )}
-          </Pressable>
-
-        </View>{/* close topRow */}
-        </View>{/* close profileScrollRow */}
 
         {/* ── Collapsible: condition tabs + sub-categories ── */}
         <Animated.View style={{ maxHeight: catMaxH, overflow: "hidden" }}>
@@ -762,18 +707,17 @@ const styles = StyleSheet.create({
 
   brandStrip: {
     alignItems: "center",
-    gap: 0,
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 8,
   },
-  brandStripBadge: { width: 140, height: 140 },
+  brandStripBadge: { width: 140, height: 70 },
 
   brandStripSub: {
     fontSize: 10,
     fontFamily: "Manrope_600SemiBold",
     letterSpacing: 1.3,
-    marginTop: -6,
+    marginTop: 2,
   },
 
   promoBannerWrap: {
