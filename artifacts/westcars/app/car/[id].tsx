@@ -293,15 +293,13 @@ export default function CarDetailScreen() {
           <Text style={[styles.cardTitle, { color: colors.text }]}>Specs</Text>
 
           {/* Colorful icon cells — 3 per row */}
-          <View style={[styles.iconSpecsGrid, { borderColor: colors.border, shadowColor: isDark ? "#000" : "#0A1628" }]}>
+          <View style={styles.iconSpecsGrid}>
             {specCells.map((sc, idx) => (
               <View
                 key={sc.label}
                 style={[
                   styles.iconSpecCell,
-                  { borderColor: colors.border },
-                  idx % 3 === 2 && { borderRightWidth: 0 },
-                  idx >= 3 && { borderBottomWidth: 0 },
+                  idx % 3 !== 2 && { borderRightWidth: 0 },
                 ]}
               >
                 {/* Colored icon bubble */}
@@ -315,7 +313,7 @@ export default function CarDetailScreen() {
           </View>
 
           {/* Extra list-style specs */}
-          <View style={[styles.extraSpecsList, { borderColor: colors.border, shadowColor: isDark ? "#000" : "#0A1628" }]}>
+          <View style={[styles.extraSpecsList, { backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(14,181,202,0.04)" }]}>
             {extraSpecs.map((sp, i) => (
               <View
                 key={sp.label}
@@ -657,71 +655,60 @@ const styles = StyleSheet.create({
   },
   cardTitle: { fontSize: 17, fontFamily: "Manrope_700Bold" },
 
-  // Icon specs grid — 3 per row, 2 rows
+  // Icon specs grid — 3 per row, 2 rows (borderless clean card design)
   iconSpecsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    borderWidth: 1,
-    borderRadius: 18,
+    borderRadius: 16,
     overflow: "hidden",
-    marginBottom: 14,
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 5,
+    marginBottom: 12,
+    backgroundColor: "rgba(14,181,202,0.04)",
   },
   iconSpecCell: {
     width: "33.33%",
     alignItems: "center",
-    paddingHorizontal: 6,
-    paddingVertical: 22,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    gap: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 18,
+    gap: 5,
   },
   specIconBubble: {
-    width: 52,
-    height: 52,
-    borderRadius: 15,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 2,
   },
-  iconSpecValue: { fontSize: 14, fontFamily: "Manrope_700Bold", textAlign: "center" },
-  iconSpecLabel: { fontSize: 11, fontFamily: "Manrope_400Regular", textAlign: "center", opacity: 0.6 },
+  iconSpecValue: { fontSize: 13, fontFamily: "Manrope_700Bold", textAlign: "center" },
+  iconSpecLabel: { fontSize: 10, fontFamily: "Manrope_400Regular", textAlign: "center", opacity: 0.55 },
 
-  // Extra row specs
+  // Extra row specs — clean alternating rows, no heavy border
   extraSpecsList: {
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 10,
+    borderRadius: 12,
     overflow: "hidden",
+    marginBottom: 2,
   },
   extraSpecRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 11,
     paddingHorizontal: 14,
+    backgroundColor: "transparent",
   },
-  extraSpecBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
-  },
+  extraSpecBorder: {},
   extraSpecLabel: { fontSize: 13, fontFamily: "Manrope_400Regular" },
   extraSpecValue: { fontSize: 13, fontFamily: "Manrope_500Medium" },
   extraSpecHighlight: { color: "#0EB5CA", fontFamily: "Manrope_700Bold" },
 
   moreBtn: {
-    height: 46,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
+    height: 44,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FAFAFA",
+    backgroundColor: "rgba(14,181,202,0.08)",
   },
-  moreBtnText: { fontSize: 14, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
+  moreBtnText: { fontSize: 14, fontFamily: "Manrope_600SemiBold" },
 
   // Ask seller
   messageBox: {

@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Manrope_400Regular",
     color: Colors.light.textTertiary,
-    marginTop: -8,
+    marginTop: 0,
   },
 
   vinTitleRow: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
@@ -651,7 +651,7 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_400Regular",
     color: Colors.light.textTertiary,
     textAlign: "right",
-    marginTop: -6,
+    marginTop: 0,
   },
   vinSuccess: {
     flexDirection: "row",

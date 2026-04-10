@@ -276,8 +276,8 @@ const styles = StyleSheet.create({
   heroBadge: { width: 180, height: 110 },
   brandName: {
     fontSize: 22, fontFamily: "Manrope_800ExtraBold",
-    color: "#0098AA", letterSpacing: 6, textAlign: "center",
-    minWidth: 210, marginTop: -4,
+    color: "#0098AA", letterSpacing: 4, textAlign: "center",
+    width: 180, marginTop: -4,
   },
   brandSub: {
     fontSize: 10, fontFamily: "Manrope_600SemiBold",

@@ -120,7 +120,7 @@ export default function HomeScreen() {
         toValue: 1,
         duration: 240,
         easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
   };
@@ -140,7 +140,7 @@ export default function HomeScreen() {
         toValue: 0,
         duration: 150,
         easing: Easing.in(Easing.quad),
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
   };
@@ -719,10 +719,10 @@ const styles = StyleSheet.create({
   brandStripName: {
     fontSize: 22,
     fontFamily: "Manrope_800ExtraBold",
-    letterSpacing: 6,
+    letterSpacing: 4,
     marginTop: -4,
     textAlign: "center",
-    minWidth: 200,
+    width: 180,
   },
 
   brandStripSub: {
