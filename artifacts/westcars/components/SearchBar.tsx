@@ -37,7 +37,6 @@ export function SearchBar({
         placeholderTextColor={Colors.light.textTertiary}
         editable={editable}
         returnKeyType="search"
-        fontFamily="Manrope_400Regular"
       />
       {value.length > 0 && (
         <Pressable onPress={() => onChangeText("")} hitSlop={8}>

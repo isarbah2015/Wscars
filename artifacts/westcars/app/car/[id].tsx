@@ -212,11 +212,13 @@ export default function CarDetailScreen() {
             onViewableItemsChanged={onViewableItemsChanged}
             viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
             renderItem={({ item }) => (
-              <Image
-                source={{ uri: item }}
-                style={{ width, height: 256 }}
-                resizeMode="cover"
-              />
+              <View style={{ width, height: 256, backgroundColor: "#EDF4F7" }}>
+                <Image
+                  source={{ uri: item }}
+                  style={{ width, height: 256 }}
+                  resizeMode="cover"
+                />
+              </View>
             )}
           />
           {/* Counter */}
@@ -291,43 +293,50 @@ export default function CarDetailScreen() {
         {/* ── Specifications ── */}
         <View style={[styles.card, { backgroundColor: colors.card }]}>
 
-          {/* Section header with teal accent bar */}
+          {/* Section header */}
           <View style={styles.specHeader}>
             <View style={[styles.specHeaderAccent, { backgroundColor: "#0EB5CA" }]} />
             <Text style={[styles.cardTitle, { color: colors.text }]}>Specifications</Text>
           </View>
 
-          {/* 2-column spec card grid */}
-          <View style={styles.specGrid}>
-            {specCells.map((sc) => (
-              <View
-                key={sc.label}
-                style={[styles.specGridCard, {
-                  backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#FAFEFF",
-                  shadowColor: "#0EB5CA",
-                }]}
-              >
-                <View style={[styles.specGridIcon, { backgroundColor: sc.iconBg }]}>
-                  <Feather name={sc.icon as any} size={18} color={sc.iconColor} />
-                </View>
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={[styles.specGridLabel, { color: colors.textTertiary }]}>
+          {/* 2-column premium stat cards — explicit rows (no flexWrap) for native */}
+          {([0, 2, 4] as const).map((rowStart) => (
+            <View key={rowStart} style={styles.specRow}>
+              {specCells.slice(rowStart, rowStart + 2).map((sc) => (
+                <View
+                  key={sc.label}
+                  style={[styles.specCard, {
+                    backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#fff",
+                    borderColor: isDark ? "rgba(255,255,255,0.08)" : sc.iconBg,
+                  }]}
+                >
+                  {/* Colored bottom accent */}
+                  <View style={[styles.specCardBottomAccent, { backgroundColor: sc.iconColor }]} />
+                  {/* Icon bubble */}
+                  <View style={[styles.specCardIconWrap, { backgroundColor: sc.iconBg }]}>
+                    <Feather name={sc.icon as any} size={22} color={sc.iconColor} />
+                  </View>
+                  {/* Value */}
+                  <Text style={[styles.specCardValue, { color: colors.text }]} numberOfLines={1}>
+                    {sc.value}
+                  </Text>
+                  {/* Label */}
+                  <Text style={[styles.specCardLabel, { color: colors.textTertiary }]}>
                     {sc.label.toUpperCase()}
                   </Text>
-                  <Text style={[styles.specGridValue, { color: colors.text }]}>{sc.value}</Text>
                 </View>
-              </View>
-            ))}
-          </View>
+              ))}
+            </View>
+          ))}
 
           {/* Mileage visual bar */}
           <View style={[styles.mileageBarWrap, {
-            backgroundColor: isDark ? "rgba(14,181,202,0.06)" : "rgba(14,181,202,0.05)",
-            borderColor: isDark ? "rgba(14,181,202,0.12)" : "rgba(14,181,202,0.14)",
+            backgroundColor: isDark ? "rgba(14,181,202,0.07)" : "rgba(14,181,202,0.05)",
+            borderColor: isDark ? "rgba(14,181,202,0.15)" : "rgba(14,181,202,0.16)",
           }]}>
             <View style={styles.mileageBarHeader}>
               <Feather name="activity" size={13} color="#22C55E" />
-              <Text style={[styles.mileageBarLabel, { color: colors.textSecondary }]}>Mileage</Text>
+              <Text style={[styles.mileageBarLabel, { color: colors.textSecondary }]}>Mileage overview</Text>
               <Text style={[styles.mileageBarValue, { color: "#22C55E" }]}>{formatMileage(car.mileage)}</Text>
             </View>
             <View style={[styles.mileageTrack, { backgroundColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.07)" }]}>
@@ -335,26 +344,28 @@ export default function CarDetailScreen() {
                 colors={["#22C55E", "#0EB5CA"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={[styles.mileageFill, { width: `${Math.min((car.mileage / 300000) * 100, 100)}%` as any }]}
+                style={[
+                  styles.mileageFill,
+                  { width: Math.max(8, (width - 80) * Math.min(car.mileage / 300000, 1)) },
+                ]}
               />
             </View>
             <View style={styles.mileageScale}>
-              <Text style={[styles.mileageScaleText, { color: colors.textTertiary }]}>0 km</Text>
-              <Text style={[styles.mileageScaleText, { color: colors.textTertiary }]}>150,000</Text>
-              <Text style={[styles.mileageScaleText, { color: colors.textTertiary }]}>300,000 km</Text>
+              <Text style={[styles.mileageScaleText, { color: colors.textTertiary }]}>0</Text>
+              <Text style={[styles.mileageScaleText, { color: colors.textTertiary }]}>150k km</Text>
+              <Text style={[styles.mileageScaleText, { color: colors.textTertiary }]}>300k km</Text>
             </View>
           </View>
 
           {/* Key-value detail table */}
-          <View style={styles.detailTable}>
+          <View style={[styles.detailTable, { borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(14,181,202,0.12)" }]}>
             {extraSpecs.map((sp, i) => (
               <View
                 key={sp.label}
-                style={[styles.detailRow, {
-                  backgroundColor: i % 2 === 0
-                    ? (isDark ? "rgba(14,181,202,0.06)" : "rgba(14,181,202,0.04)")
-                    : "transparent",
-                }]}
+                style={[
+                  styles.detailRow,
+                  i < extraSpecs.length - 1 && { borderBottomWidth: 1, borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(14,181,202,0.10)" },
+                ]}
               >
                 <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{sp.label}</Text>
                 {sp.highlight ? (
@@ -370,7 +381,7 @@ export default function CarDetailScreen() {
 
           {/* Full specs CTA */}
           <Pressable
-            style={({ pressed }) => [styles.fullSpecsBtn, pressed && { opacity: 0.85 }]}
+            style={styles.fullSpecsBtn}
             onPress={() => router.push({ pathname: "/full-specs/[id]", params: { id: car.id } })}
           >
             <LinearGradient
@@ -703,72 +714,88 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 17, fontFamily: "Manrope_700Bold" },
 
   // ── Specs redesign ──
-  specHeader: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 },
+  specHeader: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 14 },
   specHeaderAccent: { width: 4, height: 22, borderRadius: 2 },
 
-  specGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 14 },
-  specGridCard: {
-    width: "47%",
-    flexDirection: "row",
+  // Explicit rows — no flexWrap for native reliability
+  specRow: { flexDirection: "row", gap: 10, marginBottom: 10 },
+
+  // Vertical premium stat card
+  specCard: {
+    flex: 1,
     alignItems: "center",
-    padding: 12,
-    borderRadius: 14,
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    paddingTop: 20,
+    paddingBottom: 14,
+    paddingHorizontal: 8,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    overflow: "hidden",
+    gap: 6,
+    elevation: 3,
+    shadowColor: "#0EB5CA",
+    shadowOpacity: 0.10,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 3 },
   },
-  specGridIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+  specCardBottomAccent: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+  },
+  specCardIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-  },
-  specGridLabel: {
-    fontSize: 9,
-    fontFamily: "Manrope_600SemiBold",
-    letterSpacing: 0.8,
     marginBottom: 2,
   },
-  specGridValue: { fontSize: 14, fontFamily: "Manrope_700Bold" },
+  specCardValue: { fontSize: 16, fontFamily: "Manrope_700Bold", textAlign: "center" },
+  specCardLabel: { fontSize: 9, fontFamily: "Manrope_600SemiBold", letterSpacing: 1.2, textAlign: "center" },
 
-  mileageBarWrap: { borderRadius: 12, padding: 12, marginBottom: 14, borderWidth: 1 },
-  mileageBarHeader: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 },
+  // Mileage bar
+  mileageBarWrap: { borderRadius: 14, padding: 14, marginTop: 4, marginBottom: 12, borderWidth: 1 },
+  mileageBarHeader: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 10 },
   mileageBarLabel: { flex: 1, fontSize: 12, fontFamily: "Manrope_500Medium" },
-  mileageBarValue: { fontSize: 12, fontFamily: "Manrope_700Bold" },
-  mileageTrack: { height: 8, borderRadius: 4, overflow: "hidden", marginBottom: 4 },
-  mileageFill: { height: "100%", borderRadius: 4 },
+  mileageBarValue: { fontSize: 13, fontFamily: "Manrope_700Bold" },
+  mileageTrack: { height: 8, borderRadius: 4, overflow: "hidden", marginBottom: 6 },
+  mileageFill: { height: 8, borderRadius: 4 },
   mileageScale: { flexDirection: "row", justifyContent: "space-between" },
   mileageScaleText: { fontSize: 9, fontFamily: "Manrope_400Regular" },
 
-  detailTable: { borderRadius: 12, overflow: "hidden", marginBottom: 14 },
+  // Detail table
+  detailTable: { borderRadius: 14, overflow: "hidden", marginBottom: 14, borderWidth: 1 },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 13,
     paddingHorizontal: 14,
   },
   detailLabel: { fontSize: 13, fontFamily: "Manrope_400Regular" },
   detailValue: { fontSize: 13, fontFamily: "Manrope_600SemiBold" },
   detailBadge: {
     backgroundColor: "rgba(14,181,202,0.12)",
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
     borderRadius: 20,
   },
   detailBadgeText: { fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#0098AA" },
 
+  // Full specs button
   fullSpecsBtn: { borderRadius: 14, overflow: "hidden" },
   fullSpecsBtnGradient: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    height: 48,
-    gap: 6,
+    height: 50,
+    gap: 8,
   },
-  fullSpecsBtnText: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#fff" },
+  fullSpecsBtnText: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#fff", letterSpacing: 0.2 },
 
   // Ask seller
   messageBox: {
