@@ -40,14 +40,14 @@ const QUICK_QUESTIONS = [
 ];
 
 const EQUIP_CATEGORIES = [
-  { icon: "shield", label: "Safety", count: 14 },
-  { icon: "star", label: "Comfort", count: 20 },
-  { icon: "sun", label: "Interior", count: 14 },
-  { icon: "music", label: "Multimedia", count: 7 },
-  { icon: "eye", label: "Visibility", count: 6 },
-  { icon: "layers", label: "Exterior", count: 3 },
-  { icon: "lock", label: "Anti-theft", count: 2 },
-  { icon: "more-horizontal", label: "Other", count: 1 },
+  { icon: "shield",         label: "Safety",      count: 14, iconColor: "#E53935", iconBg: "#FCE4EC" },
+  { icon: "star",           label: "Comfort",     count: 20, iconColor: "#1565C0", iconBg: "#E3F2FD" },
+  { icon: "sun",            label: "Interior",    count: 14, iconColor: "#F59E0B", iconBg: "#FFF3E0" },
+  { icon: "music",          label: "Multimedia",  count: 7,  iconColor: "#7B1FA2", iconBg: "#F3E5F5" },
+  { icon: "eye",            label: "Visibility",  count: 6,  iconColor: "#0EB5CA", iconBg: "#E0F8FB" },
+  { icon: "layers",         label: "Exterior",    count: 3,  iconColor: "#2E7D32", iconBg: "#E8F5E9" },
+  { icon: "lock",           label: "Anti-theft",  count: 2,  iconColor: "#37474F", iconBg: "#ECEFF1" },
+  { icon: "more-horizontal",label: "Other",       count: 9,  iconColor: "#E65100", iconBg: "#FBE9E7" },
 ];
 
 export default function CarDetailScreen() {
@@ -235,6 +235,36 @@ export default function CarDetailScreen() {
             </View>
           )}
         </View>
+
+        {/* ── Auto.ru-style Key Specs Strip ── */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={[styles.keySpecsStrip, { backgroundColor: colors.card, borderBottomColor: colors.border }]}
+        >
+          <View style={styles.keySpecsRow}>
+            {[
+              { icon: "calendar",     label: "Year",     value: String(car.year) },
+              { icon: "activity",     label: "Mileage",  value: `${Math.round(car.mileage / 1000)}k km` },
+              { icon: "zap",          label: "Fuel",     value: car.fuelType },
+              { icon: "settings",     label: "Gearbox",  value: (s?.gearbox || car.transmission).split(" ")[0] },
+              { icon: "navigation-2", label: "Drive",    value: (s?.drive || "AWD").split(" ")[0] },
+              { icon: "grid",         label: "Body",     value: s?.bodyType || car.category || "SUV" },
+              { icon: "droplet",      label: "Color",    value: (s?.color || "White").split(" ")[0] },
+              { icon: "users",        label: "Owners",   value: `${s?.owners ?? 1}` },
+            ].map((spec, i, arr) => (
+              <View key={spec.label} style={[styles.keySpecChip, i < arr.length - 1 && { borderRightWidth: 1, borderRightColor: colors.border }]}>
+                <View style={[styles.keySpecIconBubble, { backgroundColor: isDark ? "rgba(14,181,202,0.12)" : "rgba(14,181,202,0.08)" }]}>
+                  <Feather name={spec.icon as any} size={13} color="#0EB5CA" />
+                </View>
+                <View>
+                  <Text style={[styles.keySpecValue, { color: colors.text }]}>{spec.value}</Text>
+                  <Text style={[styles.keySpecLabel, { color: colors.textTertiary }]}>{spec.label}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
 
         {/* ── Main Info ── */}
         <View style={[styles.mainCard, { backgroundColor: colors.card }]}>
@@ -436,22 +466,50 @@ export default function CarDetailScreen() {
 
         <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
-        {/* ── Equipment Categories ── */}
+        {/* ── Equipment ── */}
         <View style={[styles.card, { backgroundColor: colors.card }]}>
-          <Text style={[styles.cardTitle, { color: colors.text }]}>Equipment</Text>
-          <View style={styles.equipGrid}>
-            {EQUIP_CATEGORIES.map((cat, i) => (
-              <View key={cat.label} style={[styles.equipCell, { borderBottomColor: colors.border }]}>
-                <Feather name={cat.icon as any} size={20} color={colors.accent} />
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.equipCellLabel, { color: colors.text }]}>{cat.label}</Text>
-                </View>
-                <Text style={[styles.equipCellCount, { color: colors.text }]}>{cat.count}</Text>
-              </View>
-            ))}
+          <View style={styles.specHeader}>
+            <View style={[styles.specHeaderAccent, { backgroundColor: "#0EB5CA" }]} />
+            <Text style={[styles.cardTitle, { color: colors.text }]}>Equipment</Text>
           </View>
-          <Pressable style={[styles.moreBtn, { backgroundColor: colors.background, borderColor: colors.border }]} onPress={() => setShowEquipment(true)}>
-            <Text style={[styles.moreBtnText, { color: colors.text }]}>All options</Text>
+
+          {/* 2-column premium category cards — explicit rows */}
+          {([0, 2, 4, 6] as const).map((rowStart) => (
+            <View key={rowStart} style={[styles.specRow, { marginBottom: 10 }]}>
+              {EQUIP_CATEGORIES.slice(rowStart, rowStart + 2).map((cat) => (
+                <Pressable
+                  key={cat.label}
+                  style={[styles.equipCard, {
+                    backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#fff",
+                    borderColor: isDark ? "rgba(255,255,255,0.08)" : cat.iconBg,
+                  }]}
+                  onPress={() => setShowEquipment(true)}
+                >
+                  <View style={[styles.equipCardIcon, { backgroundColor: cat.iconBg }]}>
+                    <Feather name={cat.icon as any} size={20} color={cat.iconColor} />
+                  </View>
+                  <Text style={[styles.equipCardLabel, { color: colors.text }]}>{cat.label}</Text>
+                  <View style={[styles.equipCardBadge, { backgroundColor: cat.iconBg }]}>
+                    <Text style={[styles.equipCardBadgeText, { color: cat.iconColor }]}>{cat.count}</Text>
+                  </View>
+                  <Feather name="chevron-right" size={14} color={colors.textTertiary} style={{ marginTop: 2 }} />
+                </Pressable>
+              ))}
+            </View>
+          ))}
+
+          {/* All Options gradient CTA */}
+          <Pressable style={styles.fullSpecsBtn} onPress={() => setShowEquipment(true)}>
+            <LinearGradient
+              colors={["#0EB5CA", "#0098AA"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.fullSpecsBtnGradient}
+            >
+              <Feather name="list" size={16} color="#fff" />
+              <Text style={styles.fullSpecsBtnText}>All Options ({EQUIP_CATEGORIES.reduce((a, c) => a + c.count, 0)} items)</Text>
+              <Feather name="chevron-right" size={16} color="#fff" />
+            </LinearGradient>
           </Pressable>
         </View>
 
@@ -837,18 +895,48 @@ const styles = StyleSheet.create({
   quickChipText: { fontSize: 13, fontFamily: "Manrope_400Regular", color: "#1A1A1A" },
   quickChipTextActive: { color: "#fff", fontFamily: "Manrope_500Medium" },
 
-  // Equipment grid — 2 col
-  equipGrid: { gap: 0 },
-  equipCell: {
+  // ── Key Specs Strip (auto.ru style) ──
+  keySpecsStrip: { borderBottomWidth: 1 },
+  keySpecsRow: { flexDirection: "row", paddingVertical: 10, paddingHorizontal: 4 },
+  keySpecChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
-  equipCellLabel: { fontSize: 14, fontFamily: "Manrope_400Regular", color: "#1A1A1A", flex: 1 },
-  equipCellCount: { fontSize: 14, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
+  keySpecIconBubble: {
+    width: 28, height: 28, borderRadius: 8,
+    alignItems: "center", justifyContent: "center",
+  },
+  keySpecValue: { fontSize: 13, fontFamily: "Manrope_700Bold" },
+  keySpecLabel: { fontSize: 10, fontFamily: "Manrope_400Regular", marginTop: 1 },
+
+  // ── Equipment premium category cards ──
+  equipCard: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  equipCardIcon: {
+    width: 38, height: 38, borderRadius: 10,
+    alignItems: "center", justifyContent: "center",
+  },
+  equipCardLabel: { flex: 1, fontSize: 13, fontFamily: "Manrope_600SemiBold" },
+  equipCardBadge: {
+    paddingHorizontal: 7, paddingVertical: 3,
+    borderRadius: 10,
+  },
+  equipCardBadgeText: { fontSize: 11, fontFamily: "Manrope_700Bold" },
 
   // Description
   description: { fontSize: 14, color: "#6B6B6B", fontFamily: "Manrope_400Regular", lineHeight: 22 },

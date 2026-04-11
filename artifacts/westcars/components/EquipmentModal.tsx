@@ -10,10 +10,21 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const EQUIPMENT: { icon: string; category: string; count: number; items: string[] }[] = [
+const EQUIPMENT: {
+  icon: string;
+  category: string;
+  iconColor: string;
+  iconBg: string;
+  accentColor: string;
+  count: number;
+  items: string[];
+}[] = [
   {
     icon: "shield",
     category: "Safety",
+    iconColor: "#E53935",
+    iconBg: "#FCE4EC",
+    accentColor: "#E53935",
     count: 14,
     items: [
       "ABS (Anti-lock braking system)",
@@ -35,6 +46,9 @@ const EQUIPMENT: { icon: string; category: string; count: number; items: string[
   {
     icon: "star",
     category: "Comfort",
+    iconColor: "#1565C0",
+    iconBg: "#E3F2FD",
+    accentColor: "#1565C0",
     count: 20,
     items: [
       "Adaptive cruise control",
@@ -62,6 +76,9 @@ const EQUIPMENT: { icon: string; category: string; count: number; items: string[
   {
     icon: "sun",
     category: "Interior",
+    iconColor: "#F59E0B",
+    iconBg: "#FFF3E0",
+    accentColor: "#F59E0B",
     count: 14,
     items: [
       "Leather upholstery",
@@ -83,6 +100,9 @@ const EQUIPMENT: { icon: string; category: string; count: number; items: string[
   {
     icon: "music",
     category: "Multimedia",
+    iconColor: "#7B1FA2",
+    iconBg: "#F3E5F5",
+    accentColor: "#7B1FA2",
     count: 7,
     items: [
       "10.1\" touchscreen display",
@@ -97,6 +117,9 @@ const EQUIPMENT: { icon: string; category: string; count: number; items: string[
   {
     icon: "eye",
     category: "Visibility",
+    iconColor: "#0EB5CA",
+    iconBg: "#E0F8FB",
+    accentColor: "#0EB5CA",
     count: 6,
     items: [
       "LED headlights",
@@ -110,6 +133,9 @@ const EQUIPMENT: { icon: string; category: string; count: number; items: string[
   {
     icon: "layers",
     category: "Exterior",
+    iconColor: "#2E7D32",
+    iconBg: "#E8F5E9",
+    accentColor: "#2E7D32",
     count: 3,
     items: [
       "18\" alloy wheels",
@@ -120,6 +146,9 @@ const EQUIPMENT: { icon: string; category: string; count: number; items: string[
   {
     icon: "lock",
     category: "Anti-theft",
+    iconColor: "#37474F",
+    iconBg: "#ECEFF1",
+    accentColor: "#37474F",
     count: 2,
     items: [
       "Immobiliser",
@@ -129,6 +158,9 @@ const EQUIPMENT: { icon: string; category: string; count: number; items: string[
   {
     icon: "more-horizontal",
     category: "Other",
+    iconColor: "#E65100",
+    iconBg: "#FBE9E7",
+    accentColor: "#E65100",
     count: 9,
     items: [
       "Towing hook (detachable)",
@@ -154,75 +186,100 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
   const insets = useSafeAreaInsets();
   const [expanded, setExpanded] = useState<string | null>("Safety");
 
+  const totalItems = EQUIPMENT.reduce((acc, c) => acc + c.count, 0);
+
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[styles.root, { paddingTop: insets.top || 0 }]}>
+
         {/* Header */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.headerTitle}>Equipment</Text>
-            <Text style={styles.headerSub}>{trimName} trim</Text>
+          <View style={styles.headerLeft}>
+            <View style={styles.headerIconWrap}>
+              <Feather name="list" size={18} color="#0EB5CA" />
+            </View>
+            <View>
+              <Text style={styles.headerTitle}>All Equipment</Text>
+              <Text style={styles.headerSub}>{trimName} trim · {totalItems} options</Text>
+            </View>
           </View>
           <Pressable style={styles.closeBtn} onPress={onClose} hitSlop={10}>
             <Feather name="x" size={20} color="#1A1A1A" />
           </Pressable>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-          {/* Category summary chips */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-            <View style={styles.chipRow}>
-              {EQUIPMENT.map((cat) => (
+        {/* Category filter chips */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
+          <View style={styles.chipRow}>
+            {EQUIPMENT.map((cat) => {
+              const active = expanded === cat.category;
+              return (
                 <Pressable
                   key={cat.category}
-                  style={[styles.catChip, expanded === cat.category && styles.catChipActive]}
-                  onPress={() => setExpanded(expanded === cat.category ? null : cat.category)}
+                  style={[
+                    styles.catChip,
+                    active && { backgroundColor: cat.iconColor, borderColor: cat.iconColor },
+                  ]}
+                  onPress={() => setExpanded(active ? null : cat.category)}
                 >
-                  <Feather
-                    name={cat.icon as any}
-                    size={14}
-                    color={expanded === cat.category ? "#fff" : "#1A1A1A"}
-                  />
-                  <Text style={[styles.catChipText, expanded === cat.category && styles.catChipTextActive]}>
+                  <View style={[styles.catChipIconWrap, active ? { backgroundColor: "rgba(255,255,255,0.2)" } : { backgroundColor: cat.iconBg }]}>
+                    <Feather name={cat.icon as any} size={12} color={active ? "#fff" : cat.iconColor} />
+                  </View>
+                  <Text style={[styles.catChipText, active && styles.catChipTextActive]}>
                     {cat.category}
                   </Text>
-                  <Text style={[styles.catChipCount, expanded === cat.category && styles.catChipTextActive]}>
-                    {cat.count}
-                  </Text>
+                  <View style={[styles.catChipBadge, active ? { backgroundColor: "rgba(255,255,255,0.25)" } : { backgroundColor: cat.iconBg }]}>
+                    <Text style={[styles.catChipBadgeText, active ? { color: "#fff" } : { color: cat.iconColor }]}>
+                      {cat.count}
+                    </Text>
+                  </View>
                 </Pressable>
-              ))}
-            </View>
-          </ScrollView>
+              );
+            })}
+          </View>
+        </ScrollView>
 
-          {/* Full categories */}
+        {/* Full list */}
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
           {EQUIPMENT.map((cat) => (
             <View key={cat.category} style={styles.catBlock}>
+
+              {/* Category header */}
               <Pressable
                 style={styles.catHeader}
                 onPress={() => setExpanded(expanded === cat.category ? null : cat.category)}
               >
-                <View style={styles.catHeaderLeft}>
-                  <View style={styles.catIconWrap}>
-                    <Feather name={cat.icon as any} size={18} color="#0066CC" />
-                  </View>
+                <View style={[styles.catHeaderIconWrap, { backgroundColor: cat.iconBg }]}>
+                  <Feather name={cat.icon as any} size={20} color={cat.iconColor} />
+                </View>
+                <View style={{ flex: 1 }}>
                   <Text style={styles.catName}>{cat.category}</Text>
-                  <Text style={styles.catCount}>{cat.count}</Text>
+                  <Text style={[styles.catSubtitle, { color: cat.iconColor }]}>{cat.count} items</Text>
+                </View>
+                <View style={[styles.catCountBadge, { backgroundColor: cat.iconBg }]}>
+                  <Text style={[styles.catCountBadgeText, { color: cat.iconColor }]}>{cat.count}</Text>
                 </View>
                 <Feather
                   name={expanded === cat.category ? "chevron-up" : "chevron-down"}
                   size={18}
                   color="#9E9E9E"
+                  style={{ marginLeft: 8 }}
                 />
               </Pressable>
 
+              {/* Premium pill card grid — 2 columns */}
               {expanded === cat.category && (
-                <View style={styles.catItems}>
-                  {cat.items.map((item, i) => (
-                    <View key={item} style={[styles.itemRow, i < cat.items.length - 1 && styles.itemBorder]}>
-                      <View style={styles.itemCheck}>
-                        <Feather name="check" size={12} color="#27AE60" />
+                <View style={styles.itemGrid}>
+                  {cat.items.map((item) => (
+                    <View key={item} style={[styles.itemCard, { borderColor: cat.iconBg }]}>
+                      {/* Left accent */}
+                      <View style={[styles.itemCardAccent, { backgroundColor: cat.accentColor }]} />
+                      {/* Check circle */}
+                      <View style={[styles.itemCardCheck, { backgroundColor: cat.iconBg }]}>
+                        <Feather name="check" size={11} color={cat.iconColor} />
                       </View>
-                      <Text style={styles.itemText}>{item}</Text>
+                      {/* Text */}
+                      <Text style={styles.itemCardText}>{item}</Text>
                     </View>
                   ))}
                 </View>
@@ -238,9 +295,10 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#F5F5F5" },
 
+  // Header
   header: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: "#fff",
     paddingHorizontal: 20,
@@ -248,14 +306,21 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#EEEEEE",
   },
-  headerTitle: { fontSize: 20, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
-  headerSub: { fontSize: 13, color: "#6B6B6B", fontFamily: "Manrope_400Regular", marginTop: 2 },
+  headerLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
+  headerIconWrap: {
+    width: 40, height: 40, borderRadius: 12,
+    backgroundColor: "rgba(14,181,202,0.10)",
+    alignItems: "center", justifyContent: "center",
+  },
+  headerTitle: { fontSize: 18, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
+  headerSub: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular", marginTop: 2 },
   closeBtn: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: "#F5F5F5",
     alignItems: "center", justifyContent: "center",
   },
 
+  // Chip filter bar
   chipScroll: { backgroundColor: "#fff", borderBottomWidth: 1, borderBottomColor: "#EEEEEE" },
   chipRow: {
     flexDirection: "row",
@@ -266,19 +331,27 @@ const styles = StyleSheet.create({
   catChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 12,
+    gap: 6,
+    paddingHorizontal: 10,
     paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
+    borderRadius: 22,
+    borderWidth: 1.5,
     borderColor: "#E0E0E0",
     backgroundColor: "#fff",
   },
-  catChipActive: { backgroundColor: "#1A1A1A", borderColor: "#1A1A1A" },
-  catChipText: { fontSize: 13, fontFamily: "Manrope_500Medium", color: "#1A1A1A" },
+  catChipIconWrap: {
+    width: 20, height: 20, borderRadius: 6,
+    alignItems: "center", justifyContent: "center",
+  },
+  catChipText: { fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
   catChipTextActive: { color: "#fff" },
-  catChipCount: { fontSize: 12, fontFamily: "Manrope_400Regular", color: "#6B6B6B" },
+  catChipBadge: {
+    paddingHorizontal: 6, paddingVertical: 2,
+    borderRadius: 8,
+  },
+  catChipBadgeText: { fontSize: 10, fontFamily: "Manrope_700Bold" },
 
+  // Category blocks
   catBlock: {
     marginTop: 8,
     backgroundColor: "#fff",
@@ -289,43 +362,68 @@ const styles = StyleSheet.create({
   catHeader: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 14,
+    gap: 12,
   },
-  catHeaderLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
-  catIconWrap: {
-    width: 36, height: 36, borderRadius: 10,
-    backgroundColor: "#EBF4FF",
+  catHeaderIconWrap: {
+    width: 44, height: 44, borderRadius: 14,
     alignItems: "center", justifyContent: "center",
   },
-  catName: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
-  catCount: {
-    fontSize: 13, fontFamily: "Manrope_400Regular",
-    color: "#6B6B6B",
-    backgroundColor: "#F5F5F5",
-    paddingHorizontal: 8, paddingVertical: 2,
-    borderRadius: 10,
-    marginLeft: 4,
+  catName: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
+  catSubtitle: { fontSize: 11, fontFamily: "Manrope_500Medium", marginTop: 1 },
+  catCountBadge: {
+    paddingHorizontal: 9, paddingVertical: 4,
+    borderRadius: 12,
   },
+  catCountBadgeText: { fontSize: 12, fontFamily: "Manrope_700Bold" },
 
-  catItems: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
+  // Premium 2-column item card grid
+  itemGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingBottom: 16,
+    paddingTop: 4,
     borderTopWidth: 1,
     borderTopColor: "#F0F0F0",
   },
-  itemRow: {
+  itemCard: {
+    width: "47%",
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    paddingVertical: 11,
+    gap: 8,
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: "#FAFFFE",
+    borderWidth: 1.5,
+    overflow: "hidden",
+    elevation: 1,
+    shadowColor: "#0EB5CA",
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
   },
-  itemBorder: { borderBottomWidth: 1, borderBottomColor: "#F5F5F5" },
-  itemCheck: {
-    width: 22, height: 22, borderRadius: 11,
-    backgroundColor: "#E8F5E9",
+  itemCardAccent: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 3,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+  },
+  itemCardCheck: {
+    width: 22, height: 22, borderRadius: 7,
     alignItems: "center", justifyContent: "center",
+    flexShrink: 0,
   },
-  itemText: { fontSize: 14, fontFamily: "Manrope_400Regular", color: "#1A1A1A", flex: 1 },
+  itemCardText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: "Manrope_500Medium",
+    color: "#1A1A1A",
+    lineHeight: 16,
+  },
 });
