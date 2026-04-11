@@ -129,9 +129,17 @@ const EQUIPMENT: { icon: string; category: string; count: number; items: string[
   {
     icon: "more-horizontal",
     category: "Other",
-    count: 1,
+    count: 9,
     items: [
       "Towing hook (detachable)",
+      "Full-size spare wheel",
+      "Car cover (custom-fitted)",
+      "First aid kit",
+      "Fire extinguisher",
+      "Reflective warning triangle set",
+      "Vehicle tool kit",
+      "GPS tracker (factory installed)",
+      "Jump-start cable set",
     ],
   },
 ];
