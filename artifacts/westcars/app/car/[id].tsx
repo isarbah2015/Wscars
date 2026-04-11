@@ -473,26 +473,25 @@ export default function CarDetailScreen() {
             <Text style={[styles.cardTitle, { color: colors.text }]}>Equipment</Text>
           </View>
 
-          {/* 2-column premium category cards — explicit rows */}
+          {/* 2-column category chips — auto.ru style, nothing overflows */}
           {([0, 2, 4, 6] as const).map((rowStart) => (
-            <View key={rowStart} style={[styles.specRow, { marginBottom: 10 }]}>
+            <View key={rowStart} style={[styles.specRow, { marginBottom: 8 }]}>
               {EQUIP_CATEGORIES.slice(rowStart, rowStart + 2).map((cat) => (
                 <Pressable
                   key={cat.label}
                   style={[styles.equipCard, {
-                    backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#fff",
-                    borderColor: isDark ? "rgba(255,255,255,0.08)" : cat.iconBg,
+                    backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F6F7F9",
                   }]}
                   onPress={() => setShowEquipment(true)}
                 >
-                  <View style={[styles.equipCardIcon, { backgroundColor: cat.iconBg }]}>
-                    <Feather name={cat.icon as any} size={20} color={cat.iconColor} />
+                  <View style={[styles.equipCardIcon, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : cat.iconBg }]}>
+                    <Feather name={cat.icon as any} size={17} color={cat.iconColor} />
                   </View>
-                  <Text style={[styles.equipCardLabel, { color: colors.text }]}>{cat.label}</Text>
-                  <View style={[styles.equipCardBadge, { backgroundColor: cat.iconBg }]}>
-                    <Text style={[styles.equipCardBadgeText, { color: cat.iconColor }]}>{cat.count}</Text>
+                  <View style={styles.equipCardContent}>
+                    <Text style={[styles.equipCardLabel, { color: colors.text }]} numberOfLines={1}>{cat.label}</Text>
+                    <Text style={[styles.equipCardCount, { color: colors.textTertiary }]}>{cat.count} items</Text>
                   </View>
-                  <Feather name="chevron-right" size={14} color={colors.textTertiary} style={{ marginTop: 2 }} />
+                  <Feather name="chevron-right" size={13} color={colors.textTertiary} />
                 </Pressable>
               ))}
             </View>
@@ -922,31 +921,29 @@ const styles = StyleSheet.create({
   keySpecValue: { fontSize: 13, fontFamily: "Manrope_700Bold" },
   keySpecLabel: { fontSize: 10, fontFamily: "Manrope_400Regular", marginTop: 1 },
 
-  // ── Equipment premium category cards ──
+  // ── Equipment category chips (auto.ru style) ──
   equipCard: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    padding: 12,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 12,
+    overflow: "hidden",
   },
   equipCardIcon: {
-    width: 38, height: 38, borderRadius: 10,
+    width: 34, height: 34, borderRadius: 8,
     alignItems: "center", justifyContent: "center",
+    flexShrink: 0,
   },
-  equipCardLabel: { flex: 1, fontSize: 13, fontFamily: "Manrope_600SemiBold" },
-  equipCardBadge: {
-    paddingHorizontal: 7, paddingVertical: 3,
-    borderRadius: 10,
+  equipCardContent: {
+    flex: 1,
+    minWidth: 0,
+    gap: 1,
   },
-  equipCardBadgeText: { fontSize: 11, fontFamily: "Manrope_700Bold" },
+  equipCardLabel: { fontSize: 12, fontFamily: "Manrope_600SemiBold" },
+  equipCardCount: { fontSize: 10, fontFamily: "Manrope_400Regular" },
 
   // Description
   description: { fontSize: 14, color: "#6B6B6B", fontFamily: "Manrope_400Regular", lineHeight: 22 },

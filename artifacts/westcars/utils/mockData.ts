@@ -86,9 +86,9 @@ export const MOCK_CARS: Car[] = [
     description:
       "Excellent condition Toyota Land Cruiser V8. Full leather interior, sunroof, all options. No accident history. Ready for registration.",
     images: [
-      "https://images.unsplash.com/photo-1621993202908-12f2ca6c5a41?w=800",
-      "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800",
-      "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800",
+      "https://picsum.photos/seed/lc-v8-1/800/500",
+      "https://picsum.photos/seed/lc-v8-2/800/500",
+      "https://picsum.photos/seed/lc-v8-3/800/500",
     ],
     sellerId: "user1",
     seller: MOCK_USERS[0],
