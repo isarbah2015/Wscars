@@ -459,12 +459,20 @@ export default function HomeScreen() {
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Personally for you</Text>
             </View>
           </View>
-          <View style={styles.grid}>
-            {displayCars.map((car) => (
-              <View key={car.id} style={styles.gridItem}>
-                <CarCard car={car} />
-              </View>
-            ))}
+          <View style={styles.gridBreakout}>
+            {Array.from({ length: Math.ceil(displayCars.length / 2) }, (_, i) => {
+              const left = displayCars[i * 2];
+              const right = displayCars[i * 2 + 1];
+              return (
+                <View key={i} style={styles.cardRow}>
+                  <CarCard car={left} style={styles.halfCard} />
+                  {right
+                    ? <CarCard car={right} style={styles.halfCard} />
+                    : <View style={styles.halfCard} />
+                  }
+                </View>
+              );
+            })}
           </View>
         </View>
 
@@ -835,15 +843,17 @@ const styles = StyleSheet.create({
   },
   seeAll: { fontSize: 13, fontFamily: "Manrope_600SemiBold" },
 
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginHorizontal: -4,
+  gridBreakout: {
+    marginHorizontal: -12,
   },
-  gridItem: {
-    width: "50%",
-    paddingHorizontal: 4,
-    marginBottom: 14,
+  cardRow: {
+    flexDirection: "row",
+    paddingHorizontal: 10,
+    gap: 8,
+  },
+  halfCard: {
+    flex: 1,
+    marginBottom: 10,
   },
 
   sep: { height: 10 },

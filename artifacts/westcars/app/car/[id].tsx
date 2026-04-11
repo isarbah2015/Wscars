@@ -585,9 +585,19 @@ export default function CarDetailScreen() {
           <View style={[styles.card, { backgroundColor: colors.card }]}>
             <Text style={[styles.cardTitle, { color: colors.text }]}>We recommend</Text>
             <View style={styles.recsGrid}>
-              {related.slice(0, 4).map((rc) => (
-                <CarCard key={rc.id} car={rc} style={styles.recCarCard} />
-              ))}
+              {Array.from({ length: Math.ceil(Math.min(related.length, 4) / 2) }, (_, i) => {
+                const left = related[i * 2];
+                const right = related[i * 2 + 1];
+                return (
+                  <View key={i} style={styles.recsRow}>
+                    <CarCard car={left} style={styles.recCarCard} />
+                    {right
+                      ? <CarCard car={right} style={styles.recCarCard} />
+                      : <View style={styles.recCarCard} />
+                    }
+                  </View>
+                );
+              })}
             </View>
           </View>
         )}
@@ -961,11 +971,15 @@ const styles = StyleSheet.create({
 
   // Recommendations 2×2 grid
   recsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
+    marginHorizontal: -16,
+    gap: 0,
   },
-  recCarCard: { width: "47%" },
+  recsRow: {
+    flexDirection: "row",
+    paddingHorizontal: 10,
+    gap: 8,
+  },
+  recCarCard: { flex: 1, marginBottom: 10 },
 
   // Location
   locationRow: { flexDirection: "row", alignItems: "center", gap: 8 },

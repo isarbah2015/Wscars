@@ -308,7 +308,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 5,
     flexWrap: "nowrap",
-    overflow: "hidden",
   },
   metaChip: {
     flexDirection: "row",
@@ -320,15 +319,16 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     flexShrink: 0,
   },
-  // Location chip: absorbs leftover space and lets its text truncate
+  // Location chip: flex:1 absorbs remaining space, text truncates cleanly
   metaChipLoc: {
-    flexShrink: 1,
+    flex: 1,
     minWidth: 0,
   },
   metaChipText: {
     fontSize: 10,
     fontFamily: "Manrope_500Medium",
     flexShrink: 1,
+    minWidth: 0,
   },
   sellerRow: {
     flexDirection: "row",
