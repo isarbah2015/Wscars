@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
   Alert,
+  Animated,
   Dimensions,
   FlatList,
   Image,
@@ -40,14 +41,22 @@ const QUICK_QUESTIONS = [
 ];
 
 const EQUIP_CATEGORIES = [
-  { icon: "shield",         label: "Safety",      count: 14, iconColor: "#E53935", iconBg: "#FCE4EC" },
-  { icon: "star",           label: "Comfort",     count: 20, iconColor: "#1565C0", iconBg: "#E3F2FD" },
-  { icon: "sun",            label: "Interior",    count: 14, iconColor: "#F59E0B", iconBg: "#FFF3E0" },
-  { icon: "music",          label: "Multimedia",  count: 7,  iconColor: "#7B1FA2", iconBg: "#F3E5F5" },
-  { icon: "eye",            label: "Visibility",  count: 6,  iconColor: "#0EB5CA", iconBg: "#E0F8FB" },
-  { icon: "layers",         label: "Exterior",    count: 3,  iconColor: "#2E7D32", iconBg: "#E8F5E9" },
-  { icon: "lock",           label: "Anti-theft",  count: 2,  iconColor: "#37474F", iconBg: "#ECEFF1" },
-  { icon: "more-horizontal",label: "Other",       count: 9,  iconColor: "#E65100", iconBg: "#FBE9E7" },
+  { icon: "shield",          label: "Safety",     count: 14, iconColor: "#E53935", iconBg: "#FCE4EC",
+    items: ["ABS", "Front airbags", "Side airbags", "Curtain airbags", "Hill start assist", "Electronic stability control", "Emergency brake assist", "Traction control", "Rear parking sensors", "Front parking sensors", "Collision warning", "Lane departure warning", "Blind spot monitoring", "Emergency call"] },
+  { icon: "star",            label: "Comfort",    count: 20, iconColor: "#1565C0", iconBg: "#E3F2FD",
+    items: ["Adaptive cruise control", "Dual-zone climate control", "Power windows", "Electric mirrors", "Heated front seats", "Heated rear seats", "Seat ventilation", "Memory seat", "Sunroof / panoramic", "Keyless entry & start", "Auto-folding mirrors", "Wireless charging", "Auto parking assist", "HUD display", "Power tailgate", "Soft-close doors", "Ambient lighting", "Heated steering wheel", "360° camera", "Rain-sensing wipers"] },
+  { icon: "sun",             label: "Interior",   count: 14, iconColor: "#F59E0B", iconBg: "#FFF3E0",
+    items: ["Leather upholstery", "3-spoke wheel", "Aluminium pedals", "Wood trim accents", "Leather dashboard", "Panoramic glass roof", "Rear window shade", "Power-adjust front seats", "Lumbar support", "Flat-fold rear seats", "Centre armrest", "Rear centre armrest", "Illuminated door sills", "Grab handles"] },
+  { icon: "music",           label: "Multimedia", count: 7,  iconColor: "#7B1FA2", iconBg: "#F3E5F5",
+    items: ["10.1\" touchscreen", "Apple CarPlay", "Android Auto", "Built-in GPS", "Bluetooth audio", "USB ports (2×)", "8-speaker premium system"] },
+  { icon: "eye",             label: "Visibility", count: 6,  iconColor: "#0EB5CA", iconBg: "#E0F8FB",
+    items: ["LED headlights", "LED daytime running", "LED rear lights", "Front fog lights", "Auto headlight", "High-beam assist"] },
+  { icon: "layers",          label: "Exterior",   count: 3,  iconColor: "#2E7D32", iconBg: "#E8F5E9",
+    items: ["18\" alloy wheels", "Rear roof spoiler", "Roof rails"] },
+  { icon: "lock",            label: "Anti-theft", count: 2,  iconColor: "#37474F", iconBg: "#ECEFF1",
+    items: ["Immobiliser", "Perimeter alarm"] },
+  { icon: "more-horizontal", label: "Other",      count: 9,  iconColor: "#E65100", iconBg: "#FBE9E7",
+    items: ["Tow hook", "Full-size spare wheel", "Car cover", "First aid kit", "Fire extinguisher", "Warning triangle set", "Vehicle tool kit", "GPS tracker", "Jump-start cables"] },
 ];
 
 export default function CarDetailScreen() {
@@ -62,6 +71,24 @@ export default function CarDetailScreen() {
   const [showEquipment, setShowEquipment] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [expandedEquip, setExpandedEquip] = useState<string | null>(null);
+
+  const equipAnimVals = useRef<Record<string, Animated.Value>>(
+    Object.fromEntries(EQUIP_CATEGORIES.map((c) => [c.label, new Animated.Value(0)]))
+  ).current;
+
+  const toggleEquip = (label: string) => {
+    const isOpen = expandedEquip === label;
+    EQUIP_CATEGORIES.forEach((c) => {
+      if (c.label !== label) {
+        Animated.timing(equipAnimVals[c.label], { toValue: 0, duration: 160, useNativeDriver: false }).start();
+      }
+    });
+    Animated.timing(equipAnimVals[label], {
+      toValue: isOpen ? 0 : 1, duration: 200, useNativeDriver: false,
+    }).start();
+    setExpandedEquip(isOpen ? null : label);
+  };
 
   const car = cars.find((c) => c.id === id);
   if (!car) {
@@ -467,38 +494,74 @@ export default function CarDetailScreen() {
         <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
         {/* ── Equipment ── */}
-        <View style={[styles.card, { backgroundColor: colors.card }]}>
-          <View style={styles.specHeader}>
+        <View style={[styles.card, { backgroundColor: colors.card, paddingHorizontal: 0, paddingVertical: 0, overflow: "hidden" }]}>
+          {/* Section header */}
+          <View style={[styles.specHeader, { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 }]}>
             <View style={[styles.specHeaderAccent, { backgroundColor: "#0EB5CA" }]} />
             <Text style={[styles.cardTitle, { color: colors.text }]}>Equipment</Text>
           </View>
 
-          {/* 2-column category chips — auto.ru style, nothing overflows */}
-          {([0, 2, 4, 6] as const).map((rowStart) => (
-            <View key={rowStart} style={[styles.specRow, { marginBottom: 8 }]}>
-              {EQUIP_CATEGORIES.slice(rowStart, rowStart + 2).map((cat) => (
+          {/* Animated accordion categories */}
+          {EQUIP_CATEGORIES.map((cat, idx) => {
+            const isOpen = expandedEquip === cat.label;
+            const maxH = equipAnimVals[cat.label].interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, cat.count * 44 + 20],
+            });
+            const opac = equipAnimVals[cat.label];
+            return (
+              <View key={cat.label} style={[styles.equipAccordionBlock, idx === 0 && styles.equipAccordionFirst]}>
                 <Pressable
-                  key={cat.label}
-                  style={[styles.equipCard, {
-                    backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F6F7F9",
-                  }]}
-                  onPress={() => setShowEquipment(true)}
+                  style={[styles.equipAccordionHeader, isOpen && { backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#FAFEFF" }]}
+                  onPress={() => toggleEquip(cat.label)}
+                  android_ripple={{ color: "rgba(0,0,0,0.04)" }}
                 >
-                  <View style={[styles.equipCardIcon, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : cat.iconBg }]}>
-                    <Feather name={cat.icon as any} size={17} color={cat.iconColor} />
+                  <View style={[styles.equipAccordionIcon, { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : cat.iconBg }]}>
+                    <Feather name={cat.icon as any} size={19} color={cat.iconColor} />
                   </View>
-                  <View style={styles.equipCardContent}>
-                    <Text style={[styles.equipCardLabel, { color: colors.text }]} numberOfLines={1}>{cat.label}</Text>
-                    <Text style={[styles.equipCardCount, { color: colors.textTertiary }]}>{cat.count} items</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.equipAccordionLabel, { color: colors.text }]}>{cat.label}</Text>
+                    <Text style={[styles.equipAccordionCount, { color: cat.iconColor }]}>{cat.count} items</Text>
                   </View>
-                  <Feather name="chevron-right" size={13} color={colors.textTertiary} />
+                  <View style={[styles.equipAccordionBadge, { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : cat.iconBg }]}>
+                    <Text style={[styles.equipAccordionBadgeText, { color: cat.iconColor }]}>{cat.count}</Text>
+                  </View>
+                  <Animated.View style={{
+                    marginLeft: 10,
+                    transform: [{
+                      rotate: equipAnimVals[cat.label].interpolate({
+                        inputRange: [0, 1], outputRange: ["0deg", "180deg"],
+                      }),
+                    }],
+                  }}>
+                    <Feather name="chevron-down" size={17} color={colors.textTertiary} />
+                  </Animated.View>
                 </Pressable>
-              ))}
-            </View>
-          ))}
+
+                <Animated.View style={{ maxHeight: maxH, opacity: opac, overflow: "hidden" }}>
+                  <View style={[styles.equipItemsList, { borderTopColor: isDark ? "rgba(255,255,255,0.08)" : "#F0F0F0" }]}>
+                    {cat.items.map((item, i) => (
+                      <View
+                        key={item}
+                        style={[
+                          styles.equipItemRow,
+                          i < cat.items.length - 1 && { borderBottomWidth: 1, borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "#F5F5F5" },
+                        ]}
+                      >
+                        <View style={[styles.equipItemCheck, { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : cat.iconBg }]}>
+                          <Feather name="check" size={11} color={cat.iconColor} />
+                        </View>
+                        <Text style={[styles.equipItemText, { color: colors.textSecondary }]}>{item}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </Animated.View>
+              </View>
+            );
+          })}
 
           {/* All Options gradient CTA */}
-          <Pressable style={styles.fullSpecsBtn} onPress={() => setShowEquipment(true)}>
+          <Pressable style={[styles.fullSpecsBtn, { marginHorizontal: 16, marginBottom: 16, marginTop: 12 }]} onPress={() => setShowEquipment(true)}>
             <LinearGradient
               colors={["#0EB5CA", "#0098AA"]}
               start={{ x: 0, y: 0 }}
@@ -921,29 +984,50 @@ const styles = StyleSheet.create({
   keySpecValue: { fontSize: 13, fontFamily: "Manrope_700Bold" },
   keySpecLabel: { fontSize: 10, fontFamily: "Manrope_400Regular", marginTop: 1 },
 
-  // ── Equipment category chips (auto.ru style) ──
-  equipCard: {
-    flex: 1,
+  // ── Equipment accordion ──
+  equipAccordionBlock: {
+    borderTopWidth: 1,
+    borderTopColor: "#EEEEEE",
+  },
+  equipAccordionFirst: {
+    borderTopWidth: 0,
+  },
+  equipAccordionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    borderRadius: 12,
-    overflow: "hidden",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 13,
   },
-  equipCardIcon: {
-    width: 34, height: 34, borderRadius: 8,
+  equipAccordionIcon: {
+    width: 44, height: 44, borderRadius: 13,
     alignItems: "center", justifyContent: "center",
     flexShrink: 0,
   },
-  equipCardContent: {
-    flex: 1,
-    minWidth: 0,
-    gap: 1,
+  equipAccordionLabel: { fontSize: 14, fontFamily: "Manrope_700Bold" },
+  equipAccordionCount: { fontSize: 11, fontFamily: "Manrope_500Medium", marginTop: 2 },
+  equipAccordionBadge: {
+    minWidth: 28, paddingHorizontal: 9, paddingVertical: 4,
+    borderRadius: 10, alignItems: "center",
   },
-  equipCardLabel: { fontSize: 12, fontFamily: "Manrope_600SemiBold" },
-  equipCardCount: { fontSize: 10, fontFamily: "Manrope_400Regular" },
+  equipAccordionBadgeText: { fontSize: 12, fontFamily: "Manrope_700Bold" },
+  equipItemsList: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderTopWidth: 1,
+  },
+  equipItemRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    gap: 13,
+  },
+  equipItemCheck: {
+    width: 26, height: 26, borderRadius: 8,
+    alignItems: "center", justifyContent: "center",
+    flexShrink: 0,
+  },
+  equipItemText: { flex: 1, fontSize: 13, fontFamily: "Manrope_500Medium", lineHeight: 18 },
 
   // Description
   description: { fontSize: 14, color: "#6B6B6B", fontFamily: "Manrope_400Regular", lineHeight: 22 },

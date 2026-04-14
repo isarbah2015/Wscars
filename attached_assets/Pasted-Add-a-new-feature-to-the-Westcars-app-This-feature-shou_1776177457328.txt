@@ -1,0 +1,45 @@
+Add a new feature to the Westcars app. This feature should appear on the Car Detail Screen, placed BEFORE the specifications/equipment section.
+
+## CHANGE 3: Price Comparison & Caution Alert
+
+Add a smart price analysis feature that compares the listing price against average market prices and warns buyers if the price seems suspiciously low.
+
+### Feature Requirements:
+
+**1. Price Analysis Banner**
+- Display a banner/card between the car price and the specifications section
+- Show the listing price compared to average market price for similar cars (same brand, model, year range)
+
+**2. Price Categories:**
+- **"Fair Price"** – Price within normal range (green theme)
+- **"Good Deal"** – Price below average but reasonable (blue theme)  
+- **"Suspiciously Low"** – Price is significantly below market average (RED WARNING with caution icon)
+
+**3. Warning Message (for suspiciously low prices):**
+Show a prominent warning card with:
+- ⚠️ Red exclamation icon
+- Title: "PRICE ALERT: Too Good to Be True?"
+- Message: "This price is [X%] below the Ghana market average for this model. Be cautious – inspect the car thoroughly, verify documents, and never pay before seeing the car in person."
+- List of safety tips:
+  - ✓ Request vehicle history report
+  - ✓ Verify ownership documents
+  - ✓ Inspect car physically before any payment
+  - ✓ Meet in a public, safe location
+  - ✓ Never send money via mobile money without seeing the car
+
+**4. Market Data (Mock for now – structure for Firebase later):**
+
+Create a price reference object with average prices in GHS for Ghana market:
+
+```javascript
+const marketAverages = {
+  'Toyota Corolla': { '2020': 85000, '2019': 75000, '2018': 65000 },
+  'Toyota Camry': { '2020': 120000, '2019': 105000, '2018': 90000 },
+  'Honda Civic': { '2020': 80000, '2019': 70000, '2018': 60000 },
+  'Hyundai Elantra': { '2020': 65000, '2019': 55000, '2018': 48000 },
+  'Kia Sportage': { '2020': 95000, '2019': 85000, '2018': 75000 },
+  'BMW X5': { '2020': 250000, '2019': 220000, '2018': 190000 },
+  'Mercedes C-Class': { '2020': 200000, '2019': 180000, '2018': 160000 },
+  'Nissan Qashqai': { '2020': 85000, '2019': 75000, '2018': 65000 },
+  // Add 10-15 more common Ghana models
+};

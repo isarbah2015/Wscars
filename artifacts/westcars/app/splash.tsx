@@ -27,7 +27,7 @@ export default function SplashScreen() {
   const botY    = useRef(new Animated.Value(LOGO_H / 2 + 40)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
-  const mottoOp   = useRef(new Animated.Value(0)).current;
+  const mottoOp   = useRef(new Animated.Value(0)).current; // kept for compat, not rendered
   const shimmerX  = useRef(new Animated.Value(-LOGO_W - 60)).current;
   const shimmerOp = useRef(new Animated.Value(0)).current;
 
@@ -99,9 +99,7 @@ export default function SplashScreen() {
         />
       </View>
 
-      <Animated.Text style={[styles.motto, { opacity: mottoOp }]}>
-        Ghana's Trusted Car Marketplace
-      </Animated.Text>
+      {/* tagline removed */}
     </View>
   );
 }
