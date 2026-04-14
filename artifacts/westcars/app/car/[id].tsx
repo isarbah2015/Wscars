@@ -516,14 +516,14 @@ export default function CarDetailScreen() {
                   onPress={() => toggleEquip(cat.label)}
                   android_ripple={{ color: "rgba(0,0,0,0.04)" }}
                 >
-                  <View style={[styles.equipAccordionIcon, { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : cat.iconBg }]}>
+                  <View pointerEvents="none" style={[styles.equipAccordionIcon, { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : cat.iconBg }]}>
                     <Feather name={cat.icon as any} size={19} color={cat.iconColor} />
                   </View>
-                  <View style={{ flex: 1 }}>
+                  <View pointerEvents="none" style={{ flex: 1 }}>
                     <Text style={[styles.equipAccordionLabel, { color: colors.text }]}>{cat.label}</Text>
                     <Text style={[styles.equipAccordionCount, { color: cat.iconColor }]}>{cat.count} items</Text>
                   </View>
-                  <View style={[styles.equipAccordionBadge, { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : cat.iconBg }]}>
+                  <View pointerEvents="none" style={[styles.equipAccordionBadge, { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : cat.iconBg }]}>
                     <Text style={[styles.equipAccordionBadgeText, { color: cat.iconColor }]}>{cat.count}</Text>
                   </View>
                   <Animated.View style={{

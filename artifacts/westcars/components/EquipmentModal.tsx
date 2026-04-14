@@ -254,40 +254,17 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
                 ]}
                 onPress={() => toggle(cat.category)}
               >
-                <View
-                  style={[
-                    styles.catChipIconWrap,
-                    active
-                      ? { backgroundColor: "rgba(255,255,255,0.22)" }
-                      : { backgroundColor: cat.iconBg },
-                  ]}
-                >
-                  <Feather
-                    name={cat.icon as any}
-                    size={14}
-                    color={active ? "#fff" : cat.iconColor}
-                  />
-                </View>
+                <Feather
+                  name={cat.icon as any}
+                  size={14}
+                  color={active ? "#fff" : cat.iconColor}
+                />
                 <Text style={[styles.catChipText, active && styles.catChipTextActive]}>
                   {cat.category}
                 </Text>
-                <View
-                  style={[
-                    styles.catChipBadge,
-                    active
-                      ? { backgroundColor: "rgba(255,255,255,0.28)" }
-                      : { backgroundColor: cat.iconBg },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.catChipBadgeText,
-                      active ? { color: "#fff" } : { color: cat.iconColor },
-                    ]}
-                  >
-                    {cat.count}
-                  </Text>
-                </View>
+                <Text style={[styles.catChipBadgeText, { color: active ? "#fff" : cat.iconColor }]}>
+                  {cat.count}
+                </Text>
               </Pressable>
             );
           })}
@@ -312,27 +289,12 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
                 <Pressable
                   style={styles.catHeader}
                   onPress={() => toggle(cat.category)}
-                  android_ripple={{ color: "rgba(0,0,0,0.05)" }}
                 >
-                  <View
-                    style={[styles.catHeaderIconWrap, { backgroundColor: cat.iconBg }]}
-                  >
-                    <Feather name={cat.icon as any} size={22} color={cat.iconColor} />
-                  </View>
-                  <View style={styles.catHeaderInfo}>
-                    <Text style={styles.catName}>{cat.category}</Text>
-                    <Text style={[styles.catSubtitle, { color: cat.iconColor }]}>
-                      {cat.count} items
-                    </Text>
-                  </View>
-                  <View
-                    style={[styles.catCountBadge, { backgroundColor: cat.iconBg }]}
-                  >
-                    <Text style={[styles.catCountBadgeText, { color: cat.iconColor }]}>
-                      {cat.count}
-                    </Text>
-                  </View>
+                  <Feather name={cat.icon as any} size={22} color={cat.iconColor} style={[styles.catHeaderIconWrap, { backgroundColor: cat.iconBg } as any]} />
+                  <Text style={[styles.catName, { flex: 1 }]}>{cat.category}{"  "}<Text style={[styles.catSubtitle, { color: cat.iconColor }]}>{cat.count} items</Text></Text>
+                  <Text style={[styles.catCountBadgeText, { color: cat.iconColor, backgroundColor: cat.iconBg, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 }]}>{cat.count}</Text>
                   <Animated.View
+                    pointerEvents="none"
                     style={{
                       marginLeft: 10,
                       transform: [
