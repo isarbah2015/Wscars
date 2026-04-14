@@ -424,24 +424,20 @@ export default function AdvertiseScreen() {
         <View style={styles.contactCard}>
           <View style={styles.contactTop}>
             <View style={styles.contactIconWrap}>
-              <Feather name="phone-call" size={20} color="#0EB5CA" />
+              <Feather name="mail" size={20} color="#0EB5CA" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.contactTitle}>Talk to our Ads Team</Text>
-              <Text style={styles.contactSub}>Mon – Fri, 8am – 6pm</Text>
+              <Text style={styles.contactTitle}>Contact our Ads Team</Text>
+              <Text style={styles.contactSub}>We respond within 1 business day</Text>
             </View>
           </View>
-          <View style={styles.contactActions}>
-            <Pressable style={styles.contactBtn}>
-              <Feather name="phone" size={14} color="#0EB5CA" />
-              <Text style={styles.contactBtnText}>+233 30 274 0000</Text>
-            </Pressable>
-            <Pressable style={[styles.contactBtn, { backgroundColor: "#E8F5E9", borderColor: "#27AE60" }]}>
-              <Feather name="message-circle" size={14} color="#27AE60" />
-              <Text style={[styles.contactBtnText, { color: "#27AE60" }]}>WhatsApp</Text>
-            </Pressable>
-          </View>
-          <Text style={styles.contactEmail}>ads@westcars.com.gh</Text>
+          <Pressable
+            style={[styles.contactBtn, { alignSelf: "center", marginTop: 12 }]}
+            onPress={() => Linking.openURL("mailto:westcarsgh@gmail.com?subject=Westcars Ad Enquiry")}
+          >
+            <Feather name="mail" size={14} color="#0EB5CA" />
+            <Text style={styles.contactBtnText}>westcarsgh@gmail.com</Text>
+          </Pressable>
         </View>
 
         <View style={{ height: (insets.bottom || 0) + 120 }} />
