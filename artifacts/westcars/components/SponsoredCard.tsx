@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
   Animated,
+  Dimensions,
   Image,
   Pressable,
   StyleSheet,
@@ -14,6 +15,8 @@ import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Car } from "@/types";
 import { formatPrice } from "@/utils/ghanaData";
+
+const SCREEN_W = Dimensions.get("window").width;
 
 interface SponsoredCardProps {
   car: Car;
@@ -47,8 +50,8 @@ export function SponsoredCard({ car, style }: SponsoredCardProps) {
           onPressOut={pressOut}
           android_ripple={{ color: "rgba(255,140,0,0.10)", borderless: false }}
         >
-          {/* Left: image */}
-          <View style={styles.imageCol}>
+          {/* ── Large image block ── */}
+          <View style={styles.imageWrap}>
             {!imgError ? (
               <Image
                 source={{ uri: car.images[0] }}
@@ -58,26 +61,18 @@ export function SponsoredCard({ car, style }: SponsoredCardProps) {
               />
             ) : (
               <View style={[styles.image, styles.imgFallback]}>
-                <Feather name="camera" size={22} color="#FF8C00" />
+                <Feather name="camera" size={32} color="#FF8C00" />
               </View>
             )}
+
+            {/* Scrim at bottom of image */}
             <LinearGradient
-              colors={["transparent", "rgba(30,12,0,0.60)"]}
-              style={styles.imageScrim}
+              colors={["transparent", "rgba(20,8,0,0.72)"]}
+              style={styles.scrim}
               pointerEvents="none"
             />
-            <LinearGradient
-              colors={["#FF8C00", "#E8640A"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.priceBadge}
-            >
-              <Text style={styles.priceText}>{formatPrice(car.price)}</Text>
-            </LinearGradient>
-          </View>
 
-          {/* Right: info */}
-          <View style={styles.infoCol}>
+            {/* ★ SPONSORED pill — top-left */}
             <LinearGradient
               colors={["#FF8C00", "#FFB347"]}
               start={{ x: 0, y: 0 }}
@@ -88,49 +83,78 @@ export function SponsoredCard({ car, style }: SponsoredCardProps) {
               <Text style={styles.sponsoredLabel}>SPONSORED</Text>
             </LinearGradient>
 
-            <Text style={[styles.carName, { color: colors.text }]} numberOfLines={2}>
-              {car.brand} {car.model}
-            </Text>
-
-            <View style={styles.metaRow}>
-              <View style={[styles.chip, { backgroundColor: "rgba(255,140,0,0.12)" }]}>
-                <Text style={[styles.chipText, { color: colors.textSecondary }]}>{car.year}</Text>
-              </View>
-              {car.mileage !== undefined && (
-                <View style={[styles.chip, { backgroundColor: "rgba(255,140,0,0.12)" }]}>
-                  <Feather name="activity" size={8} color={colors.textTertiary} />
-                  <Text style={[styles.chipText, { color: colors.textSecondary }]}>
-                    {car.mileage === 0 ? "New" : `${(car.mileage / 1000).toFixed(0)}k km`}
-                  </Text>
-                </View>
-              )}
-              {car.location && (
-                <View style={[styles.chip, styles.chipFlex, { backgroundColor: "rgba(255,140,0,0.12)" }]}>
-                  <Feather name="map-pin" size={8} color={colors.textTertiary} />
-                  <Text style={[styles.chipText, { color: colors.textSecondary }]} numberOfLines={1}>
-                    {car.location.split(",")[0]}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            {car.seller?.name && (
-              <View style={styles.sellerRow}>
-                <Feather name="user" size={9} color={colors.textTertiary} />
-                <Text style={[styles.sellerName, { color: colors.textSecondary }]} numberOfLines={1}>
-                  {car.seller.name}
-                </Text>
-                {car.seller?.isVerified && (
-                  <Feather name="check-circle" size={9} color="#1565C0" />
-                )}
-              </View>
-            )}
-
-            <Pressable style={styles.heartBtn} onPress={() => toggleFavorite(car.id)} hitSlop={10}>
+            {/* Favourite — top-right */}
+            <Pressable style={styles.heartBtn} onPress={() => toggleFavorite(car.id)} hitSlop={12}>
               <View style={[styles.heartBg, fav && styles.heartBgActive]}>
-                <Feather name="heart" size={12} color={fav ? "#fff" : "rgba(255,255,255,0.9)"} />
+                <Feather name="heart" size={14} color={fav ? "#fff" : "rgba(255,255,255,0.92)"} />
               </View>
             </Pressable>
+
+            {/* Price badge — bottom-right overlaid on image */}
+            <LinearGradient
+              colors={["#FF8C00", "#E8640A"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.priceBadge}
+            >
+              <Text style={styles.priceText}>{formatPrice(car.price)}</Text>
+            </LinearGradient>
+          </View>
+
+          {/* ── Info bar below image ── */}
+          <View style={styles.infoRow}>
+            {/* Left: name + chips */}
+            <View style={styles.infoLeft}>
+              <Text style={[styles.carName, { color: colors.text }]} numberOfLines={1}>
+                {car.brand} {car.model}
+              </Text>
+              <View style={styles.chipRow}>
+                <View style={[styles.chip, { backgroundColor: isDark ? "rgba(255,140,0,0.15)" : "rgba(255,140,0,0.10)" }]}>
+                  <Text style={[styles.chipText, { color: colors.textSecondary }]}>{car.year}</Text>
+                </View>
+                {car.mileage !== undefined && (
+                  <View style={[styles.chip, { backgroundColor: isDark ? "rgba(255,140,0,0.15)" : "rgba(255,140,0,0.10)" }]}>
+                    <Feather name="activity" size={9} color={colors.textTertiary} />
+                    <Text style={[styles.chipText, { color: colors.textSecondary }]}>
+                      {car.mileage === 0 ? "New" : `${(car.mileage / 1000).toFixed(0)}k km`}
+                    </Text>
+                  </View>
+                )}
+                {car.location && (
+                  <View style={[styles.chip, { backgroundColor: isDark ? "rgba(255,140,0,0.15)" : "rgba(255,140,0,0.10)" }]}>
+                    <Feather name="map-pin" size={9} color={colors.textTertiary} />
+                    <Text style={[styles.chipText, { color: colors.textSecondary }]} numberOfLines={1}>
+                      {car.location.split(",")[0]}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* Right: view detail arrow */}
+            <View style={styles.arrowWrap}>
+              <LinearGradient
+                colors={["#FF8C00", "#E8640A"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.arrowBtn}
+              >
+                <Feather name="arrow-right" size={15} color="#fff" />
+              </LinearGradient>
+            </View>
+          </View>
+
+          {/* ── Footer strip ── */}
+          <View style={[styles.footerStrip, { borderTopColor: isDark ? "rgba(255,140,0,0.18)" : "rgba(255,140,0,0.14)" }]}>
+            <Feather name="star" size={10} color="#FF8C00" />
+            <Text style={styles.footerText}>Featured Listing · Promoted by Seller</Text>
+            {car.seller?.isVerified && (
+              <>
+                <View style={styles.footerDot} />
+                <Feather name="check-circle" size={10} color="#1565C0" />
+                <Text style={[styles.footerText, { color: "#1565C0" }]}>Verified</Text>
+              </>
+            )}
           </View>
         </Pressable>
       </LinearGradient>
@@ -140,130 +164,151 @@ export function SponsoredCard({ car, style }: SponsoredCardProps) {
 
 const styles = StyleSheet.create({
   gradientBorder: {
-    borderRadius: 17,
+    borderRadius: 18,
     padding: 1.5,
-    marginHorizontal: 16,
-    marginBottom: 12,
+    marginHorizontal: 14,
+    marginBottom: 14,
     shadowColor: "#FF8C00",
-    shadowOpacity: 0.38,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 10,
+    shadowOpacity: 0.42,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 12,
   },
   card: {
-    borderRadius: 16,
+    borderRadius: 17,
     overflow: "hidden",
-    flexDirection: "row",
-    height: 116,
   },
 
-  imageCol: {
-    width: 116,
-    position: "relative",
+  imageWrap: {
+    width: "100%",
+    height: 190,
     backgroundColor: "#2A1800",
+    position: "relative",
   },
-  image: { width: "100%", height: "100%" },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
   imgFallback: {
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFF0D6",
   },
-  imageScrim: {
+  scrim: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: 60,
-  },
-  priceBadge: {
-    position: "absolute",
-    bottom: 7,
-    left: 7,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  priceText: {
-    color: "#fff",
-    fontSize: 11,
-    fontFamily: "Manrope_800ExtraBold",
-    letterSpacing: -0.2,
-  },
-
-  infoCol: {
-    flex: 1,
-    paddingHorizontal: 10,
-    paddingTop: 9,
-    paddingBottom: 8,
-    gap: 4,
-    position: "relative",
+    height: 90,
   },
 
   sponsoredPill: {
+    position: "absolute",
+    top: 10,
+    left: 10,
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
-    alignSelf: "flex-start",
+    gap: 4,
     borderRadius: 20,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
-  sponsoredStar: { color: "#fff", fontSize: 8, lineHeight: 11 },
+  sponsoredStar: { color: "#fff", fontSize: 9, lineHeight: 12 },
   sponsoredLabel: {
     color: "#fff",
-    fontSize: 8,
+    fontSize: 9,
     fontFamily: "Manrope_800ExtraBold",
-    letterSpacing: 0.8,
+    letterSpacing: 1,
   },
 
+  heartBtn: { position: "absolute", top: 10, right: 10 },
+  heartBg: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(0,0,0,0.28)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heartBgActive: { backgroundColor: "#E8192C" },
+
+  priceBadge: {
+    position: "absolute",
+    bottom: 10,
+    right: 10,
+    borderRadius: 9,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  priceText: {
+    color: "#fff",
+    fontSize: 14,
+    fontFamily: "Manrope_800ExtraBold",
+    letterSpacing: -0.3,
+  },
+
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 13,
+    paddingTop: 11,
+    paddingBottom: 9,
+    gap: 10,
+  },
+  infoLeft: {
+    flex: 1,
+    gap: 6,
+  },
   carName: {
-    fontSize: 13,
+    fontSize: 15,
     fontFamily: "Manrope_800ExtraBold",
     letterSpacing: 0.05,
-    lineHeight: 17,
   },
-
-  metaRow: {
+  chipRow: {
     flexDirection: "row",
-    gap: 4,
+    gap: 5,
     flexWrap: "nowrap",
   },
   chip: {
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    borderRadius: 5,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    flexShrink: 0,
+    borderRadius: 6,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
   },
-  chipFlex: { flex: 1, minWidth: 0, flexShrink: 1 },
   chipText: {
-    fontSize: 9,
-    fontFamily: "Manrope_500Medium",
-    flexShrink: 1,
-    minWidth: 0,
-  },
-
-  sellerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  sellerName: {
     fontSize: 10,
     fontFamily: "Manrope_500Medium",
-    flex: 1,
   },
 
-  heartBtn: { position: "absolute", top: 8, right: 8 },
-  heartBg: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: "rgba(0,0,0,0.20)",
+  arrowWrap: {},
+  arrowBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
-  heartBgActive: { backgroundColor: "#E8192C" },
+
+  footerStrip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 13,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+  },
+  footerText: {
+    fontSize: 10,
+    fontFamily: "Manrope_500Medium",
+    color: "#FF8C00",
+  },
+  footerDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: "#CBD5E1",
+    marginHorizontal: 1,
+  },
 });

@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Modal,
@@ -37,6 +37,16 @@ const PRICE_RANGES = [
 ];
 
 const QUICK_FILTERS = ["All", "SUV", "Sedan", "Tokunbo", "Budget", "Luxury", "Pickup", "New"];
+
+function mapCategoryToFilter(cat: string): { quickFilter: string; query: string } {
+  const l = cat.toLowerCase();
+  if (l.includes("suv") || l.includes("4x4") || l.includes("4×4")) return { quickFilter: "SUV",    query: "" };
+  if (l.includes("sedan"))                                             return { quickFilter: "Sedan",  query: "" };
+  if (l.includes("pickup"))                                            return { quickFilter: "Pickup", query: "" };
+  if (l.includes("hatchback") || l.includes("hatch"))                 return { quickFilter: "All",    query: "hatchback" };
+  if (l.includes("van") || l.includes("minibus"))                     return { quickFilter: "All",    query: "van" };
+  return { quickFilter: "All", query: cat };
+}
 const CHIP_COLORS: Record<string, { bg: string; text: string; activeBg: string; activeText: string }> = {
   "All":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#0EB5CA", activeText: "#FFFFFF" },
   "SUV":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#818CF8", activeText: "#fff" },
@@ -164,10 +174,21 @@ export default function SearchScreen() {
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 10 : insets.top;
 
+  const { category } = useLocalSearchParams<{ category?: string }>();
+
   const [query, setQuery] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
   const [activeFilters, setActiveFilters] = useState<any>(null);
   const [quickFilter, setQuickFilter] = useState("All");
+
+  useEffect(() => {
+    if (category) {
+      const { quickFilter: qf, query: q } = mapCategoryToFilter(category as string);
+      setQuickFilter(qf);
+      setQuery(q);
+      setActiveFilters(null);
+    }
+  }, [category]);
 
   const filtered = cars.filter((car) => {
     const q = query.toLowerCase();
@@ -176,7 +197,8 @@ export default function SearchScreen() {
       car.brand.toLowerCase().includes(q) ||
       car.model.toLowerCase().includes(q) ||
       car.location.toLowerCase().includes(q) ||
-      car.condition.toLowerCase().includes(q);
+      car.condition.toLowerCase().includes(q) ||
+      (car.category?.toLowerCase().includes(q) ?? false);
 
     if (!matchQuery) return false;
 

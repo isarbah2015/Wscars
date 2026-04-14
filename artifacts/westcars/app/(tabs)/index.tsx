@@ -309,7 +309,12 @@ export default function HomeScreen() {
                       borderColor: isDark ? "#2D3A4F" : "#E4E8EF",
                     },
                   ]}
-                  onPress={() => router.push("/(tabs)/search")}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(tabs)/search",
+                      params: { category: cat.label },
+                    })
+                  }
                 >
                   <Text style={[styles.subTabLabel, { color: isDark ? "#CBD5E1" : "#1E293B" }]} numberOfLines={1}>
                     {cat.label}
