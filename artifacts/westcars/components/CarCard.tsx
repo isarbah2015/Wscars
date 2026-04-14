@@ -469,7 +469,8 @@ const styles = StyleSheet.create({
   sellerName: {
     fontSize: 10,
     fontFamily: "Manrope_500Medium",
-    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
   },
 });
 
