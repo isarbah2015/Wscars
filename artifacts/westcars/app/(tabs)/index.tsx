@@ -854,11 +854,11 @@ const styles = StyleSheet.create({
   cardRow: {
     flexDirection: "row",
     paddingHorizontal: 10,
-    gap: 8,
+    gap: 10,
   },
   halfCard: {
     flex: 1,
-    marginBottom: 10,
+    marginBottom: 12,
   },
 
   sep: { height: 10 },

@@ -642,25 +642,22 @@ export default function CarDetailScreen() {
 
         <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
-        {/* ── Recommendations 2×2 Grid ── */}
+        {/* ── You May Also Like — horizontal scroll ── */}
         {related.length > 0 && (
           <View style={[styles.card, { backgroundColor: colors.card }]}>
-            <Text style={[styles.cardTitle, { color: colors.text }]}>We recommend</Text>
-            <View style={styles.recsGrid}>
-              {Array.from({ length: Math.ceil(Math.min(related.length, 4) / 2) }, (_, i) => {
-                const left = related[i * 2];
-                const right = related[i * 2 + 1];
-                return (
-                  <View key={i} style={styles.recsRow}>
-                    <CarCard car={left} style={styles.recCarCard} />
-                    {right
-                      ? <CarCard car={right} style={styles.recCarCard} />
-                      : <View style={styles.recCarCard} />
-                    }
-                  </View>
-                );
-              })}
+            <View style={styles.recsHeader}>
+              <View style={styles.recsHeaderAccent} />
+              <Text style={[styles.cardTitle, { color: colors.text }]}>You may also like</Text>
             </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.recsScroll}
+            >
+              {related.slice(0, 6).map((rec) => (
+                <CarCard key={rec.id} car={rec} style={styles.recCard} />
+              ))}
+            </ScrollView>
           </View>
         )}
 
@@ -1050,17 +1047,24 @@ const styles = StyleSheet.create({
   sellerStars: { flexDirection: "row", alignItems: "center", gap: 2, marginTop: 4 },
   sellerRatingText: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular", marginLeft: 4 },
 
-  // Recommendations 2×2 grid
-  recsGrid: {
-    marginHorizontal: -16,
-    gap: 0,
-  },
-  recsRow: {
+  recsHeader: {
     flexDirection: "row",
-    paddingHorizontal: 10,
-    gap: 8,
+    alignItems: "center",
+    gap: 10,
   },
-  recCarCard: { flex: 1, marginBottom: 10 },
+  recsHeaderAccent: {
+    width: 4,
+    height: 22,
+    borderRadius: 2,
+    backgroundColor: "#0EB5CA",
+  },
+  recsScroll: {
+    flexDirection: "row",
+    gap: 10,
+    paddingHorizontal: 2,
+    paddingBottom: 6,
+  },
+  recCard: { width: 175 },
 
   // Location
   locationRow: { flexDirection: "row", alignItems: "center", gap: 8 },
