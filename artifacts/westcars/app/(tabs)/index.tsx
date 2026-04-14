@@ -161,14 +161,11 @@ export default function HomeScreen() {
     }
   };
 
-  const filteredCars =
-    condition === "new"
-      ? cars.filter((c) => c.condition === "New" && c.category !== "motorcycle" && c.category !== "moto")
-      : condition === "moto"
-      ? cars.filter((c) => c.category === "motorcycle" || c.category === "moto")
-      : cars.filter((c) => c.condition !== "New" && c.category !== "motorcycle" && c.category !== "moto");
-
-  const displayCars = filteredCars;
+  // "Personally for you" always shows all non-moto cars regardless of which condition tab is selected.
+  // The condition tabs only control which subcategory tiles are displayed below.
+  const displayCars = cars.filter(
+    (c) => c.category !== "motorcycle" && c.category !== "moto"
+  );
   const totalCount   = cars.length;
   const specialOffers = cars
     .filter((c) => c.isSponsored || c.isFeatured)
