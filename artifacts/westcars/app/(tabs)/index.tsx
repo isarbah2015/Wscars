@@ -720,16 +720,16 @@ const styles = StyleSheet.create({
   brandStrip: {
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 8,
+    paddingTop: 8,
+    paddingBottom: 6,
   },
-  brandStripBadge: { width: 180, height: 90 },
+  brandStripBadge: { width: 160, height: 64 },
 
   brandStripName: {
     fontSize: 22,
     fontFamily: "Manrope_800ExtraBold",
     letterSpacing: 4,
-    marginTop: -10,
+    marginTop: -16,
     textAlign: "center",
     width: 180,
   },
@@ -738,7 +738,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: "Manrope_600SemiBold",
     letterSpacing: 1.3,
-    marginTop: 0,
+    marginTop: 1,
     textAlign: "center",
   },
 

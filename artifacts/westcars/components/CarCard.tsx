@@ -39,6 +39,166 @@ export function CarCard({ car, style }: CarCardProps) {
   const badgeLabel = isNew ? "New" : isForeign ? "Foreign" : null;
   const isSold = (car as any).isSold;
 
+  if (car.isSponsored) {
+    return (
+      <Animated.View style={[sponsoredStyles.outerWrap, { transform: [{ scale }] }, style]}>
+        {/* Golden gradient border */}
+        <LinearGradient
+          colors={["#FFB347", "#FF8C00", "#E8640A", "#FFB347"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={sponsoredStyles.gradientBorder}
+        >
+          <Pressable
+            style={[
+              sponsoredStyles.card,
+              {
+                backgroundColor: isDark ? "#1C1408" : "#FFFBF4",
+                shadowColor: "#FF8C00",
+              },
+            ]}
+            onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
+            onPressIn={pressIn}
+            onPressOut={pressOut}
+            android_ripple={{ color: "rgba(255,140,0,0.10)", borderless: false }}
+          >
+            {/* ── Image block (taller for sponsored) ── */}
+            <View style={sponsoredStyles.imageWrap}>
+              {!imgError ? (
+                <Image
+                  source={{ uri: car.images[0] }}
+                  style={sponsoredStyles.image}
+                  resizeMode="cover"
+                  onError={() => setImgError(true)}
+                />
+              ) : (
+                <View style={[sponsoredStyles.image, styles.imgFallback, { backgroundColor: "#FFF0D6" }]}>
+                  <Feather name="camera" size={28} color="#FF8C00" />
+                  <Text style={{ color: "#FF8C00", fontSize: 11, marginTop: 4 }}>No photo</Text>
+                </View>
+              )}
+
+              {/* Warm gradient scrim */}
+              <LinearGradient
+                colors={["transparent", "rgba(30,12,0,0.80)"]}
+                style={styles.imageScrim}
+                pointerEvents="none"
+              />
+
+              {/* SPONSORED badge — top-left, premium gold pill */}
+              <LinearGradient
+                colors={["#FF8C00", "#FFB347"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={sponsoredStyles.sponsoredBadge}
+              >
+                <Text style={sponsoredStyles.sponsoredStar}>★</Text>
+                <Text style={sponsoredStyles.sponsoredBadgeText}>SPONSORED</Text>
+              </LinearGradient>
+
+              {/* Condition badge — top-right area (offset below heart) */}
+              {badgeLabel && (
+                <View style={[styles.condBadge, { backgroundColor: isNew ? "#FF6B00" : "#1565C0", top: 38 }]}>
+                  <Text style={styles.condBadgeText}>{badgeLabel}</Text>
+                </View>
+              )}
+
+              {/* Heart */}
+              <Pressable style={styles.heartBtn} onPress={() => toggleFavorite(car.id)} hitSlop={10}>
+                <View style={[styles.heartBg, fav && styles.heartBgActive]}>
+                  <Feather name="heart" size={15} color={fav ? "#fff" : "rgba(255,255,255,0.9)"} />
+                </View>
+              </Pressable>
+
+              {/* Floating price — amber/gold gradient badge */}
+              <LinearGradient
+                colors={["#FF8C00", "#E8640A"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={sponsoredStyles.priceBadge}
+              >
+                <Text style={sponsoredStyles.priceBadgeText}>{formatPrice(car.price)}</Text>
+              </LinearGradient>
+
+              {/* Views tag */}
+              {car.views !== undefined && car.views > 0 && (
+                <View style={styles.viewsTag}>
+                  <Feather name="eye" size={9} color="rgba(255,255,255,0.88)" />
+                  <Text style={styles.viewsText}>
+                    {car.views >= 1000 ? `${(car.views / 1000).toFixed(1)}k` : car.views}
+                  </Text>
+                </View>
+              )}
+
+              {/* SOLD overlay */}
+              {isSold && (
+                <View style={styles.soldOverlay}>
+                  <Text style={styles.soldText}>SOLD</Text>
+                </View>
+              )}
+            </View>
+
+            {/* ── Info block ── */}
+            <View style={[sponsoredStyles.info, { backgroundColor: isDark ? "#1C1408" : "#FFFBF4" }]}>
+              <Text style={[sponsoredStyles.carName, { color: colors.text }]} numberOfLines={1}>
+                {car.brand} {car.model}
+              </Text>
+              <View style={styles.metaRow}>
+                <View style={[styles.metaChip, { backgroundColor: "rgba(255,140,0,0.10)" }]}>
+                  <Text style={[styles.metaChipText, { color: colors.textSecondary }]}>{car.year}</Text>
+                </View>
+                {car.mileage !== undefined && (
+                  <View style={[styles.metaChip, { backgroundColor: "rgba(255,140,0,0.10)" }]}>
+                    <Feather name="activity" size={9} color={colors.textTertiary} />
+                    <Text style={[styles.metaChipText, { color: colors.textSecondary }]}>
+                      {car.mileage === 0 ? "Brand New" : `${(car.mileage / 1000).toFixed(0)}k km`}
+                    </Text>
+                  </View>
+                )}
+                {car.location && (
+                  <View style={[styles.metaChip, styles.metaChipLoc, { backgroundColor: "rgba(255,140,0,0.10)" }]}>
+                    <Feather name="map-pin" size={9} color={colors.textTertiary} />
+                    <Text style={[styles.metaChipText, { color: colors.textSecondary }]} numberOfLines={1}>
+                      {car.location.split(",")[0]}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Seller row */}
+              {car.seller?.name && (
+                <View style={styles.sellerRow}>
+                  <Feather name="user" size={10} color={colors.textTertiary} />
+                  <Text style={[styles.sellerName, { color: colors.textSecondary }]} numberOfLines={1}>
+                    {car.seller.name}
+                  </Text>
+                  {car.seller?.isVerified && (
+                    <Feather name="check-circle" size={10} color="#1565C0" />
+                  )}
+                </View>
+              )}
+
+              {/* Premium promoted strip */}
+              <View style={sponsoredStyles.promoStrip}>
+                <LinearGradient
+                  colors={["#FF8C00", "#FFB347"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={sponsoredStyles.promoStripInner}
+                >
+                  <Text style={sponsoredStyles.promoStripStar}>★</Text>
+                  <Text style={sponsoredStyles.promoStripText}>Featured Listing</Text>
+                  <Text style={sponsoredStyles.promoStripDot}>·</Text>
+                  <Text style={sponsoredStyles.promoStripText}>Promoted by Seller</Text>
+                </LinearGradient>
+              </View>
+            </View>
+          </Pressable>
+        </LinearGradient>
+      </Animated.View>
+    );
+  }
+
   return (
     <Animated.View style={[styles.wrapper, { transform: [{ scale }] }, style]}>
       <Pressable
@@ -72,33 +232,28 @@ export function CarCard({ car, style }: CarCardProps) {
             </View>
           )}
 
-          {/* Gradient scrim — transparent top → dark bottom */}
           <LinearGradient
             colors={["transparent", "rgba(0,0,0,0.72)"]}
             style={styles.imageScrim}
             pointerEvents="none"
           />
 
-          {/* Condition badge top-left */}
           {badgeLabel && (
             <View style={[styles.condBadge, { backgroundColor: isNew ? "#FF6B00" : "#1565C0" }]}>
               <Text style={styles.condBadgeText}>{badgeLabel}</Text>
             </View>
           )}
 
-          {/* Heart top-right */}
           <Pressable style={styles.heartBtn} onPress={() => toggleFavorite(car.id)} hitSlop={10}>
             <View style={[styles.heartBg, fav && styles.heartBgActive]}>
               <Feather name="heart" size={15} color={fav ? "#fff" : "rgba(255,255,255,0.9)"} />
             </View>
           </Pressable>
 
-          {/* Floating price badge — bottom-left on image */}
           <View style={styles.priceBadge}>
             <Text style={styles.priceBadgeText}>{formatPrice(car.price)}</Text>
           </View>
 
-          {/* Views tag bottom-right */}
           {car.views !== undefined && car.views > 0 && (
             <View style={styles.viewsTag}>
               <Feather name="eye" size={9} color="rgba(255,255,255,0.88)" />
@@ -108,14 +263,6 @@ export function CarCard({ car, style }: CarCardProps) {
             </View>
           )}
 
-          {/* Sponsored badge */}
-          {car.isSponsored && (
-            <View style={styles.adBadge}>
-              <Text style={styles.adBadgeText}>AD</Text>
-            </View>
-          )}
-
-          {/* SOLD overlay */}
           {isSold && (
             <View style={styles.soldOverlay}>
               <Text style={styles.soldText}>SOLD</Text>
@@ -246,22 +393,6 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
 
-  adBadge: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    backgroundColor: "rgba(255,107,0,0.85)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  adBadgeText: {
-    color: "#fff",
-    fontSize: 9,
-    fontFamily: "Manrope_700Bold",
-    letterSpacing: 0.8,
-  },
-
   viewsTag: {
     position: "absolute",
     bottom: 9,
@@ -319,7 +450,6 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     flexShrink: 0,
   },
-  // Location chip: flex:1 absorbs remaining space, text truncates cleanly
   metaChipLoc: {
     flex: 1,
     minWidth: 0,
@@ -340,5 +470,119 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: "Manrope_500Medium",
     flex: 1,
+  },
+});
+
+const sponsoredStyles = StyleSheet.create({
+  outerWrap: {
+    marginBottom: 2,
+  },
+  gradientBorder: {
+    borderRadius: 17,
+    padding: 1.5,
+    shadowColor: "#FF8C00",
+    shadowOpacity: 0.45,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 10,
+  },
+  card: {
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  imageWrap: {
+    position: "relative",
+    height: 132,
+    backgroundColor: "#2A1800",
+  },
+  image: { width: "100%", height: "100%" },
+
+  sponsoredBadge: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    shadowColor: "#FF6B00",
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  sponsoredStar: {
+    color: "#fff",
+    fontSize: 9,
+    lineHeight: 13,
+  },
+  sponsoredBadgeText: {
+    color: "#fff",
+    fontSize: 9,
+    fontFamily: "Manrope_800ExtraBold",
+    letterSpacing: 1.0,
+  },
+
+  priceBadge: {
+    position: "absolute",
+    bottom: 9,
+    left: 9,
+    borderRadius: 10,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    shadowColor: "#FF6B00",
+    shadowOpacity: 0.65,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
+  },
+  priceBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontFamily: "Manrope_800ExtraBold",
+    letterSpacing: -0.3,
+  },
+
+  info: {
+    paddingHorizontal: 9,
+    paddingTop: 7,
+    paddingBottom: 0,
+    gap: 3,
+  },
+  carName: {
+    fontSize: 12,
+    fontFamily: "Manrope_800ExtraBold",
+    letterSpacing: 0.1,
+  },
+
+  promoStrip: {
+    marginTop: 6,
+    borderRadius: 0,
+    overflow: "hidden",
+    marginHorizontal: -9,
+  },
+  promoStripInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  promoStripStar: {
+    color: "#fff",
+    fontSize: 9,
+    lineHeight: 13,
+  },
+  promoStripText: {
+    color: "#fff",
+    fontSize: 9,
+    fontFamily: "Manrope_700Bold",
+    letterSpacing: 0.3,
+  },
+  promoStripDot: {
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 11,
   },
 });

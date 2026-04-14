@@ -274,11 +274,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   brandCol: { alignItems: "center", gap: 0 },
-  heroBadge: { width: 180, height: 110 },
+  heroBadge: { width: 140, height: 66 },
   brandName: {
     fontSize: 22, fontFamily: "Manrope_800ExtraBold",
     color: "#0098AA", letterSpacing: 4, textAlign: "center",
-    width: 180, marginTop: -10,
+    width: 180, marginTop: -16,
   },
   brandSub: {
     fontSize: 10, fontFamily: "Manrope_600SemiBold",
