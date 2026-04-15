@@ -15,7 +15,6 @@ import {
   Text,
   TextInput,
   View,
-  ViewToken,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -66,6 +65,7 @@ export default function CarDetailScreen() {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const [activeImg, setActiveImg] = useState(0);
+  const flatListRef = useRef<FlatList>(null);
   const [message, setMessage] = useState("");
   const [showAllSpecs, setShowAllSpecs] = useState(false);
   const [showEquipment, setShowEquipment] = useState(false);
@@ -105,11 +105,11 @@ export default function CarDetailScreen() {
 
   const fav = isFavorite(car.id);
 
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      if (viewableItems[0]?.index != null) setActiveImg(viewableItems[0].index);
-    }
-  ).current;
+  const handleCarouselScroll = (e: any) => {
+    const x = e.nativeEvent.contentOffset.x;
+    const idx = Math.round(x / (width || 400));
+    if (idx >= 0 && idx !== activeImg) setActiveImg(idx);
+  };
 
   const handleMessage = (text?: string) => {
     if (!isAuthenticated) {
@@ -231,13 +231,15 @@ export default function CarDetailScreen() {
         {/* ── Image Gallery ── */}
         <View>
           <FlatList
+            ref={flatListRef}
             data={car.images}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             keyExtractor={(_, i) => String(i)}
-            onViewableItemsChanged={onViewableItemsChanged}
-            viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
+            onScroll={handleCarouselScroll}
+            onMomentumScrollEnd={handleCarouselScroll}
+            scrollEventThrottle={16}
             renderItem={({ item }) => (
               <View style={{ width, height: 256, backgroundColor: "#EDF4F7" }}>
                 <Image
@@ -248,19 +250,67 @@ export default function CarDetailScreen() {
               </View>
             )}
           />
-          {/* Counter */}
-          <View style={styles.imgCounter}>
-            <Feather name="image" size={11} color="#fff" />
-            <Text style={styles.imgCounterText}>{activeImg + 1}/{car.images.length}</Text>
-          </View>
-          {/* Dots */}
-          {car.images.length > 1 && (
-            <View style={styles.dots}>
-              {car.images.map((_, i) => (
-                <View key={i} style={[styles.dot, i === activeImg && styles.dotActive]} />
-              ))}
+
+          {/* Overlay: arrows + counter + dots — above FlatList */}
+          <View style={styles.carouselOverlay} pointerEvents="box-none">
+            {/* Left arrow */}
+            {activeImg > 0 && (
+              <Pressable
+                style={styles.carouselArrowLeft}
+                hitSlop={16}
+                onPress={() => {
+                  const n = activeImg - 1;
+                  setActiveImg(n);
+                  flatListRef.current?.scrollToIndex({ index: n, animated: true });
+                }}
+              >
+                <View style={styles.carouselArrowBg}>
+                  <Feather name="chevron-left" size={22} color="#fff" />
+                </View>
+              </Pressable>
+            )}
+
+            {/* Right arrow */}
+            {activeImg < car.images.length - 1 && (
+              <Pressable
+                style={styles.carouselArrowRight}
+                hitSlop={16}
+                onPress={() => {
+                  const n = activeImg + 1;
+                  setActiveImg(n);
+                  flatListRef.current?.scrollToIndex({ index: n, animated: true });
+                }}
+              >
+                <View style={styles.carouselArrowBg}>
+                  <Feather name="chevron-right" size={22} color="#fff" />
+                </View>
+              </Pressable>
+            )}
+
+            {/* Counter */}
+            <View style={styles.imgCounter}>
+              <Feather name="image" size={11} color="#fff" />
+              <Text style={styles.imgCounterText}>{activeImg + 1}/{car.images.length}</Text>
             </View>
-          )}
+
+            {/* Dots */}
+            {car.images.length > 1 && (
+              <View style={styles.dots}>
+                {car.images.map((_, i) => (
+                  <Pressable
+                    key={i}
+                    hitSlop={8}
+                    onPress={() => {
+                      setActiveImg(i);
+                      flatListRef.current?.scrollToIndex({ index: i, animated: true });
+                    }}
+                  >
+                    <View style={[styles.dot, i === activeImg && styles.dotActive]} />
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </View>
         </View>
 
         {/* ── Auto.ru-style Key Specs Strip ── */}
@@ -781,6 +831,35 @@ const styles = StyleSheet.create({
   },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.5)" },
   dotActive: { backgroundColor: "#fff", width: 16 },
+
+  carouselOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
+  },
+  carouselArrowLeft: {
+    position: "absolute",
+    left: 8,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+    zIndex: 20,
+  },
+  carouselArrowRight: {
+    position: "absolute",
+    right: 8,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+    zIndex: 20,
+  },
+  carouselArrowBg: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "rgba(0,0,0,0.38)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   // Main info
   mainCard: { backgroundColor: "#fff", padding: 16, gap: 10 },
