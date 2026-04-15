@@ -49,13 +49,14 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | null>(null);
 
 const STORAGE_KEYS = {
-  USER:          "@westcars_user",
-  FAVORITES:     "@westcars_favorites",
-  REVIEWS:       "@westcars_reviews",
-  REPORTS:       "@westcars_reports",
-  TRANSACTIONS:  "@westcars_transactions",
-  BLOCKED:       "@westcars_blocked",
-  CARS:          "@westcars_cars_v2",
+  USER:             "@westcars_user",
+  FAVORITES:        "@westcars_favorites",
+  REVIEWS:          "@westcars_reviews",
+  REPORTS:          "@westcars_reports",
+  TRANSACTIONS:     "@westcars_transactions",
+  BLOCKED:          "@westcars_blocked",
+  CARS:             "@westcars_cars_v2",
+  REGISTERED_USERS: "@westcars_registered_users",
 };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -100,32 +101,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // ── Auth ──────────────────────────────────────────────────────────────
   const login = useCallback(async (email: string, _pw: string): Promise<boolean> => {
-    const isAdmin = email.toLowerCase().trim() === "admin@westcars.gh";
-    const u: User = isAdmin ? { ...ADMIN_USER } : {
-      id: "currentUser",
-      name: "Akosua Darko",
-      phone: "+233 24 555 0000",
-      email,
-      location: "Accra",
-      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
-      memberSince: "2024-01-01",
-      isVerified: false,
-      verification: { phone: false, id: false, dealer: false },
-      rating: 4.1,
-      totalReviews: 3,
-      totalListings: 0,
-      trustScore: 42,
-      totalSales: 0,
-    };
-    setCurrentUser(u); setIsAuthenticated(true);
-    await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(u));
-    return true;
-  }, []);
+    const normalised = email.toLowerCase().trim();
 
-  const signup = useCallback(async (name: string, email: string, phone: string, _pw: string): Promise<boolean> => {
+    // Admin shortcut
+    if (normalised === "admin@westcars.gh") {
+      const u = { ...ADMIN_USER };
+      setCurrentUser(u); setIsAuthenticated(true);
+      await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(u));
+      return true;
+    }
+
+    // Look up a previously registered profile for this email
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEYS.REGISTERED_USERS);
+      if (raw) {
+        const map: Record<string, User> = JSON.parse(raw);
+        if (map[normalised]) {
+          const u = map[normalised];
+          setCurrentUser(u); setIsAuthenticated(true);
+          await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(u));
+          return true;
+        }
+      }
+    } catch { /* ignore */ }
+
+    // Fallback: create a guest profile for any unregistered email
     const u: User = {
       id: "currentUser",
-      name, phone, email,
+      name: email.split("@")[0] || "Guest",
+      phone: "",
+      email,
       location: "Accra",
       memberSince: new Date().toISOString().split("T")[0],
       isVerified: false,
@@ -136,6 +141,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       trustScore: 15,
       totalSales: 0,
     };
+    setCurrentUser(u); setIsAuthenticated(true);
+    await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(u));
+    return true;
+  }, []);
+
+  const signup = useCallback(async (name: string, email: string, phone: string, _pw: string): Promise<boolean> => {
+    const normalised = email.toLowerCase().trim();
+    const u: User = {
+      id: `user_${Date.now()}`,
+      name, phone, email: normalised,
+      location: "Accra",
+      memberSince: new Date().toISOString().split("T")[0],
+      isVerified: false,
+      verification: { phone: false, id: false, dealer: false },
+      rating: 0,
+      totalReviews: 0,
+      totalListings: 0,
+      trustScore: 15,
+      totalSales: 0,
+    };
+
+    // Persist profile so login can retrieve it later
+    try {
+      const raw = await AsyncStorage.getItem(STORAGE_KEYS.REGISTERED_USERS);
+      const map: Record<string, User> = raw ? JSON.parse(raw) : {};
+      map[normalised] = u;
+      await AsyncStorage.setItem(STORAGE_KEYS.REGISTERED_USERS, JSON.stringify(map));
+    } catch { /* ignore */ }
+
     setCurrentUser(u); setIsAuthenticated(true);
     await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(u));
     return true;

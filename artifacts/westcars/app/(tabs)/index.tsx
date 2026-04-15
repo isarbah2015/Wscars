@@ -811,23 +811,23 @@ const styles = StyleSheet.create({
   },
 
   section: {
-    paddingHorizontal: 12,
-    paddingTop: 16,
-    paddingBottom: 8,
-    marginHorizontal: 10,
-    marginTop: 10,
-    borderRadius: 18,
+    paddingHorizontal: 10,
+    paddingTop: 12,
+    paddingBottom: 4,
+    marginHorizontal: 6,
+    marginTop: 6,
+    borderRadius: 16,
     shadowColor: "#0A1628",
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
   },
   sectionRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 8,
   },
   sectionTitleRow: {
     flexDirection: "row",
@@ -846,7 +846,7 @@ const styles = StyleSheet.create({
   seeAll: { fontSize: 13, fontFamily: "Manrope_600SemiBold" },
 
   gridBreakout: {
-    marginHorizontal: -12,
+    marginHorizontal: -10,
   },
   cardRow: {
     flexDirection: "row",
@@ -858,7 +858,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  sep: { height: 10 },
+  sep: { height: 6 },
 
   offersRow: { flexDirection: "row", gap: 10, paddingRight: 12, paddingBottom: 12 },
   offerCarCard: { width: 180 },

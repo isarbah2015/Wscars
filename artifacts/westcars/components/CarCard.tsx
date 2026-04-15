@@ -5,6 +5,7 @@ import React, { useRef, useState } from "react";
 import {
   Animated,
   Image,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -28,11 +29,13 @@ export function CarCard({ car, style }: CarCardProps) {
 
   const scale = useRef(new Animated.Value(1)).current;
 
+  const nativeDriver = Platform.OS !== "web";
+
   const pressIn = () =>
-    Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 80, bounciness: 0 }).start();
+    Animated.spring(scale, { toValue: 0.96, useNativeDriver: nativeDriver, speed: 80, bounciness: 0 }).start();
 
   const pressOut = () =>
-    Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 28, bounciness: 5 }).start();
+    Animated.spring(scale, { toValue: 1, useNativeDriver: nativeDriver, speed: 28, bounciness: 5 }).start();
 
   const isNew     = car.condition === "New";
   const isForeign = car.condition === "Foreign Used";
