@@ -181,20 +181,6 @@ export function CarCard({ car, style }: CarCardProps) {
                 </View>
               )}
 
-              {/* Premium promoted strip */}
-              <View style={sponsoredStyles.promoStrip}>
-                <LinearGradient
-                  colors={["#FF8C00", "#FFB347"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={sponsoredStyles.promoStripInner}
-                >
-                  <Text style={sponsoredStyles.promoStripStar}>★</Text>
-                  <Text style={sponsoredStyles.promoStripText}>Featured Listing</Text>
-                  <Text style={sponsoredStyles.promoStripDot}>·</Text>
-                  <Text style={sponsoredStyles.promoStripText}>Promoted by Seller</Text>
-                </LinearGradient>
-              </View>
             </View>
           </Pressable>
         </LinearGradient>
@@ -496,7 +482,7 @@ const sponsoredStyles = StyleSheet.create({
   },
   imageWrap: {
     position: "relative",
-    height: 132,
+    height: 108,
     backgroundColor: "#2A1800",
   },
   image: { width: "100%", height: "100%" },
