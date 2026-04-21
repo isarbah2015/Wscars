@@ -55,6 +55,7 @@ export default function LoginScreen() {
         {/* WestCars badge + motto */}
         <View style={styles.brandCol}>
           <Image source={WC_LOGO} style={styles.heroBadge} resizeMode="contain" tintColor="#0EB5CA" />
+          <Text style={styles.brandName}>WESTCARS</Text>
           <Text style={styles.tagline}>Ghana's Trusted Car Marketplace</Text>
         </View>
 
@@ -179,11 +180,25 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 
-  brandCol: { alignItems: "center", gap: 0 },
-  heroBadge: { width: 120, height: 62 },
+  brandCol: { alignItems: "center", gap: 4, paddingVertical: 4 },
+  heroBadge: { width: 150, height: 60 },
+  brandName: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontFamily: "Manrope_800ExtraBold",
+    color: "#0098AA",
+    letterSpacing: 4,
+    textAlign: "center",
+    includeFontPadding: false,
+  },
   tagline: {
-    fontSize: 10, fontFamily: "Manrope_600SemiBold",
-    color: "#0098AA", letterSpacing: 1.2, textAlign: "center",
+    fontSize: 11,
+    lineHeight: 14,
+    fontFamily: "Manrope_600SemiBold",
+    color: "#0098AA",
+    letterSpacing: 1.2,
+    textAlign: "center",
+    includeFontPadding: false,
   },
 
   heroTitle: {
