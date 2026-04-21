@@ -263,8 +263,8 @@ const styles = StyleSheet.create({
   /* Hero */
   hero: {
     paddingHorizontal: 24,
-    paddingBottom: 32,
-    gap: 12,
+    paddingBottom: 12,
+    gap: 6,
   },
   heroWhite: { backgroundColor: "#FFFFFF" },
   backBtn: {
