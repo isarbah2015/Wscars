@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
 
   imageWrap: {
     position: "relative",
-    height: 108,
+    height: 148,
     backgroundColor: "#1A2340",
   },
   image: { width: "100%", height: "100%" },
@@ -482,7 +482,7 @@ const sponsoredStyles = StyleSheet.create({
   },
   imageWrap: {
     position: "relative",
-    height: 108,
+    height: 148,
     backgroundColor: "#2A1800",
   },
   image: { width: "100%", height: "100%" },
