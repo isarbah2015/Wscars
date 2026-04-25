@@ -167,15 +167,24 @@ export default function HomeScreen() {
     (c) => c.category !== "motorcycle" && c.category !== "moto"
   );
   const totalCount   = cars.length;
-  const specialOffers = cars
-    .filter((c) => c.isSponsored || c.isFeatured)
-    .filter((car, i, arr) => arr.findIndex((c) => c.id === car.id) === i)
-    .slice(0, 5);
 
-  // Featured = top cars by views (1×1 full-width showcase)
-  const featuredCars = [...cars]
-    .sort((a, b) => (b.views || 0) - (a.views || 0))
-    .slice(0, 4);
+  // Featured = top cars by views + sponsored cars, mixed randomly (stable per render)
+  const featuredCars = React.useMemo(() => {
+    const sponsoredOnes = cars.filter((c) => c.isSponsored);
+    const topByViews = [...cars]
+      .filter((c) => !c.isSponsored)
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 4);
+    const sponsoredPick = sponsoredOnes.slice(0, 3);
+    const merged = [...topByViews, ...sponsoredPick];
+    // Stable Fisher-Yates shuffle by id hash so order doesn't jitter on re-render
+    const seeded = merged.map((c) => ({
+      c,
+      k: [...c.id].reduce((s, ch) => (s * 31 + ch.charCodeAt(0)) >>> 0, 7),
+    }));
+    seeded.sort((a, b) => a.k - b.k);
+    return seeded.map((x) => x.c).slice(0, 6);
+  }, [cars]);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -382,7 +391,17 @@ export default function HomeScreen() {
                       style={styles.featScrim}
                       pointerEvents="none"
                     />
-                    {(car.condition === "New" || car.condition === "Foreign Used") && (
+                    {car.isSponsored ? (
+                      <LinearGradient
+                        colors={["#FF8C00", "#FFB347"]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.featSponsoredBadge}
+                      >
+                        <Text style={styles.featSponsoredStar}>★</Text>
+                        <Text style={styles.featSponsoredText}>SPONSORED</Text>
+                      </LinearGradient>
+                    ) : (car.condition === "New" || car.condition === "Foreign Used") && (
                       <View style={[styles.featCondBadge, { backgroundColor: car.condition === "New" ? "#FF6B00" : "#1565C0" }]}>
                         <Text style={styles.featCondText}>{car.condition === "New" ? "New" : "Foreign"}</Text>
                       </View>
@@ -470,28 +489,6 @@ export default function HomeScreen() {
               );
             })}
           </View>
-        </View>
-
-        <View style={[styles.sep, { backgroundColor: colors.background }]} />
-
-        {/* ── Special Offers ── */}
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
-          <View style={styles.sectionRow}>
-            <View style={styles.sectionTitleRow}>
-              <View style={[styles.sectionAccentBar, { backgroundColor: "#D97706" }]} />
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Special Offers</Text>
-            </View>
-            <Pressable onPress={() => router.push("/(tabs)/search")}>
-              <Text style={[styles.seeAll, { color: colors.accent }]}>See all</Text>
-            </Pressable>
-          </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.offersRow}>
-              {specialOffers.map((car) => (
-                <CarCard key={`special_${car.id}`} car={car} style={styles.offerCarCard} />
-              ))}
-            </View>
-          </ScrollView>
         </View>
 
         <View style={[styles.sep, { backgroundColor: colors.background }]} />
@@ -854,8 +851,25 @@ const styles = StyleSheet.create({
 
   sep: { height: 6 },
 
-  offersRow: { flexDirection: "row", gap: 10, paddingRight: 12, paddingBottom: 12 },
-  offerCarCard: { width: 180 },
+  /* sponsored badge inside Featured cards */
+  featSponsoredBadge: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    borderRadius: 20,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    shadowColor: "#FF6B00",
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  featSponsoredStar: { color: "#fff", fontSize: 10, lineHeight: 13 },
+  featSponsoredText: { color: "#fff", fontSize: 10, fontFamily: "Manrope_800ExtraBold", letterSpacing: 1.0 },
 
   /* ── Featured Listings (1×1) ── */
   featuredList: { gap: 12 },

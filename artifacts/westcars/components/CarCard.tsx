@@ -538,7 +538,7 @@ const sponsoredStyles = StyleSheet.create({
   info: {
     paddingHorizontal: 9,
     paddingTop: 7,
-    paddingBottom: 0,
+    paddingBottom: 7,
     gap: 3,
   },
   carName: {

@@ -15,7 +15,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
-import { SponsoredCard } from "@/components/SponsoredCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Car } from "@/types";
@@ -226,20 +225,16 @@ export default function SearchScreen() {
     );
   });
 
-  const sponsored = filtered.filter((c) => c.isSponsored);
-  const buildList = () => {
-    const result: any[] = [];
-    let adIdx = 0;
-    filtered.forEach((car, i) => {
-      result.push({ type: "car", item: car });
-      if ((i + 1) % 4 === 0 && adIdx < sponsored.length) {
-        result.push({ type: "ad", car: sponsored[adIdx % sponsored.length] });
-        adIdx++;
-      }
-    });
-    return result;
-  };
-  const listData = buildList();
+  // Shuffle filtered list with a stable seed (per-render order) so sponsored
+  // cars are mixed randomly throughout the grid, not in fixed 2x2 grid slots.
+  const listData = React.useMemo(() => {
+    const seeded = filtered.map((car) => ({
+      car,
+      k: [...car.id].reduce((s, ch) => (s * 33 + ch.charCodeAt(0)) >>> 0, 13),
+    }));
+    seeded.sort((a, b) => a.k - b.k);
+    return seeded.map((x) => ({ type: "car" as const, item: x.car }));
+  }, [filtered]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -331,22 +326,15 @@ export default function SearchScreen() {
 
       <FlatList
         data={listData}
-        keyExtractor={(item, i) => item.type === "car" ? item.item.id : `ad_${i}`}
+        keyExtractor={(item) => item.item.id}
         renderItem={({ item, index }) => {
-          if (item.type === "ad") {
-            return <SponsoredCard car={item.car} />;
-          }
-          const carsBefore = listData.slice(0, index).filter((x) => x.type === "car").length;
-          if (carsBefore % 2 === 1) return null;
-
+          if (index % 2 === 1) return null;
           const nextItem = listData[index + 1];
-          const nextCar = nextItem?.type === "car" ? nextItem.item : null;
-
           return (
             <View style={styles.row}>
               <CarCard car={item.item} style={styles.halfCard} />
-              {nextCar ? (
-                <CarCard car={nextCar} style={styles.halfCard} />
+              {nextItem ? (
+                <CarCard car={nextItem.item} style={styles.halfCard} />
               ) : (
                 <View style={styles.halfCard} />
               )}
