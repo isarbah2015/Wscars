@@ -193,7 +193,7 @@ export default function UserProfileScreen() {
         </View>
       )}
 
-      <View style={{ height: 60 + insets.bottom }} />
+      <View style={{ height: 24 + insets.bottom }} />
     </ScrollView>
   );
 }
