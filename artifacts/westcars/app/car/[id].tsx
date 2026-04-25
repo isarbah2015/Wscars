@@ -19,6 +19,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { CarCard } from "@/components/CarCard";
+import { CarGenomics } from "@/components/CarGenomics";
 import { EquipmentModal } from "@/components/EquipmentModal";
 import { LocationMap } from "@/components/LocationMap";
 import { ReportModal } from "@/components/ReportModal";
@@ -397,110 +398,27 @@ export default function CarDetailScreen() {
 
         <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
-        {/* ── Specifications ── */}
-        <View style={[styles.card, { backgroundColor: colors.card }]}>
+        {/* ── Car Genomics ── */}
+        <View style={{ backgroundColor: colors.card }}>
+          <CarGenomics brand={car.brand} model={car.model} />
 
-          {/* Section header */}
-          <View style={styles.specHeader}>
-            <View style={[styles.specHeaderAccent, { backgroundColor: "#0EB5CA" }]} />
-            <Text style={[styles.cardTitle, { color: colors.text }]}>Specifications</Text>
-          </View>
-
-          {/* 2-column premium stat cards — explicit rows (no flexWrap) for native */}
-          {([0, 2, 4] as const).map((rowStart) => (
-            <View key={rowStart} style={styles.specRow}>
-              {specCells.slice(rowStart, rowStart + 2).map((sc) => (
-                <View
-                  key={sc.label}
-                  style={[styles.specCard, {
-                    backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#fff",
-                    borderColor: isDark ? "rgba(255,255,255,0.08)" : sc.iconBg,
-                  }]}
-                >
-                  {/* Colored bottom accent */}
-                  <View style={[styles.specCardBottomAccent, { backgroundColor: sc.iconColor }]} />
-                  {/* Icon bubble */}
-                  <View style={[styles.specCardIconWrap, { backgroundColor: sc.iconBg }]}>
-                    <Feather name={sc.icon as any} size={22} color={sc.iconColor} />
-                  </View>
-                  {/* Value */}
-                  <Text style={[styles.specCardValue, { color: colors.text }]} numberOfLines={1}>
-                    {sc.value}
-                  </Text>
-                  {/* Label */}
-                  <Text style={[styles.specCardLabel, { color: colors.textTertiary }]}>
-                    {sc.label.toUpperCase()}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ))}
-
-          {/* Mileage visual bar */}
-          <View style={[styles.mileageBarWrap, {
-            backgroundColor: isDark ? "rgba(14,181,202,0.07)" : "rgba(14,181,202,0.05)",
-            borderColor: isDark ? "rgba(14,181,202,0.15)" : "rgba(14,181,202,0.16)",
-          }]}>
-            <View style={styles.mileageBarHeader}>
-              <Feather name="activity" size={13} color="#22C55E" />
-              <Text style={[styles.mileageBarLabel, { color: colors.textSecondary }]}>Mileage overview</Text>
-              <Text style={[styles.mileageBarValue, { color: "#22C55E" }]}>{formatMileage(car.mileage)}</Text>
-            </View>
-            <View style={[styles.mileageTrack, { backgroundColor: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.07)" }]}>
+          {/* Full specs CTA — kept for full spec sheet access */}
+          <View style={{ paddingHorizontal: 16, paddingBottom: 18 }}>
+            <Pressable
+              style={styles.fullSpecsBtn}
+              onPress={() => router.push({ pathname: "/full-specs/[id]", params: { id: car.id } })}
+            >
               <LinearGradient
-                colors={["#22C55E", "#0EB5CA"]}
+                colors={["#0EB5CA", "#0098AA"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={[
-                  styles.mileageFill,
-                  { width: Math.max(8, (width - 80) * Math.min(car.mileage / 300000, 1)) },
-                ]}
-              />
-            </View>
-            <View style={styles.mileageScale}>
-              <Text style={[styles.mileageScaleText, { color: colors.textTertiary }]}>0</Text>
-              <Text style={[styles.mileageScaleText, { color: colors.textTertiary }]}>150k km</Text>
-              <Text style={[styles.mileageScaleText, { color: colors.textTertiary }]}>300k km</Text>
-            </View>
-          </View>
-
-          {/* Key-value detail table */}
-          <View style={[styles.detailTable, { borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(14,181,202,0.12)" }]}>
-            {extraSpecs.map((sp, i) => (
-              <View
-                key={sp.label}
-                style={[
-                  styles.detailRow,
-                  i < extraSpecs.length - 1 && { borderBottomWidth: 1, borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(14,181,202,0.10)" },
-                ]}
+                style={styles.fullSpecsBtnGradient}
               >
-                <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{sp.label}</Text>
-                {sp.highlight ? (
-                  <View style={styles.detailBadge}>
-                    <Text style={styles.detailBadgeText}>{sp.value}</Text>
-                  </View>
-                ) : (
-                  <Text style={[styles.detailValue, { color: colors.text }]}>{sp.value}</Text>
-                )}
-              </View>
-            ))}
+                <Text style={styles.fullSpecsBtnText}>View Full Specifications</Text>
+                <Feather name="chevron-right" size={16} color="#fff" />
+              </LinearGradient>
+            </Pressable>
           </View>
-
-          {/* Full specs CTA */}
-          <Pressable
-            style={styles.fullSpecsBtn}
-            onPress={() => router.push({ pathname: "/full-specs/[id]", params: { id: car.id } })}
-          >
-            <LinearGradient
-              colors={["#0EB5CA", "#0098AA"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.fullSpecsBtnGradient}
-            >
-              <Text style={styles.fullSpecsBtnText}>View Full Specifications</Text>
-              <Feather name="chevron-right" size={16} color="#fff" />
-            </LinearGradient>
-          </Pressable>
         </View>
 
         <View style={[styles.sep, { backgroundColor: colors.background }]} />
