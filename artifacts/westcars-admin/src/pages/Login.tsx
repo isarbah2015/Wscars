@@ -7,7 +7,7 @@
 import { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db, isFirebaseReady } from "@/lib/firebase";
 
 interface LoginProps {
@@ -53,14 +53,36 @@ export default function Login({ onLogin }: LoginProps) {
 
     try {
       const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
-      const snap = await getDoc(doc(db, "users", cred.user.uid));
-      const isAdmin = !!(snap.exists() && (snap.data() as any).isAdmin);
+      const userRef = doc(db, "users", cred.user.uid);
+      const snap = await getDoc(userRef);
+      const data = snap.exists() ? (snap.data() as any) : {};
+      const isAdmin = !!data.isAdmin;
       if (!isAdmin) {
         await auth.signOut();
         setError("This account does not have admin access.");
         setLoading(false);
         return;
       }
+      // Backfill profile fields (best-effort, non-blocking) so the admin
+      // appears properly in the Users table. Uses merge so we never overwrite
+      // existing values. Login should succeed even if the write fails (e.g.
+      // transient network issue).
+      setDoc(
+        userRef,
+        {
+          email:      cred.user.email ?? data.email ?? email.trim(),
+          name:       data.name       ?? cred.user.displayName ?? "Admin",
+          location:   data.location   ?? "—",
+          isVerified: data.isVerified ?? true,
+          isDealer:   data.isDealer   ?? false,
+          isBlocked:  data.isBlocked  ?? false,
+          trustScore: data.trustScore ?? 100,
+          memberSince: data.memberSince ?? new Date().toISOString().slice(0, 10),
+          isAdmin:    true,
+          createdAt:  data.createdAt  ?? serverTimestamp(),
+        },
+        { merge: true },
+      ).catch((e) => console.warn("[admin-login] profile backfill failed:", e));
       onLogin();
     } catch (err) {
       setError(friendlyAuthError(err));

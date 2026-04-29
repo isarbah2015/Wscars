@@ -1,6 +1,6 @@
 import { Feather, AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Image,
@@ -49,40 +49,40 @@ export default function LoginScreen() {
   };
 
   // ── Google Sign-In via expo-auth-session ──
-  const googleConfigured = !!(GOOGLE_WEB_CLIENT_ID || GOOGLE_IOS_CLIENT_ID || GOOGLE_ANDROID_CLIENT_ID);
-  const [_, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId:        GOOGLE_WEB_CLIENT_ID,
-    iosClientId:     GOOGLE_IOS_CLIENT_ID,
-    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-  });
+  // The Google.useIdTokenAuthRequest hook throws synchronously when the
+  // platform-required client ID is missing, so we delegate the hook call to a
+  // child component that only mounts when the right ID for this platform is
+  // configured.
+  // - Web always needs `clientId` (= web client ID).
+  // - iOS needs iosClientId; Android needs androidClientId.
+  const googleConfigured =
+    Platform.OS === "web"     ? !!GOOGLE_WEB_CLIENT_ID :
+    Platform.OS === "ios"     ? !!GOOGLE_IOS_CLIENT_ID :
+    Platform.OS === "android" ? !!GOOGLE_ANDROID_CLIENT_ID :
+    false;
+  const promptGoogleRef = useRef<(() => Promise<void>) | null>(null);
 
-  useEffect(() => {
-    if (response?.type !== "success") return;
-    const idToken = response.params?.id_token || (response as any).authentication?.idToken;
-    const accessToken = (response as any).authentication?.accessToken;
-    if (!idToken) return;
-    (async () => {
-      setLoading(true);
-      const ok = await loginWithGoogle(idToken, accessToken);
-      setLoading(false);
-      if (ok) router.replace("/(tabs)");
-      else Alert.alert("Sign in failed", "Could not sign in with Google.");
-    })();
-  }, [response]);
+  const onGoogleIdToken = useCallback(async (idToken: string, accessToken?: string) => {
+    setLoading(true);
+    const ok = await loginWithGoogle(idToken, accessToken);
+    setLoading(false);
+    if (ok) router.replace("/(tabs)");
+    else Alert.alert("Sign in failed", "Could not sign in with Google.");
+  }, [loginWithGoogle]);
 
   const handleGoogle = () => {
     if (!isFirebaseReady()) {
       Alert.alert("Not configured", "Firebase is not configured yet. Please add the Firebase secrets first.");
       return;
     }
-    if (!googleConfigured) {
+    if (!googleConfigured || !promptGoogleRef.current) {
       Alert.alert(
         "Google Sign-In not configured",
         "Add EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID (and iOS/Android client IDs) to enable Google login.",
       );
       return;
     }
-    promptAsync().catch((e) => Alert.alert("Error", String(e?.message || e)));
+    promptGoogleRef.current().catch((e) => Alert.alert("Error", String(e?.message || e)));
   };
 
   const handlePhone = () => {
@@ -96,6 +96,9 @@ export default function LoginScreen() {
       style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
+      {googleConfigured && (
+        <GoogleAuthBridge onIdToken={onGoogleIdToken} promptRef={promptGoogleRef} />
+      )}
       {/* Hero */}
       <View style={[styles.hero, styles.heroWhite, { paddingTop: topPad + 16 }]}>
         <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
@@ -354,3 +357,36 @@ const styles = StyleSheet.create({
   trustText: { fontSize: 11, color: "#BDBDBD", fontFamily: "Manrope_400Regular" },
 
 });
+
+// ──────────────────────────────────────────────────────────────────────
+// GoogleAuthBridge — only mounts when a Google client ID is configured,
+// so we never call useIdTokenAuthRequest with an undefined clientId
+// (which throws synchronously and breaks the whole screen).
+// ──────────────────────────────────────────────────────────────────────
+function GoogleAuthBridge({
+  onIdToken,
+  promptRef,
+}: {
+  onIdToken: (idToken: string, accessToken?: string) => void;
+  promptRef: React.MutableRefObject<(() => Promise<void>) | null>;
+}) {
+  const [_, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId:        GOOGLE_WEB_CLIENT_ID,
+    iosClientId:     GOOGLE_IOS_CLIENT_ID,
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+  });
+
+  useEffect(() => {
+    promptRef.current = async () => { await promptAsync(); };
+    return () => { promptRef.current = null; };
+  }, [promptAsync, promptRef]);
+
+  useEffect(() => {
+    if (response?.type !== "success") return;
+    const idToken = response.params?.id_token || (response as any).authentication?.idToken;
+    const accessToken = (response as any).authentication?.accessToken;
+    if (idToken) onIdToken(idToken, accessToken);
+  }, [response, onIdToken]);
+
+  return null;
+}

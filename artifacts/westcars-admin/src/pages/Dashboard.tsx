@@ -29,12 +29,13 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function Dashboard() {
-  const { cars, users } = useAdmin();
+  const { cars, users, reports } = useAdmin();
 
-  const totalViews = cars.reduce((s, c) => s + c.views, 0);
+  const totalViews = cars.reduce((s, c) => s + (c.views ?? 0), 0);
   const active = cars.filter(c => c.status === "active").length;
   const pending = cars.filter(c => c.status === "pending").length;
-  const totalRevEst = cars.reduce((s, c) => s + c.price * 0.02, 0);
+  const openReports = reports.filter(r => r.status === "open").length;
+  const totalRevEst = cars.reduce((s, c) => s + (c.price ?? 0) * 0.02, 0);
 
   const recentCars = [...cars].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 6);
 
@@ -58,7 +59,7 @@ export default function Dashboard() {
         {[
           { label: "Active listings", value: active, icon: CheckCircle, color: "text-green-600", bg: "bg-green-50 border-green-100" },
           { label: "Pending review", value: pending, icon: Clock, color: "text-amber-600", bg: "bg-amber-50 border-amber-100" },
-          { label: "Open reports", value: 3, icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50 border-red-100" },
+          { label: "Open reports", value: openReports, icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50 border-red-100" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className={`rounded-xl p-4 border flex items-center gap-3 ${bg}`}>
             <Icon size={20} className={color} />
