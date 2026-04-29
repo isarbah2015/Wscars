@@ -5,16 +5,10 @@
  * secrets). If any value is missing, isFirebaseReady() returns false and the
  * AppContext falls back to mock data so dev keeps working without secrets.
  */
-import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
-import {
-  getAuth,
-  initializeAuth,
-  Auth,
-  // @ts-expect-error - getReactNativePersistence is exported but not in the .d.ts
-  getReactNativePersistence,
-} from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore";
-import { getStorage, FirebaseStorage } from "firebase/storage";
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { getAuth, initializeAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 
@@ -39,13 +33,20 @@ if (missing.length === 0) {
   try {
     app = getApps().length ? getApp() : initializeApp(firebaseConfig as any);
 
-    // RN needs initializeAuth with AsyncStorage persistence the first time.
     if (Platform.OS === "web") {
       auth = getAuth(app);
     } else {
+      // RN needs initializeAuth with AsyncStorage persistence the first time.
+      // getReactNativePersistence is only available in the RN build of
+      // firebase/auth, so we resolve it dynamically to avoid import errors
+      // on web.
       try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { getReactNativePersistence } = require("firebase/auth") as any;
         auth = initializeAuth(app, {
-          persistence: getReactNativePersistence(AsyncStorage),
+          persistence: getReactNativePersistence
+            ? getReactNativePersistence(AsyncStorage)
+            : undefined,
         });
       } catch {
         // initializeAuth throws if it was already initialised (Fast Refresh)
