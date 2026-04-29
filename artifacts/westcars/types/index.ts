@@ -53,6 +53,7 @@ export interface User {
   blockedUsers?: string[];
   totalSales?: number;
   isDealer?: boolean;
+  favorites?: string[];
 }
 
 export interface CarRating {

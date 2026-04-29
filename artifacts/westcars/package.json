@@ -57,6 +57,9 @@
   },
   "dependencies": {
     "@expo-google-fonts/manrope": "^0.4.2",
-    "@expo-google-fonts/raleway": "^0.4.2"
+    "@expo-google-fonts/raleway": "^0.4.2",
+    "expo-auth-session": "^55.0.15",
+    "expo-crypto": "^55.0.14",
+    "firebase": "^12.12.1"
   }
 }

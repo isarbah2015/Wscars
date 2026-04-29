@@ -1,0 +1,110 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────────
+    function isSignedIn()        { return request.auth != null; }
+    function isUser(uid)         { return isSignedIn() && request.auth.uid == uid; }
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    // Block users from setting protected fields on themselves. Note:
+    // `verification.phone` etc. are intentionally NOT in this list so the
+    // mobile app's optimistic flow still works — production should move
+    // verification flips to an admin-callable Cloud Function and re-add
+    // `verification` to this list.
+    function noProtectedFieldChange() {
+      return !(request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(['isAdmin', 'isVerified', 'trustScore', 'reportCount', 'totalSales']));
+    }
+
+    // ── /users/{uid} ─────────────────────────────────────────────────
+    // Read is restricted to signed-in users so anonymous crawlers cannot
+    // harvest emails/phone numbers from profile docs. Owner & admin always OK.
+    match /users/{uid} {
+      allow read:   if isSignedIn();
+      allow create: if isUser(uid)
+                    && request.resource.data.isAdmin != true
+                    && request.resource.data.isVerified != true
+                    && (!('verification' in request.resource.data)
+                         || (request.resource.data.verification.id == false
+                             && request.resource.data.verification.dealer == false));
+      allow update: if (isUser(uid) && noProtectedFieldChange()) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── /cars/{carId} ────────────────────────────────────────────────
+    match /cars/{carId} {
+      allow read: if true;                              // public listings
+      allow create: if isSignedIn()
+                    && request.resource.data.sellerId == request.auth.uid;
+      allow update: if isAdmin()
+                    || (isSignedIn() && resource.data.sellerId == request.auth.uid
+                        && !(request.resource.data.diff(resource.data).affectedKeys()
+                             .hasAny(['reportCount', 'sellerId'])));
+      allow delete: if isAdmin()
+                    || (isSignedIn() && resource.data.sellerId == request.auth.uid);
+    }
+
+    // ── /reviews/{reviewId} ──────────────────────────────────────────
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+                    && request.resource.data.fromUserId == request.auth.uid
+                    && request.resource.data.toUserId != request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ── /reports/{reportId} ──────────────────────────────────────────
+    match /reports/{reportId} {
+      allow read:   if isAdmin();
+      allow create: if isSignedIn()
+                    && request.resource.data.reporterId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // ── /conversations/{convId} ──────────────────────────────────────
+    match /conversations/{convId} {
+      allow read, update: if isSignedIn()
+                          && request.auth.uid in resource.data.participantIds;
+      allow create:       if isSignedIn()
+                          && request.auth.uid in request.resource.data.participantIds;
+      allow delete:       if isAdmin();
+
+      // Messages live as a subcollection.
+      match /messages/{msgId} {
+        allow read: if isSignedIn()
+                    && request.auth.uid in
+                       get(/databases/$(database)/documents/conversations/$(convId)).data.participantIds;
+
+        allow create: if isSignedIn()
+                      && request.resource.data.senderId == request.auth.uid
+                      && request.auth.uid in
+                         get(/databases/$(database)/documents/conversations/$(convId)).data.participantIds;
+
+        // Only the original sender may edit their own message (e.g. mark as
+        // read/delete). The senderId itself can never change.
+        allow update: if isSignedIn()
+                      && resource.data.senderId == request.auth.uid
+                      && request.resource.data.senderId == resource.data.senderId;
+
+        allow delete: if isAdmin()
+                      || (isSignedIn() && resource.data.senderId == request.auth.uid);
+      }
+    }
+
+    // ── /transactions/{txId} ─────────────────────────────────────────
+    match /transactions/{txId} {
+      allow read:   if isSignedIn()
+                    && (request.auth.uid == resource.data.sellerId
+                        || request.auth.uid == resource.data.buyerId
+                        || isAdmin());
+      allow create: if isSignedIn()
+                    && request.resource.data.sellerId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+  }
+}

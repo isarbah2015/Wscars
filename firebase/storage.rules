@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn()  { return request.auth != null; }
+    function isOwner(uid)  { return isSignedIn() && request.auth.uid == uid; }
+    function isImage()     { return request.resource.contentType.matches('image/.*'); }
+    function isUnder10MB() { return request.resource.size < 10 * 1024 * 1024; }
+    function isAdmin() {
+      return isSignedIn()
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // ── Car listing photos ─────────────────────────────────────────
+    // Path: cars/{carId}/{userId}/{file}
+    // Public read; only the *seller* (path-encoded userId) may write/delete.
+    match /cars/{carId}/{userId}/{file} {
+      allow read:   if true;
+      allow write:  if isOwner(userId) && isImage() && isUnder10MB();
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // ── Avatars ────────────────────────────────────────────────────
+    // Path: avatars/{userId}{.ext}
+    match /avatars/{file} {
+      allow read:  if true;
+      allow write: if isSignedIn()
+                   && file.matches(request.auth.uid + '\\..*')
+                   && isImage() && isUnder10MB();
+    }
+
+    // ── ID verification (PRIVATE — owner + admin only) ─────────────
+    // Path: id-verification/{userId}/{file}
+    match /id-verification/{userId}/{file} {
+      allow read:  if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) && isImage() && isUnder10MB();
+    }
+
+    // ── Chat media ─────────────────────────────────────────────────
+    // Path: chat/{conversationId}/{userId}/{file}
+    // Read: only conversation participants. Write: only the uploading user
+    // AND only if they're a participant.
+    match /chat/{conversationId}/{userId}/{file} {
+      allow read:  if isSignedIn()
+                   && request.auth.uid in
+                      firestore.get(/databases/(default)/documents/conversations/$(conversationId)).data.participantIds;
+      allow write: if isOwner(userId) && isUnder10MB()
+                   && request.auth.uid in
+                      firestore.get(/databases/(default)/documents/conversations/$(conversationId)).data.participantIds;
+    }
+  }
+}

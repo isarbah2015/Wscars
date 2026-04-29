@@ -1,9 +1,31 @@
+/**
+ * Admin login screen.
+ * Authenticates via Firebase Auth, then verifies the signed-in user has the
+ * `isAdmin: true` flag on their Firestore users/{uid} doc. Falls back to a
+ * built-in mock credential when Firebase isn't configured yet.
+ */
 import { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db, isFirebaseReady } from "@/lib/firebase";
 
 interface LoginProps {
   onLogin: () => void;
 }
+
+const friendlyAuthError = (err: unknown): string => {
+  const code = (err as { code?: string })?.code || "";
+  switch (code) {
+    case "auth/invalid-email":          return "That email is not valid.";
+    case "auth/user-not-found":
+    case "auth/wrong-password":
+    case "auth/invalid-credential":     return "Invalid email or password.";
+    case "auth/too-many-requests":      return "Too many attempts. Try again later.";
+    case "auth/network-request-failed": return "Network error. Check your connection.";
+    default:                            return (err as Error)?.message || "Sign-in failed.";
+  }
+};
 
 export default function Login({ onLogin }: LoginProps) {
   const [email, setEmail] = useState("");
@@ -16,13 +38,35 @@ export default function Login({ onLogin }: LoginProps) {
     e.preventDefault();
     setError("");
     setLoading(true);
-    await new Promise(r => setTimeout(r, 600));
-    if (email === "admin@westcars.gh" && password === "admin2024") {
-      onLogin();
-    } else {
-      setError("Invalid credentials. Please try again.");
+
+    if (!isFirebaseReady() || !auth || !db) {
+      // Mock fallback for local dev without secrets.
+      await new Promise((r) => setTimeout(r, 400));
+      if (email === "admin@westcars.gh" && password === "admin2024") {
+        onLogin();
+      } else {
+        setError("Invalid credentials. (Firebase not configured — using demo creds.)");
+      }
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
+      const snap = await getDoc(doc(db, "users", cred.user.uid));
+      const isAdmin = !!(snap.exists() && (snap.data() as any).isAdmin);
+      if (!isAdmin) {
+        await auth.signOut();
+        setError("This account does not have admin access.");
+        setLoading(false);
+        return;
+      }
+      onLogin();
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -58,7 +102,7 @@ export default function Login({ onLogin }: LoginProps) {
               <input
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@westcars.gh"
                 required
                 className="w-full pl-9 pr-4 py-2.5 text-sm bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
@@ -73,12 +117,16 @@ export default function Login({ onLogin }: LoginProps) {
               <input
                 type={showPw ? "text" : "password"}
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
                 className="w-full pl-9 pr-10 py-2.5 text-sm bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
               />
-              <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground cursor-pointer">
+              <button
+                type="button"
+                onClick={() => setShowPw(!showPw)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground cursor-pointer"
+              >
                 {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
@@ -92,9 +140,11 @@ export default function Login({ onLogin }: LoginProps) {
             {loading ? "Signing in…" : "Sign in"}
           </button>
 
-          <p className="text-xs text-center text-muted-foreground pt-1">
-            Hint: admin@westcars.gh / admin2024
-          </p>
+          {!isFirebaseReady() && (
+            <p className="text-xs text-center text-amber-600 pt-1">
+              Firebase not configured — demo creds: admin@westcars.gh / admin2024
+            </p>
+          )}
         </form>
       </div>
     </div>

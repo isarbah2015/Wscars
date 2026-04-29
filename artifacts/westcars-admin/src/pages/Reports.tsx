@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlertTriangle, CheckCircle, XCircle, Car, Users, MessageCircle } from "lucide-react";
-import { MOCK_REPORTS, formatDate, Report } from "@/data/mock";
+import { formatDate, type Report } from "@/data/mock";
+import { useAdmin } from "@/context/AdminContext";
 
 function TypeIcon({ type }: { type: Report["type"] }) {
   if (type === "listing") return <Car size={14} className="text-[#0EB5CA]" />;
@@ -18,23 +19,22 @@ function StatusBadge({ status }: { status: Report["status"] }) {
 }
 
 export default function Reports() {
-  const [reports, setReports] = useState(MOCK_REPORTS);
+  const { reports, resolveReport, dismissReport } = useAdmin();
   const [filter, setFilter] = useState<Report["status"] | "all">("all");
 
-  const filtered = filter === "all" ? reports : reports.filter(r => r.status === filter);
-
-  function resolve(id: string) { setReports(prev => prev.map(r => r.id === id ? { ...r, status: "resolved" as const } : r)); }
-  function dismiss(id: string) { setReports(prev => prev.map(r => r.id === id ? { ...r, status: "dismissed" as const } : r)); }
+  const filtered = filter === "all" ? reports : reports.filter((r) => r.status === filter);
 
   return (
     <div className="p-6 space-y-5">
       <div>
         <h1 className="text-xl font-bold text-foreground">Reports</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">{reports.filter(r => r.status === "open").length} open reports</p>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          {reports.filter((r) => r.status === "open").length} open reports
+        </p>
       </div>
 
       <div className="flex gap-1 bg-card border border-input rounded-lg p-1 w-fit">
-        {(["all", "open", "resolved", "dismissed"] as const).map(f => (
+        {(["all", "open", "resolved", "dismissed"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -47,9 +47,11 @@ export default function Reports() {
 
       <div className="space-y-3">
         {filtered.length === 0 && (
-          <div className="bg-card rounded-xl border border-card-border p-10 text-center text-muted-foreground">No reports here.</div>
+          <div className="bg-card rounded-xl border border-card-border p-10 text-center text-muted-foreground">
+            No reports here.
+          </div>
         )}
-        {filtered.map(report => (
+        {filtered.map((report) => (
           <div key={report.id} className={`bg-card rounded-xl border p-4 ${report.status === "open" ? "border-red-200" : "border-card-border"}`}>
             <div className="flex items-start gap-4">
               <div className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${report.status === "open" ? "bg-red-100" : "bg-muted"}`}>
@@ -65,14 +67,22 @@ export default function Reports() {
                   <StatusBadge status={report.status} />
                 </div>
                 <p className="text-sm text-foreground">{report.reason}</p>
-                <p className="text-xs text-muted-foreground mt-1.5">Reported by <span className="font-medium">{report.reportedBy}</span> · {formatDate(report.createdAt)}</p>
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  Reported by <span className="font-medium">{report.reportedBy}</span> · {formatDate(report.createdAt)}
+                </p>
               </div>
               {report.status === "open" && (
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <button onClick={() => resolve(report.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-100 text-green-700 text-xs font-medium hover:bg-green-200 transition-colors cursor-pointer">
+                  <button
+                    onClick={() => resolveReport(report.id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-100 text-green-700 text-xs font-medium hover:bg-green-200 transition-colors cursor-pointer"
+                  >
                     <CheckCircle size={13} /> Resolve
                   </button>
-                  <button onClick={() => dismiss(report.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium hover:bg-slate-200 transition-colors cursor-pointer">
+                  <button
+                    onClick={() => dismissReport(report.id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium hover:bg-slate-200 transition-colors cursor-pointer"
+                  >
                     <XCircle size={13} /> Dismiss
                   </button>
                 </div>

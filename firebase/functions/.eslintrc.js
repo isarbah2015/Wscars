@@ -1,0 +1,9 @@
+module.exports = {
+  env: { es6: true, node: true },
+  parserOptions: { ecmaVersion: 2022, sourceType: "module" },
+  extends: ["eslint:recommended"],
+  rules: {
+    "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    "no-console":     "off",
+  },
+};

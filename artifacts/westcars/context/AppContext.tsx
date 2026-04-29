@@ -1,7 +1,16 @@
+/**
+ * AppContext — central data hub for the Westcars app.
+ *
+ * Wired to Firebase (Auth + Firestore) when EXPO_PUBLIC_FIREBASE_* secrets
+ * are configured. Falls back to mock data + AsyncStorage when they are not,
+ * so the project keeps building and previewing without secrets.
+ */
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Car, Conversation, Message, Report, Review, Transaction, User } from "@/types";
 import { ADMIN_USER, MOCK_CARS, MOCK_CONVERSATIONS, MOCK_MESSAGES, MOCK_USERS } from "@/utils/mockData";
+import { isFirebaseReady } from "@/lib/firebase";
+import * as fb from "@/services/firebase";
 
 interface AppContextType {
   currentUser: User | null;
@@ -18,12 +27,13 @@ interface AppContextType {
 
   login: (email: string, password: string) => Promise<boolean>;
   signup: (name: string, email: string, phone: string, password: string) => Promise<boolean>;
+  loginWithGoogle: (idToken: string, accessToken?: string) => Promise<boolean>;
   logout: () => void;
   toggleFavorite: (carId: string) => void;
   isFavorite: (carId: string) => boolean;
-  addCar: (car: Omit<Car, "id" | "seller" | "rating" | "createdAt" | "isSponsored">) => void;
+  addCar: (car: Omit<Car, "id" | "seller" | "rating" | "createdAt" | "isSponsored">) => Promise<string | null>;
   sendMessage: (conversationId: string, text: string, mediaUrl?: string, mediaType?: "image" | "voice") => void;
-  startConversation: (car: Car) => string;
+  startConversation: (car: Car) => Promise<string>;
   updateUserProfile: (updates: Partial<User>) => void;
   markAsSold: (carId: string) => void;
   renewListing: (carId: string) => void;
@@ -60,26 +70,47 @@ const STORAGE_KEYS = {
 };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  const useFirebase = isFirebaseReady();
+
   const [currentUser,    setCurrentUser]    = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [favorites,      setFavorites]      = useState<string[]>([]);
-  const [cars,           setCars]           = useState<Car[]>(MOCK_CARS);
-  const [conversations,  setConversations]  = useState<Conversation[]>(MOCK_CONVERSATIONS);
-  const [messages,       setMessages]       = useState<Record<string, Message[]>>({
-    conv1: MOCK_MESSAGES,
-    conv2: [],
-  });
+  const [cars,           setCars]           = useState<Car[]>(useFirebase ? [] : MOCK_CARS);
+  const [conversations,  setConversations]  = useState<Conversation[]>(useFirebase ? [] : MOCK_CONVERSATIONS);
+  const [messages,       setMessages]       = useState<Record<string, Message[]>>(
+    useFirebase ? {} : { conv1: MOCK_MESSAGES, conv2: [] },
+  );
   const [isLoading,      setIsLoading]      = useState(true);
-  const [reviews,        setReviews]        = useState<Review[]>(MOCK_REVIEWS);
+  const [reviews,        setReviews]        = useState<Review[]>(useFirebase ? [] : MOCK_REVIEWS);
   const [reports,        setReports]        = useState<Report[]>([]);
   const [transactions,   setTransactions]   = useState<Transaction[]>([]);
   const [blockedUsers,   setBlockedUsers]   = useState<string[]>([]);
 
-  useEffect(() => {
-    loadStoredData();
-  }, []);
+  // Track per-conversation message subscriptions so we can clean up.
+  const messageSubsRef = useRef<Record<string, () => void>>({});
 
-  const loadStoredData = async () => {
+  // ── Bootstrap ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (useFirebase) {
+      // Firebase mode — auth state is the source of truth.
+      const unsub = fb.subscribeAuth((u) => {
+        setCurrentUser(u);
+        setIsAuthenticated(!!u);
+        setFavorites(u?.favorites as string[] | undefined ?? []);
+        setBlockedUsers(u?.blockedUsers ?? []);
+        setIsLoading(false);
+      });
+      // Also load favorites cache for instant UI
+      AsyncStorage.getItem(STORAGE_KEYS.FAVORITES).then((raw) => {
+        if (raw) try { setFavorites(JSON.parse(raw)); } catch {}
+      });
+      return () => unsub();
+    }
+    // Mock mode — preserve the original AsyncStorage flow.
+    loadMockStored();
+  }, [useFirebase]);
+
+  const loadMockStored = async () => {
     try {
       const [storedUser, storedFavs, storedReviews, storedReports, storedBlocked] =
         await Promise.all([
@@ -89,29 +120,92 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           AsyncStorage.getItem(STORAGE_KEYS.REPORTS),
           AsyncStorage.getItem(STORAGE_KEYS.BLOCKED),
         ]);
-
       if (storedUser)    { const u = JSON.parse(storedUser); setCurrentUser(u); setIsAuthenticated(true); }
       if (storedFavs)    setFavorites(JSON.parse(storedFavs));
       if (storedReviews) setReviews([...MOCK_REVIEWS, ...JSON.parse(storedReviews)]);
       if (storedReports) setReports(JSON.parse(storedReports));
       if (storedBlocked) setBlockedUsers(JSON.parse(storedBlocked));
     } catch { /* ignore */ }
-    finally  { setIsLoading(false); }
+    finally { setIsLoading(false); }
   };
 
-  // ── Auth ──────────────────────────────────────────────────────────────
-  const login = useCallback(async (email: string, _pw: string): Promise<boolean> => {
-    const normalised = email.toLowerCase().trim();
+  // ── Firestore live subscriptions ─────────────────────────────────────────
+  useEffect(() => {
+    if (!useFirebase) return;
+    const unsub = fb.subscribeCars(setCars);
+    return () => unsub();
+  }, [useFirebase]);
 
-    // Admin shortcut
+  useEffect(() => {
+    if (!useFirebase) return;
+    const unsub = fb.subscribeReviews(setReviews);
+    return () => unsub();
+  }, [useFirebase]);
+
+  useEffect(() => {
+    if (!useFirebase || !currentUser?.isAdmin) return;
+    const unsub = fb.subscribeReports(setReports);
+    return () => unsub();
+  }, [useFirebase, currentUser?.isAdmin]);
+
+  useEffect(() => {
+    if (!useFirebase || !currentUser?.id) {
+      setConversations([]);
+      return;
+    }
+    const unsub = fb.subscribeConversations(currentUser.id, setConversations);
+    return () => unsub();
+  }, [useFirebase, currentUser?.id]);
+
+  // For each visible conversation, subscribe to its messages (and clean up old ones).
+  useEffect(() => {
+    if (!useFirebase) return;
+    const visibleIds = new Set(conversations.map((c) => c.id));
+    // Tear down subs for convos no longer visible
+    for (const id of Object.keys(messageSubsRef.current)) {
+      if (!visibleIds.has(id)) {
+        messageSubsRef.current[id]();
+        delete messageSubsRef.current[id];
+      }
+    }
+    // Spin up subs for new convos
+    for (const id of visibleIds) {
+      if (!messageSubsRef.current[id]) {
+        messageSubsRef.current[id] = fb.subscribeMessages(id, (msgs) => {
+          setMessages((prev) => ({ ...prev, [id]: msgs }));
+        });
+      }
+    }
+  }, [useFirebase, conversations]);
+
+  useEffect(() => () => {
+    // Final cleanup
+    for (const off of Object.values(messageSubsRef.current)) off();
+    messageSubsRef.current = {};
+  }, []);
+
+  // ── Auth ─────────────────────────────────────────────────────────────────
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+    if (useFirebase) {
+      try {
+        const user = await fb.signInEmail(email, password);
+        // onAuthStateChanged will populate currentUser; pre-fill for snappier UX.
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        return true;
+      } catch (err) {
+        console.warn("[login] failed:", err);
+        return false;
+      }
+    }
+    // ── Mock fallback ──
+    const normalised = email.toLowerCase().trim();
     if (normalised === "admin@westcars.gh") {
       const u = { ...ADMIN_USER };
       setCurrentUser(u); setIsAuthenticated(true);
       await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(u));
       return true;
     }
-
-    // Look up a previously registered profile for this email
     try {
       const raw = await AsyncStorage.getItem(STORAGE_KEYS.REGISTERED_USERS);
       if (raw) {
@@ -124,81 +218,99 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch { /* ignore */ }
-
-    // Fallback: create a guest profile for any unregistered email
     const u: User = {
       id: "currentUser",
       name: email.split("@")[0] || "Guest",
-      phone: "",
-      email,
-      location: "Accra",
+      phone: "", email, location: "Accra",
       memberSince: new Date().toISOString().split("T")[0],
       isVerified: false,
       verification: { phone: false, id: false, dealer: false },
-      rating: 0,
-      totalReviews: 0,
-      totalListings: 0,
-      trustScore: 15,
-      totalSales: 0,
+      rating: 0, totalReviews: 0, totalListings: 0, trustScore: 15, totalSales: 0,
     };
     setCurrentUser(u); setIsAuthenticated(true);
     await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(u));
     return true;
-  }, []);
+  }, [useFirebase]);
 
-  const signup = useCallback(async (name: string, email: string, phone: string, _pw: string): Promise<boolean> => {
+  const signup = useCallback(async (name: string, email: string, phone: string, password: string): Promise<boolean> => {
+    if (useFirebase) {
+      try {
+        const user = await fb.signUpEmail(name, email, phone, password);
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        return true;
+      } catch (err) {
+        console.warn("[signup] failed:", err);
+        return false;
+      }
+    }
+    // ── Mock fallback ──
     const normalised = email.toLowerCase().trim();
     const u: User = {
       id: `user_${Date.now()}`,
-      name, phone, email: normalised,
-      location: "Accra",
+      name, phone, email: normalised, location: "Accra",
       memberSince: new Date().toISOString().split("T")[0],
       isVerified: false,
       verification: { phone: false, id: false, dealer: false },
-      rating: 0,
-      totalReviews: 0,
-      totalListings: 0,
-      trustScore: 15,
-      totalSales: 0,
+      rating: 0, totalReviews: 0, totalListings: 0, trustScore: 15, totalSales: 0,
     };
-
-    // Persist profile so login can retrieve it later
     try {
       const raw = await AsyncStorage.getItem(STORAGE_KEYS.REGISTERED_USERS);
       const map: Record<string, User> = raw ? JSON.parse(raw) : {};
       map[normalised] = u;
       await AsyncStorage.setItem(STORAGE_KEYS.REGISTERED_USERS, JSON.stringify(map));
     } catch { /* ignore */ }
-
     setCurrentUser(u); setIsAuthenticated(true);
     await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(u));
     return true;
-  }, []);
+  }, [useFirebase]);
+
+  const loginWithGoogle = useCallback(async (idToken: string, accessToken?: string): Promise<boolean> => {
+    if (!useFirebase) {
+      console.warn("[google-login] requires Firebase to be configured.");
+      return false;
+    }
+    try {
+      const user = await fb.signInWithGoogleIdToken(idToken, accessToken);
+      setCurrentUser(user); setIsAuthenticated(true);
+      return true;
+    } catch (err) {
+      console.warn("[google-login] failed:", err);
+      return false;
+    }
+  }, [useFirebase]);
 
   const logout = useCallback(async () => {
+    if (useFirebase) {
+      try { await fb.signOut(); } catch { /* ignore */ }
+    }
     setCurrentUser(null); setIsAuthenticated(false);
     await AsyncStorage.removeItem(STORAGE_KEYS.USER);
-  }, []);
+  }, [useFirebase]);
 
-  // ── Favorites ──────────────────────────────────────────────────────────
+  // ── Favorites ────────────────────────────────────────────────────────────
   const toggleFavorite = useCallback((carId: string) => {
     setFavorites((prev) => {
       const next = prev.includes(carId) ? prev.filter((id) => id !== carId) : [...prev, carId];
       AsyncStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(next));
+      // Persist to user doc when authenticated.
+      if (useFirebase && currentUser?.id) {
+        fb.updateUser(currentUser.id, { favorites: next } as any).catch(() => {});
+      }
       return next;
     });
-  }, []);
+  }, [useFirebase, currentUser?.id]);
 
   const isFavorite = useCallback((carId: string) => favorites.includes(carId), [favorites]);
 
-  // ── Cars ───────────────────────────────────────────────────────────────
-  const addCar = useCallback((carData: Omit<Car, "id" | "seller" | "rating" | "createdAt" | "isSponsored">) => {
+  // ── Cars ─────────────────────────────────────────────────────────────────
+  const addCar = useCallback(async (carData: Omit<Car, "id" | "seller" | "rating" | "createdAt" | "isSponsored">): Promise<string | null> => {
     const now = new Date();
     const expires = new Date(now); expires.setDate(expires.getDate() + 30);
-    const newCar: Car = {
+    const seller = currentUser || MOCK_USERS[0];
+    const newCar: Omit<Car, "id"> = {
       ...carData,
-      id: `car_${Date.now()}`,
-      seller: currentUser || MOCK_USERS[0],
+      seller,
       sellerId: currentUser?.id || "currentUser",
       rating: { overall: 0, comfort: 0, ergonomics: 0, performance: 0, safety: 0, reliability: 0, totalRatings: 0 },
       createdAt: now.toISOString().split("T")[0],
@@ -206,11 +318,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       isSponsored: false,
       reportCount: 0,
     };
-    setCars((prev) => [newCar, ...prev]);
-  }, [currentUser]);
+    if (useFirebase) {
+      try { return await fb.createCar(newCar); }
+      catch (err) { console.warn("[addCar] failed:", err); return null; }
+    }
+    const localId = `car_${Date.now()}`;
+    setCars((prev) => [{ id: localId, ...newCar }, ...prev]);
+    return localId;
+  }, [currentUser, useFirebase]);
 
   const markAsSold = useCallback((carId: string) => {
-    setCars((prev) => prev.map((c) => c.id === carId ? { ...c, isSold: true } : c));
+    if (useFirebase) {
+      fb.markCarSold(carId).catch((e) => console.warn("[markSold]", e));
+    } else {
+      setCars((prev) => prev.map((c) => c.id === carId ? { ...c, isSold: true } : c));
+    }
     const tx: Transaction = {
       id: `tx_${Date.now()}`,
       carId,
@@ -222,19 +344,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (currentUser) {
       const updated = { ...currentUser, totalSales: (currentUser.totalSales || 0) + 1 };
       setCurrentUser(updated);
-      AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updated));
+      if (useFirebase) fb.updateUser(currentUser.id, { totalSales: updated.totalSales }).catch(() => {});
+      else AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updated));
     }
-  }, [currentUser]);
+  }, [currentUser, useFirebase]);
 
   const renewListing = useCallback((carId: string) => {
+    if (useFirebase) {
+      fb.renewCar(carId).catch((e) => console.warn("[renew]", e));
+      return;
+    }
     const expires = new Date(); expires.setDate(expires.getDate() + 30);
     setCars((prev) =>
-      prev.map((c) => c.id === carId ? { ...c, expiresAt: expires.toISOString().split("T")[0] } : c)
+      prev.map((c) => c.id === carId ? { ...c, expiresAt: expires.toISOString().split("T")[0] } : c),
     );
-  }, []);
+  }, [useFirebase]);
 
-  // ── Messages ───────────────────────────────────────────────────────────
-  const startConversation = useCallback((car: Car): string => {
+  // ── Messages ─────────────────────────────────────────────────────────────
+  const startConversation = useCallback(async (car: Car): Promise<string> => {
+    if (useFirebase && currentUser?.id) {
+      try { return await fb.getOrCreateConversation(currentUser.id, car); }
+      catch (err) { console.warn("[startConv]", err); }
+    }
     const existing = conversations.find((c) => c.carId === car.id);
     if (existing) return existing.id;
     const id = `conv_${Date.now()}`;
@@ -247,141 +378,161 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setConversations((prev) => [newConv, ...prev]);
     setMessages((prev) => ({ ...prev, [id]: [] }));
     return id;
-  }, [conversations]);
+  }, [conversations, currentUser?.id, useFirebase]);
 
   const sendMessage = useCallback((conversationId: string, text: string, mediaUrl?: string, mediaType?: "image" | "voice") => {
+    if (useFirebase && currentUser?.id) {
+      fb.sendMessage(conversationId, currentUser.id, text, mediaUrl, mediaType)
+        .catch((e) => console.warn("[sendMessage]", e));
+      return;
+    }
+    // Mock fallback (with the original auto-reply for demo continuity)
     const msg: Message = {
-      id: `msg_${Date.now()}`,
-      conversationId,
+      id: `msg_${Date.now()}`, conversationId,
       senderId: currentUser?.id || "currentUser",
-      text,
-      timestamp: new Date().toISOString(),
+      text, timestamp: new Date().toISOString(),
       ...(mediaUrl ? { mediaUrl, mediaType } : {}),
       isRead: false,
     };
     setMessages((prev) => ({ ...prev, [conversationId]: [...(prev[conversationId] || []), msg] }));
     setConversations((prev) => prev.map((c) =>
-      c.id === conversationId ? { ...c, lastMessage: text || "📷 Photo", lastMessageTime: new Date().toISOString() } : c
+      c.id === conversationId ? { ...c, lastMessage: text || "📷 Photo", lastMessageTime: new Date().toISOString() } : c,
     ));
-    // Auto-reply
     setTimeout(() => {
       const reply: Message = {
-        id: `msg_${Date.now()}_r`,
-        conversationId,
-        senderId: "other",
+        id: `msg_${Date.now()}_r`, conversationId, senderId: "other",
         text: "Thanks for your message! I'll get back to you shortly.",
-        timestamp: new Date().toISOString(),
-        isRead: false,
+        timestamp: new Date().toISOString(), isRead: false,
       };
       setMessages((prev) => ({ ...prev, [conversationId]: [...(prev[conversationId] || []), reply] }));
       setConversations((prev) => prev.map((c) =>
-        c.id === conversationId ? { ...c, unreadCount: c.unreadCount + 1 } : c
+        c.id === conversationId ? { ...c, unreadCount: c.unreadCount + 1 } : c,
       ));
     }, 1500);
-  }, [currentUser]);
+  }, [currentUser, useFirebase]);
 
   const deleteMessage = useCallback((conversationId: string, messageId: string) => {
+    if (useFirebase) {
+      fb.softDeleteMessage(conversationId, messageId).catch((e) => console.warn("[delMsg]", e));
+      return;
+    }
     setMessages((prev) => ({
       ...prev,
       [conversationId]: (prev[conversationId] || []).map((m) =>
-        m.id === messageId ? { ...m, isDeletedForSelf: true } : m
+        m.id === messageId ? { ...m, isDeletedForSelf: true } : m,
       ),
     }));
-  }, []);
+  }, [useFirebase]);
 
   const markMessagesRead = useCallback((conversationId: string) => {
-    setConversations((prev) => prev.map((c) =>
-      c.id === conversationId ? { ...c, unreadCount: 0 } : c
-    ));
+    if (useFirebase) {
+      fb.markConversationRead(conversationId).catch(() => {});
+      return;
+    }
+    setConversations((prev) => prev.map((c) => c.id === conversationId ? { ...c, unreadCount: 0 } : c));
     setMessages((prev) => ({
       ...prev,
       [conversationId]: (prev[conversationId] || []).map((m) => ({ ...m, isRead: true })),
     }));
-  }, []);
+  }, [useFirebase]);
 
-  // ── Profile ────────────────────────────────────────────────────────────
+  // ── Profile ──────────────────────────────────────────────────────────────
   const updateUserProfile = useCallback(async (updates: Partial<User>) => {
     setCurrentUser((prev) => {
       if (!prev) return prev;
       const updated = { ...prev, ...updates };
-      AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updated));
+      if (useFirebase) fb.updateUser(prev.id, updates).catch(() => {});
+      else AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updated));
       return updated;
     });
-  }, []);
+  }, [useFirebase]);
 
   const toggleAnonymous = useCallback(() => {
     setCurrentUser((prev) => {
       if (!prev) return prev;
       const updated = { ...prev, isAnonymous: !prev.isAnonymous };
-      AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updated));
+      if (useFirebase) fb.updateUser(prev.id, { isAnonymous: updated.isAnonymous }).catch(() => {});
+      else AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updated));
       return updated;
     });
-  }, []);
+  }, [useFirebase]);
 
-  // ── Verification ───────────────────────────────────────────────────────
+  // ── Verification ─────────────────────────────────────────────────────────
   const verifyPhone = useCallback(async (): Promise<boolean> => {
-    // Simulates Firebase SMS verification
     await new Promise((r) => setTimeout(r, 800));
-    if (currentUser) {
-      const updated = {
-        ...currentUser,
+    if (!currentUser) return false;
+    const updated: User = {
+      ...currentUser,
+      isVerified: true,
+      verification: { ...(currentUser.verification || { phone: false, id: false, dealer: false }), phone: true },
+      trustScore: Math.min(100, (currentUser.trustScore || 0) + 20),
+    };
+    setCurrentUser(updated);
+    if (useFirebase) {
+      fb.updateUser(currentUser.id, {
         isVerified: true,
-        verification: { ...(currentUser.verification || { phone: false, id: false, dealer: false }), phone: true },
-        trustScore: Math.min(100, (currentUser.trustScore || 0) + 20),
-      };
-      setCurrentUser(updated);
+        verification: updated.verification,
+        trustScore: updated.trustScore,
+      }).catch(() => {});
+    } else {
       await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updated));
     }
     return true;
-  }, [currentUser]);
+  }, [currentUser, useFirebase]);
 
   const verifyId = useCallback(async (): Promise<boolean> => {
     await new Promise((r) => setTimeout(r, 1200));
-    if (currentUser) {
-      const updated = {
-        ...currentUser,
+    if (!currentUser) return false;
+    const updated: User = {
+      ...currentUser,
+      isVerified: true,
+      verification: { ...(currentUser.verification || { phone: false, id: false, dealer: false }), id: true },
+      trustScore: Math.min(100, (currentUser.trustScore || 0) + 30),
+    };
+    setCurrentUser(updated);
+    if (useFirebase) {
+      fb.updateUser(currentUser.id, {
         isVerified: true,
-        verification: { ...(currentUser.verification || { phone: false, id: false, dealer: false }), id: true },
-        trustScore: Math.min(100, (currentUser.trustScore || 0) + 30),
-      };
-      setCurrentUser(updated);
+        verification: updated.verification,
+        trustScore: updated.trustScore,
+      }).catch(() => {});
+    } else {
       await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updated));
     }
     return true;
-  }, [currentUser]);
+  }, [currentUser, useFirebase]);
 
-  // ── Reviews ────────────────────────────────────────────────────────────
+  // ── Reviews ──────────────────────────────────────────────────────────────
   const submitReview = useCallback((review: Omit<Review, "id" | "createdAt">) => {
-    const newReview: Review = {
-      ...review,
-      id: `rev_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
+    if (useFirebase) {
+      fb.createReview(review).catch((e) => console.warn("[submitReview]", e));
+      return;
+    }
+    const newReview: Review = { ...review, id: `rev_${Date.now()}`, createdAt: new Date().toISOString() };
     setReviews((prev) => {
       const next = [newReview, ...prev];
       AsyncStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(next.filter((r) => !MOCK_REVIEWS.find((m) => m.id === r.id))));
       return next;
     });
-  }, []);
+  }, [useFirebase]);
 
   const getUserReviews = useCallback((userId: string) =>
     reviews.filter((r) => r.toUserId === userId),
   [reviews]);
 
-  // ── Reports ────────────────────────────────────────────────────────────
+  // ── Reports ──────────────────────────────────────────────────────────────
   const reportItem = useCallback((report: Omit<Report, "id" | "createdAt" | "status">) => {
-    const newReport: Report = {
-      ...report,
-      id: `rep_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      status: "pending",
-    };
+    if (useFirebase) {
+      fb.createReport(report).catch((e) => console.warn("[reportItem]", e));
+      // Auto-hide @ 3 reports is enforced by reportContent Cloud Function.
+      return;
+    }
+    const newReport: Report = { ...report, id: `rep_${Date.now()}`, createdAt: new Date().toISOString(), status: "pending" };
     setReports((prev) => {
       const next = [newReport, ...prev];
       AsyncStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(next));
       return next;
     });
-    // Auto-hide if 3+ reports
     if (report.targetType === "listing") {
       setCars((prev) => prev.map((c) => {
         if (c.id !== report.targetId) return c;
@@ -389,18 +540,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return { ...c, reportCount: count, isHidden: count >= 3 };
       }));
     }
-  }, []);
+  }, [useFirebase]);
 
-  // ── Admin Actions ──────────────────────────────────────────────────────
+  // ── Admin Actions ────────────────────────────────────────────────────────
   const dismissReport = useCallback((reportId: string) => {
+    if (useFirebase) {
+      fb.setReportStatus(reportId, "dismissed").catch(() => {});
+      return;
+    }
     setReports((prev) => {
       const next = prev.map((r) => r.id === reportId ? { ...r, status: "dismissed" as const } : r);
       AsyncStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(next));
       return next;
     });
-  }, []);
+  }, [useFirebase]);
 
   const resolveReport = useCallback((reportId: string, action: "dismiss" | "remove") => {
+    if (useFirebase) {
+      const target = reports.find((r) => r.id === reportId);
+      fb.setReportStatus(reportId, "reviewed").catch(() => {});
+      if (action === "remove" && target?.targetType === "listing") {
+        fb.deleteCar(target.targetId).catch(() => {});
+      }
+      return;
+    }
     setReports((prev) => {
       const report = prev.find((r) => r.id === reportId);
       const next = prev.map((r) => r.id === reportId ? { ...r, status: "reviewed" as const } : r);
@@ -410,37 +573,52 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return next;
     });
-  }, []);
+  }, [reports, useFirebase]);
 
   const toggleCarVisibility = useCallback((carId: string) => {
+    const car = cars.find((c) => c.id === carId);
+    if (useFirebase) {
+      fb.setCarHidden(carId, !car?.isHidden).catch(() => {});
+      return;
+    }
     setCars((prev) => prev.map((c) => c.id === carId ? { ...c, isHidden: !c.isHidden } : c));
-  }, []);
+  }, [cars, useFirebase]);
 
   const deleteCar = useCallback((carId: string) => {
+    if (useFirebase) {
+      fb.deleteCar(carId).catch(() => {});
+      return;
+    }
     setCars((prev) => prev.filter((c) => c.id !== carId));
-  }, []);
+  }, [useFirebase]);
 
-  // ── Block ──────────────────────────────────────────────────────────────
+  // ── Block ────────────────────────────────────────────────────────────────
   const blockUser = useCallback((userId: string) => {
     setBlockedUsers((prev) => {
       if (prev.includes(userId)) return prev;
       const next = [...prev, userId];
       AsyncStorage.setItem(STORAGE_KEYS.BLOCKED, JSON.stringify(next));
+      if (useFirebase && currentUser?.id) {
+        fb.updateUser(currentUser.id, { blockedUsers: next }).catch(() => {});
+      }
       return next;
     });
-  }, []);
+  }, [useFirebase, currentUser?.id]);
 
   const unblockUser = useCallback((userId: string) => {
     setBlockedUsers((prev) => {
       const next = prev.filter((id) => id !== userId);
       AsyncStorage.setItem(STORAGE_KEYS.BLOCKED, JSON.stringify(next));
+      if (useFirebase && currentUser?.id) {
+        fb.updateUser(currentUser.id, { blockedUsers: next }).catch(() => {});
+      }
       return next;
     });
-  }, []);
+  }, [useFirebase, currentUser?.id]);
 
   const isBlocked = useCallback((userId: string) => blockedUsers.includes(userId), [blockedUsers]);
 
-  // ── Trust Score ────────────────────────────────────────────────────────
+  // ── Trust Score ──────────────────────────────────────────────────────────
   const getSellerTrustScore = useCallback((user: User): number => {
     if (user.trustScore !== undefined) return user.trustScore;
     let score = 0;
@@ -455,19 +633,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return Math.min(100, score);
   }, []);
 
-  return (
-    <AppContext.Provider value={{
-      currentUser, isAuthenticated, favorites, cars, conversations, messages,
-      isLoading, reviews, reports, transactions, blockedUsers,
-      login, signup, logout, toggleFavorite, isFavorite, addCar, sendMessage,
-      startConversation, updateUserProfile, markAsSold, renewListing, submitReview,
-      reportItem, blockUser, unblockUser, isBlocked, verifyPhone, verifyId,
-      toggleAnonymous, getUserReviews, getSellerTrustScore, deleteMessage, markMessagesRead,
-      dismissReport, resolveReport, toggleCarVisibility, deleteCar,
-    }}>
-      {children}
-    </AppContext.Provider>
-  );
+  const ctxValue = useMemo<AppContextType>(() => ({
+    currentUser, isAuthenticated, favorites, cars, conversations, messages,
+    isLoading, reviews, reports, transactions, blockedUsers,
+    login, signup, loginWithGoogle, logout, toggleFavorite, isFavorite, addCar, sendMessage,
+    startConversation, updateUserProfile, markAsSold, renewListing, submitReview,
+    reportItem, blockUser, unblockUser, isBlocked, verifyPhone, verifyId,
+    toggleAnonymous, getUserReviews, getSellerTrustScore, deleteMessage, markMessagesRead,
+    dismissReport, resolveReport, toggleCarVisibility, deleteCar,
+  }), [
+    currentUser, isAuthenticated, favorites, cars, conversations, messages, isLoading,
+    reviews, reports, transactions, blockedUsers,
+    login, signup, loginWithGoogle, logout, toggleFavorite, isFavorite, addCar, sendMessage,
+    startConversation, updateUserProfile, markAsSold, renewListing, submitReview,
+    reportItem, blockUser, unblockUser, isBlocked, verifyPhone, verifyId,
+    toggleAnonymous, getUserReviews, getSellerTrustScore, deleteMessage, markMessagesRead,
+    dismissReport, resolveReport, toggleCarVisibility, deleteCar,
+  ]);
+
+  return <AppContext.Provider value={ctxValue}>{children}</AppContext.Provider>;
 }
 
 export function useApp() {

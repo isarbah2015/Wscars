@@ -1,0 +1,128 @@
+/**
+ * Firebase Auth helpers for Westcars.
+ * Wraps Firebase Auth with friendly error messages and a Firestore user-doc
+ * shape that matches the existing User type.
+ */
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut as fbSignOut,
+  onAuthStateChanged,
+  updateProfile,
+  GoogleAuthProvider,
+  signInWithCredential,
+  type User as FirebaseUser,
+  type Unsubscribe,
+} from "firebase/auth";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db, isFirebaseReady } from "@/lib/firebase";
+import { User } from "@/types";
+
+const ensureReady = () => {
+  if (!isFirebaseReady() || !auth || !db) {
+    throw new Error("Firebase is not configured. Add EXPO_PUBLIC_FIREBASE_* secrets.");
+  }
+};
+
+const todayIso = () => new Date().toISOString().split("T")[0];
+
+/** Build a default User doc shape from a Firebase auth user. */
+const buildDefaultUserDoc = (fbUser: FirebaseUser, overrides: Partial<User> = {}): User => ({
+  id: fbUser.uid,
+  name: overrides.name ?? fbUser.displayName ?? (fbUser.email?.split("@")[0] || "User"),
+  email: fbUser.email || "",
+  phone: overrides.phone ?? fbUser.phoneNumber ?? "",
+  location: overrides.location ?? "Accra",
+  avatar: overrides.avatar ?? fbUser.photoURL ?? undefined,
+  memberSince: todayIso(),
+  isVerified: false,
+  verification: { phone: false, id: false, dealer: false },
+  rating: 0,
+  totalReviews: 0,
+  totalListings: 0,
+  trustScore: 15,
+  totalSales: 0,
+  ...overrides,
+});
+
+/** Look up the Firestore profile for a Firebase user, creating one if missing. */
+export async function loadOrCreateUserDoc(fbUser: FirebaseUser, overrides: Partial<User> = {}): Promise<User> {
+  ensureReady();
+  const ref = doc(db!, "users", fbUser.uid);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    return { id: fbUser.uid, ...(snap.data() as Omit<User, "id">) };
+  }
+  const profile = buildDefaultUserDoc(fbUser, overrides);
+  await setDoc(ref, { ...profile, createdAt: serverTimestamp() });
+  return profile;
+}
+
+/** Sign in with email + password, return the Firestore user profile. */
+export async function signInEmail(email: string, password: string): Promise<User> {
+  ensureReady();
+  const cred = await signInWithEmailAndPassword(auth!, email.trim(), password);
+  return loadOrCreateUserDoc(cred.user);
+}
+
+/** Create a new account, persist user doc, return the Firestore profile. */
+export async function signUpEmail(
+  name: string,
+  email: string,
+  phone: string,
+  password: string,
+): Promise<User> {
+  ensureReady();
+  const cred = await createUserWithEmailAndPassword(auth!, email.trim(), password);
+  if (name) {
+    try { await updateProfile(cred.user, { displayName: name }); } catch { /* ignore */ }
+  }
+  return loadOrCreateUserDoc(cred.user, { name, phone });
+}
+
+/** Exchange a Google id_token (from expo-auth-session) for a Firebase session. */
+export async function signInWithGoogleIdToken(idToken: string, accessToken?: string): Promise<User> {
+  ensureReady();
+  const credential = GoogleAuthProvider.credential(idToken, accessToken);
+  const result = await signInWithCredential(auth!, credential);
+  return loadOrCreateUserDoc(result.user);
+}
+
+export async function signOut(): Promise<void> {
+  ensureReady();
+  await fbSignOut(auth!);
+}
+
+/** Subscribe to auth state changes; resolves the user-doc on each login. */
+export function subscribeAuth(cb: (user: User | null) => void): Unsubscribe {
+  if (!isFirebaseReady() || !auth) {
+    cb(null);
+    return () => {};
+  }
+  return onAuthStateChanged(auth, async (fbUser) => {
+    if (!fbUser) { cb(null); return; }
+    try {
+      const u = await loadOrCreateUserDoc(fbUser);
+      cb(u);
+    } catch (err) {
+      console.warn("[auth] failed to load user doc:", err);
+      cb(null);
+    }
+  });
+}
+
+/** Friendly error message from a Firebase auth error code. */
+export function authErrorMessage(err: unknown): string {
+  const code = (err as { code?: string })?.code || "";
+  switch (code) {
+    case "auth/invalid-email":            return "That email address is not valid.";
+    case "auth/user-not-found":
+    case "auth/wrong-password":
+    case "auth/invalid-credential":       return "Invalid email or password.";
+    case "auth/email-already-in-use":     return "An account with that email already exists.";
+    case "auth/weak-password":            return "Password must be at least 6 characters.";
+    case "auth/network-request-failed":   return "Network error. Check your connection.";
+    case "auth/too-many-requests":        return "Too many attempts. Please try again later.";
+    default:                              return (err as Error)?.message || "Something went wrong.";
+  }
+}

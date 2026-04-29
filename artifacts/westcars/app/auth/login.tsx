@@ -1,6 +1,6 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -14,12 +14,21 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
 import { useApp } from "@/context/AppContext";
+import { isFirebaseReady } from "@/lib/firebase";
+
+WebBrowser.maybeCompleteAuthSession();
 
 const WC_LOGO = require("@/assets/images/wc-logo.png");
 
+const GOOGLE_WEB_CLIENT_ID     = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+const GOOGLE_IOS_CLIENT_ID     = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+const GOOGLE_ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
+
 export default function LoginScreen() {
-  const { login } = useApp();
+  const { login, loginWithGoogle } = useApp();
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,6 +46,47 @@ export default function LoginScreen() {
     setLoading(false);
     if (ok) router.replace("/(tabs)");
     else Alert.alert("Login Failed", "Invalid email or password.");
+  };
+
+  // ── Google Sign-In via expo-auth-session ──
+  const googleConfigured = !!(GOOGLE_WEB_CLIENT_ID || GOOGLE_IOS_CLIENT_ID || GOOGLE_ANDROID_CLIENT_ID);
+  const [_, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId:        GOOGLE_WEB_CLIENT_ID,
+    iosClientId:     GOOGLE_IOS_CLIENT_ID,
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+  });
+
+  useEffect(() => {
+    if (response?.type !== "success") return;
+    const idToken = response.params?.id_token || (response as any).authentication?.idToken;
+    const accessToken = (response as any).authentication?.accessToken;
+    if (!idToken) return;
+    (async () => {
+      setLoading(true);
+      const ok = await loginWithGoogle(idToken, accessToken);
+      setLoading(false);
+      if (ok) router.replace("/(tabs)");
+      else Alert.alert("Sign in failed", "Could not sign in with Google.");
+    })();
+  }, [response]);
+
+  const handleGoogle = () => {
+    if (!isFirebaseReady()) {
+      Alert.alert("Not configured", "Firebase is not configured yet. Please add the Firebase secrets first.");
+      return;
+    }
+    if (!googleConfigured) {
+      Alert.alert(
+        "Google Sign-In not configured",
+        "Add EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID (and iOS/Android client IDs) to enable Google login.",
+      );
+      return;
+    }
+    promptAsync().catch((e) => Alert.alert("Error", String(e?.message || e)));
+  };
+
+  const handlePhone = () => {
+    router.push("/auth/phone");
   };
 
   const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
@@ -135,8 +185,19 @@ export default function LoginScreen() {
 
           <View style={styles.divider}>
             <View style={styles.divLine} />
-            <Text style={styles.divText}>or</Text>
+            <Text style={styles.divText}>or continue with</Text>
             <View style={styles.divLine} />
+          </View>
+
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <Pressable style={[styles.socialBtn, { flex: 1 }]} onPress={handleGoogle} disabled={loading}>
+              <AntDesign name="google" size={18} color="#0F172A" />
+              <Text style={styles.socialText}>Google</Text>
+            </Pressable>
+            <Pressable style={[styles.socialBtn, { flex: 1 }]} onPress={handlePhone} disabled={loading}>
+              <Feather name="phone" size={18} color="#0F172A" />
+              <Text style={styles.socialText}>Phone</Text>
+            </Pressable>
           </View>
 
           <Pressable style={styles.registerBtn} onPress={() => router.push("/auth/signup")}>
@@ -273,6 +334,14 @@ const styles = StyleSheet.create({
     borderRadius: 12, backgroundColor: "rgba(14,181,202,0.07)",
   },
   registerText: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#0098AA" },
+
+  socialBtn: {
+    height: 52, flexDirection: "row", alignItems: "center",
+    justifyContent: "center", gap: 8,
+    borderWidth: 1.5, borderColor: "#E2E8F0",
+    borderRadius: 12, backgroundColor: "#fff",
+  },
+  socialText: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#0F172A" },
 
   guestBtn: { alignItems: "center", paddingVertical: 6 },
   guestText: { fontSize: 13, color: "#9E9E9E", fontFamily: "Manrope_400Regular" },

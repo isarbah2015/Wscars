@@ -88,11 +88,54 @@ A full-featured React Native / Expo mobile app called **Westcars** — Ghana's t
 - TypeScript
 - Manrope font (400/500/600/700/800) via @expo-google-fonts/manrope
 - expo-linear-gradient, expo-blur, expo-image-picker
-- @expo/vector-icons (Feather)
+- expo-auth-session, expo-crypto, expo-web-browser (Google sign-in)
+- @expo/vector-icons (Feather, AntDesign)
 - AsyncStorage for auth/favorites/theme/blocks/reviews persistence
 - ThemeContext (dark/light mode)
-- AppContext (all app state + 15 feature actions)
+- AppContext (all app state + 15 feature actions; live Firestore subscriptions when configured)
 - react-native-safe-area-context
+- **Firebase JS SDK** (auth + firestore + storage) — see Firebase Backend below
+
+## Firebase Backend
+
+The mobile app and admin dashboard share a single Firebase project. Live data
+flows through `firebase/firestore` with `onSnapshot` subscriptions; storage
+uploads go to `firebase/storage`; logic lives in `firebase/functions`.
+
+### Project layout
+- `firebase/` — deployable Firebase project (rules, indexes, functions, README)
+  - `firestore.rules` — owner-write / public-read; admins via `users/{uid}.isAdmin`; clients can't spoof `isAdmin` / `isVerified`
+  - `storage.rules` — owner-write; ID docs are private; 10 MB cap
+  - `firestore.indexes.json` — 6 composite indexes for the queries the apps run
+  - `functions/index.js` — 6 Cloud Functions (sendMessageNotification, processCarImages, calculateCarRating, sendVerificationEmail, reportContent, expireListings)
+  - `README.md` — full deploy + setup guide
+- `scripts/seed-firestore.mjs` — one-shot seeder (firebase-admin) that pushes the original mock cars/users/reviews to Firestore
+- `artifacts/westcars/lib/firebase.ts` + `artifacts/westcars-admin/src/lib/firebase.ts` — SDK init (gracefully no-ops when secrets are missing)
+- `artifacts/westcars/services/firebase/*.ts` — 8 service modules (auth, cars, users, messages, reviews, reports, storage, index)
+- `artifacts/westcars-admin/src/lib/firestore.ts` — admin Firestore service with mappers (mobile shape ↔ admin shape; `status` computed from `isHidden`/`isSold`/`reportCount`)
+
+### Dual-mode data layer
+Both `AppContext` (mobile) and `AdminContext` (admin) check `isFirebaseReady()`:
+when secrets are present they live-subscribe to Firestore; otherwise they fall
+back to `MOCK_CARS` / `MOCK_USERS` so the app keeps building without setup.
+
+### Auth
+- **Email + password** (default), **Google sign-in** (expo-auth-session), and **Phone OTP** (UI scaffolded — needs `@react-native-firebase/auth` or a Twilio-backed Cloud Function for production; see `app/auth/phone.tsx`).
+- Admin login signs in with Firebase Auth, then verifies `users/{uid}.isAdmin == true` before granting access.
+
+### Required secrets
+Mobile (Expo): `EXPO_PUBLIC_FIREBASE_API_KEY`, `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`, `EXPO_PUBLIC_FIREBASE_PROJECT_ID`, `EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET`, `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`, `EXPO_PUBLIC_FIREBASE_APP_ID`.
+Admin (Vite): mirror the same six values as `VITE_FIREBASE_*`.
+Optional Google sign-in: `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`.
+
+### Deploying
+1. Create a Firebase project and **upgrade to Blaze** (Cloud Functions require it).
+2. Enable Auth providers: Email/Password, Google, Phone.
+3. Enable Firestore (production mode) and Storage.
+4. Add the 6 Web SDK config values to Replit secrets (both `EXPO_PUBLIC_*` and `VITE_*`).
+5. From your local machine: `npm i -g firebase-tools && cd firebase && firebase login && firebase use --add`.
+6. `firebase deploy --only firestore:rules,storage,firestore:indexes` then `firebase deploy --only functions`.
+7. `node scripts/seed-firestore.mjs` to populate sample data.
 
 ## Branding
 - Logo: `wc-badge.png` (navy rounded square with silver chrome W)
