@@ -28,7 +28,8 @@ if (missing.length === 0) {
   try {
     app = getApps().length ? getApp() : initializeApp(cfg as any);
     auth = getAuth(app);
-    db = getFirestore(app);
+    const databaseId = import.meta.env.VITE_FIREBASE_DATABASE_ID as string | undefined;
+    db = databaseId ? getFirestore(app, databaseId) : getFirestore(app);
     storage = getStorage(app);
   } catch (err) {
     console.warn("[firebase] init failed:", err);

@@ -40,3 +40,9 @@ externalPort = 3001
 [[ports]]
 localPort = 24648
 externalPort = 3000
+
+[userenv]
+
+[userenv.shared]
+EXPO_PUBLIC_FIREBASE_DATABASE_ID = "westcar-5c1e6"
+VITE_FIREBASE_DATABASE_ID = "westcar-5c1e6"

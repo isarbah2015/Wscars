@@ -126,6 +126,8 @@ back to `MOCK_CARS` / `MOCK_USERS` so the app keeps building without setup.
 ### Required secrets
 Mobile (Expo): `EXPO_PUBLIC_FIREBASE_API_KEY`, `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`, `EXPO_PUBLIC_FIREBASE_PROJECT_ID`, `EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET`, `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`, `EXPO_PUBLIC_FIREBASE_APP_ID`.
 Admin (Vite): mirror the same six values as `VITE_FIREBASE_*`.
+
+Optional: `EXPO_PUBLIC_FIREBASE_DATABASE_ID` / `VITE_FIREBASE_DATABASE_ID` — set these only if your Firestore database has a custom ID instead of `(default)` (e.g. when the database was created via gcloud or named in the console). Both apps pass this as the second arg to `getFirestore(app, databaseId)` when set.
 Optional Google sign-in: `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`.
 
 ### Deploying

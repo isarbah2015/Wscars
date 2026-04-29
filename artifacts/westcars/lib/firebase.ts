@@ -53,7 +53,8 @@ if (missing.length === 0) {
         auth = getAuth(app);
       }
     }
-    db      = getFirestore(app);
+    const databaseId = process.env.EXPO_PUBLIC_FIREBASE_DATABASE_ID;
+    db      = databaseId ? getFirestore(app, databaseId) : getFirestore(app);
     storage = getStorage(app);
   } catch (err) {
     console.warn("[firebase] init failed:", err);
