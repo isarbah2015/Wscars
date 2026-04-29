@@ -16,10 +16,10 @@ interface SidebarProps {
 
 export function Sidebar({ onLogout }: SidebarProps) {
   const [location] = useLocation();
-  const { cars, users } = useAdmin();
+  const { cars, users, reports } = useAdmin();
 
   const pendingListings = cars.filter(c => c.status === "pending").length;
-  const openReports = 3;
+  const openReports = reports.filter(r => r.status === "open").length;
 
   return (
     <aside className="w-60 flex-shrink-0 flex flex-col h-screen bg-sidebar text-sidebar-foreground">
