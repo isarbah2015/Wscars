@@ -24,20 +24,25 @@ function NotFound() {
 }
 
 function AdminApp({ onLogout }: { onLogout: () => void }) {
+  // AdminProvider lives INSIDE the authed shell so its Firestore
+  // subscriptions only fire after a successful admin login. Otherwise
+  // unauthenticated reads trip the security rules (permission-denied).
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar onLogout={onLogout} />
-      <main className="flex-1 overflow-y-auto">
-        <Switch>
-          <Route path="/" component={Dashboard} />
-          <Route path="/listings" component={Listings} />
-          <Route path="/users" component={Users} />
-          <Route path="/reports" component={Reports} />
-          <Route path="/analytics" component={Analytics} />
-          <Route component={NotFound} />
-        </Switch>
-      </main>
-    </div>
+    <AdminProvider>
+      <div className="flex h-screen overflow-hidden bg-background">
+        <Sidebar onLogout={onLogout} />
+        <main className="flex-1 overflow-y-auto">
+          <Switch>
+            <Route path="/" component={Dashboard} />
+            <Route path="/listings" component={Listings} />
+            <Route path="/users" component={Users} />
+            <Route path="/reports" component={Reports} />
+            <Route path="/analytics" component={Analytics} />
+            <Route component={NotFound} />
+          </Switch>
+        </main>
+      </div>
+    </AdminProvider>
   );
 }
 
@@ -46,14 +51,12 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AdminProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          {authed
-            ? <AdminApp onLogout={() => setAuthed(false)} />
-            : <Login onLogin={() => setAuthed(true)} />
-          }
-        </WouterRouter>
-      </AdminProvider>
+      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+        {authed
+          ? <AdminApp onLogout={() => setAuthed(false)} />
+          : <Login onLogin={() => setAuthed(true)} />
+        }
+      </WouterRouter>
     </QueryClientProvider>
   );
 }
