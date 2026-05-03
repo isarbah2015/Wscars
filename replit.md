@@ -176,6 +176,23 @@ To let `eas submit` upload builds to Play Console without manual drag-and-drop, 
 
 Once configured: `eas build --profile production --platform android` then `eas submit --latest --platform android` is your full release loop.
 
+### Privacy policy (required by Play Store)
+Play Console requires a publicly accessible privacy-policy URL for any app that requests sensitive permissions or collects user data. The full policy is in `artifacts/westcars/PRIVACY_POLICY.md`.
+
+**To host it (pick one):**
+- **GitHub raw URL** (fastest): push the file to your `Westcar-Mobile` GitHub repo and use `https://raw.githubusercontent.com/Lyon7Sarbah/Westcar-Mobile/master/PRIVACY_POLICY.md`. Works but renders as plain text.
+- **GitHub Pages** (recommended): in repo Settings → Pages → enable from `master` branch → root. Then the URL is `https://lyon7sarbah.github.io/Westcar-Mobile/PRIVACY_POLICY` (renders as HTML).
+- **Notion / Google Sites / any free static host**: paste the markdown content and publish.
+
+Then in Play Console → **App content** → **Privacy policy** → paste the URL.
+
+### Permissions hardening (Play Store compliance)
+The app now declares **only** the permissions it actually uses:
+- `ACCESS_FINE_LOCATION` + `ACCESS_COARSE_LOCATION` — used in `app/(tabs)/profile.tsx` to set the user's region.
+- Photo-library access is added automatically by `expo-image-picker` for the gallery picker used in `sell.tsx` and `conversation/[id].tsx`.
+
+`app.json` explicitly **blocks** `CAMERA`, `RECORD_AUDIO`, `READ_EXTERNAL_STORAGE`, and `WRITE_EXTERNAL_STORAGE` via the `android.blockedPermissions` array, and `expo-image-picker` is configured with `cameraPermission: false` and `microphonePermission: false` so the plugin does not silently re-add them. This eliminates the Play Console "permissions that require a privacy policy: CAMERA" warning and avoids being flagged for sensitive permissions the app does not use. If you ever add an in-app camera flow, re-enable `CAMERA` here.
+
 ## Branding
 - Logo: `wc-badge.png` (navy rounded square with silver chrome W)
 - Colors: #0066CC primary blue, #E8192C red, #0A1628 dark navy, #F5F5F5 light bg

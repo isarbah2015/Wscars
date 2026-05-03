@@ -23,7 +23,6 @@
       "bundleIdentifier": "gh.westcars.app",
       "buildNumber": "1",
       "infoPlist": {
-        "NSCameraUsageDescription": "Westcars needs camera access to take photos of cars you want to list.",
         "NSPhotoLibraryUsageDescription": "Westcars needs access to your photos to upload car images.",
         "NSLocationWhenInUseUsageDescription": "Westcars uses your location to show cars near you and to attach a location to your listings."
       }
@@ -36,12 +35,14 @@
         "backgroundColor": "#0A1628"
       },
       "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ],
+      "blockedPermissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ]
     },
     "web": {
@@ -60,7 +61,8 @@
         "expo-image-picker",
         {
           "photosPermission": "Westcars needs access to your photos to upload car images.",
-          "cameraPermission": "Westcars needs camera access to take photos of cars you want to list."
+          "cameraPermission": false,
+          "microphonePermission": false
         }
       ]
     ],
