@@ -154,6 +154,28 @@ The Expo project intentionally has **no `android/` or `ios/` directory** — tha
 
 App identifiers in `app.json`: Android `package` = `gh.westcars.app`, iOS `bundleIdentifier` = `gh.westcars.app`. Change these BEFORE the first store submission if you want a different ID — once published, they cannot be changed.
 
+### Play Store service account (for `eas submit`)
+To let `eas submit` upload builds to Play Console without manual drag-and-drop, you need a Google service account with Play Console access:
+
+1. **Create a Play Console developer account** ($25 one-time, https://play.google.com/console).
+2. **Create your app** in Play Console → "Create app". Use package name `gh.westcars.app` (must match `app.json`).
+3. **Create the service account in Google Cloud:**
+   - Go to https://console.cloud.google.com/iam-admin/serviceaccounts
+   - Pick the same Google Cloud project that's linked to your Firebase project (or create one).
+   - Click **+ Create service account** → name it `westcars-play-publisher` → **Create and continue**.
+   - Skip the optional "Grant access" step → **Done**.
+   - Click the new service account → **Keys** tab → **Add key** → **Create new key** → **JSON** → downloads `xxx.json`.
+4. **Save the key file** as `artifacts/westcars/play-store-service-account.json` (this path is referenced in `eas.json`). **Add this filename to `.gitignore`** — never commit it.
+5. **Grant the service account Play Console access:**
+   - Play Console → **Users and permissions** → **Invite new users**.
+   - Email: paste the service account email (looks like `westcars-play-publisher@yourproject.iam.gserviceaccount.com`).
+   - **App permissions** → add Westcars → grant **Admin (all permissions)** for first setup, or just **Release manager** + **View app information**.
+   - Send invitation. The service account auto-accepts.
+6. **Enable the Google Play Android Developer API** in Google Cloud Console (https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com) for the same project.
+7. **First submission must be manual:** Play Console requires you to upload the very first `.aab` through the web UI to create the app listing. After that, `eas submit --profile production --platform android` will push subsequent builds straight to the **internal** track (configured in `eas.json`).
+
+Once configured: `eas build --profile production --platform android` then `eas submit --latest --platform android` is your full release loop.
+
 ## Branding
 - Logo: `wc-badge.png` (navy rounded square with silver chrome W)
 - Colors: #0066CC primary blue, #E8192C red, #0A1628 dark navy, #F5F5F5 light bg
