@@ -597,8 +597,9 @@ const styles = StyleSheet.create({
   contactSub: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular", marginTop: 2 },
   contactActions: { flexDirection: "row", gap: 10 },
   contactBtn: {
-    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
     gap: 6, height: 40, borderRadius: 10,
+    paddingHorizontal: 20,
     borderWidth: 1.5, borderColor: "#0EB5CA",
     backgroundColor: "rgba(14,181,202,0.08)",
   },
