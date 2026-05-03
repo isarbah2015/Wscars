@@ -130,7 +130,7 @@ Admin (Vite): mirror the same six values as `VITE_FIREBASE_*`.
 Optional: `EXPO_PUBLIC_FIREBASE_DATABASE_ID` / `VITE_FIREBASE_DATABASE_ID` — set these only if your Firestore database has a custom ID instead of `(default)` (e.g. when the database was created via gcloud or named in the console). Both apps pass this as the second arg to `getFirestore(app, databaseId)` when set.
 Optional Google sign-in: `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`.
 
-### Deploying
+### Deploying Firebase backend
 1. Create a Firebase project and **upgrade to Blaze** (Cloud Functions require it).
 2. Enable Auth providers: Email/Password, Google, Phone.
 3. Enable Firestore (production mode) and Storage.
@@ -138,6 +138,21 @@ Optional Google sign-in: `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, `EXPO_PUBLIC_GOOGLE
 5. From your local machine: `npm i -g firebase-tools && cd firebase && firebase login && firebase use --add`.
 6. `firebase deploy --only firestore:rules,storage,firestore:indexes` then `firebase deploy --only functions`.
 7. `node scripts/seed-firestore.mjs` to populate sample data.
+
+### Building the mobile app for Play Store / App Store
+The Expo project intentionally has **no `android/` or `ios/` directory** — that is normal for Expo's managed workflow. Native projects are generated on demand at build time. Two options:
+
+**Option A — EAS Build (recommended, no local Xcode/Android Studio required):**
+1. `npm i -g eas-cli && eas login`
+2. `cd artifacts/westcars && eas init` (this creates the EAS project and writes the real `projectId` into `app.json` → `extra.eas.projectId`, replacing the `REPLACE_WITH_EAS_PROJECT_ID` placeholder).
+3. `eas build --profile production --platform android` → produces a signed `.aab` ready for Play Store internal testing.
+4. `eas submit --profile production --platform android` to upload to Play Console (requires `play-store-service-account.json` — see `eas.json` `submit.production.android.serviceAccountKeyPath`).
+5. For iOS: `eas build --profile production --platform ios` (requires Apple Developer membership) and update the `submit.production.ios` placeholders in `eas.json`.
+
+**Option B — Local prebuild (eject to bare workflow):**
+- `cd artifacts/westcars && npx expo prebuild` will generate `android/` and `ios/` folders from `app.json`. After this, you build with Gradle (`cd android && ./gradlew bundleRelease`) or Xcode. Most teams skip this and use EAS Build.
+
+App identifiers in `app.json`: Android `package` = `gh.westcars.app`, iOS `bundleIdentifier` = `gh.westcars.app`. Change these BEFORE the first store submission if you want a different ID — once published, they cannot be changed.
 
 ## Branding
 - Logo: `wc-badge.png` (navy rounded square with silver chrome W)
