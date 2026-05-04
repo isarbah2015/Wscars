@@ -502,16 +502,16 @@ const styles = StyleSheet.create({
 
   titleRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" },
   titleSub: {
-    fontSize: 10,
-    fontFamily: "Sora_800ExtraBold",
-    letterSpacing: 2.5,
+    fontSize: 9,
+    fontFamily: "PlusJakartaSans_600SemiBold",
+    letterSpacing: 2,
     marginBottom: 1,
   },
   title: {
-    fontSize: 28,
-    fontFamily: "Sora_800ExtraBold",
-    letterSpacing: -0.5,
-    lineHeight: 32,
+    fontSize: 17,
+    fontFamily: "PlusJakartaSans_600SemiBold",
+    letterSpacing: -0.2,
+    lineHeight: 22,
   },
   countBadge: {
     alignItems: "center",

@@ -42,7 +42,10 @@ export default function LoginScreen() {
     const ok = await login(email.trim(), password);
     setLoading(false);
     if (ok) router.replace("/(tabs)");
-    else Alert.alert("Login Failed", "Invalid email or password.");
+    else Alert.alert(
+      "Sign In Failed",
+      "No account found with those details. Please check your email and password, or tap 'Create account' to register.",
+    );
   };
 
   // ── Google Sign-In via expo-auth-session ──

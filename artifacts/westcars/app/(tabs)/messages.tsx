@@ -247,9 +247,9 @@ const styles = StyleSheet.create({
     fontFamily: "PlusJakartaSans_700Bold",
   },
   headerTitle: {
-    fontSize: 22,
-    fontFamily: "Sora_800ExtraBold",
-    letterSpacing: -0.3,
+    fontSize: 15,
+    fontFamily: "PlusJakartaSans_600SemiBold",
+    letterSpacing: -0.1,
   },
   headerSub: {
     fontSize: 12,
