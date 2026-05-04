@@ -67,8 +67,8 @@ const CONDITION_TABS: { id: Condition; label: string; img: any }[] = [
   { id: "moto", label: "Moto", img: CAR_MOTO },
 ];
 
-const ALL_VEHICLE_TYPES: { label: string; img: any }[] = [
-  { label: "SUV / 4×4",        img: CAT_SUV        },
+const ALL_VEHICLE_TYPES: { label: string; img: any; imgScale?: number }[] = [
+  { label: "SUV / 4×4",        img: CAT_SUV,         imgScale: 0.78 },
   { label: "Sedan",             img: CAT_SEDAN      },
   { label: "Hatchback",         img: CAT_HATCH      },
   { label: "Pickup Truck",      img: CAT_PICKUP     },
@@ -361,7 +361,17 @@ export default function HomeScreen() {
                     {cat.label}
                   </Text>
                   <View style={styles.subTabImgWrap}>
-                    <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
+                    <Image
+                      source={cat.img}
+                      style={[
+                        styles.subTabImg,
+                        cat.imgScale && {
+                          width: 62 * cat.imgScale,
+                          height: 40 * cat.imgScale,
+                        },
+                      ]}
+                      resizeMode="contain"
+                    />
                   </View>
                 </Pressable>
 
@@ -745,11 +755,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     width: 140,
-    height: 54,
     borderRadius: 14,
     borderWidth: 1,
     paddingLeft: 10,
     paddingRight: 0,
+    paddingVertical: 8,
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 5,
@@ -758,13 +768,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   subTabImgWrap: {
-    width: 66,
-    height: 54,
-    overflow: "hidden",
+    width: 64,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
   },
-  subTabImg: { width: 66, height: 44 },
+  subTabImg: { width: 62, height: 40 },
   subTabLabel: {
     fontSize: 11,
     fontFamily: "Manrope_700Bold",
