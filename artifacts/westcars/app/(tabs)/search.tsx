@@ -3,6 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Dimensions,
   FlatList,
   Image,
   Modal,
@@ -14,6 +15,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
@@ -27,6 +29,8 @@ import {
   TRANSMISSIONS,
 } from "@/utils/ghanaData";
 import { BRAND_LOGOS } from "@/utils/brandLogos";
+
+const SHEET_H = Dimensions.get("window").height * 0.80;
 
 const PRICE_RANGES = [
   { label: "Any Price",     min: 0,      max: 9999999, icon: "layers" as const },
@@ -240,7 +244,7 @@ function FilterModal({
             </View>
           </LinearGradient>
 
-          <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, flexShrink: 1 }}>
+          <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
             <BrandSection />
             <View style={fStyles.divider} />
             <FilterSection title="Location"     options={GHANA_CITIES}   selected={location}     onSelect={setLocation}     />
@@ -679,7 +683,7 @@ const fStyles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
-    maxHeight: "82%",
+    height: SHEET_H,
     overflow: "hidden",
     flexDirection: "column",
   },
