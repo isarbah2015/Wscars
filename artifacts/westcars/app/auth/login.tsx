@@ -1,4 +1,4 @@
-import { Feather, AntDesign } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -191,7 +191,7 @@ export default function LoginScreen() {
 
           <View style={{ flexDirection: "row", gap: 10 }}>
             <Pressable style={[styles.socialBtn, { flex: 1 }]} onPress={handleGoogle} disabled={loading}>
-              <AntDesign name="google" size={18} color="#0F172A" />
+              <Text style={styles.googleG}>G</Text>
               <Text style={styles.socialText}>Google</Text>
             </Pressable>
             <Pressable style={[styles.socialBtn, { flex: 1 }]} onPress={handlePhone} disabled={loading}>
@@ -342,6 +342,10 @@ const styles = StyleSheet.create({
     borderRadius: 12, backgroundColor: "#fff",
   },
   socialText: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#0F172A" },
+  googleG: {
+    fontSize: 18, fontFamily: "Manrope_800ExtraBold",
+    color: "#4285F4", lineHeight: 20,
+  },
 
   guestBtn: { alignItems: "center", paddingVertical: 6 },
   guestText: { fontSize: 13, color: "#9E9E9E", fontFamily: "Manrope_400Regular" },
