@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#1A1A1A",
   },
   subtitle: {

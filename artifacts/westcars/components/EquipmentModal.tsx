@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#fff",
     letterSpacing: -0.3,
   },
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
   statBox: { flex: 1, alignItems: "center" },
   statValue: {
     fontSize: 18,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#fff",
     letterSpacing: -0.5,
   },
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   },
   gridTitle: {
     fontSize: 15,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#0F172A",
     letterSpacing: -0.2,
   },
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
   },
   gridCardCount: {
     fontSize: 18,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: -0.5,
   },
   gridCardCountLabel: {
@@ -559,7 +559,7 @@ const styles = StyleSheet.create({
   sectionsWrap: { paddingHorizontal: 14 },
   sectionsHeader: {
     fontSize: 15,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#0F172A",
     letterSpacing: -0.2,
     paddingHorizontal: 4,
@@ -592,7 +592,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitle: {
     fontSize: 15,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#fff",
     letterSpacing: -0.2,
   },
@@ -613,7 +613,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderBadgeText: {
     fontSize: 11,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#fff",
     letterSpacing: 0.3,
   },

@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 14,
     lineHeight: 18,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#0098AA",
     letterSpacing: 3,
     textAlign: "center",
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   },
   socialText: { fontSize: 14, fontFamily: "PlusJakartaSans_700Bold", color: "#0F172A" },
   googleG: {
-    fontSize: 18, fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontSize: 18, fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#4285F4", lineHeight: 20,
   },
 

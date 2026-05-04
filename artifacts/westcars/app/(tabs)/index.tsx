@@ -196,7 +196,7 @@ export default function HomeScreen() {
     }
   };
 
-  // "Personally for you" always shows all non-moto cars regardless of which condition tab is selected.
+  // "Just for you" always shows all non-moto cars regardless of which condition tab is selected.
   // The condition tabs only control which subcategory tiles are displayed below.
   const displayCars = cars.filter(
     (c) => c.category !== "motorcycle" && c.category !== "moto"
@@ -320,7 +320,7 @@ export default function HomeScreen() {
                   <Text style={[
                     styles.mainTabLabel,
                     active
-                      ? { color: "#FFFFFF", fontFamily: "PlusJakartaSans_800ExtraBold" }
+                      ? { color: "#FFFFFF", fontFamily: "PlusJakartaSans_600SemiBold" }
                       : { color: isDark ? "#94A3B8" : "#64748B", fontFamily: "PlusJakartaSans_600SemiBold" },
                   ]}>
                     {tab.label}
@@ -540,12 +540,12 @@ export default function HomeScreen() {
 
         <View style={[styles.sep, { backgroundColor: colors.background }]} />
 
-        {/* ── "Personally for you" section ── */}
+        {/* ── "Just for you" section ── */}
         <View style={[styles.section, { backgroundColor: colors.card }]}>
           <View style={styles.sectionRow}>
             <View style={styles.sectionTitleRow}>
               <View style={[styles.sectionAccentBar, { backgroundColor: colors.accent }]} />
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Personally for you</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Just for you</Text>
             </View>
           </View>
           <View style={styles.gridBreakout}>
@@ -793,7 +793,7 @@ const styles = StyleSheet.create({
 
   brandStripName: {
     fontSize: 15,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: 3.5,
     marginTop: -20,
     textAlign: "center",
@@ -943,7 +943,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   featSponsoredStar: { color: "#fff", fontSize: 10, lineHeight: 13 },
-  featSponsoredText: { color: "#fff", fontSize: 10, fontFamily: "PlusJakartaSans_800ExtraBold", letterSpacing: 1.0 },
+  featSponsoredText: { color: "#fff", fontSize: 10, fontFamily: "PlusJakartaSans_600SemiBold", letterSpacing: 1.0 },
 
   /* ── Featured Listings (1×1) ── */
   featuredList: { gap: 12 },
@@ -972,7 +972,7 @@ const styles = StyleSheet.create({
     shadowColor: "#0EB5CA", shadowOpacity: 0.6, shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 }, elevation: 4,
   },
-  featPriceText: { color: "#fff", fontSize: 16, fontFamily: "PlusJakartaSans_800ExtraBold", letterSpacing: -0.3 },
+  featPriceText: { color: "#fff", fontSize: 16, fontFamily: "PlusJakartaSans_600SemiBold", letterSpacing: -0.3 },
   featViewsTag: {
     position: "absolute", bottom: 14, right: 12,
     flexDirection: "row", alignItems: "center", gap: 4,

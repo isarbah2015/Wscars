@@ -665,7 +665,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.45)", borderRadius: 2,
     alignItems: "center", justifyContent: "center",
   },
-  soldOverlayText: { fontSize: 18, fontFamily: "PlusJakartaSans_800ExtraBold", color: "#fff", letterSpacing: 2 },
+  soldOverlayText: { fontSize: 18, fontFamily: "PlusJakartaSans_600SemiBold", color: "#fff", letterSpacing: 2 },
   expiry: {
     position: "absolute", bottom: 42, left: 6,
     flexDirection: "row", alignItems: "center", gap: 3,

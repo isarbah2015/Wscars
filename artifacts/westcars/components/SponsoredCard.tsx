@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   sponsoredLabel: {
     color: "#fff",
     fontSize: 9,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: 1,
   },
 
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   priceText: {
     color: "#fff",
     fontSize: 14,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: -0.3,
   },
 
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   },
   carName: {
     fontSize: 15,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: 0.05,
   },
   chipRow: {

@@ -72,6 +72,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     gap: 0,
   },
-  smScore: { fontSize: 14, fontFamily: "PlusJakartaSans_800ExtraBold" },
+  smScore: { fontSize: 14, fontFamily: "PlusJakartaSans_600SemiBold" },
   smLabel: { fontSize: 9, fontFamily: "PlusJakartaSans_500Medium" },
 });

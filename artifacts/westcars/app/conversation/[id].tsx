@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { AudioModule, RecordingPresets, useAudioPlayer, useAudioPlayerStatus, useAudioRecorder } from "expo-audio";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -33,6 +34,53 @@ function timeStr(iso: string) {
   return d.toLocaleDateString([], { day: "numeric", month: "short" });
 }
 
+// ── Audio Player bubble ───────────────────────────────────────────────────────
+function AudioBubble({ uri, isOwn }: { uri: string; isOwn: boolean }) {
+  const player = useAudioPlayer({ uri });
+  const status = useAudioPlayerStatus(player);
+
+  const toggle = () => {
+    if (status.playing) {
+      player.pause();
+    } else {
+      player.play();
+    }
+  };
+
+  const pct = (status.duration ?? 0) > 0
+    ? (status.currentTime ?? 0) / (status.duration ?? 1)
+    : 0;
+  const remaining = Math.max(0, (status.duration ?? 0) - (status.currentTime ?? 0));
+  const secs = Math.round(remaining);
+  const timeLabel = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`;
+
+  return (
+    <Pressable onPress={toggle} style={[styles.audioBubble, isOwn && styles.audioBubbleOwn]}>
+      <View style={[styles.audioPlayBtn, isOwn && styles.audioPlayBtnOwn]}>
+        <Feather name={status.playing ? "pause" : "play"} size={16} color={isOwn ? "#0066CC" : "#fff"} />
+      </View>
+      <View style={styles.audioWaveWrap}>
+        {Array.from({ length: 22 }).map((_, i) => {
+          const h = 6 + Math.sin(i * 0.9) * 6 + Math.cos(i * 1.7) * 4;
+          const filled = i / 22 <= pct;
+          return (
+            <View
+              key={i}
+              style={[
+                styles.audioBar,
+                { height: h, backgroundColor: filled
+                  ? (isOwn ? "rgba(255,255,255,0.9)" : "#0066CC")
+                  : (isOwn ? "rgba(255,255,255,0.35)" : "#CBD5E1") },
+              ]}
+            />
+          );
+        })}
+      </View>
+      <Text style={[styles.audioDuration, isOwn && { color: "rgba(255,255,255,0.8)" }]}>{timeLabel}</Text>
+    </Pressable>
+  );
+}
+
 function MessageBubble({
   msg, isOwn, sellerPhone, onDelete,
 }: {
@@ -43,8 +91,7 @@ function MessageBubble({
 
   if (msg.isDeletedForSelf) return null;
 
-  // Detect phone mismatch
-  const phones = msg.text.match(PHONE_RE);
+  const phones = msg.text?.match(PHONE_RE);
   const hasMismatch = phones && sellerPhone &&
     phones.some((p) => p.replace(/\s/g, "") !== sellerPhone.replace(/\s/g, ""));
 
@@ -62,36 +109,54 @@ function MessageBubble({
         styles.bubbleContainer,
         isOwn ? styles.bubbleContainerOwn : styles.bubbleContainerOther,
       ]}>
-        <Pressable
-          onLongPress={() => isOwn && setShowActions(true)}
-          style={[styles.bubble, isOwn ? styles.bubbleOwn : { ...styles.bubbleOther, backgroundColor: colors.card }]}
-        >
-          {/* Media image */}
-          {msg.mediaType === "image" && msg.mediaUrl && (
-            <Image source={{ uri: msg.mediaUrl }} style={styles.mediaImg} resizeMode="cover" />
-          )}
-
-          {msg.text ? (
-            <Text style={[styles.bubbleText, isOwn ? styles.bubbleTextOwn : { color: colors.text }]}>
-              {msg.text}
-            </Text>
-          ) : null}
-
-          <View style={styles.bubbleMeta}>
-            <Text style={[styles.bubbleTime, { color: isOwn ? "rgba(255,255,255,0.65)" : colors.textTertiary }]}>
-              {timeStr(msg.timestamp)}
-            </Text>
-            {isOwn && (
-              <Feather
-                name={msg.isRead ? "check-circle" : "check"}
-                size={10}
-                color={msg.isRead ? "#4ADE80" : "rgba(255,255,255,0.6)"}
-              />
+        {/* Audio message — rendered outside normal bubble */}
+        {msg.mediaType === "audio" && msg.mediaUrl ? (
+          <Pressable onLongPress={() => isOwn && setShowActions(true)}>
+            <AudioBubble uri={msg.mediaUrl} isOwn={isOwn} />
+          </Pressable>
+        ) : (
+          <Pressable
+            onLongPress={() => isOwn && setShowActions(true)}
+            style={[styles.bubble, isOwn ? styles.bubbleOwn : { ...styles.bubbleOther, backgroundColor: colors.card }]}
+          >
+            {/* Image */}
+            {msg.mediaType === "image" && msg.mediaUrl && (
+              <Image source={{ uri: msg.mediaUrl }} style={styles.mediaImg} resizeMode="cover" />
             )}
-          </View>
-        </Pressable>
 
-        {/* Long-press actions */}
+            {/* Video thumbnail */}
+            {msg.mediaType === "video" && msg.mediaUrl && (
+              <View style={styles.videoThumb}>
+                <Image source={{ uri: msg.mediaUrl }} style={styles.mediaImg} resizeMode="cover" />
+                <View style={styles.videoPlayOverlay}>
+                  <View style={styles.videoPlayCircle}>
+                    <Feather name="play" size={22} color="#fff" />
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {msg.text ? (
+              <Text style={[styles.bubbleText, isOwn ? styles.bubbleTextOwn : { color: colors.text }]}>
+                {msg.text}
+              </Text>
+            ) : null}
+
+            <View style={styles.bubbleMeta}>
+              <Text style={[styles.bubbleTime, { color: isOwn ? "rgba(255,255,255,0.65)" : colors.textTertiary }]}>
+                {timeStr(msg.timestamp)}
+              </Text>
+              {isOwn && (
+                <Feather
+                  name={msg.isRead ? "check-circle" : "check"}
+                  size={10}
+                  color={msg.isRead ? "#4ADE80" : "rgba(255,255,255,0.6)"}
+                />
+              )}
+            </View>
+          </Pressable>
+        )}
+
         {showActions && (
           <View style={styles.actions}>
             <Pressable style={styles.actionBtn} onPress={() => { onDelete(); setShowActions(false); }}>
@@ -121,6 +186,9 @@ export default function ConversationScreen() {
   const [typingVisible, setTypingVisible] = useState(false);
   const [showReport,    setShowReport]   = useState(false);
   const [showActions,   setShowActions]  = useState(false);
+  const [showAttach,    setShowAttach]   = useState(false);
+  const [isRecording,   setIsRecording]  = useState(false);
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const flatListRef = useRef<FlatList>(null);
   const typingTimer = useRef<ReturnType<typeof setTimeout>>();
 
@@ -157,6 +225,7 @@ export default function ConversationScreen() {
   };
 
   const handlePickImage = async () => {
+    setShowAttach(false);
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
       Alert.alert("Permission needed", "Allow access to your photos to send images.");
@@ -169,6 +238,51 @@ export default function ConversationScreen() {
     });
     if (!result.canceled && result.assets[0]) {
       sendMessage(id, "", result.assets[0].uri, "image");
+    }
+  };
+
+  const handlePickVideo = async () => {
+    setShowAttach(false);
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert("Permission needed", "Allow access to your gallery to send videos.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["videos"],
+      quality: 0.7,
+      videoMaxDuration: 60,
+    });
+    if (!result.canceled && result.assets[0]) {
+      sendMessage(id, "", result.assets[0].uri, "video");
+    }
+  };
+
+  const handleStartRecording = async () => {
+    setShowAttach(false);
+    try {
+      const perm = await AudioModule.requestRecordingPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert("Permission needed", "Allow microphone access to send voice messages.");
+        return;
+      }
+      await audioRecorder.record();
+      setIsRecording(true);
+    } catch {
+      Alert.alert("Error", "Could not start recording. Please try again.");
+    }
+  };
+
+  const handleStopRecording = async () => {
+    try {
+      await audioRecorder.stop();
+      const uri = audioRecorder.uri;
+      setIsRecording(false);
+      if (uri) {
+        sendMessage(id, "", uri, "audio");
+      }
+    } catch {
+      setIsRecording(false);
     }
   };
 
@@ -453,20 +567,65 @@ export default function ConversationScreen() {
         </View>
       )}
 
+      {/* Attachment picker tray */}
+      {showAttach && !blocked && (
+        <View style={[styles.attachTray, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
+          <Pressable style={styles.attachOption} onPress={handlePickImage}>
+            <View style={[styles.attachIcon, { backgroundColor: "#EFF6FF" }]}>
+              <Feather name="image" size={20} color="#2563EB" />
+            </View>
+            <Text style={[styles.attachLabel, { color: colors.textSecondary }]}>Photo</Text>
+          </Pressable>
+          <Pressable style={styles.attachOption} onPress={handlePickVideo}>
+            <View style={[styles.attachIcon, { backgroundColor: "#FFF7ED" }]}>
+              <Feather name="video" size={20} color="#EA580C" />
+            </View>
+            <Text style={[styles.attachLabel, { color: colors.textSecondary }]}>Video</Text>
+          </Pressable>
+          <Pressable
+            style={styles.attachOption}
+            onPress={isRecording ? handleStopRecording : handleStartRecording}
+          >
+            <View style={[styles.attachIcon, { backgroundColor: isRecording ? "#FEF2F2" : "#F0FDF4" }]}>
+              <Feather name="mic" size={20} color={isRecording ? "#DC2626" : "#16A34A"} />
+            </View>
+            <Text style={[styles.attachLabel, { color: isRecording ? "#DC2626" : colors.textSecondary }]}>
+              {isRecording ? "Stop" : "Audio"}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/* Recording in progress banner */}
+      {isRecording && (
+        <View style={styles.recordingBanner}>
+          <View style={styles.recordingDot} />
+          <Text style={styles.recordingText}>Recording… tap Audio to stop</Text>
+          <Pressable onPress={handleStopRecording}>
+            <Feather name="stop-circle" size={20} color="#DC2626" />
+          </Pressable>
+        </View>
+      )}
+
       {/* Input bar */}
       <View style={[styles.inputBar, {
         backgroundColor: colors.card,
         borderTopColor: colors.border,
         paddingBottom: insets.bottom || (Platform.OS === "web" ? 34 : 10),
       }]}>
-        <Pressable style={styles.attachBtn} onPress={handlePickImage} hitSlop={8}>
-          <Feather name="image" size={22} color={colors.accent} />
+        <Pressable
+          style={[styles.attachBtn, showAttach && { backgroundColor: colors.accentLight }]}
+          onPress={() => setShowAttach((v) => !v)}
+          hitSlop={8}
+        >
+          <Feather name={showAttach ? "x" : "plus"} size={22} color={colors.accent} />
         </Pressable>
 
         <TextInput
           style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.border, color: colors.text }]}
           value={text}
           onChangeText={setText}
+          onFocus={() => setShowAttach(false)}
           placeholder={blocked ? "Messaging blocked" : "Type a message…"}
           placeholderTextColor={colors.textTertiary}
           multiline
@@ -608,6 +767,50 @@ const styles = StyleSheet.create({
   bubbleMeta: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 4, marginTop: 3 },
   bubbleTime: { fontSize: 10, fontFamily: "PlusJakartaSans_400Regular" },
   mediaImg: { width: 200, height: 140, borderRadius: 10, marginBottom: 4 },
+
+  videoThumb: { position: "relative" },
+  videoPlayOverlay: {
+    position: "absolute", top: 0, left: 0, right: 0, bottom: 4,
+    alignItems: "center", justifyContent: "center",
+  },
+  videoPlayCircle: {
+    width: 46, height: 46, borderRadius: 23,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    alignItems: "center", justifyContent: "center",
+  },
+
+  audioBubble: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    backgroundColor: "#F1F5F9", borderRadius: 18, borderBottomLeftRadius: 4,
+    paddingHorizontal: 12, paddingVertical: 10, minWidth: 180,
+  },
+  audioBubbleOwn: {
+    backgroundColor: "#0066CC", borderBottomRightRadius: 4, borderBottomLeftRadius: 18,
+  },
+  audioPlayBtn: {
+    width: 34, height: 34, borderRadius: 17,
+    backgroundColor: "#0066CC", alignItems: "center", justifyContent: "center",
+  },
+  audioPlayBtnOwn: { backgroundColor: "#fff" },
+  audioWaveWrap: { flex: 1, flexDirection: "row", alignItems: "center", gap: 2 },
+  audioBar: { width: 3, borderRadius: 2, minHeight: 4 },
+  audioDuration: { fontSize: 11, fontFamily: "PlusJakartaSans_400Regular", color: "#64748B", minWidth: 28, textAlign: "right" },
+
+  attachTray: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-around",
+    paddingHorizontal: 24, paddingVertical: 14, borderTopWidth: 1,
+  },
+  attachOption: { alignItems: "center", gap: 6 },
+  attachIcon: { width: 52, height: 52, borderRadius: 16, alignItems: "center", justifyContent: "center" },
+  attachLabel: { fontSize: 12, fontFamily: "PlusJakartaSans_500Medium" },
+
+  recordingBanner: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    backgroundColor: "#FEF2F2", paddingHorizontal: 16, paddingVertical: 10,
+    borderTopWidth: 1, borderTopColor: "#FECACA",
+  },
+  recordingDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#DC2626" },
+  recordingText: { flex: 1, fontSize: 13, fontFamily: "PlusJakartaSans_500Medium", color: "#DC2626" },
 
   actions: {
     flexDirection: "row", gap: 8, marginTop: 4,

@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   priceBadgeText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: -0.3,
   },
 
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
   },
   soldText: {
     fontSize: 22,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#fff",
     letterSpacing: 5,
   },
@@ -511,7 +511,7 @@ const sponsoredStyles = StyleSheet.create({
   sponsoredBadgeText: {
     color: "#fff",
     fontSize: 9,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: 1.0,
   },
 
@@ -531,7 +531,7 @@ const sponsoredStyles = StyleSheet.create({
   priceBadgeText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: -0.3,
   },
 
@@ -543,7 +543,7 @@ const sponsoredStyles = StyleSheet.create({
   },
   carName: {
     fontSize: 12,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: 0.1,
   },
 

@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 14,
     lineHeight: 18,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#0098AA",
     letterSpacing: 3,
     textAlign: "center",
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   heroTitle: {
-    fontSize: 32, fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontSize: 32, fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#0F172A", letterSpacing: -0.5,
   },
   heroSubtitle: {

@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
   heroLeft: { alignItems: "center", minWidth: 72 },
   heroValue: {
     fontSize: 38,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: -1.2,
     lineHeight: 42,
   },

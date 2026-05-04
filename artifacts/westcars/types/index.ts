@@ -169,7 +169,7 @@ export interface Message {
   text: string;
   timestamp: string;
   mediaUrl?: string;
-  mediaType?: "image" | "voice";
+  mediaType?: "image" | "video" | "audio";
   isRead?: boolean;
   isDeletedForSelf?: boolean;
 }

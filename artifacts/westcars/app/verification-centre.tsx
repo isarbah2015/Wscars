@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
   },
   scoreTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   scoreLabel: { fontSize: 12, fontFamily: "PlusJakartaSans_500Medium" },
-  scoreNum: { fontSize: 32, fontFamily: "PlusJakartaSans_800ExtraBold", lineHeight: 38 },
+  scoreNum: { fontSize: 32, fontFamily: "PlusJakartaSans_600SemiBold", lineHeight: 38 },
   scoreDen: { fontSize: 16, fontFamily: "PlusJakartaSans_400Regular" },
   scoreBadge: {
     flexDirection: "row",
@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
   },
   sheetTitle: {
     fontSize: 18,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     textAlign: "center",
   },
   sheetBody: {
@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 20,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     textAlign: "center",
   },
   successBody: {

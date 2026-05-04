@@ -604,7 +604,7 @@ const styles = StyleSheet.create({
   },
   chipLabelActive: {
     fontSize: 12,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#fff",
   },
 
@@ -720,7 +720,7 @@ const fStyles = StyleSheet.create({
   },
   cardLabel: {
     fontSize: 13,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#0F172A",
     letterSpacing: 0.1,
   },
@@ -834,7 +834,7 @@ const fStyles = StyleSheet.create({
   },
   applyText: {
     fontSize: 16,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#fff",
     letterSpacing: 0.2,
   },

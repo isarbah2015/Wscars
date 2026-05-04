@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     fontSize: 26,
-    fontFamily: "PlusJakartaSans_800ExtraBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
   screenSubtitle: {
     fontSize: 14,

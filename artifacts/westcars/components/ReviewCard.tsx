@@ -92,6 +92,6 @@ const styles = StyleSheet.create({
   comment: { fontSize: 13, fontFamily: "PlusJakartaSans_400Regular", color: "#4A4A4A", lineHeight: 20 },
 
   ratingBig: { flexDirection: "row", alignItems: "center", gap: 6 },
-  ratingNum: { fontSize: 22, fontFamily: "PlusJakartaSans_800ExtraBold", color: "#1A1A1A" },
+  ratingNum: { fontSize: 22, fontFamily: "PlusJakartaSans_600SemiBold", color: "#1A1A1A" },
   ratingCount: { fontSize: 12, fontFamily: "PlusJakartaSans_400Regular", color: "#9E9E9E" },
 });
