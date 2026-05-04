@@ -45,17 +45,29 @@ const buildDefaultUserDoc = (fbUser: FirebaseUser, overrides: Partial<User> = {}
   ...overrides,
 });
 
-/** Look up the Firestore profile for a Firebase user, creating one if missing. */
+/** Look up the Firestore profile for a Firebase user, creating one if missing.
+ *  Falls back to an auth-only profile if Firestore rules block the read/write
+ *  (e.g. rules not yet deployed) so login still succeeds. */
 export async function loadOrCreateUserDoc(fbUser: FirebaseUser, overrides: Partial<User> = {}): Promise<User> {
   ensureReady();
-  const ref = doc(db!, "users", fbUser.uid);
-  const snap = await getDoc(ref);
-  if (snap.exists()) {
-    return { id: fbUser.uid, ...(snap.data() as Omit<User, "id">) };
+  try {
+    const ref = doc(db!, "users", fbUser.uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      return { id: fbUser.uid, ...(snap.data() as Omit<User, "id">) };
+    }
+    const profile = buildDefaultUserDoc(fbUser, overrides);
+    try {
+      await setDoc(ref, { ...profile, createdAt: serverTimestamp() });
+    } catch (writeErr) {
+      console.warn("[auth] Firestore write blocked (check rules):", writeErr);
+    }
+    return profile;
+  } catch (err) {
+    // Firestore unavailable — return a working profile from auth data alone.
+    console.warn("[auth] Firestore read failed, using auth-only profile:", err);
+    return buildDefaultUserDoc(fbUser, overrides);
   }
-  const profile = buildDefaultUserDoc(fbUser, overrides);
-  await setDoc(ref, { ...profile, createdAt: serverTimestamp() });
-  return profile;
 }
 
 /** Sign in with email + password, return the Firestore user profile. */

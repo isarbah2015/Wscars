@@ -52,8 +52,10 @@ export default function LoginScreen() {
   // configured.
   // - Web always needs `clientId` (= web client ID).
   // - iOS needs iosClientId; Android needs androidClientId.
+  // On web we use signInWithPopup — no OAuth client ID needed, just Firebase config.
+  // On native we need the platform-specific client ID from Google Console.
   const googleConfigured =
-    Platform.OS === "web"     ? !!GOOGLE_WEB_CLIENT_ID :
+    Platform.OS === "web"     ? isFirebaseReady() :
     Platform.OS === "ios"     ? !!GOOGLE_IOS_CLIENT_ID :
     Platform.OS === "android" ? !!GOOGLE_ANDROID_CLIENT_ID :
     false;
@@ -74,8 +76,8 @@ export default function LoginScreen() {
     }
     if (!googleConfigured || !promptGoogleRef.current) {
       Alert.alert(
-        "Google Sign-In not configured",
-        "Add EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID (and iOS/Android client IDs) to enable Google login.",
+        "Google Sign-In unavailable",
+        "Google sign-in requires a native build with OAuth credentials configured.",
       );
       return;
     }

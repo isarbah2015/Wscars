@@ -79,7 +79,7 @@ export default function SignupScreen() {
 
           <Text style={styles.heroTitle}>Create account</Text>
           <Text style={styles.heroSubtitle}>
-            Join thousands of buyers &amp; sellers. List your car for free.
+            Join thousands of buyers {"&"} sellers.{"\n"}List your car for free.
           </Text>
         </View>
 
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   /* Hero */
   hero: {
     paddingHorizontal: 24,
-    paddingBottom: 12,
+    paddingBottom: 32,
     gap: 6,
   },
   heroWhite: { backgroundColor: "#FFFFFF" },
