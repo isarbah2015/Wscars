@@ -14,7 +14,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
@@ -59,12 +59,21 @@ export default function RootLayout() {
     Raleway_800ExtraBold,
   });
 
+  // Safety net: if fonts don't resolve within 4 s (network slow / CDN blocked),
+  // proceed with system fonts rather than showing a blank screen or timeout error.
+  const [fontTimeout, setFontTimeout] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setFontTimeout(true), 4000);
+    return () => clearTimeout(t);
+  }, []);
+
   const fontsLoaded = manropeLoaded && ralewayLoaded;
-  const fontError = manropeError || ralewayError;
+  const fontError   = manropeError  || ralewayError;
+  const ready       = fontsLoaded || fontError || fontTimeout;
 
   useEffect(() => {
-    if (fontsLoaded || fontError) SplashScreen.hideAsync();
-  }, [fontsLoaded, fontError]);
+    if (ready) SplashScreen.hideAsync().catch(() => {});
+  }, [ready]);
 
   useEffect(() => {
     if (Platform.OS !== "web") return;
@@ -77,7 +86,7 @@ export default function RootLayout() {
     return () => { document.head.removeChild(style); };
   }, []);
 
-  if (!fontsLoaded && !fontError) return null;
+  if (!ready) return null;
 
   return (
     <SafeAreaProvider>
