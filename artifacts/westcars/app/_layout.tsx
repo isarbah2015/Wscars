@@ -9,6 +9,7 @@ import {
   Raleway_700Bold,
   Raleway_800ExtraBold,
 } from "@expo-google-fonts/raleway";
+import { Feather } from "@expo/vector-icons";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Font from "expo-font";
 import { Stack } from "expo-router";
@@ -54,6 +55,7 @@ export default function RootLayout() {
     const timer = setTimeout(() => setReady(true), 3500);
 
     Font.loadAsync({
+      ...Feather.font,
       Manrope_400Regular,
       Manrope_500Medium,
       Manrope_600SemiBold,

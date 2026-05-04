@@ -822,6 +822,7 @@ const fStyles = StyleSheet.create({
   },
   applyBtn: {
     borderRadius: 14,
+    overflow: "hidden",
   },
   applyGrad: {
     height: 52,
