@@ -59,7 +59,7 @@
     "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",
     "@expo-google-fonts/raleway": "^0.4.2",
     "@expo-google-fonts/sora": "^0.4.2",
-    "expo-audio": "^55.0.14",
+    "expo-audio": "^1.1.1",
     "expo-auth-session": "^55.0.15",
     "expo-av": "^16.0.8",
     "expo-crypto": "^55.0.14",

@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { AudioModule, RecordingPresets, useAudioPlayer, useAudioPlayerStatus, useAudioRecorder } from "expo-audio";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -15,6 +14,28 @@ import {
   TextInput,
   View,
 } from "react-native";
+
+// expo-audio hooks — real on native, harmless stubs on web so hooks are
+// always called the same number of times (no React rules-of-hooks violation).
+const STUB_PLAYER = { play: () => {}, pause: () => {}, playing: false, currentTime: 0, duration: 0 };
+const STUB_RECORDER = { record: async () => {}, stop: async () => {}, uri: null as string | null };
+
+let AudioModule: any  = { requestRecordingPermissionsAsync: async () => ({ granted: false }) };
+let RecordingPresets: any = { HIGH_QUALITY: {} };
+let useAudioPlayer: (src: any) => any   = () => STUB_PLAYER;
+let useAudioPlayerStatus: (p: any) => any = (p) => p;
+let useAudioRecorder: (opts: any) => any  = () => STUB_RECORDER;
+
+if (Platform.OS !== "web") {
+  try {
+    const mod = require("expo-audio");
+    AudioModule         = mod.AudioModule;
+    RecordingPresets    = mod.RecordingPresets;
+    useAudioPlayer      = mod.useAudioPlayer;
+    useAudioPlayerStatus = mod.useAudioPlayerStatus;
+    useAudioRecorder    = mod.useAudioRecorder;
+  } catch { /* expo-audio not available — stubs already set */ }
+}
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ReportModal } from "@/components/ReportModal";
 import { SafetyTipsModal } from "@/components/SafetyTipsModal";
