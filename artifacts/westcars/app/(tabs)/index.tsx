@@ -123,7 +123,7 @@ export default function HomeScreen() {
   // catMaxH: controls the height collapse of the categories section (JS thread)
   // catOpacity: smooth fade of categories content (native thread)
   // scrollPad: animated spacer in the ScrollView that tracks header height (JS thread)
-  const CAT_DEFAULT_H  = 150;    // ~75px tabs + ~75px subcats
+  const CAT_DEFAULT_H  = 175;    // ~85px tabs + ~90px subcats
   const STICKY_DEFAULT = 152;    // ~topPad+8 + ~55px profile + ~10px gap + ~72px search
   // Extra gap between the glass header and the first content card
   const EXTRA_PAD = 6;
@@ -700,17 +700,17 @@ const styles = StyleSheet.create({
   mainTabsRow: {
     flexDirection: "row",
     gap: 8,
-    paddingHorizontal: 2,
-    paddingTop: 2,
-    paddingBottom: 4,
+    paddingHorizontal: 12,
+    paddingTop: 4,
+    paddingBottom: 6,
   },
   mainTab: {
     flex: 1,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 8,
-    paddingBottom: 4,
+    paddingTop: 10,
+    paddingBottom: 6,
     paddingHorizontal: 4,
     borderRadius: 16,
     borderWidth: 1,
@@ -723,13 +723,12 @@ const styles = StyleSheet.create({
   },
   mainTabImgWrap: {
     width: 80,
-    height: 44,
-    overflow: "hidden",
+    height: 48,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: -2,
+    marginTop: 2,
   },
-  mainTabImg: { width: 78, height: 46 },
+  mainTabImg: { width: 78, height: 48 },
 
   subCatsSection: {
     paddingVertical: 8,
