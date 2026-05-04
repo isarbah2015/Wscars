@@ -16,7 +16,7 @@ import {
   View,
 } from "react-native";
 
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -77,21 +77,10 @@ function mapCategoryToFilter(cat: string): { quickFilter: QuickFilterKey; query:
   return { quickFilter: "All", query: cat };
 }
 
-// ── "Any" icon per filter section ────────────────────────────────────────────
-const SECTION_ANY_ICON: Record<string, any> = {
-  Brand:        "layers",
-  Location:     "map",
-  "Fuel Type":  "zap",
-  Transmission: "settings",
-  Condition:    "check-circle",
-  "Price Range":"dollar-sign",
-};
-
-// ── Premium Filter Modal ──────────────────────────────────────────────────────
+// ── Full-screen Premium Filter Modal ─────────────────────────────────────────
 function FilterModal({
-  visible, onClose, onApply, colors,
-}: { visible: boolean; onClose: () => void; onApply: (f: any) => void; colors: any }) {
-  const { bottom: safeBottom } = useSafeAreaInsets();
+  visible, onClose, onApply,
+}: { visible: boolean; onClose: () => void; onApply: (f: any) => void; colors?: any }) {
   const [brand,        setBrand]        = useState("Any");
   const [location,     setLocation]     = useState("Any");
   const [fuelType,     setFuelType]     = useState("Any");
@@ -104,184 +93,161 @@ function FilterModal({
     setTransmission("Any"); setCondition("Any"); setPriceRange(PRICE_RANGES[0]);
   };
 
-  // Generic horizontal chip row with "Any" icon
-  const FilterSection = ({
-    title, options, selected, onSelect,
-  }: { title: string; options: string[]; selected: string; onSelect: (v: string) => void }) => {
-    const anyIcon = SECTION_ANY_ICON[title] || "layers";
-    return (
-      <View style={fStyles.section}>
-        <View style={fStyles.sectionHeader}>
-          <View style={[fStyles.sectionIconBg, { backgroundColor: "#0EB5CA18" }]}>
-            <Feather name={anyIcon} size={13} color="#0EB5CA" />
-          </View>
-          <Text style={fStyles.sectionTitle}>{title}</Text>
-        </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={fStyles.chips}>
-            {/* "Any" chip with icon */}
-            <Pressable
-              style={[fStyles.chip, selected === "Any" && fStyles.chipActive]}
-              onPress={() => onSelect("Any")}
-            >
-              <Feather
-                name={anyIcon}
-                size={13}
-                color={selected === "Any" ? "#fff" : "#94A3B8"}
-              />
-              <Text style={[fStyles.chipText, selected === "Any" && fStyles.chipTextActive]}>
-                Any
-              </Text>
-            </Pressable>
-            {options.map((opt) => (
-              <Pressable
-                key={opt}
-                style={[fStyles.chip, selected === opt && fStyles.chipActive]}
-                onPress={() => onSelect(opt)}
-              >
-                <Text style={[fStyles.chipText, selected === opt && fStyles.chipTextActive]}>
-                  {opt}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
-    );
-  };
+  const hasFilters =
+    brand !== "Any" || location !== "Any" || fuelType !== "Any" ||
+    transmission !== "Any" || condition !== "Any" || priceRange.label !== "Any Price";
 
-  // Brand section with logo chips
-  const BrandSection = () => (
-    <View style={fStyles.section}>
-      <View style={fStyles.sectionHeader}>
-        <View style={[fStyles.sectionIconBg, { backgroundColor: "#0EB5CA18" }]}>
-          <Feather name="layers" size={13} color="#0EB5CA" />
+  // ── Section card ──
+  const SectionCard = ({
+    icon, label, children,
+  }: { icon: any; label: string; children: React.ReactNode }) => (
+    <View style={fStyles.card}>
+      <View style={fStyles.cardHeader}>
+        <View style={fStyles.cardIconBg}>
+          <Feather name={icon} size={14} color="#0EB5CA" />
         </View>
-        <Text style={fStyles.sectionTitle}>Brand</Text>
+        <Text style={fStyles.cardLabel}>{label}</Text>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={fStyles.chips}>
-          {/* "Any" brand chip with icon */}
-          <Pressable
-            style={[fStyles.brandChip, brand === "Any" && fStyles.chipActive]}
-            onPress={() => setBrand("Any")}
-          >
-            <View style={[fStyles.brandLogoWrap, brand === "Any" && { backgroundColor: "rgba(255,255,255,0.18)" }]}>
-              <Feather name="layers" size={16} color={brand === "Any" ? "#fff" : "#94A3B8"} />
-            </View>
-            <Text style={[fStyles.chipText, brand === "Any" && fStyles.chipTextActive]}>Any</Text>
-          </Pressable>
-          {CAR_BRANDS.map((b) => {
-            const logoUrl = BRAND_LOGOS[b];
-            const active  = brand === b;
-            return (
-              <Pressable
-                key={b}
-                style={[fStyles.brandChip, active && fStyles.chipActive]}
-                onPress={() => setBrand(b)}
-              >
-                <View style={[fStyles.brandLogoWrap, active && { backgroundColor: "rgba(255,255,255,0.15)" }]}>
-                  {logoUrl ? (
-                    <Image source={{ uri: logoUrl }} style={fStyles.brandLogo} resizeMode="contain" />
-                  ) : (
-                    <Text style={[fStyles.brandInitial, { color: active ? "#fff" : "#64748B" }]}>{b.charAt(0)}</Text>
-                  )}
-                </View>
-                <Text style={[fStyles.chipText, active && fStyles.chipTextActive]}>{b}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </ScrollView>
+      {children}
     </View>
   );
 
-  // Price range — 2-column grid cards
-  const PriceSection = () => (
-    <View style={fStyles.section}>
-      <View style={fStyles.sectionHeader}>
-        <View style={[fStyles.sectionIconBg, { backgroundColor: "#0EB5CA18" }]}>
-          <Feather name="dollar-sign" size={13} color="#0EB5CA" />
-        </View>
-        <Text style={fStyles.sectionTitle}>Price Range</Text>
-      </View>
-      <View style={fStyles.priceGrid}>
-        {PRICE_RANGES.map((pr) => {
-          const active = priceRange.label === pr.label;
+  // ── Chip row ──
+  const ChipRow = ({
+    options, selected, onSelect,
+  }: { options: string[]; selected: string; onSelect: (v: string) => void }) => (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
+      <View style={{ flexDirection: "row", gap: 7, paddingRight: 4 }}>
+        {["Any", ...options].map((opt) => {
+          const active = selected === opt;
           return (
             <Pressable
-              key={pr.label}
-              style={[fStyles.priceCard, active && fStyles.priceCardActive]}
-              onPress={() => setPriceRange(pr)}
+              key={opt}
+              onPress={() => onSelect(opt)}
+              style={[fStyles.chip, active && fStyles.chipActive]}
             >
-              <Feather name={pr.icon} size={15} color={active ? "#fff" : "#0EB5CA"} />
-              <Text style={[fStyles.priceLabel, active && { color: "#fff" }]}>{pr.label}</Text>
+              <Text style={[fStyles.chipText, active && fStyles.chipTextActive]}>{opt}</Text>
             </Pressable>
           );
         })}
       </View>
+    </ScrollView>
+  );
+
+  // ── Brand row ──
+  const BrandRow = () => (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
+      <View style={{ flexDirection: "row", gap: 8, paddingRight: 4 }}>
+        {[{ name: "Any", logo: null }, ...CAR_BRANDS.map(b => ({ name: b, logo: BRAND_LOGOS[b] ?? null }))].map(({ name: b, logo }) => {
+          const active = brand === b;
+          return (
+            <Pressable
+              key={b}
+              onPress={() => setBrand(b)}
+              style={[fStyles.brandChip, active && fStyles.chipActive]}
+            >
+              <View style={[fStyles.brandLogoWrap, active && { backgroundColor: "rgba(255,255,255,0.2)" }]}>
+                {b === "Any" ? (
+                  <Feather name="layers" size={15} color={active ? "#fff" : "#94A3B8"} />
+                ) : logo ? (
+                  <Image source={{ uri: logo }} style={{ width: 22, height: 22 }} resizeMode="contain" />
+                ) : (
+                  <Text style={{ fontSize: 11, fontFamily: "Raleway_800ExtraBold", color: active ? "#fff" : "#64748B" }}>{b.charAt(0)}</Text>
+                )}
+              </View>
+              <Text style={[fStyles.chipText, active && fStyles.chipTextActive]}>{b}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </ScrollView>
+  );
+
+  // ── Price grid ──
+  const PriceGrid = () => (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+      {PRICE_RANGES.map((pr) => {
+        const active = priceRange.label === pr.label;
+        return (
+          <Pressable
+            key={pr.label}
+            onPress={() => setPriceRange(pr)}
+            style={[fStyles.priceCard, active && fStyles.priceCardActive]}
+          >
+            <Feather name={pr.icon} size={14} color={active ? "#fff" : "#0EB5CA"} />
+            <Text style={[fStyles.priceLabel, active && { color: "#fff" }]}>{pr.label}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={[fStyles.overlay, { paddingBottom: safeBottom }]}>
-        <View style={fStyles.sheet}>
-          {/* Premium gradient header */}
-          <LinearGradient
-            colors={["#0EB5CA", "#0098AA"]}
-            start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-            style={fStyles.gradHeader}
+    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen">
+      <SafeAreaView style={fStyles.safeArea} edges={["top", "bottom"]}>
+        {/* ── Header ── */}
+        <LinearGradient
+          colors={["#0EB5CA", "#008FA0"]}
+          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+          style={fStyles.header}
+        >
+          <Pressable style={fStyles.headerBack} onPress={onClose}>
+            <Feather name="arrow-left" size={20} color="#fff" />
+          </Pressable>
+          <Text style={fStyles.headerTitle}>Filters</Text>
+          <Pressable onPress={reset} style={fStyles.headerClear}>
+            <Text style={[fStyles.headerClearText, !hasFilters && { opacity: 0.45 }]}>Clear All</Text>
+          </Pressable>
+        </LinearGradient>
+
+        {/* ── Scrollable body ── */}
+        <ScrollView
+          style={fStyles.body}
+          contentContainerStyle={fStyles.bodyContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <SectionCard icon="layers" label="Brand">
+            <BrandRow />
+          </SectionCard>
+
+          <SectionCard icon="map-pin" label="Location">
+            <ChipRow options={GHANA_CITIES} selected={location} onSelect={setLocation} />
+          </SectionCard>
+
+          <SectionCard icon="zap" label="Fuel Type">
+            <ChipRow options={FUEL_TYPES} selected={fuelType} onSelect={setFuelType} />
+          </SectionCard>
+
+          <SectionCard icon="settings" label="Transmission">
+            <ChipRow options={TRANSMISSIONS} selected={transmission} onSelect={setTransmission} />
+          </SectionCard>
+
+          <SectionCard icon="check-circle" label="Condition">
+            <ChipRow options={CONDITIONS} selected={condition} onSelect={setCondition} />
+          </SectionCard>
+
+          <SectionCard icon="dollar-sign" label="Price Range">
+            <PriceGrid />
+          </SectionCard>
+        </ScrollView>
+
+        {/* ── Footer ── */}
+        <View style={fStyles.footer}>
+          <Pressable
+            style={fStyles.applyBtn}
+            onPress={() => { onApply({ brand, location, fuelType, transmission, condition, priceRange }); onClose(); }}
           >
-            <View style={fStyles.handle} />
-            <View style={fStyles.headerRow}>
-              <View>
-                <Text style={fStyles.headerTitle}>Filters</Text>
-                <Text style={fStyles.headerSub}>Refine your search</Text>
-              </View>
-              <Pressable style={fStyles.closeBtn} onPress={onClose}>
-                <Feather name="x" size={18} color="#fff" />
-              </Pressable>
-            </View>
-          </LinearGradient>
-
-          <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: SHEET_H - 100 }}>
-            <BrandSection />
-            <View style={fStyles.divider} />
-            <FilterSection title="Location"     options={GHANA_CITIES}   selected={location}     onSelect={setLocation}     />
-            <View style={fStyles.divider} />
-            <FilterSection title="Fuel Type"    options={FUEL_TYPES}     selected={fuelType}     onSelect={setFuelType}     />
-            <View style={fStyles.divider} />
-            <FilterSection title="Transmission" options={TRANSMISSIONS}   selected={transmission} onSelect={setTransmission} />
-            <View style={fStyles.divider} />
-            <FilterSection title="Condition"    options={CONDITIONS}     selected={condition}    onSelect={setCondition}    />
-            <View style={fStyles.divider} />
-            <PriceSection />
-            <View style={{ height: 24 }} />
-          </ScrollView>
-
-          {/* Footer actions */}
-          <View style={fStyles.footer}>
-            <Pressable style={fStyles.resetBtn} onPress={reset}>
-              <Feather name="refresh-ccw" size={15} color="#0EB5CA" />
-              <Text style={fStyles.resetText}>Reset</Text>
-            </Pressable>
-            <Pressable
-              style={fStyles.applyBtn}
-              onPress={() => { onApply({ brand, location, fuelType, transmission, condition, priceRange }); onClose(); }}
+            <LinearGradient
+              colors={["#0EB5CA", "#008FA0"]}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+              style={fStyles.applyGrad}
             >
-              <LinearGradient
-                colors={["#0EB5CA", "#0098AA"]}
-                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                style={fStyles.applyGrad}
-              >
-                <Feather name="check" size={16} color="#fff" />
-                <Text style={fStyles.applyText}>Apply Filters</Text>
-              </LinearGradient>
-            </Pressable>
-          </View>
+              <Feather name="check" size={18} color="#fff" />
+              <Text style={fStyles.applyText}>Apply Filters</Text>
+            </LinearGradient>
+          </Pressable>
         </View>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 }
@@ -675,154 +641,140 @@ const styles = StyleSheet.create({
 });
 
 const fStyles = StyleSheet.create({
-  overlay: {
+  safeArea: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.55)",
-    justifyContent: "flex-end",
-  },
-  sheet: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    overflow: "hidden",
+    backgroundColor: "#F0F5F9",
   },
 
-  // Gradient header
-  gradHeader: {
-    paddingHorizontal: 18,
-    paddingTop: 10,
-    paddingBottom: 12,
-    gap: 6,
-  },
-  handle: {
-    width: 32,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.45)",
-    alignSelf: "center",
-    marginBottom: 2,
-  },
-  headerRow: {
+  // ── Header ──
+  header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 0,
+  },
+  headerBack: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
   },
   headerTitle: {
-    fontSize: 17,
+    flex: 1,
+    fontSize: 20,
     fontFamily: "Raleway_800ExtraBold",
     color: "#fff",
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
   },
-  headerSub: {
-    fontSize: 11,
-    fontFamily: "Manrope_500Medium",
-    color: "rgba(255,255,255,0.8)",
-    marginTop: 1,
+  headerClear: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.15)",
   },
-  closeBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
+  headerClearText: {
+    fontSize: 13,
+    fontFamily: "Manrope_700Bold",
+    color: "#fff",
   },
 
-  section: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 2,
-    gap: 7,
+  // ── Body ──
+  body: {
+    flex: 1,
   },
-  sectionHeader: {
+  bodyContent: {
+    padding: 14,
+    gap: 12,
+    paddingBottom: 8,
+  },
+
+  // ── Section cards ──
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingTop: 13,
+    paddingBottom: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  cardHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
   },
-  sectionIconBg: {
-    width: 20,
-    height: 20,
-    borderRadius: 6,
+  cardIconBg: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    backgroundColor: "#E6F8FB",
     alignItems: "center",
     justifyContent: "center",
   },
-  sectionTitle: {
-    fontSize: 10,
+  cardLabel: {
+    fontSize: 13,
     fontFamily: "Manrope_800ExtraBold",
     color: "#0F172A",
-    letterSpacing: 1.1,
-    textTransform: "uppercase",
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#F1F5F9",
-    marginHorizontal: 16,
-    marginTop: 4,
+    letterSpacing: 0.1,
   },
 
-  chips: { flexDirection: "row", gap: 6 },
+  // ── Chips ──
   chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 11,
-    paddingVertical: 6,
-    borderRadius: 9,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 50,
     backgroundColor: "#F1F5F9",
-    borderWidth: 1,
-    borderColor: "#DDE3EC",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
   },
   chipActive: {
     backgroundColor: "#0EB5CA",
     borderColor: "#0EB5CA",
     shadowColor: "#0EB5CA",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 4,
   },
   chipText: {
-    fontSize: 12,
-    fontFamily: "Manrope_700Bold",
-    color: "#1E293B",
+    fontSize: 13,
+    fontFamily: "Manrope_600SemiBold",
+    color: "#334155",
   },
   chipTextActive: {
     color: "#fff",
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "Manrope_700Bold",
   },
 
-  // Brand chips — horizontal: logo left, text right
+  // ── Brand chips ──
   brandChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 9,
-    paddingVertical: 6,
-    borderRadius: 9,
+    gap: 7,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 50,
     backgroundColor: "#F1F5F9",
-    borderWidth: 1,
-    borderColor: "#DDE3EC",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
   },
   brandLogoWrap: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: "#E8EEF5",
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#EEF3F8",
     alignItems: "center",
     justifyContent: "center",
   },
-  brandLogo: { width: 22, height: 22 },
-  brandInitial: {
-    fontSize: 12,
-    fontFamily: "Raleway_800ExtraBold",
-  },
 
-  // Price grid
-  priceGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 7,
-  },
+  // ── Price grid ──
   priceCard: {
     width: "30%",
     flexGrow: 1,
@@ -830,72 +782,57 @@ const fStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 5,
-    paddingVertical: 9,
-    paddingHorizontal: 6,
-    borderRadius: 9,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 12,
     backgroundColor: "#F1F5F9",
-    borderWidth: 1,
-    borderColor: "#DDE3EC",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
   },
   priceCardActive: {
     backgroundColor: "#0EB5CA",
     borderColor: "#0EB5CA",
     shadowColor: "#0EB5CA",
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
     elevation: 4,
   },
   priceLabel: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontFamily: "Manrope_700Bold",
     color: "#1E293B",
     textAlign: "center",
     flexShrink: 1,
   },
 
-  // Footer
+  // ── Footer ──
   footer: {
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 10,
     backgroundColor: "#fff",
-    flexShrink: 0,
-  },
-  resetBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-    height: 28,
-    borderRadius: 8,
-    borderWidth: 1.5,
-    borderColor: "#0EB5CA",
-    backgroundColor: "#0EB5CA0D",
-  },
-  resetText: {
-    fontSize: 11,
-    fontFamily: "Manrope_700Bold",
-    color: "#0EB5CA",
+    borderTopWidth: 1,
+    borderTopColor: "#E8EEF5",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 8,
   },
   applyBtn: {
-    flex: 2,
-    borderRadius: 8,
+    borderRadius: 14,
     overflow: "hidden",
   },
   applyGrad: {
-    height: 28,
+    height: 52,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 5,
+    gap: 8,
   },
   applyText: {
-    fontSize: 11,
+    fontSize: 16,
     fontFamily: "Manrope_800ExtraBold",
     color: "#fff",
     letterSpacing: 0.2,
