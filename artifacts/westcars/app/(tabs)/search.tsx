@@ -240,7 +240,7 @@ function FilterModal({
             </View>
           </LinearGradient>
 
-          <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+          <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, flexShrink: 1 }}>
             <BrandSection />
             <View style={fStyles.divider} />
             <FilterSection title="Location"     options={GHANA_CITIES}   selected={location}     onSelect={setLocation}     />
@@ -679,8 +679,9 @@ const fStyles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
-    maxHeight: "78%",
+    maxHeight: "82%",
     overflow: "hidden",
+    flexDirection: "column",
   },
 
   // Gradient header
@@ -859,6 +860,7 @@ const fStyles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#F1F5F9",
     backgroundColor: "#fff",
+    flexShrink: 0,
   },
   resetBtn: {
     flex: 1,
