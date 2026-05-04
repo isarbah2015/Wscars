@@ -37,90 +37,68 @@ const CAT_MOTO     = require("@/assets/images/cat-motorcycle.png");
 const CAT_SCOOTER  = require("@/assets/images/cat-scooter.png");
 const CAT_ATV      = require("@/assets/images/cat-atv.png");
 const CAT_DIRTBIKE = require("@/assets/images/cat-dirtbike.png");
-const CAT_TRUCK    = require("@/assets/images/cat-truck.jpg");
-const CAT_BUS      = require("@/assets/images/cat-bus.jpg");
-const CAT_MINIBUS  = require("@/assets/images/cat-minibus.jpg");
-const CAT_EXCAVATOR = require("@/assets/images/cat-excavator.jpg");
-const CAT_BULLDOZER = require("@/assets/images/cat-bulldozer.jpg");
-const CAT_CRANE    = require("@/assets/images/cat-crane.jpg");
-const CAT_FORKLIFT = require("@/assets/images/cat-forklift.jpg");
-const CAT_TRACTOR  = require("@/assets/images/cat-tractor.jpg");
-const CAT_AMBULANCE = require("@/assets/images/cat-ambulance.jpg");
-const CAT_FIRETRUCK = require("@/assets/images/cat-firetruck.jpg");
 const BANNER_CAR  = require("@/assets/images/banner-car.png");
 
-type Condition = "new" | "used" | "moto" | "trucks" | "heavy";
+type Condition = "new" | "used" | "moto";
 
 const CONDITION_TABS: { id: Condition; label: string; img: any }[] = [
-  { id: "new",    label: "New",    img: CAR_NEW    },
-  { id: "used",   label: "Used",   img: CAR_USED   },
-  { id: "moto",   label: "Moto",   img: CAR_MOTO   },
-  { id: "trucks", label: "Trucks", img: CAT_TRUCK  },
-  { id: "heavy",  label: "Heavy",  img: CAT_EXCAVATOR },
+  { id: "new",  label: "New",  img: CAR_NEW  },
+  { id: "used", label: "Used", img: CAR_USED },
+  { id: "moto", label: "Moto", img: CAR_MOTO },
 ];
 
-const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: number }[]> = {
+const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any }[]> = {
   new: [
-    { label: "SUV / 4×4",    img: CAT_SUV,       count: 2 },
-    { label: "Sedan",         img: CAT_SEDAN,     count: 2 },
-    { label: "Hatchback",     img: CAT_HATCH,     count: 1 },
-    { label: "Pickup Truck",  img: CAT_PICKUP,    count: 0 },
-    { label: "Van",           img: CAT_VAN,       count: 0 },
-    { label: "Coupe",         img: CAT_COUPE,     count: 0 },
-    { label: "Cargo Truck",   img: CAT_TRUCK,     count: 0 },
-    { label: "Bus",           img: CAT_BUS,       count: 0 },
-    { label: "Minibus",       img: CAT_MINIBUS,   count: 0 },
-    { label: "Motorcycle",    img: CAT_MOTO,      count: 0 },
-    { label: "Tractor",       img: CAT_TRACTOR,   count: 0 },
-    { label: "Ambulance",     img: CAT_AMBULANCE, count: 0 },
+    { label: "SUV / 4×4",     img: CAT_SUV    },
+    { label: "Sedan",          img: CAT_SEDAN  },
+    { label: "Hatchback",      img: CAT_HATCH  },
+    { label: "Pickup Truck",   img: CAT_PICKUP },
+    { label: "Van",            img: CAT_VAN    },
+    { label: "Coupe",          img: CAT_COUPE  },
   ],
   used: [
-    { label: "SUV / 4×4",    img: CAT_SUV,       count: 5 },
-    { label: "Sedan",         img: CAT_SEDAN,     count: 2 },
-    { label: "Pickup Truck",  img: CAT_PICKUP,    count: 1 },
-    { label: "Van",           img: CAT_VAN,       count: 1 },
-    { label: "Hatchback",     img: CAT_HATCH,     count: 1 },
-    { label: "Coupe",         img: CAT_COUPE,     count: 0 },
-    { label: "Station Wagon", img: CAT_SEDAN,     count: 0 },
-    { label: "Cargo Truck",   img: CAT_TRUCK,     count: 0 },
-    { label: "Bus",           img: CAT_BUS,       count: 0 },
-    { label: "Minibus",       img: CAT_MINIBUS,   count: 0 },
-    { label: "Motorcycle",    img: CAT_MOTO,      count: 0 },
-    { label: "Tractor",       img: CAT_TRACTOR,   count: 0 },
-    { label: "Forklift",      img: CAT_FORKLIFT,  count: 0 },
+    { label: "SUV / 4×4",     img: CAT_SUV    },
+    { label: "Sedan",          img: CAT_SEDAN  },
+    { label: "Pickup Truck",   img: CAT_PICKUP },
+    { label: "Van",            img: CAT_VAN    },
+    { label: "Hatchback",      img: CAT_HATCH  },
+    { label: "Coupe",          img: CAT_COUPE  },
+    { label: "Station Wagon",  img: CAT_SEDAN  },
   ],
   moto: [
-    { label: "Motorcycle",   img: CAT_MOTO,      count: 2 },
-    { label: "Scooter",      img: CAT_SCOOTER,   count: 0 },
-    { label: "ATV / Quad",   img: CAT_ATV,       count: 0 },
-    { label: "Dirt Bike",    img: CAT_DIRTBIKE,  count: 0 },
-  ],
-  trucks: [
-    { label: "Pickup Truck",  img: CAT_PICKUP,   count: 0 },
-    { label: "Cargo Truck",   img: CAT_TRUCK,    count: 0 },
-    { label: "Tipper Truck",  img: CAT_TRUCK,    count: 0 },
-    { label: "Tanker Truck",  img: CAT_TRUCK,    count: 0 },
-    { label: "Flatbed Truck", img: CAT_TRUCK,    count: 0 },
-    { label: "Box Truck",     img: CAT_VAN,      count: 0 },
-    { label: "Bus",           img: CAT_BUS,      count: 0 },
-    { label: "Minibus",       img: CAT_MINIBUS,  count: 0 },
-    { label: "Coach Bus",     img: CAT_BUS,      count: 0 },
-  ],
-  heavy: [
-    { label: "Excavator",        img: CAT_EXCAVATOR, count: 0 },
-    { label: "Bulldozer",        img: CAT_BULLDOZER, count: 0 },
-    { label: "Crane",            img: CAT_CRANE,     count: 0 },
-    { label: "Forklift",         img: CAT_FORKLIFT,  count: 0 },
-    { label: "Front Loader",     img: CAT_BULLDOZER, count: 0 },
-    { label: "Grader",           img: CAT_BULLDOZER, count: 0 },
-    { label: "Compactor",        img: CAT_BULLDOZER, count: 0 },
-    { label: "Concrete Mixer",   img: CAT_TRUCK,     count: 0 },
-    { label: "Tractor",          img: CAT_TRACTOR,   count: 0 },
-    { label: "Combine Harvester",img: CAT_TRACTOR,   count: 0 },
-    { label: "Ambulance",        img: CAT_AMBULANCE, count: 0 },
-    { label: "Fire Truck",       img: CAT_FIRETRUCK, count: 0 },
+    { label: "Motorcycle",  img: CAT_MOTO     },
+    { label: "Scooter",     img: CAT_SCOOTER  },
+    { label: "ATV / Quad",  img: CAT_ATV      },
+    { label: "Dirt Bike",   img: CAT_DIRTBIKE },
   ],
 };
+
+const TRUCKS_CATEGORIES: { label: string; img: any }[] = [
+  { label: "Pickup Truck",  img: CAT_PICKUP },
+  { label: "Cargo Truck",   img: CAT_PICKUP },
+  { label: "Tipper Truck",  img: CAT_PICKUP },
+  { label: "Tanker Truck",  img: CAT_PICKUP },
+  { label: "Flatbed Truck", img: CAT_PICKUP },
+  { label: "Box Truck",     img: CAT_VAN    },
+  { label: "Bus",           img: CAT_VAN    },
+  { label: "Minibus",       img: CAT_VAN    },
+  { label: "Coach Bus",     img: CAT_VAN    },
+];
+
+const HEAVY_CATEGORIES: { label: string; img: any }[] = [
+  { label: "Excavator",         img: CAT_PICKUP },
+  { label: "Bulldozer",         img: CAT_PICKUP },
+  { label: "Crane",             img: CAT_PICKUP },
+  { label: "Forklift",          img: CAT_VAN    },
+  { label: "Front Loader",      img: CAT_PICKUP },
+  { label: "Grader",            img: CAT_PICKUP },
+  { label: "Compactor",         img: CAT_PICKUP },
+  { label: "Concrete Mixer",    img: CAT_VAN    },
+  { label: "Tractor",           img: CAT_PICKUP },
+  { label: "Combine Harvester", img: CAT_PICKUP },
+  { label: "Ambulance",         img: CAT_VAN    },
+  { label: "Fire Truck",        img: CAT_PICKUP },
+];
 
 export default function HomeScreen() {
   const { cars, currentUser, conversations } = useApp();
@@ -382,6 +360,7 @@ export default function HomeScreen() {
                     <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
                   </View>
                 </Pressable>
+
               ))}
             </ScrollView>
           </View>
@@ -417,6 +396,50 @@ export default function HomeScreen() {
                 </Pressable>
               );
             })}
+          </ScrollView>
+        </View>
+
+        {/* ── Trucks & Commercial ── */}
+        <View style={[styles.brandSection, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
+          <View style={styles.brandSectionHeader}>
+            <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#0EB5CA" />
+            <Text style={[styles.brandSectionTitle, { color: isDark ? "#CBD5E1" : "#334155" }]}>Trucks & Commercial</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.subCatsRow}>
+            {TRUCKS_CATEGORIES.map((cat) => (
+              <Pressable
+                key={cat.label}
+                style={[styles.subTab, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA", borderColor: isDark ? "#2D3A4F" : "#E4E8EF" }]}
+                onPress={() => router.push({ pathname: "/(tabs)/search", params: { category: cat.label } })}
+              >
+                <Text style={[styles.subTabLabel, { color: isDark ? "#CBD5E1" : "#1E293B" }]} numberOfLines={1}>{cat.label}</Text>
+                <View style={styles.subTabImgWrap}>
+                  <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
+                </View>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* ── Heavy Equipment ── */}
+        <View style={[styles.brandSection, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
+          <View style={styles.brandSectionHeader}>
+            <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#0EB5CA" />
+            <Text style={[styles.brandSectionTitle, { color: isDark ? "#CBD5E1" : "#334155" }]}>Heavy Equipment</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.subCatsRow}>
+            {HEAVY_CATEGORIES.map((cat) => (
+              <Pressable
+                key={cat.label}
+                style={[styles.subTab, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA", borderColor: isDark ? "#2D3A4F" : "#E4E8EF" }]}
+                onPress={() => router.push({ pathname: "/(tabs)/search", params: { category: cat.label } })}
+              >
+                <Text style={[styles.subTabLabel, { color: isDark ? "#CBD5E1" : "#1E293B" }]} numberOfLines={1}>{cat.label}</Text>
+                <View style={styles.subTabImgWrap}>
+                  <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
+                </View>
+              </Pressable>
+            ))}
           </ScrollView>
         </View>
 
