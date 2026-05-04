@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#EBF4FF",
     alignItems: "center", justifyContent: "center",
   },
-  autoGenTitle: { fontSize: 18, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
+  autoGenTitle: { fontSize: 18, fontFamily: "Raleway_800ExtraBold", color: "#1A1A1A", letterSpacing: -0.2 },
   autoGenSub: {
     fontSize: 13, fontFamily: "Manrope_400Regular", color: "#6B6B6B",
     textAlign: "center", lineHeight: 20,
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
   sumVal: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
   sumTotal: { paddingTop: 12, marginTop: 4, borderTopWidth: 1, borderTopColor: "#F0F0F0" },
   sumTotalKey: { fontSize: 16, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
-  sumTotalVal: { fontSize: 20, fontFamily: "Manrope_700Bold", color: "#0066CC" },
+  sumTotalVal: { fontSize: 20, fontFamily: "Raleway_800ExtraBold", color: "#0066CC", letterSpacing: -0.3 },
 
   // Submit bar
   submitBar: {
@@ -621,7 +621,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06, shadowRadius: 8, elevation: 8,
   },
   submitLbl: { fontSize: 11, color: "#9E9E9E", fontFamily: "Manrope_400Regular" },
-  submitPrice: { fontSize: 22, fontFamily: "Manrope_700Bold", color: "#0066CC" },
+  submitPrice: { fontSize: 22, fontFamily: "Raleway_800ExtraBold", color: "#0066CC", letterSpacing: -0.4 },
   submitBtn: {
     flexDirection: "row", alignItems: "center", gap: 8,
     backgroundColor: "#0066CC",

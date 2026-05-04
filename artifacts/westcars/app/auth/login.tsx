@@ -267,8 +267,8 @@ const styles = StyleSheet.create({
   },
 
   heroTitle: {
-    fontSize: 30, fontFamily: "Manrope_700Bold",
-    color: "#0F172A", letterSpacing: -0.8, marginTop: 4,
+    fontSize: 30, fontFamily: "Raleway_800ExtraBold",
+    color: "#0F172A", letterSpacing: -1, marginTop: 4,
   },
   heroSub: {
     fontSize: 14, fontFamily: "Manrope_400Regular",
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0,0,0,0.06)",
   },
   statItem: { flex: 1, alignItems: "center", gap: 2 },
-  statValue: { fontSize: 20, fontFamily: "Manrope_700Bold", color: "#0F172A" },
+  statValue: { fontSize: 20, fontFamily: "Raleway_800ExtraBold", color: "#0F172A", letterSpacing: -0.3 },
   statLabel: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "#64748B" },
 
   scroll: { flex: 1 },
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     shadowColor: "#000", shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08, shadowRadius: 16, elevation: 6,
   },
-  formTitle: { fontSize: 22, fontFamily: "Manrope_700Bold", color: "#1A1A1A", marginBottom: 4 },
+  formTitle: { fontSize: 22, fontFamily: "Raleway_800ExtraBold", color: "#1A1A1A", marginBottom: 4, letterSpacing: -0.3 },
 
   fieldWrap: { gap: 6 },
   fieldLabel: {

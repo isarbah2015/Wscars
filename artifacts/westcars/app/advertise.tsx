@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 10,
   },
-  heroTitle: { fontSize: 22, fontFamily: "Manrope_700Bold", color: "#fff", letterSpacing: -0.3 },
+  heroTitle: { fontSize: 22, fontFamily: "Raleway_800ExtraBold", color: "#fff", letterSpacing: -0.4 },
   heroSub: { fontSize: 13, color: "rgba(255,255,255,0.8)", fontFamily: "Manrope_400Regular" },
   statsRow: {
     flexDirection: "row",
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
 
   sep: { height: 8, backgroundColor: "#F5F5F5" },
   section: { backgroundColor: "#fff", padding: 16, gap: 12 },
-  sectionTitle: { fontSize: 16, fontFamily: "Manrope_700Bold", color: "#1A1A1A", marginBottom: 4 },
+  sectionTitle: { fontSize: 16, fontFamily: "Raleway_800ExtraBold", color: "#1A1A1A", marginBottom: 4, letterSpacing: -0.2 },
 
   includeRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   includeIcon: {
@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   bookSummary: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular" },
-  bookPrice: { fontSize: 22, fontFamily: "Manrope_700Bold", color: "#0EB5CA", letterSpacing: -0.5 },
+  bookPrice: { fontSize: 22, fontFamily: "Raleway_800ExtraBold", color: "#0EB5CA", letterSpacing: -0.6 },
   bookBtn: {
     backgroundColor: "#0EB5CA",
     paddingHorizontal: 24, paddingVertical: 14,

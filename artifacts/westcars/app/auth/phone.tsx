@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.05)",
     alignItems: "center", justifyContent: "center", marginBottom: 8,
   },
-  title:    { fontSize: 26, fontFamily: "Manrope_700Bold", color: "#0F172A" },
+  title:    { fontSize: 26, fontFamily: "Raleway_800ExtraBold", color: "#0F172A", letterSpacing: -0.5 },
   subtitle: { fontSize: 14, fontFamily: "Manrope_400Regular", color: "#64748B", lineHeight: 20 },
 
   scroll: { flex: 1 },

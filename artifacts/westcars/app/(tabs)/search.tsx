@@ -628,11 +628,12 @@ const styles = StyleSheet.create({
   },
   chipLabel: {
     fontSize: 12,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "Manrope_700Bold",
+    color: "#334155",
   },
   chipLabelActive: {
     fontSize: 12,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "Manrope_800ExtraBold",
     color: "#fff",
   },
 
@@ -710,8 +711,8 @@ const fStyles = StyleSheet.create({
   },
   headerSub: {
     fontSize: 12,
-    fontFamily: "Manrope_400Regular",
-    color: "rgba(255,255,255,0.75)",
+    fontFamily: "Manrope_600SemiBold",
+    color: "rgba(255,255,255,0.85)",
     marginTop: 1,
   },
   closeBtn: {
@@ -742,10 +743,10 @@ const fStyles = StyleSheet.create({
     justifyContent: "center",
   },
   sectionTitle: {
-    fontSize: 13,
-    fontFamily: "Manrope_700Bold",
+    fontSize: 11,
+    fontFamily: "Manrope_800ExtraBold",
     color: "#0F172A",
-    letterSpacing: 0.3,
+    letterSpacing: 1.2,
     textTransform: "uppercase",
   },
   divider: {
@@ -778,12 +779,12 @@ const fStyles = StyleSheet.create({
   },
   chipText: {
     fontSize: 13,
-    fontFamily: "Manrope_500Medium",
-    color: "#64748B",
+    fontFamily: "Manrope_700Bold",
+    color: "#334155",
   },
   chipTextActive: {
     color: "#fff",
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "Manrope_800ExtraBold",
   },
 
   // Brand chips
@@ -842,7 +843,7 @@ const fStyles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 11,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "Manrope_800ExtraBold",
     color: "#334155",
     textAlign: "center",
   },
@@ -871,7 +872,7 @@ const fStyles = StyleSheet.create({
   },
   resetText: {
     fontSize: 14,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "Manrope_800ExtraBold",
     color: "#0EB5CA",
   },
   applyBtn: {
