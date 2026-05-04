@@ -112,7 +112,7 @@ export default function CarDetailScreen() {
     if (idx >= 0 && idx !== activeImg) setActiveImg(idx);
   };
 
-  const handleMessage = (text?: string) => {
+  const handleMessage = async (text?: string) => {
     if (!isAuthenticated) {
       Alert.alert("Sign In Required", "Please sign in to message the seller.", [
         { text: "Sign In", onPress: () => router.push("/auth/login") },
@@ -120,7 +120,7 @@ export default function CarDetailScreen() {
       ]);
       return;
     }
-    const convId = startConversation(car);
+    const convId = await startConversation(car);
     router.push({ pathname: "/conversation/[id]", params: { id: convId } });
   };
 

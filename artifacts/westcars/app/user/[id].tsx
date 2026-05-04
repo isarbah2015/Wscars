@@ -1,7 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   Linking,
   Platform,
@@ -18,7 +19,9 @@ import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
-import { MOCK_USERS } from "@/utils/mockData";
+import { isFirebaseReady } from "@/lib/firebase";
+import { getUser } from "@/services/firebase";
+import { User } from "@/types";
 
 export default function UserProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -26,7 +29,33 @@ export default function UserProfileScreen() {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const user = MOCK_USERS.find((u) => u.id === id);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) { setLoading(false); return; }
+    // First: check if seller data is already embedded in any car listing (fast, no network)
+    const fromCar = cars.find((c) => c.sellerId === id)?.seller as User | undefined;
+    if (fromCar) { setUser(fromCar); setLoading(false); return; }
+    // Second: fetch from Firestore when Firebase is active
+    if (isFirebaseReady()) {
+      getUser(id)
+        .then((u) => setUser(u))
+        .catch(() => setUser(null))
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [id, cars]);
+
+  if (loading) {
+    return (
+      <View style={[styles.notFound, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color="#0EB5CA" />
+      </View>
+    );
+  }
+
   if (!user) {
     return (
       <View style={[styles.notFound, { backgroundColor: colors.background }]}>
