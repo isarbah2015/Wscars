@@ -14,12 +14,9 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Google from "expo-auth-session/providers/google";
-import * as WebBrowser from "expo-web-browser";
 import { useApp } from "@/context/AppContext";
 import { isFirebaseReady } from "@/lib/firebase";
-
-WebBrowser.maybeCompleteAuthSession();
+import { GoogleAuthBridge } from "@/components/GoogleAuthBridge";
 
 const WC_LOGO = require("@/assets/images/wc-logo.png");
 
@@ -358,35 +355,3 @@ const styles = StyleSheet.create({
 
 });
 
-// ──────────────────────────────────────────────────────────────────────
-// GoogleAuthBridge — only mounts when a Google client ID is configured,
-// so we never call useIdTokenAuthRequest with an undefined clientId
-// (which throws synchronously and breaks the whole screen).
-// ──────────────────────────────────────────────────────────────────────
-function GoogleAuthBridge({
-  onIdToken,
-  promptRef,
-}: {
-  onIdToken: (idToken: string, accessToken?: string) => void;
-  promptRef: React.MutableRefObject<(() => Promise<void>) | null>;
-}) {
-  const [_, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId:        GOOGLE_WEB_CLIENT_ID,
-    iosClientId:     GOOGLE_IOS_CLIENT_ID,
-    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-  });
-
-  useEffect(() => {
-    promptRef.current = async () => { await promptAsync(); };
-    return () => { promptRef.current = null; };
-  }, [promptAsync, promptRef]);
-
-  useEffect(() => {
-    if (response?.type !== "success") return;
-    const idToken = response.params?.id_token || (response as any).authentication?.idToken;
-    const accessToken = (response as any).authentication?.accessToken;
-    if (idToken) onIdToken(idToken, accessToken);
-  }, [response, onIdToken]);
-
-  return null;
-}
