@@ -247,9 +247,9 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_700Bold",
   },
   headerTitle: {
-    fontSize: 20,
-    fontFamily: "Manrope_800ExtraBold",
-    letterSpacing: 0.2,
+    fontSize: 22,
+    fontFamily: "Raleway_800ExtraBold",
+    letterSpacing: -0.3,
   },
   headerSub: {
     fontSize: 12,
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  emptyTitle: { fontSize: 20, fontFamily: "Manrope_700Bold" },
+  emptyTitle: { fontSize: 20, fontFamily: "Raleway_800ExtraBold", letterSpacing: -0.3 },
   emptyText: {
     fontSize: 14,
     fontFamily: "Manrope_400Regular",

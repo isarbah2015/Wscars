@@ -781,7 +781,7 @@ const styles = StyleSheet.create({
 
   // Main info
   mainCard: { backgroundColor: "#fff", padding: 16, gap: 10 },
-  carTitle: { fontSize: 20, fontFamily: "Manrope_700Bold", color: "#1A1A1A", letterSpacing: -0.3 },
+  carTitle: { fontSize: 22, fontFamily: "Raleway_800ExtraBold", color: "#1A1A1A", letterSpacing: -0.4 },
   ratingLine: {
     flexDirection: "row",
     alignItems: "center",
@@ -792,8 +792,8 @@ const styles = StyleSheet.create({
   ratingCount: { fontSize: 12, color: "#9E9E9E", fontFamily: "Manrope_400Regular" },
   priceRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   bigPrice: {
-    fontSize: 28, fontFamily: "Manrope_700Bold",
-    color: "#1A1A1A", letterSpacing: -0.5,
+    fontSize: 30, fontFamily: "Raleway_800ExtraBold",
+    color: "#1A1A1A", letterSpacing: -0.8,
   },
   fairBadge: {
     backgroundColor: "#E8F5E9",

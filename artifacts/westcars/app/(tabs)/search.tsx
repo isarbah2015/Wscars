@@ -29,23 +29,38 @@ import {
 import { BRAND_LOGOS } from "@/utils/brandLogos";
 
 const PRICE_RANGES = [
-  { label: "Any Price", min: 0, max: 9999999 },
-  { label: "Under ₵50k", min: 0, max: 50000 },
-  { label: "₵50k–₵100k", min: 50000, max: 100000 },
-  { label: "₵100k–₵250k", min: 100000, max: 250000 },
-  { label: "₵250k–₵500k", min: 250000, max: 500000 },
-  { label: "₵500k+", min: 500000, max: 9999999 },
+  { label: "Any Price",     min: 0,      max: 9999999, icon: "layers" as const },
+  { label: "Under ₵50k",   min: 0,      max: 50000,   icon: "tag" as const },
+  { label: "₵50k–₵100k",  min: 50000,  max: 100000,  icon: "tag" as const },
+  { label: "₵100k–₵250k", min: 100000, max: 250000,  icon: "tag" as const },
+  { label: "₵250k–₵500k", min: 250000, max: 500000,  icon: "tag" as const },
+  { label: "₵500k+",       min: 500000, max: 9999999, icon: "award" as const },
 ];
 
-const QUICK_FILTERS = ["All", "SUV", "Sedan", "Tokunbo", "Budget", "Luxury", "Pickup", "Truck", "Bus", "Heavy", "Moto", "New"];
+type QuickFilterKey = "All"|"SUV"|"Sedan"|"Tokunbo"|"Budget"|"Luxury"|"Pickup"|"Truck"|"Bus"|"Heavy"|"Moto"|"New";
 
-function mapCategoryToFilter(cat: string): { quickFilter: string; query: string } {
+const QUICK_FILTERS: { key: QuickFilterKey; label: string; icon: any; color: string }[] = [
+  { key: "All",     label: "All",     icon: "grid",        color: "#0EB5CA" },
+  { key: "SUV",     label: "SUV",     icon: "box",         color: "#6366F1" },
+  { key: "Sedan",   label: "Sedan",   icon: "minus-circle",color: "#EC4899" },
+  { key: "Tokunbo", label: "Tokunbo", icon: "package",     color: "#22C55E" },
+  { key: "Budget",  label: "Budget",  icon: "tag",         color: "#F59E0B" },
+  { key: "Luxury",  label: "Luxury",  icon: "award",       color: "#A855F7" },
+  { key: "Pickup",  label: "Pickup",  icon: "truck",       color: "#F97316" },
+  { key: "Truck",   label: "Truck",   icon: "truck",       color: "#DC2626" },
+  { key: "Bus",     label: "Bus",     icon: "users",       color: "#0284C7" },
+  { key: "Heavy",   label: "Heavy",   icon: "tool",        color: "#92400E" },
+  { key: "Moto",    label: "Moto",    icon: "navigation-2",color: "#0F766E" },
+  { key: "New",     label: "New",     icon: "star",        color: "#7C3AED" },
+];
+
+function mapCategoryToFilter(cat: string): { quickFilter: QuickFilterKey; query: string } {
   const l = cat.toLowerCase();
   if (l.includes("suv") || l.includes("4x4") || l.includes("4×4"))              return { quickFilter: "SUV",    query: "" };
   if (l.includes("sedan"))                                                         return { quickFilter: "Sedan",  query: "" };
   if (l.includes("pickup"))                                                        return { quickFilter: "Pickup", query: "" };
   if (l.includes("cargo truck") || l.includes("tipper") || l.includes("flatbed") ||
-      l.includes("tanker") || l.includes("box truck") || l.includes("cargo"))     return { quickFilter: "Truck",  query: "" };
+      l.includes("tanker") || l.includes("box truck"))                            return { quickFilter: "Truck",  query: "" };
   if (l.includes("bus") || l.includes("minibus") || l.includes("coach"))         return { quickFilter: "Bus",    query: "" };
   if (l.includes("excavator") || l.includes("bulldozer") || l.includes("crane") ||
       l.includes("forklift") || l.includes("loader") || l.includes("grader") ||
@@ -53,122 +68,121 @@ function mapCategoryToFilter(cat: string): { quickFilter: string; query: string 
       l.includes("harvester") || l.includes("ambulance") || l.includes("fire"))  return { quickFilter: "Heavy",  query: "" };
   if (l.includes("motorcycle") || l.includes("scooter") || l.includes("atv") ||
       l.includes("dirt bike") || l.includes("quad"))                              return { quickFilter: "Moto",   query: "" };
-  if (l.includes("hatchback") || l.includes("hatch"))                            return { quickFilter: "All",    query: "hatchback" };
-  if (l.includes("van") || l.includes("minivan") || l.includes("station wagon")) return { quickFilter: "All",    query: l };
+  if (l.includes("hatchback"))                                                     return { quickFilter: "All",    query: "hatchback" };
+  if (l.includes("van") || l.includes("station wagon"))                           return { quickFilter: "All",    query: l };
   return { quickFilter: "All", query: cat };
 }
 
-const CHIP_COLORS: Record<string, { bg: string; text: string; activeBg: string; activeText: string }> = {
-  "All":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#0EB5CA", activeText: "#FFFFFF" },
-  "SUV":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#818CF8", activeText: "#fff" },
-  "Sedan":   { bg: "#F1F5F9", text: "#64748B", activeBg: "#F472B6", activeText: "#fff" },
-  "Tokunbo": { bg: "#F1F5F9", text: "#64748B", activeBg: "#22C55E", activeText: "#fff" },
-  "Budget":  { bg: "#F1F5F9", text: "#64748B", activeBg: "#F59E0B", activeText: "#fff" },
-  "Luxury":  { bg: "#F1F5F9", text: "#64748B", activeBg: "#A855F7", activeText: "#fff" },
-  "Pickup":  { bg: "#F1F5F9", text: "#64748B", activeBg: "#F97316", activeText: "#fff" },
-  "Truck":   { bg: "#F1F5F9", text: "#64748B", activeBg: "#DC2626", activeText: "#fff" },
-  "Bus":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#0284C7", activeText: "#fff" },
-  "Heavy":   { bg: "#F1F5F9", text: "#64748B", activeBg: "#78350F", activeText: "#fff" },
-  "Moto":    { bg: "#F1F5F9", text: "#64748B", activeBg: "#0F766E", activeText: "#fff" },
-  "New":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#06B6D4", activeText: "#fff" },
+// ── "Any" icon per filter section ────────────────────────────────────────────
+const SECTION_ANY_ICON: Record<string, any> = {
+  Brand:        "layers",
+  Location:     "map",
+  "Fuel Type":  "zap",
+  Transmission: "settings",
+  Condition:    "check-circle",
+  "Price Range":"dollar-sign",
 };
 
+// ── Premium Filter Modal ──────────────────────────────────────────────────────
 function FilterModal({
-  visible,
-  onClose,
-  onApply,
-  colors,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  onApply: (filters: any) => void;
-  colors: any;
-}) {
-  const [brand, setBrand] = useState("Any");
-  const [location, setLocation] = useState("Any");
-  const [fuelType, setFuelType] = useState("Any");
+  visible, onClose, onApply, colors,
+}: { visible: boolean; onClose: () => void; onApply: (f: any) => void; colors: any }) {
+  const [brand,        setBrand]        = useState("Any");
+  const [location,     setLocation]     = useState("Any");
+  const [fuelType,     setFuelType]     = useState("Any");
   const [transmission, setTransmission] = useState("Any");
-  const [condition, setCondition] = useState("Any");
-  const [priceRange, setPriceRange] = useState(PRICE_RANGES[0]);
+  const [condition,    setCondition]    = useState("Any");
+  const [priceRange,   setPriceRange]   = useState(PRICE_RANGES[0]);
 
+  const reset = () => {
+    setBrand("Any"); setLocation("Any"); setFuelType("Any");
+    setTransmission("Any"); setCondition("Any"); setPriceRange(PRICE_RANGES[0]);
+  };
+
+  // Generic horizontal chip row with "Any" icon
   const FilterSection = ({
-    title,
-    options,
-    selected,
-    onSelect,
-  }: {
-    title: string;
-    options: string[];
-    selected: string;
-    onSelect: (v: string) => void;
-  }) => (
-    <View style={fStyles.section}>
-      <Text style={[fStyles.sectionTitle, { color: colors.text }]}>{title}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={fStyles.chips}>
-          {["Any", ...options].map((opt) => (
+    title, options, selected, onSelect,
+  }: { title: string; options: string[]; selected: string; onSelect: (v: string) => void }) => {
+    const anyIcon = SECTION_ANY_ICON[title] || "layers";
+    return (
+      <View style={fStyles.section}>
+        <View style={fStyles.sectionHeader}>
+          <View style={[fStyles.sectionIconBg, { backgroundColor: "#0EB5CA18" }]}>
+            <Feather name={anyIcon} size={13} color="#0EB5CA" />
+          </View>
+          <Text style={fStyles.sectionTitle}>{title}</Text>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={fStyles.chips}>
+            {/* "Any" chip with icon */}
             <Pressable
-              key={opt}
-              style={[fStyles.chip, { backgroundColor: colors.background, borderColor: colors.border },
-                selected === opt && { backgroundColor: colors.accent, borderColor: colors.accent }]}
-              onPress={() => onSelect(opt)}
+              style={[fStyles.chip, selected === "Any" && fStyles.chipActive]}
+              onPress={() => onSelect("Any")}
             >
-              <Text style={[fStyles.chipText, { color: colors.textSecondary },
-                selected === opt && { color: "#fff", fontFamily: "Manrope_600SemiBold" }]}>
-                {opt}
+              <Feather
+                name={anyIcon}
+                size={13}
+                color={selected === "Any" ? "#fff" : "#94A3B8"}
+              />
+              <Text style={[fStyles.chipText, selected === "Any" && fStyles.chipTextActive]}>
+                Any
               </Text>
             </Pressable>
-          ))}
-        </View>
-      </ScrollView>
-    </View>
-  );
+            {options.map((opt) => (
+              <Pressable
+                key={opt}
+                style={[fStyles.chip, selected === opt && fStyles.chipActive]}
+                onPress={() => onSelect(opt)}
+              >
+                <Text style={[fStyles.chipText, selected === opt && fStyles.chipTextActive]}>
+                  {opt}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
 
-  const BrandFilterSection = () => (
+  // Brand section with logo chips
+  const BrandSection = () => (
     <View style={fStyles.section}>
-      <Text style={[fStyles.sectionTitle, { color: colors.text }]}>Brand</Text>
+      <View style={fStyles.sectionHeader}>
+        <View style={[fStyles.sectionIconBg, { backgroundColor: "#0EB5CA18" }]}>
+          <Feather name="layers" size={13} color="#0EB5CA" />
+        </View>
+        <Text style={fStyles.sectionTitle}>Brand</Text>
+      </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={fStyles.chips}>
+          {/* "Any" brand chip with icon */}
           <Pressable
-            style={[fStyles.chip, { backgroundColor: colors.background, borderColor: colors.border },
-              brand === "Any" && { backgroundColor: colors.accent, borderColor: colors.accent }]}
+            style={[fStyles.brandChip, brand === "Any" && fStyles.chipActive]}
             onPress={() => setBrand("Any")}
           >
-            <Text style={[fStyles.chipText, { color: colors.textSecondary },
-              brand === "Any" && { color: "#fff", fontFamily: "Manrope_600SemiBold" }]}>
-              Any
-            </Text>
+            <View style={[fStyles.brandLogoWrap, brand === "Any" && { backgroundColor: "rgba(255,255,255,0.18)" }]}>
+              <Feather name="layers" size={16} color={brand === "Any" ? "#fff" : "#94A3B8"} />
+            </View>
+            <Text style={[fStyles.chipText, brand === "Any" && fStyles.chipTextActive]}>Any</Text>
           </Pressable>
           {CAR_BRANDS.map((b) => {
             const logoUrl = BRAND_LOGOS[b];
-            const active = brand === b;
+            const active  = brand === b;
             return (
               <Pressable
                 key={b}
-                style={[
-                  fStyles.brandChip,
-                  { backgroundColor: colors.background, borderColor: colors.border },
-                  active && { backgroundColor: colors.accent, borderColor: colors.accent },
-                ]}
+                style={[fStyles.brandChip, active && fStyles.chipActive]}
                 onPress={() => setBrand(b)}
               >
-                {logoUrl ? (
-                  <Image
-                    source={{ uri: logoUrl }}
-                    style={fStyles.brandChipLogo}
-                    resizeMode="contain"
-                  />
-                ) : (
-                  <View style={[fStyles.brandChipLogoPlaceholder, { backgroundColor: active ? "rgba(255,255,255,0.2)" : colors.border }]}>
-                    <Text style={[fStyles.brandChipInitial, { color: active ? "#fff" : colors.textSecondary }]}>
-                      {b.charAt(0)}
-                    </Text>
-                  </View>
-                )}
-                <Text style={[fStyles.chipText, { color: colors.textSecondary },
-                  active && { color: "#fff", fontFamily: "Manrope_600SemiBold" }]}>
-                  {b}
-                </Text>
+                <View style={[fStyles.brandLogoWrap, active && { backgroundColor: "rgba(255,255,255,0.15)" }]}>
+                  {logoUrl ? (
+                    <Image source={{ uri: logoUrl }} style={fStyles.brandLogo} resizeMode="contain" />
+                  ) : (
+                    <Text style={[fStyles.brandInitial, { color: active ? "#fff" : "#64748B" }]}>{b.charAt(0)}</Text>
+                  )}
+                </View>
+                <Text style={[fStyles.chipText, active && fStyles.chipTextActive]}>{b}</Text>
               </Pressable>
             );
           })}
@@ -177,57 +191,88 @@ function FilterModal({
     </View>
   );
 
+  // Price range — 2-column grid cards
+  const PriceSection = () => (
+    <View style={fStyles.section}>
+      <View style={fStyles.sectionHeader}>
+        <View style={[fStyles.sectionIconBg, { backgroundColor: "#0EB5CA18" }]}>
+          <Feather name="dollar-sign" size={13} color="#0EB5CA" />
+        </View>
+        <Text style={fStyles.sectionTitle}>Price Range</Text>
+      </View>
+      <View style={fStyles.priceGrid}>
+        {PRICE_RANGES.map((pr) => {
+          const active = priceRange.label === pr.label;
+          return (
+            <Pressable
+              key={pr.label}
+              style={[fStyles.priceCard, active && fStyles.priceCardActive]}
+              onPress={() => setPriceRange(pr)}
+            >
+              <Feather name={pr.icon} size={15} color={active ? "#fff" : "#0EB5CA"} />
+              <Text style={[fStyles.priceLabel, active && { color: "#fff" }]}>{pr.label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={fStyles.overlay}>
-        <View style={[fStyles.sheet, { backgroundColor: colors.card }]}>
-          <View style={[fStyles.handle, { backgroundColor: colors.border }]} />
-          <View style={fStyles.header}>
-            <Text style={[fStyles.title, { color: colors.text }]}>Filters</Text>
-            <Pressable onPress={onClose}>
-              <Feather name="x" size={22} color={colors.textSecondary} />
-            </Pressable>
-          </View>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <BrandFilterSection />
-            <FilterSection title="Location" options={GHANA_CITIES} selected={location} onSelect={setLocation} />
-            <FilterSection title="Fuel Type" options={FUEL_TYPES} selected={fuelType} onSelect={setFuelType} />
-            <FilterSection title="Transmission" options={TRANSMISSIONS} selected={transmission} onSelect={setTransmission} />
-            <FilterSection title="Condition" options={CONDITIONS} selected={condition} onSelect={setCondition} />
-            <View style={fStyles.section}>
-              <Text style={[fStyles.sectionTitle, { color: colors.text }]}>Price Range</Text>
-              <View style={[fStyles.chips, { flexWrap: "wrap" }]}>
-                {PRICE_RANGES.map((pr) => (
-                  <Pressable
-                    key={pr.label}
-                    style={[fStyles.chip, { backgroundColor: colors.background, borderColor: colors.border },
-                      priceRange.label === pr.label && { backgroundColor: colors.accent, borderColor: colors.accent }]}
-                    onPress={() => setPriceRange(pr)}
-                  >
-                    <Text style={[fStyles.chipText, { color: colors.textSecondary },
-                      priceRange.label === pr.label && { color: "#fff", fontFamily: "Manrope_600SemiBold" }]}>
-                      {pr.label}
-                    </Text>
-                  </Pressable>
-                ))}
+        <View style={fStyles.sheet}>
+          {/* Premium gradient header */}
+          <LinearGradient
+            colors={["#0EB5CA", "#0098AA"]}
+            start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+            style={fStyles.gradHeader}
+          >
+            <View style={fStyles.handle} />
+            <View style={fStyles.headerRow}>
+              <View>
+                <Text style={fStyles.headerTitle}>Filters</Text>
+                <Text style={fStyles.headerSub}>Refine your search</Text>
               </View>
+              <Pressable style={fStyles.closeBtn} onPress={onClose}>
+                <Feather name="x" size={18} color="#fff" />
+              </Pressable>
             </View>
+          </LinearGradient>
+
+          <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+            <BrandSection />
+            <View style={fStyles.divider} />
+            <FilterSection title="Location"     options={GHANA_CITIES}   selected={location}     onSelect={setLocation}     />
+            <View style={fStyles.divider} />
+            <FilterSection title="Fuel Type"    options={FUEL_TYPES}     selected={fuelType}     onSelect={setFuelType}     />
+            <View style={fStyles.divider} />
+            <FilterSection title="Transmission" options={TRANSMISSIONS}   selected={transmission} onSelect={setTransmission} />
+            <View style={fStyles.divider} />
+            <FilterSection title="Condition"    options={CONDITIONS}     selected={condition}    onSelect={setCondition}    />
+            <View style={fStyles.divider} />
+            <PriceSection />
+            <View style={{ height: 24 }} />
           </ScrollView>
-          <View style={[fStyles.footer, { borderTopColor: colors.border }]}>
-            <Pressable
-              style={[fStyles.resetBtn, { borderColor: colors.accent }]}
-              onPress={() => {
-                setBrand("Any"); setLocation("Any"); setFuelType("Any");
-                setTransmission("Any"); setCondition("Any"); setPriceRange(PRICE_RANGES[0]);
-              }}
-            >
-              <Text style={[fStyles.resetText, { color: colors.accent }]}>Reset</Text>
+
+          {/* Footer actions */}
+          <View style={fStyles.footer}>
+            <Pressable style={fStyles.resetBtn} onPress={reset}>
+              <Feather name="refresh-ccw" size={15} color="#0EB5CA" />
+              <Text style={fStyles.resetText}>Reset</Text>
             </Pressable>
             <Pressable
-              style={[fStyles.applyBtn, { backgroundColor: colors.accent }]}
+              style={fStyles.applyBtn}
               onPress={() => { onApply({ brand, location, fuelType, transmission, condition, priceRange }); onClose(); }}
             >
-              <Text style={fStyles.applyText}>Apply Filters</Text>
+              <LinearGradient
+                colors={["#0EB5CA", "#0098AA"]}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={fStyles.applyGrad}
+              >
+                <Feather name="check" size={16} color="#fff" />
+                <Text style={fStyles.applyText}>Apply Filters</Text>
+              </LinearGradient>
             </Pressable>
           </View>
         </View>
@@ -236,6 +281,7 @@ function FilterModal({
   );
 }
 
+// ── Main Search Screen ────────────────────────────────────────────────────────
 export default function SearchScreen() {
   const { cars } = useApp();
   const { colors, isDark } = useTheme();
@@ -244,10 +290,10 @@ export default function SearchScreen() {
 
   const { category, brand: brandParam } = useLocalSearchParams<{ category?: string; brand?: string }>();
 
-  const [query, setQuery] = useState("");
+  const [query,         setQuery]         = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
   const [activeFilters, setActiveFilters] = useState<any>(null);
-  const [quickFilter, setQuickFilter] = useState("All");
+  const [quickFilter,   setQuickFilter]   = useState<QuickFilterKey>("All");
 
   useEffect(() => {
     if (brandParam) {
@@ -266,7 +312,7 @@ export default function SearchScreen() {
     }
   }, [category]);
 
-  const filtered = cars.filter((car) => {
+  const filtered = cars.filter((car: Car) => {
     const q = query.toLowerCase();
     const matchQuery =
       !q ||
@@ -307,8 +353,6 @@ export default function SearchScreen() {
     );
   });
 
-  // Shuffle filtered list with a stable seed (per-render order) so sponsored
-  // cars are mixed randomly throughout the grid, not in fixed 2x2 grid slots.
   const listData = React.useMemo(() => {
     const seeded = filtered.map((car) => ({
       car,
@@ -318,117 +362,137 @@ export default function SearchScreen() {
     return seeded.map((x) => ({ type: "car" as const, item: x.car }));
   }, [filtered]);
 
+  const bgHeader = isDark ? "#111827" : "#FFFFFF";
+  const borderHeader = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)";
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* ── Light Header ── */}
-      <View
-        style={[
-          styles.header,
-          {
-            paddingTop: topPad + 14,
-            backgroundColor: isDark ? "#111827" : "#FFFFFF",
-            borderBottomColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
-          },
-        ]}
-      >
-        <View style={styles.headerTop}>
-          <Text style={[styles.headerTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Search Cars</Text>
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
+      {/* ── Premium Header ── */}
+      <View style={[styles.header, { paddingTop: topPad + 14, backgroundColor: bgHeader, borderBottomColor: borderHeader }]}>
+        {/* Title row */}
+        <View style={styles.titleRow}>
+          <View>
+            <Text style={[styles.titleSub, { color: "#0EB5CA" }]}>WESTCARS</Text>
+            <Text style={[styles.title, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Search</Text>
+          </View>
           {filtered.length > 0 && (
-            <View style={[styles.resultPill, { backgroundColor: "#0EB5CA" }]}>
-              <Text style={styles.resultPillText}>{filtered.length} found</Text>
+            <View style={styles.countBadge}>
+              <Text style={styles.countText}>{filtered.length}</Text>
+              <Text style={styles.countLabel}>found</Text>
             </View>
           )}
         </View>
 
-        {/* Search input */}
-        <View style={[styles.searchRow, {
-          backgroundColor: isDark ? "#1E293B" : "#F1F5F9",
-          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+        {/* Search bar */}
+        <View style={[styles.searchBar, {
+          backgroundColor: isDark ? "#1E293B" : "#F8FAFC",
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
         }]}>
-          <Feather name="search" size={18} color={isDark ? "#94A3B8" : "#64748B"} />
+          <Feather name="search" size={17} color={isDark ? "#64748B" : "#94A3B8"} />
           <TextInput
             style={[styles.searchInput, { color: isDark ? "#F1F5F9" : "#0F172A" }]}
             placeholder="Brand, model, location..."
-            placeholderTextColor={isDark ? "#64748B" : "#94A3B8"}
+            placeholderTextColor={isDark ? "#475569" : "#94A3B8"}
             value={query}
             onChangeText={setQuery}
           />
           {query.length > 0 && (
             <Pressable onPress={() => setQuery("")} hitSlop={8}>
-              <Feather name="x" size={16} color={isDark ? "#94A3B8" : "#64748B"} />
+              <Feather name="x-circle" size={16} color="#94A3B8" />
             </Pressable>
           )}
           <Pressable
             onPress={() => setFilterVisible(true)}
-            style={[styles.filterIconBtn, { backgroundColor: "#0EB5CA" }]}
+            style={[styles.filterBtn, activeFilters && styles.filterBtnActive]}
           >
-            <Feather name="sliders" size={17} color="#FFFFFF" />
-            {activeFilters && <View style={styles.filterDot} />}
+            <LinearGradient
+              colors={["#0EB5CA", "#0098AA"]}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+              style={styles.filterBtnGrad}
+            >
+              <Feather name="sliders" size={16} color="#fff" />
+              {activeFilters && <View style={styles.filterDot} />}
+            </LinearGradient>
           </Pressable>
         </View>
 
-        {/* Quick filter chips */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickScroll}>
-          <View style={styles.quickRow}>
-            {QUICK_FILTERS.map((f) => {
-              const c = CHIP_COLORS[f] || CHIP_COLORS["All"];
-              const active = quickFilter === f;
+        {/* Premium quick-filter chips */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
+          <View style={styles.chipRow}>
+            {QUICK_FILTERS.map(({ key, label, icon, color }) => {
+              const active = quickFilter === key;
               return (
                 <Pressable
-                  key={f}
-                  style={[styles.quickChip, {
-                    backgroundColor: active ? c.activeBg : (isDark ? "#1E293B" : c.bg),
-                    borderColor: active ? "transparent" : (isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0"),
-                  }]}
-                  onPress={() => setQuickFilter(f)}
+                  key={key}
+                  style={[styles.chip, { borderColor: active ? "transparent" : (isDark ? "rgba(255,255,255,0.10)" : "#E2E8F0") }]}
+                  onPress={() => setQuickFilter(key)}
                 >
-                  <Text style={[styles.quickChipText, { color: active ? c.activeText : (isDark ? "#94A3B8" : c.text) },
-                    active && { fontFamily: "Manrope_700Bold" }]}>
-                    {f}
-                  </Text>
+                  {active ? (
+                    <LinearGradient
+                      colors={[color, color + "CC"]}
+                      start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                      style={styles.chipInner}
+                    >
+                      <View style={styles.chipIconCircle}>
+                        <Feather name={icon} size={12} color={color} />
+                      </View>
+                      <Text style={styles.chipLabelActive}>{label}</Text>
+                    </LinearGradient>
+                  ) : (
+                    <View style={[styles.chipInner, { backgroundColor: isDark ? "#1E293B" : "#F8FAFC" }]}>
+                      <View style={[styles.chipIconCircleInactive, { backgroundColor: color + "1A" }]}>
+                        <Feather name={icon} size={12} color={color} />
+                      </View>
+                      <Text style={[styles.chipLabel, { color: isDark ? "#94A3B8" : "#64748B" }]}>{label}</Text>
+                    </View>
+                  )}
                 </Pressable>
               );
             })}
           </View>
         </ScrollView>
+
+        {/* Active filter badge */}
+        {activeFilters && (
+          <View style={styles.filterBadgeRow}>
+            <LinearGradient
+              colors={["#0EB5CA18", "#0098AA18"]}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+              style={styles.filterBadge}
+            >
+              <Feather name="filter" size={11} color="#0EB5CA" />
+              <Text style={styles.filterBadgeText}>Filters active</Text>
+              <Pressable onPress={() => setActiveFilters(null)} hitSlop={10}>
+                <Feather name="x" size={12} color="#0EB5CA" />
+              </Pressable>
+            </LinearGradient>
+          </View>
+        )}
       </View>
 
-      {/* Active filter tag */}
-      {activeFilters && (
-        <View style={[styles.filterTagRow, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-          <View style={[styles.filterTag, { backgroundColor: colors.accentLight }]}>
-            <Feather name="filter" size={12} color={colors.accent} />
-            <Text style={[styles.filterTagText, { color: colors.accent }]}>Filters applied</Text>
-            <Pressable onPress={() => setActiveFilters(null)} hitSlop={8}>
-              <Feather name="x" size={12} color={colors.accent} />
-            </Pressable>
-          </View>
-        </View>
-      )}
-
+      {/* ── Results ── */}
       <FlatList
         data={listData}
         keyExtractor={(item) => item.item.id}
         renderItem={({ item, index }) => {
           if (index % 2 === 1) return null;
-          const nextItem = listData[index + 1];
+          const next = listData[index + 1];
           return (
             <View style={styles.row}>
-              <CarCard car={item.item} style={styles.halfCard} />
-              {nextItem ? (
-                <CarCard car={nextItem.item} style={styles.halfCard} />
-              ) : (
-                <View style={styles.halfCard} />
-              )}
+              <CarCard car={item.item} style={styles.half} />
+              {next ? <CarCard car={next.item} style={styles.half} /> : <View style={styles.half} />}
             </View>
           );
         }}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <View style={[styles.emptyIconBg, { backgroundColor: colors.accentLight }]}>
-              <Feather name="search" size={36} color={colors.accent} />
-            </View>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No cars found</Text>
+            <LinearGradient
+              colors={["#0EB5CA18", "#0098AA18"]}
+              style={styles.emptyIconBg}
+            >
+              <Feather name="search" size={34} color="#0EB5CA" />
+            </LinearGradient>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>No vehicles found</Text>
             <Text style={[styles.emptyText, { color: colors.textTertiary }]}>
               Try adjusting your search or filters
             </Text>
@@ -436,7 +500,7 @@ export default function SearchScreen() {
         }
         ListFooterComponent={<View style={{ height: 100 + insets.bottom }} />}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 8 }}
+        contentContainerStyle={{ paddingTop: 10 }}
       />
 
       <FilterModal
@@ -449,211 +513,383 @@ export default function SearchScreen() {
   );
 }
 
+// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  root: { flex: 1 },
 
   header: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     paddingBottom: 14,
     gap: 12,
+    borderBottomWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  headerTop: {
-    flexDirection: "row",
+
+  titleRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" },
+  titleSub: {
+    fontSize: 10,
+    fontFamily: "Raleway_800ExtraBold",
+    letterSpacing: 2.5,
+    marginBottom: 1,
+  },
+  title: {
+    fontSize: 28,
+    fontFamily: "Raleway_800ExtraBold",
+    letterSpacing: -0.5,
+    lineHeight: 32,
+  },
+  countBadge: {
     alignItems: "center",
-    justifyContent: "space-between",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontFamily: "Manrope_800ExtraBold",
-    letterSpacing: 0.3,
-  },
-  resultPill: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    backgroundColor: "#0EB5CA",
     borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginBottom: 2,
   },
-  resultPillText: {
-    fontSize: 12,
-    fontFamily: "Manrope_700Bold",
-    color: "#FFFFFF",
-  },
-  searchRow: {
+  countText: { fontSize: 18, fontFamily: "Raleway_800ExtraBold", color: "#fff", lineHeight: 22 },
+  countLabel: { fontSize: 9, fontFamily: "Manrope_600SemiBold", color: "rgba(255,255,255,0.85)", letterSpacing: 1 },
+
+  searchBar: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    borderRadius: 14,
+    borderRadius: 16,
     paddingHorizontal: 14,
-    paddingVertical: 11,
-    borderWidth: 1,
+    paddingVertical: 12,
+    borderWidth: 1.5,
   },
   searchInput: {
     flex: 1,
-    fontSize: 15,
-    fontFamily: "Manrope_400Regular",
+    fontSize: 14,
+    fontFamily: "Manrope_500Medium",
     padding: 0,
   },
-  filterIconBtn: {
-    position: "relative",
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+  filterBtn: {
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  filterBtnActive: {
+    shadowColor: "#0EB5CA",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  filterBtnGrad: {
+    width: 38,
+    height: 38,
     alignItems: "center",
     justifyContent: "center",
   },
   filterDot: {
     position: "absolute",
-    top: 0,
-    right: 0,
-    width: 8,
-    height: 8,
+    top: 4,
+    right: 4,
+    width: 7,
+    height: 7,
     borderRadius: 4,
     backgroundColor: "#EF4444",
-  },
-  quickScroll: { flexGrow: 0 },
-  quickRow: { flexDirection: "row", gap: 8 },
-  quickChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  quickChipText: {
-    fontSize: 12,
-    fontFamily: "Manrope_500Medium",
+    borderWidth: 1.5,
+    borderColor: "#fff",
   },
 
-  filterTagRow: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
+  chipScroll: { flexGrow: 0, marginHorizontal: -2 },
+  chipRow: { flexDirection: "row", gap: 7, paddingHorizontal: 2 },
+  chip: {
+    borderRadius: 14,
+    borderWidth: 1.5,
+    overflow: "hidden",
   },
-  filterTag: {
+  chipInner: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    alignSelf: "flex-start",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
-  filterTagText: {
+  chipIconCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  chipIconCircleInactive: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  chipLabel: {
     fontSize: 12,
-    fontFamily: "Manrope_500Medium",
-  },
-
-  row: {
-    flexDirection: "row",
-    paddingHorizontal: 10,
-    gap: 10,
-    marginBottom: 0,
-  },
-  halfCard: { flex: 1, marginBottom: 12 },
-
-  empty: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 80,
-    gap: 14,
-  },
-  emptyIconBg: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyTitle: {
-    fontSize: 18,
     fontFamily: "Manrope_600SemiBold",
   },
-  emptyText: {
-    fontSize: 14,
-    fontFamily: "Manrope_400Regular",
-    textAlign: "center",
+  chipLabelActive: {
+    fontSize: 12,
+    fontFamily: "Manrope_700Bold",
+    color: "#fff",
   },
+
+  filterBadgeRow: { flexDirection: "row" },
+  filterBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#0EB5CA33",
+  },
+  filterBadgeText: {
+    fontSize: 12,
+    fontFamily: "Manrope_600SemiBold",
+    color: "#0EB5CA",
+  },
+
+  row: { flexDirection: "row", paddingHorizontal: 10, gap: 10 },
+  half: { flex: 1, marginBottom: 12 },
+
+  empty: { alignItems: "center", paddingVertical: 80, gap: 14 },
+  emptyIconBg: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyTitle: { fontSize: 18, fontFamily: "Raleway_800ExtraBold", letterSpacing: -0.3 },
+  emptyText: { fontSize: 13, fontFamily: "Manrope_400Regular", textAlign: "center", lineHeight: 20 },
 });
 
 const fStyles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.55)",
+    backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "flex-end",
   },
   sheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    maxHeight: "92%",
+    overflow: "hidden",
+  },
+
+  // Gradient header
+  gradHeader: {
     paddingHorizontal: 20,
-    paddingTop: 16,
-    maxHeight: "90%",
+    paddingTop: 12,
+    paddingBottom: 18,
+    gap: 10,
   },
   handle: {
-    width: 36,
+    width: 38,
     height: 4,
     borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.4)",
     alignSelf: "center",
-    marginBottom: 12,
+    marginBottom: 4,
   },
-  header: {
+  headerRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 16,
   },
-  title: { fontSize: 20, fontFamily: "Manrope_700Bold" },
-  section: { marginBottom: 20 },
-  sectionTitle: { fontSize: 14, fontFamily: "Manrope_600SemiBold", marginBottom: 10 },
-  chips: { flexDirection: "row", gap: 8 },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
+  headerTitle: {
+    fontSize: 22,
+    fontFamily: "Raleway_800ExtraBold",
+    color: "#fff",
+    letterSpacing: -0.3,
   },
-  chipText: { fontSize: 13, fontFamily: "Manrope_400Regular" },
-  brandChip: {
-    flexDirection: "column",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 4,
-    minWidth: 70,
+  headerSub: {
+    fontSize: 12,
+    fontFamily: "Manrope_400Regular",
+    color: "rgba(255,255,255,0.75)",
+    marginTop: 1,
   },
-  brandChipLogo: {
-    width: 40,
-    height: 26,
-  },
-  brandChipLogoPlaceholder: {
-    width: 40,
-    height: 26,
-    borderRadius: 6,
+  closeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
   },
-  brandChipInitial: {
-    fontSize: 14,
+
+  section: {
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 4,
+    gap: 10,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  sectionIconBg: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontFamily: "Manrope_700Bold",
+    color: "#0F172A",
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#F1F5F9",
+    marginHorizontal: 20,
+    marginTop: 8,
+  },
+
+  chips: { flexDirection: "row", gap: 8 },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 12,
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+  },
+  chipActive: {
+    backgroundColor: "#0EB5CA",
+    borderColor: "#0EB5CA",
+    shadowColor: "#0EB5CA",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  chipText: {
+    fontSize: 13,
+    fontFamily: "Manrope_500Medium",
+    color: "#64748B",
+  },
+  chipTextActive: {
+    color: "#fff",
     fontFamily: "Manrope_700Bold",
   },
+
+  // Brand chips
+  brandChip: {
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 14,
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    minWidth: 70,
+  },
+  brandLogoWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  brandLogo: { width: 28, height: 28 },
+  brandInitial: {
+    fontSize: 15,
+    fontFamily: "Raleway_800ExtraBold",
+  },
+
+  // Price grid
+  priceGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  priceCard: {
+    width: "30%",
+    flexGrow: 1,
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    borderRadius: 14,
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+  },
+  priceCardActive: {
+    backgroundColor: "#0EB5CA",
+    borderColor: "#0EB5CA",
+    shadowColor: "#0EB5CA",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  priceLabel: {
+    fontSize: 11,
+    fontFamily: "Manrope_700Bold",
+    color: "#334155",
+    textAlign: "center",
+  },
+
+  // Footer
   footer: {
     flexDirection: "row",
     gap: 12,
+    paddingHorizontal: 20,
     paddingVertical: 16,
     borderTopWidth: 1,
+    borderTopColor: "#F1F5F9",
+    backgroundColor: "#fff",
   },
   resetBtn: {
     flex: 1,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    height: 52,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#0EB5CA",
+    backgroundColor: "#0EB5CA0D",
   },
-  resetText: { fontSize: 15, fontFamily: "Manrope_600SemiBold" },
+  resetText: {
+    fontSize: 14,
+    fontFamily: "Manrope_700Bold",
+    color: "#0EB5CA",
+  },
   applyBtn: {
     flex: 2,
-    paddingVertical: 14,
     borderRadius: 14,
-    alignItems: "center",
+    overflow: "hidden",
   },
-  applyText: { fontSize: 15, color: "#fff", fontFamily: "Manrope_600SemiBold" },
+  applyGrad: {
+    height: 52,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  applyText: {
+    fontSize: 15,
+    fontFamily: "Manrope_800ExtraBold",
+    color: "#fff",
+    letterSpacing: 0.2,
+  },
 });

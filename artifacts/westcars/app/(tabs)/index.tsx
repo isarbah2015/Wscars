@@ -896,7 +896,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "Raleway_800ExtraBold",
+    letterSpacing: -0.2,
   },
   seeAll: { fontSize: 13, fontFamily: "Manrope_600SemiBold" },
 

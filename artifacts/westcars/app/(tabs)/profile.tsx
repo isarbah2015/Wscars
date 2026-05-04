@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
   // Auth wall
   authWall: { flex: 1, alignItems: "center", justifyContent: "center", gap: 14, padding: 40 },
   iconRing: { width: 88, height: 88, borderRadius: 44, alignItems: "center", justifyContent: "center" },
-  authTitle: { fontSize: 24, fontFamily: "Manrope_700Bold" },
+  authTitle: { fontSize: 24, fontFamily: "Raleway_800ExtraBold", letterSpacing: -0.3 },
   authText: { fontSize: 14, fontFamily: "Manrope_400Regular", textAlign: "center", lineHeight: 20 },
   authBtn: { borderRadius: 14, width: "100%", paddingVertical: 15, alignItems: "center", justifyContent: "center" },
   authGradient: { paddingVertical: 14, alignItems: "center" },
@@ -604,7 +604,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#0EB5CA", borderWidth: 2, borderColor: "#fff",
     alignItems: "center", justifyContent: "center",
   },
-  userName: { fontSize: 22, fontFamily: "Manrope_700Bold" },
+  userName: { fontSize: 22, fontFamily: "Raleway_800ExtraBold", letterSpacing: -0.3 },
   locationRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   userLocation: { fontSize: 13, fontFamily: "Manrope_400Regular" },
   veriBadges: { marginTop: 2 },
@@ -621,7 +621,7 @@ const styles = StyleSheet.create({
     marginTop: 8, width: "100%",
   },
   statBox: { flex: 1, alignItems: "center", gap: 2 },
-  statValue: { fontSize: 16, fontFamily: "Manrope_700Bold" },
+  statValue: { fontSize: 18, fontFamily: "Raleway_800ExtraBold", letterSpacing: -0.2 },
   statLabel: { fontSize: 10, fontFamily: "Manrope_400Regular" },
   statDivider: { width: 1, height: 30 },
 

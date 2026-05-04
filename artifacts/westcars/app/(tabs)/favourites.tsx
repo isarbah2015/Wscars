@@ -127,9 +127,10 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   headerTitle: {
-    fontSize: 24,
-    fontFamily: "Manrope_800ExtraBold",
-    letterSpacing: 0.3,
+    fontSize: 28,
+    fontFamily: "Raleway_800ExtraBold",
+    letterSpacing: -0.5,
+    lineHeight: 32,
   },
   countBadge: {
     backgroundColor: "#0EB5CA",
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  emptyTitle: { fontSize: 22, fontFamily: "Manrope_700Bold" },
+  emptyTitle: { fontSize: 22, fontFamily: "Raleway_800ExtraBold", letterSpacing: -0.3 },
   emptyText: {
     fontSize: 14,
     fontFamily: "Manrope_400Regular",
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
   /* ── Auth wall ── */
   authWall: { flex: 1, alignItems: "center", justifyContent: "center", gap: 14, padding: 40 },
   iconRing: { width: 90, height: 90, borderRadius: 45, alignItems: "center", justifyContent: "center" },
-  authTitle: { fontSize: 22, fontFamily: "Manrope_700Bold" },
+  authTitle: { fontSize: 22, fontFamily: "Raleway_800ExtraBold", letterSpacing: -0.3 },
   authText: { fontSize: 14, fontFamily: "Manrope_400Regular", textAlign: "center", lineHeight: 20 },
   authBtn: { borderRadius: 14, marginTop: 8, width: "80%", paddingVertical: 15, alignItems: "center", justifyContent: "center" },
   authGradient: { paddingVertical: 14, alignItems: "center" },
