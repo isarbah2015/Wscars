@@ -19,7 +19,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
-import { formatPrice } from "@/utils/ghanaData";
+import { CAR_BRANDS, formatPrice } from "@/utils/ghanaData";
+import { BRAND_LOGOS } from "@/utils/brandLogos";
 
 const WC_LOGO      = require("@/assets/images/wc-logo.png");
 const WC_LOGO_FULL = require("@/assets/images/wc-logo-full.png");
@@ -334,9 +335,37 @@ export default function HomeScreen() {
           </View>
         </Animated.View>{/* end inner opacity Animated.View */}
         </Animated.View>{/* end outer maxHeight Animated.View */}
-        {/* ── WESTCARS brand strip (logo only) ── */}
-        <View style={styles.brandStrip}>
-          <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#0EB5CA" />
+        {/* ── Browse by Brand ── */}
+        <View style={[styles.brandSection, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
+          <View style={styles.brandSectionHeader}>
+            <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#0EB5CA" />
+            <Text style={[styles.brandSectionTitle, { color: isDark ? "#CBD5E1" : "#334155" }]}>Browse by Brand</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.brandRow}>
+            {CAR_BRANDS.map((brand) => {
+              const logoUrl = BRAND_LOGOS[brand];
+              return (
+                <Pressable
+                  key={brand}
+                  style={[styles.brandPill, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA", borderColor: isDark ? "#2D3A4F" : "#E4E8EF" }]}
+                  onPress={() => router.push({ pathname: "/(tabs)/search", params: { brand } })}
+                >
+                  {logoUrl ? (
+                    <Image source={{ uri: logoUrl }} style={styles.brandPillLogo} resizeMode="contain" />
+                  ) : (
+                    <View style={[styles.brandPillLogoPlaceholder, { backgroundColor: isDark ? "#2D3A4F" : "#E2E8F0" }]}>
+                      <Text style={[styles.brandPillLogoInitial, { color: isDark ? "#94A3B8" : "#475569" }]}>
+                        {brand.charAt(0)}
+                      </Text>
+                    </View>
+                  )}
+                  <Text style={[styles.brandPillLabel, { color: isDark ? "#CBD5E1" : "#334155" }]} numberOfLines={1}>
+                    {brand}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
         </View>
 
         {/* ── Sponsored Banner → leads to Advertise ── */}
@@ -968,5 +997,68 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  brandSection: {
+    marginHorizontal: 6,
+    marginTop: 6,
+    borderRadius: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
+    shadowColor: "#0A1628",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  brandSectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    marginBottom: 8,
+  },
+  brandSectionTitle: {
+    fontSize: 15,
+    fontFamily: "Manrope_600SemiBold",
+  },
+  brandStripBadge: {
+    width: 28,
+    height: 28,
+  },
+  brandRow: {
+    paddingHorizontal: 10,
+    gap: 8,
+    paddingBottom: 2,
+  },
+  brandPill: {
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    width: 80,
+    gap: 5,
+  },
+  brandPillLogo: {
+    width: 44,
+    height: 30,
+  },
+  brandPillLogoPlaceholder: {
+    width: 44,
+    height: 30,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  brandPillLogoInitial: {
+    fontSize: 16,
+    fontFamily: "Manrope_700Bold",
+  },
+  brandPillLabel: {
+    fontSize: 10,
+    fontFamily: "Manrope_500Medium",
+    textAlign: "center",
   },
 });

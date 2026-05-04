@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
+  Image,
   Modal,
   Platform,
   Pressable,
@@ -25,6 +26,7 @@ import {
   GHANA_CITIES,
   TRANSMISSIONS,
 } from "@/utils/ghanaData";
+import { BRAND_LOGOS } from "@/utils/brandLogos";
 
 const PRICE_RANGES = [
   { label: "Any Price", min: 0, max: 9999999 },
@@ -108,6 +110,59 @@ function FilterModal({
     </View>
   );
 
+  const BrandFilterSection = () => (
+    <View style={fStyles.section}>
+      <Text style={[fStyles.sectionTitle, { color: colors.text }]}>Brand</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={fStyles.chips}>
+          <Pressable
+            style={[fStyles.chip, { backgroundColor: colors.background, borderColor: colors.border },
+              brand === "Any" && { backgroundColor: colors.accent, borderColor: colors.accent }]}
+            onPress={() => setBrand("Any")}
+          >
+            <Text style={[fStyles.chipText, { color: colors.textSecondary },
+              brand === "Any" && { color: "#fff", fontFamily: "Manrope_600SemiBold" }]}>
+              Any
+            </Text>
+          </Pressable>
+          {CAR_BRANDS.map((b) => {
+            const logoUrl = BRAND_LOGOS[b];
+            const active = brand === b;
+            return (
+              <Pressable
+                key={b}
+                style={[
+                  fStyles.brandChip,
+                  { backgroundColor: colors.background, borderColor: colors.border },
+                  active && { backgroundColor: colors.accent, borderColor: colors.accent },
+                ]}
+                onPress={() => setBrand(b)}
+              >
+                {logoUrl ? (
+                  <Image
+                    source={{ uri: logoUrl }}
+                    style={fStyles.brandChipLogo}
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <View style={[fStyles.brandChipLogoPlaceholder, { backgroundColor: active ? "rgba(255,255,255,0.2)" : colors.border }]}>
+                    <Text style={[fStyles.brandChipInitial, { color: active ? "#fff" : colors.textSecondary }]}>
+                      {b.charAt(0)}
+                    </Text>
+                  </View>
+                )}
+                <Text style={[fStyles.chipText, { color: colors.textSecondary },
+                  active && { color: "#fff", fontFamily: "Manrope_600SemiBold" }]}>
+                  {b}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </View>
+  );
+
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={fStyles.overlay}>
@@ -120,7 +175,7 @@ function FilterModal({
             </Pressable>
           </View>
           <ScrollView showsVerticalScrollIndicator={false}>
-            <FilterSection title="Brand" options={CAR_BRANDS} selected={brand} onSelect={setBrand} />
+            <BrandFilterSection />
             <FilterSection title="Location" options={GHANA_CITIES} selected={location} onSelect={setLocation} />
             <FilterSection title="Fuel Type" options={FUEL_TYPES} selected={fuelType} onSelect={setFuelType} />
             <FilterSection title="Transmission" options={TRANSMISSIONS} selected={transmission} onSelect={setTransmission} />
@@ -173,12 +228,20 @@ export default function SearchScreen() {
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 10 : insets.top;
 
-  const { category } = useLocalSearchParams<{ category?: string }>();
+  const { category, brand: brandParam } = useLocalSearchParams<{ category?: string; brand?: string }>();
 
   const [query, setQuery] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
   const [activeFilters, setActiveFilters] = useState<any>(null);
   const [quickFilter, setQuickFilter] = useState("All");
+
+  useEffect(() => {
+    if (brandParam) {
+      setActiveFilters((prev: any) => ({ ...(prev || {}), brand: brandParam }));
+      setQuickFilter("All");
+      setQuery("");
+    }
+  }, [brandParam]);
 
   useEffect(() => {
     if (category) {
@@ -528,6 +591,31 @@ const fStyles = StyleSheet.create({
     borderWidth: 1,
   },
   chipText: { fontSize: 13, fontFamily: "Manrope_400Regular" },
+  brandChip: {
+    flexDirection: "column",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 4,
+    minWidth: 70,
+  },
+  brandChipLogo: {
+    width: 40,
+    height: 26,
+  },
+  brandChipLogoPlaceholder: {
+    width: 40,
+    height: 26,
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  brandChipInitial: {
+    fontSize: 14,
+    fontFamily: "Manrope_700Bold",
+  },
   footer: {
     flexDirection: "row",
     gap: 12,
