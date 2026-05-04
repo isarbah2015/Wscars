@@ -401,7 +401,13 @@ importers:
       '@expo-google-fonts/manrope':
         specifier: ^0.4.2
         version: 0.4.2
+      '@expo-google-fonts/plus-jakarta-sans':
+        specifier: ^0.4.2
+        version: 0.4.2
       '@expo-google-fonts/raleway':
+        specifier: ^0.4.2
+        version: 0.4.2
+      '@expo-google-fonts/sora':
         specifier: ^0.4.2
         version: 0.4.2
       expo-auth-session:
@@ -436,7 +442,7 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2
       '@tanstack/react-query':
-        specifier: 'catalog:'
+        specifier: '*'
         version: 5.90.21(react@19.1.0)
       '@types/react':
         specifier: ~19.1.10
@@ -502,10 +508,10 @@ importers:
         specifier: ~15.0.10
         version: 15.0.10(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))
       react:
-        specifier: 'catalog:'
+        specifier: '*'
         version: 19.1.0
       react-dom:
-        specifier: 'catalog:'
+        specifier: '*'
         version: 19.1.0(react@19.1.0)
       react-native:
         specifier: 0.81.5
@@ -538,7 +544,7 @@ importers:
         specifier: ~5.9.2
         version: 5.9.3
       zod:
-        specifier: 'catalog:'
+        specifier: '*'
         version: 3.25.76
       zod-validation-error:
         specifier: ^3.4.0
@@ -1332,8 +1338,14 @@ packages:
   '@expo-google-fonts/manrope@0.4.2':
     resolution: {integrity: sha512-BZsKe8d9BJrVnIQIZcTS7/Kac0TbXnqs/+8EBSiQxrmK6GoCO6eTkmr50D1weIk/EoF20pTmAkpWICnovATr/g==}
 
+  '@expo-google-fonts/plus-jakarta-sans@0.4.2':
+    resolution: {integrity: sha512-6LYVmVGwjQvH+uzzWlVc9+oMj4lkNQ41aymVDjO+x8aFk8kCye20wOyLomYMZaMezA++Uf1mZRCw3W3Fy/hxEA==}
+
   '@expo-google-fonts/raleway@0.4.2':
     resolution: {integrity: sha512-EFHYXFx9/M+6kGt/T2/y2Aqo30SosZUp4d8Dd7aLumhacrwlcRL6GYMqwIYQpLbR0xh5Vn4/APH5N72tEkoKRA==}
+
+  '@expo-google-fonts/sora@0.4.2':
+    resolution: {integrity: sha512-X86Kl1cfObcSUzTLIbtmrPCLRlIbCNh0uBOo8bjmXb8gWgVVhnI8CZJEK2btsdq85JPn5k4P6sbV9JLbAm7dqQ==}
 
   '@expo/cli@54.0.23':
     resolution: {integrity: sha512-km0h72SFfQCmVycH/JtPFTVy69w6Lx1cHNDmfLfQqgKFYeeHTjx7LVDP4POHCtNxFP2UeRazrygJhlh4zz498g==}
@@ -6826,7 +6838,11 @@ snapshots:
 
   '@expo-google-fonts/manrope@0.4.2': {}
 
+  '@expo-google-fonts/plus-jakarta-sans@0.4.2': {}
+
   '@expo-google-fonts/raleway@0.4.2': {}
+
+  '@expo-google-fonts/sora@0.4.2': {}
 
   '@expo/cli@54.0.23(expo-router@6.0.23)(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))':
     dependencies:

@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   condBadgeText: {
     color: "#fff",
     fontSize: 10,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     letterSpacing: 0.5,
   },
 
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   priceBadgeText: {
     color: "#FFFFFF",
     fontSize: 13,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     letterSpacing: -0.3,
   },
 
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
   viewsText: {
     color: "rgba(255,255,255,0.9)",
     fontSize: 9,
-    fontFamily: "Manrope_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
   },
 
   soldOverlay: {
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
   },
   soldText: {
     fontSize: 22,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     color: "#fff",
     letterSpacing: 5,
   },
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
   },
   carName: {
     fontSize: 12,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     letterSpacing: 0.1,
   },
   metaRow: {
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
   },
   metaChipText: {
     fontSize: 10,
-    fontFamily: "Manrope_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     flexShrink: 1,
     minWidth: 0,
   },
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
   },
   sellerName: {
     fontSize: 10,
-    fontFamily: "Manrope_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     flexShrink: 1,
     minWidth: 0,
   },
@@ -511,7 +511,7 @@ const sponsoredStyles = StyleSheet.create({
   sponsoredBadgeText: {
     color: "#fff",
     fontSize: 9,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     letterSpacing: 1.0,
   },
 
@@ -531,7 +531,7 @@ const sponsoredStyles = StyleSheet.create({
   priceBadgeText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     letterSpacing: -0.3,
   },
 
@@ -543,7 +543,7 @@ const sponsoredStyles = StyleSheet.create({
   },
   carName: {
     fontSize: 12,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     letterSpacing: 0.1,
   },
 
@@ -568,7 +568,7 @@ const sponsoredStyles = StyleSheet.create({
   promoStripText: {
     color: "#fff",
     fontSize: 9,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     letterSpacing: 0.3,
   },
   promoStripDot: {

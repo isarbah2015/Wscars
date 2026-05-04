@@ -125,12 +125,12 @@ const styles = StyleSheet.create({
   bannerTitle: {
     color: "#fff",
     fontSize: 18,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
   },
   bannerSubtitle: {
     color: "rgba(255,255,255,0.85)",
     fontSize: 12,
-    fontFamily: "Manrope_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     marginBottom: 8,
   },
   ctaButton: {
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   ctaText: {
     color: "#fff",
     fontSize: 12,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
   dots: {
     flexDirection: "row",

@@ -704,8 +704,8 @@ export default function CarDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F5F5" },
   notFound: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, backgroundColor: "#fff" },
-  notFoundText: { fontSize: 16, color: Colors.light.textSecondary, fontFamily: "Manrope_500Medium" },
-  backLink: { fontSize: 14, color: "#0066CC", fontFamily: "Manrope_500Medium" },
+  notFoundText: { fontSize: 16, color: Colors.light.textSecondary, fontFamily: "PlusJakartaSans_500Medium" },
+  backLink: { fontSize: 14, color: "#0066CC", fontFamily: "PlusJakartaSans_500Medium" },
 
   // Top bar
   topBar: {
@@ -725,13 +725,13 @@ const styles = StyleSheet.create({
   },
   topTitle: {
     fontSize: 14,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#1A1A1A",
     lineHeight: 18,
   },
   topPrice: {
     fontSize: 12,
-    fontFamily: "Manrope_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     color: "#6B6B6B",
   },
 
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6,
   },
-  imgCounterText: { color: "#fff", fontSize: 12, fontFamily: "Manrope_500Medium" },
+  imgCounterText: { color: "#fff", fontSize: 12, fontFamily: "PlusJakartaSans_500Medium" },
   dots: {
     position: "absolute", bottom: 12, alignSelf: "center",
     flexDirection: "row", gap: 5,
@@ -781,18 +781,18 @@ const styles = StyleSheet.create({
 
   // Main info
   mainCard: { backgroundColor: "#fff", padding: 16, gap: 10 },
-  carTitle: { fontSize: 22, fontFamily: "Raleway_800ExtraBold", color: "#1A1A1A", letterSpacing: -0.4 },
+  carTitle: { fontSize: 22, fontFamily: "Sora_800ExtraBold", color: "#1A1A1A", letterSpacing: -0.4 },
   ratingLine: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
   },
-  ratingText: { fontSize: 13, color: "#6B6B6B", fontFamily: "Manrope_400Regular" },
-  ratingNum: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
-  ratingCount: { fontSize: 12, color: "#9E9E9E", fontFamily: "Manrope_400Regular" },
+  ratingText: { fontSize: 13, color: "#6B6B6B", fontFamily: "PlusJakartaSans_400Regular" },
+  ratingNum: { fontSize: 13, fontFamily: "PlusJakartaSans_600SemiBold", color: "#1A1A1A" },
+  ratingCount: { fontSize: 12, color: "#9E9E9E", fontFamily: "PlusJakartaSans_400Regular" },
   priceRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   bigPrice: {
-    fontSize: 30, fontFamily: "Raleway_800ExtraBold",
+    fontSize: 30, fontFamily: "Sora_800ExtraBold",
     color: "#1A1A1A", letterSpacing: -0.8,
   },
   fairBadge: {
@@ -801,8 +801,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginLeft: 4,
   },
-  fairBadgeText: { fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#2E7D32" },
-  creditLine: { fontSize: 13, color: "#0066CC", fontFamily: "Manrope_500Medium" },
+  fairBadgeText: { fontSize: 12, fontFamily: "PlusJakartaSans_600SemiBold", color: "#2E7D32" },
+  creditLine: { fontSize: 13, color: "#0066CC", fontFamily: "PlusJakartaSans_500Medium" },
   historyBanner: {
     flexDirection: "row",
     alignItems: "center",
@@ -818,12 +818,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3E8FF",
     alignItems: "center", justifyContent: "center",
   },
-  historyTitle: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#1A1A1A" },
-  historySub: { fontSize: 11, color: "#6B6B6B", fontFamily: "Manrope_400Regular", marginTop: 2 },
+  historyTitle: { fontSize: 13, fontFamily: "PlusJakartaSans_600SemiBold", color: "#1A1A1A" },
+  historySub: { fontSize: 11, color: "#6B6B6B", fontFamily: "PlusJakartaSans_400Regular", marginTop: 2 },
   metaRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  metaDate: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular" },
+  metaDate: { fontSize: 12, color: "#6B6B6B", fontFamily: "PlusJakartaSans_400Regular" },
   metaViews: { flexDirection: "row", alignItems: "center", gap: 4 },
-  metaViewsText: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular" },
+  metaViewsText: { fontSize: 12, color: "#6B6B6B", fontFamily: "PlusJakartaSans_400Regular" },
 
   sep: { height: 8 },
   card: {
@@ -835,7 +835,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
-  cardTitle: { fontSize: 17, fontFamily: "Manrope_700Bold" },
+  cardTitle: { fontSize: 17, fontFamily: "PlusJakartaSans_700Bold" },
 
   // ── Specs redesign ──
   specHeader: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 14 },
@@ -878,18 +878,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 2,
   },
-  specCardValue: { fontSize: 16, fontFamily: "Manrope_700Bold", textAlign: "center" },
-  specCardLabel: { fontSize: 9, fontFamily: "Manrope_600SemiBold", letterSpacing: 1.2, textAlign: "center" },
+  specCardValue: { fontSize: 16, fontFamily: "PlusJakartaSans_700Bold", textAlign: "center" },
+  specCardLabel: { fontSize: 9, fontFamily: "PlusJakartaSans_600SemiBold", letterSpacing: 1.2, textAlign: "center" },
 
   // Mileage bar
   mileageBarWrap: { borderRadius: 14, padding: 14, marginTop: 4, marginBottom: 12, borderWidth: 1 },
   mileageBarHeader: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 10 },
-  mileageBarLabel: { flex: 1, fontSize: 12, fontFamily: "Manrope_500Medium" },
-  mileageBarValue: { fontSize: 13, fontFamily: "Manrope_700Bold" },
+  mileageBarLabel: { flex: 1, fontSize: 12, fontFamily: "PlusJakartaSans_500Medium" },
+  mileageBarValue: { fontSize: 13, fontFamily: "PlusJakartaSans_700Bold" },
   mileageTrack: { height: 8, borderRadius: 4, overflow: "hidden", marginBottom: 6 },
   mileageFill: { height: 8, borderRadius: 4 },
   mileageScale: { flexDirection: "row", justifyContent: "space-between" },
-  mileageScaleText: { fontSize: 9, fontFamily: "Manrope_400Regular" },
+  mileageScaleText: { fontSize: 9, fontFamily: "PlusJakartaSans_400Regular" },
 
   // Detail table
   detailTable: { borderRadius: 14, overflow: "hidden", marginBottom: 14, borderWidth: 1 },
@@ -900,15 +900,15 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     paddingHorizontal: 14,
   },
-  detailLabel: { fontSize: 13, fontFamily: "Manrope_400Regular" },
-  detailValue: { fontSize: 13, fontFamily: "Manrope_600SemiBold" },
+  detailLabel: { fontSize: 13, fontFamily: "PlusJakartaSans_400Regular" },
+  detailValue: { fontSize: 13, fontFamily: "PlusJakartaSans_600SemiBold" },
   detailBadge: {
     backgroundColor: "rgba(14,181,202,0.12)",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 20,
   },
-  detailBadgeText: { fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#0098AA" },
+  detailBadgeText: { fontSize: 12, fontFamily: "PlusJakartaSans_600SemiBold", color: "#0098AA" },
 
   // Full specs button
   fullSpecsBtn: { borderRadius: 14, overflow: "hidden" },
@@ -919,7 +919,7 @@ const styles = StyleSheet.create({
     height: 50,
     gap: 8,
   },
-  fullSpecsBtnText: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#fff", letterSpacing: 0.2 },
+  fullSpecsBtnText: { fontSize: 15, fontFamily: "PlusJakartaSans_700Bold", color: "#fff", letterSpacing: 0.2 },
 
   // Ask seller
   messageBox: {
@@ -936,7 +936,7 @@ const styles = StyleSheet.create({
   messageInput: {
     flex: 1,
     fontSize: 14,
-    fontFamily: "Manrope_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     color: "#1A1A1A",
     minHeight: 40,
     maxHeight: 100,
@@ -958,8 +958,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#1A1A1A",
     borderColor: "#1A1A1A",
   },
-  quickChipText: { fontSize: 13, fontFamily: "Manrope_400Regular", color: "#1A1A1A" },
-  quickChipTextActive: { color: "#fff", fontFamily: "Manrope_500Medium" },
+  quickChipText: { fontSize: 13, fontFamily: "PlusJakartaSans_400Regular", color: "#1A1A1A" },
+  quickChipTextActive: { color: "#fff", fontFamily: "PlusJakartaSans_500Medium" },
 
   // ── Key Specs Strip (auto.ru style) ──
   keySpecsStrip: { borderBottomWidth: 1 },
@@ -975,8 +975,8 @@ const styles = StyleSheet.create({
     width: 28, height: 28, borderRadius: 8,
     alignItems: "center", justifyContent: "center",
   },
-  keySpecValue: { fontSize: 13, fontFamily: "Manrope_700Bold" },
-  keySpecLabel: { fontSize: 10, fontFamily: "Manrope_400Regular", marginTop: 1 },
+  keySpecValue: { fontSize: 13, fontFamily: "PlusJakartaSans_700Bold" },
+  keySpecLabel: { fontSize: 10, fontFamily: "PlusJakartaSans_400Regular", marginTop: 1 },
 
   // ── Equipment accordion ──
   equipAccordionBlock: {
@@ -998,13 +998,13 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     flexShrink: 0,
   },
-  equipAccordionLabel: { fontSize: 14, fontFamily: "Manrope_700Bold" },
-  equipAccordionCount: { fontSize: 11, fontFamily: "Manrope_500Medium", marginTop: 2 },
+  equipAccordionLabel: { fontSize: 14, fontFamily: "PlusJakartaSans_700Bold" },
+  equipAccordionCount: { fontSize: 11, fontFamily: "PlusJakartaSans_500Medium", marginTop: 2 },
   equipAccordionBadge: {
     minWidth: 28, paddingHorizontal: 9, paddingVertical: 4,
     borderRadius: 10, alignItems: "center",
   },
-  equipAccordionBadgeText: { fontSize: 12, fontFamily: "Manrope_700Bold" },
+  equipAccordionBadgeText: { fontSize: 12, fontFamily: "PlusJakartaSans_700Bold" },
   equipItemsList: {
     paddingHorizontal: 16,
     paddingVertical: 6,
@@ -1021,10 +1021,10 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     flexShrink: 0,
   },
-  equipItemText: { flex: 1, fontSize: 13, fontFamily: "Manrope_500Medium", lineHeight: 18 },
+  equipItemText: { flex: 1, fontSize: 13, fontFamily: "PlusJakartaSans_500Medium", lineHeight: 18 },
 
   // Description
-  description: { fontSize: 14, color: "#6B6B6B", fontFamily: "Manrope_400Regular", lineHeight: 22 },
+  description: { fontSize: 14, color: "#6B6B6B", fontFamily: "PlusJakartaSans_400Regular", lineHeight: 22 },
 
   // Seller
   sellerRow: {
@@ -1039,10 +1039,10 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     borderWidth: 1, borderColor: "#E0E0E0",
   },
-  sellerName: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#1A1A1A" },
-  sellerType: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular", marginTop: 1 },
+  sellerName: { fontSize: 15, fontFamily: "PlusJakartaSans_700Bold", color: "#1A1A1A" },
+  sellerType: { fontSize: 12, color: "#6B6B6B", fontFamily: "PlusJakartaSans_400Regular", marginTop: 1 },
   sellerStars: { flexDirection: "row", alignItems: "center", gap: 2, marginTop: 4 },
-  sellerRatingText: { fontSize: 12, color: "#6B6B6B", fontFamily: "Manrope_400Regular", marginLeft: 4 },
+  sellerRatingText: { fontSize: 12, color: "#6B6B6B", fontFamily: "PlusJakartaSans_400Regular", marginLeft: 4 },
 
   recsHeader: {
     flexDirection: "row",
@@ -1065,13 +1065,13 @@ const styles = StyleSheet.create({
 
   // Location
   locationRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  locationText: { fontSize: 14, color: "#1A1A1A", fontFamily: "Manrope_400Regular" },
+  locationText: { fontSize: 14, color: "#1A1A1A", fontFamily: "PlusJakartaSans_400Regular" },
   mapPlaceholder: {
     height: 120, backgroundColor: "#F5F5F5", borderRadius: 8,
     alignItems: "center", justifyContent: "center", gap: 8,
     borderWidth: 1, borderColor: "#E0E0E0",
   },
-  mapPlaceholderText: { fontSize: 13, color: "#BDBDBD", fontFamily: "Manrope_400Regular" },
+  mapPlaceholderText: { fontSize: 13, color: "#BDBDBD", fontFamily: "PlusJakartaSans_400Regular" },
 
   // Bottom sticky bar
   stickyBar: {
@@ -1121,13 +1121,13 @@ const styles = StyleSheet.create({
   stickyBtnText: { gap: 1 },
   stickyBtnLabel: {
     fontSize: 14,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     color: "#fff",
     letterSpacing: 0.1,
   },
   stickyBtnSub: {
     fontSize: 10,
-    fontFamily: "Manrope_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     color: "rgba(255,255,255,0.80)",
   },
 
@@ -1140,7 +1140,7 @@ const styles = StyleSheet.create({
     minWidth: 180, overflow: "hidden",
   },
   moreItem: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingVertical: 13 },
-  moreItemText: { fontSize: 14, fontFamily: "Manrope_500Medium" },
+  moreItemText: { fontSize: 14, fontFamily: "PlusJakartaSans_500Medium" },
 
   // Sold banner
   soldBanner: {
@@ -1148,7 +1148,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#22C55E",
     paddingHorizontal: 16, paddingVertical: 12,
   },
-  soldBannerText: { fontSize: 15, fontFamily: "Manrope_700Bold", color: "#fff" },
+  soldBannerText: { fontSize: 15, fontFamily: "PlusJakartaSans_700Bold", color: "#fff" },
 
   // Trust score wrapper inside seller card
   trustScoreWrap: {

@@ -422,14 +422,14 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     color: "#fff",
     letterSpacing: -0.3,
   },
   headerSub: {
     fontSize: 12,
     color: "rgba(255,255,255,0.85)",
-    fontFamily: "Manrope_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     marginTop: 2,
   },
   closeBtn: {
@@ -449,13 +449,13 @@ const styles = StyleSheet.create({
   statBox: { flex: 1, alignItems: "center" },
   statValue: {
     fontSize: 18,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     color: "#fff",
     letterSpacing: -0.5,
   },
   statLabel: {
     fontSize: 10,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "rgba(255,255,255,0.85)",
     letterSpacing: 0.4,
     marginTop: 2,
@@ -483,13 +483,13 @@ const styles = StyleSheet.create({
   },
   gridTitle: {
     fontSize: 15,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     color: "#0F172A",
     letterSpacing: -0.2,
   },
   gridSubtitle: {
     fontSize: 11,
-    fontFamily: "Manrope_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     color: "#64748B",
   },
   grid: {
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
   },
   gridCardName: {
     fontSize: 13,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     color: "#0F172A",
     letterSpacing: -0.1,
   },
@@ -544,12 +544,12 @@ const styles = StyleSheet.create({
   },
   gridCardCount: {
     fontSize: 18,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     letterSpacing: -0.5,
   },
   gridCardCountLabel: {
     fontSize: 10,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#64748B",
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -559,7 +559,7 @@ const styles = StyleSheet.create({
   sectionsWrap: { paddingHorizontal: 14 },
   sectionsHeader: {
     fontSize: 15,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     color: "#0F172A",
     letterSpacing: -0.2,
     paddingHorizontal: 4,
@@ -592,13 +592,13 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitle: {
     fontSize: 15,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     color: "#fff",
     letterSpacing: -0.2,
   },
   sectionHeaderSub: {
     fontSize: 11,
-    fontFamily: "Manrope_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     color: "rgba(255,255,255,0.85)",
     marginTop: 2,
   },
@@ -613,7 +613,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderBadgeText: {
     fontSize: 11,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     color: "#fff",
     letterSpacing: 0.3,
   },
@@ -644,7 +644,7 @@ const styles = StyleSheet.create({
   itemText: {
     flex: 1,
     fontSize: 11,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#0F172A",
     lineHeight: 14,
   },

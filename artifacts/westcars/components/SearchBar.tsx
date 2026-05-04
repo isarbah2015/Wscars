@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     color: Colors.light.text,
-    fontFamily: "Manrope_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     padding: 0,
   },
   filterBtn: {

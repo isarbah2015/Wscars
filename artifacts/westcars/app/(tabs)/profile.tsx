@@ -582,12 +582,12 @@ const styles = StyleSheet.create({
   // Auth wall
   authWall: { flex: 1, alignItems: "center", justifyContent: "center", gap: 14, padding: 40 },
   iconRing: { width: 88, height: 88, borderRadius: 44, alignItems: "center", justifyContent: "center" },
-  authTitle: { fontSize: 24, fontFamily: "Raleway_800ExtraBold", letterSpacing: -0.3 },
-  authText: { fontSize: 14, fontFamily: "Manrope_400Regular", textAlign: "center", lineHeight: 20 },
+  authTitle: { fontSize: 24, fontFamily: "Sora_800ExtraBold", letterSpacing: -0.3 },
+  authText: { fontSize: 14, fontFamily: "PlusJakartaSans_400Regular", textAlign: "center", lineHeight: 20 },
   authBtn: { borderRadius: 14, width: "100%", paddingVertical: 15, alignItems: "center", justifyContent: "center" },
   authGradient: { paddingVertical: 14, alignItems: "center" },
-  authBtnText: { fontSize: 16, fontFamily: "Manrope_600SemiBold", color: "#fff", textAlign: "center" },
-  signupLink: { fontSize: 14, fontFamily: "Manrope_600SemiBold" },
+  authBtnText: { fontSize: 16, fontFamily: "PlusJakartaSans_600SemiBold", color: "#fff", textAlign: "center" },
+  signupLink: { fontSize: 14, fontFamily: "PlusJakartaSans_600SemiBold" },
 
   // Profile header
   profileHeader: { padding: 20, alignItems: "center", gap: 6, paddingBottom: 24 },
@@ -604,15 +604,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#0EB5CA", borderWidth: 2, borderColor: "#fff",
     alignItems: "center", justifyContent: "center",
   },
-  userName: { fontSize: 22, fontFamily: "Raleway_800ExtraBold", letterSpacing: -0.3 },
+  userName: { fontSize: 22, fontFamily: "Sora_800ExtraBold", letterSpacing: -0.3 },
   locationRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  userLocation: { fontSize: 13, fontFamily: "Manrope_400Regular" },
+  userLocation: { fontSize: 13, fontFamily: "PlusJakartaSans_400Regular" },
   veriBadges: { marginTop: 2 },
   verifyBtn: {
     flexDirection: "row", alignItems: "center", gap: 6,
     backgroundColor: "#0EB5CA", paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20,
   },
-  verifyBtnText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#FFFFFF" },
+  verifyBtnText: { fontSize: 13, fontFamily: "PlusJakartaSans_600SemiBold", color: "#FFFFFF" },
 
   statsRow: {
     flexDirection: "row", alignItems: "center",
@@ -621,8 +621,8 @@ const styles = StyleSheet.create({
     marginTop: 8, width: "100%",
   },
   statBox: { flex: 1, alignItems: "center", gap: 2 },
-  statValue: { fontSize: 18, fontFamily: "Raleway_800ExtraBold", letterSpacing: -0.2 },
-  statLabel: { fontSize: 10, fontFamily: "Manrope_400Regular" },
+  statValue: { fontSize: 18, fontFamily: "Sora_800ExtraBold", letterSpacing: -0.2 },
+  statLabel: { fontSize: 10, fontFamily: "PlusJakartaSans_400Regular" },
   statDivider: { width: 1, height: 30 },
 
   // Trust score card
@@ -639,8 +639,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2, borderBottomColor: "transparent",
   },
   tabActive: { borderBottomColor: Colors.primary },
-  tabText: { fontSize: 12, fontFamily: "Manrope_500Medium" },
-  tabTextActive: { fontFamily: "Manrope_700Bold" },
+  tabText: { fontSize: 12, fontFamily: "PlusJakartaSans_500Medium" },
+  tabTextActive: { fontFamily: "PlusJakartaSans_700Bold" },
 
   // Tab content
   tabContent: { padding: 14, gap: 12 },
@@ -656,8 +656,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,107,0,0.12)",
     alignItems: "center", justifyContent: "center",
   },
-  adBoostTitle: { fontSize: 13, fontFamily: "Manrope_700Bold" },
-  adBoostSub: { fontSize: 11, fontFamily: "Manrope_400Regular", marginTop: 2 },
+  adBoostTitle: { fontSize: 13, fontFamily: "PlusJakartaSans_700Bold" },
+  adBoostSub: { fontSize: 11, fontFamily: "PlusJakartaSans_400Regular", marginTop: 2 },
   gridRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   halfCard: { width: "47%", position: "relative" },
   soldOverlay: {
@@ -665,19 +665,19 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.45)", borderRadius: 2,
     alignItems: "center", justifyContent: "center",
   },
-  soldOverlayText: { fontSize: 18, fontFamily: "Manrope_800ExtraBold", color: "#fff", letterSpacing: 2 },
+  soldOverlayText: { fontSize: 18, fontFamily: "PlusJakartaSans_800ExtraBold", color: "#fff", letterSpacing: 2 },
   expiry: {
     position: "absolute", bottom: 42, left: 6,
     flexDirection: "row", alignItems: "center", gap: 3,
     backgroundColor: "rgba(0,0,0,0.55)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4,
   },
-  expiryText: { fontSize: 9, fontFamily: "Manrope_500Medium", color: "#FBBF24" },
+  expiryText: { fontSize: 9, fontFamily: "PlusJakartaSans_500Medium", color: "#FBBF24" },
 
   emptyState: { alignItems: "center", paddingVertical: 48, gap: 12 },
-  emptyTitle: { fontSize: 17, fontFamily: "Manrope_600SemiBold" },
-  emptySubtitle: { fontSize: 13, fontFamily: "Manrope_400Regular", textAlign: "center" },
+  emptyTitle: { fontSize: 17, fontFamily: "PlusJakartaSans_600SemiBold" },
+  emptySubtitle: { fontSize: 13, fontFamily: "PlusJakartaSans_400Regular", textAlign: "center" },
   listNowBtn: { paddingHorizontal: 24, paddingVertical: 10, borderRadius: 12, backgroundColor: Colors.primary },
-  listNowText: { fontSize: 14, fontFamily: "Manrope_600SemiBold", color: "#fff" },
+  listNowText: { fontSize: 14, fontFamily: "PlusJakartaSans_600SemiBold", color: "#fff" },
 
   // Settings
   settingsCard: {
@@ -685,7 +685,7 @@ const styles = StyleSheet.create({
     shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
   },
   settingsSection: {
-    fontSize: 11, fontFamily: "Manrope_600SemiBold",
+    fontSize: 11, fontFamily: "PlusJakartaSans_600SemiBold",
     paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8,
     textTransform: "uppercase", letterSpacing: 0.5,
   },
@@ -694,10 +694,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 14, borderTopWidth: 1,
   },
   settingLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
-  settingLabel: { fontSize: 15, fontFamily: "Manrope_400Regular" },
-  settingHint: { fontSize: 11, fontFamily: "Manrope_400Regular", marginTop: 1 },
+  settingLabel: { fontSize: 15, fontFamily: "PlusJakartaSans_400Regular" },
+  settingHint: { fontSize: 11, fontFamily: "PlusJakartaSans_400Regular", marginTop: 1 },
   settingRight: { flexDirection: "row", alignItems: "center", gap: 6 },
-  settingValue: { fontSize: 14, fontFamily: "Manrope_400Regular" },
+  settingValue: { fontSize: 14, fontFamily: "PlusJakartaSans_400Regular" },
 
   // Verification rows
   veriRow: {
@@ -705,15 +705,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 13, borderTopWidth: 1,
   },
   veriIcon: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
-  veriTitle: { fontSize: 14, fontFamily: "Manrope_600SemiBold" },
-  veriSub: { fontSize: 11, fontFamily: "Manrope_400Regular" },
+  veriTitle: { fontSize: 14, fontFamily: "PlusJakartaSans_600SemiBold" },
+  veriSub: { fontSize: 11, fontFamily: "PlusJakartaSans_400Regular" },
   veriBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  veriBadgeText: { fontSize: 12, fontFamily: "Manrope_600SemiBold" },
+  veriBadgeText: { fontSize: 12, fontFamily: "PlusJakartaSans_600SemiBold" },
 
   // Logout
   logoutCard: {
     flexDirection: "row", alignItems: "center", justifyContent: "center",
     gap: 10, paddingVertical: 18,
   },
-  logoutText: { fontSize: 16, fontFamily: "Manrope_600SemiBold", color: Colors.danger },
+  logoutText: { fontSize: 16, fontFamily: "PlusJakartaSans_600SemiBold", color: Colors.danger },
 });

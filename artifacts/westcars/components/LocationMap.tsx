@@ -109,12 +109,12 @@ export function LocationMap({ location }: Props) {
 const styles = StyleSheet.create({
   root: { gap: 10 },
   locationRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  locationText: { fontSize: 14, fontFamily: "Manrope_600SemiBold" },
+  locationText: { fontSize: 14, fontFamily: "PlusJakartaSans_600SemiBold" },
   openBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center",
     gap: 6, paddingVertical: 10, borderRadius: 10, borderWidth: 1,
   },
-  openBtnText: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#0EB5CA" },
+  openBtnText: { fontSize: 13, fontFamily: "PlusJakartaSans_600SemiBold", color: "#0EB5CA" },
   nativeMapCard: {
     height: 180, borderRadius: 14, borderWidth: 1,
     overflow: "hidden", alignItems: "center", justifyContent: "center",
@@ -124,11 +124,11 @@ const styles = StyleSheet.create({
   gridV: { position: "absolute", top: 0, bottom: 0, width: 1, backgroundColor: "rgba(14,181,202,0.15)" },
   pin: { alignItems: "center", gap: 4 },
   pinHead: {},
-  pinLabel: { fontSize: 12, fontFamily: "Manrope_700Bold" },
+  pinLabel: { fontSize: 12, fontFamily: "PlusJakartaSans_700Bold" },
   openOverlay: {
     position: "absolute", bottom: 10, right: 10,
     flexDirection: "row", alignItems: "center", gap: 5,
     backgroundColor: "rgba(255,255,255,0.85)", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5,
   },
-  openOverlayText: { fontSize: 11, fontFamily: "Manrope_600SemiBold", color: "#0EB5CA" },
+  openOverlayText: { fontSize: 11, fontFamily: "PlusJakartaSans_600SemiBold", color: "#0EB5CA" },
 });

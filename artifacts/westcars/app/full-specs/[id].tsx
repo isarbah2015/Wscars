@@ -217,8 +217,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center", justifyContent: "center",
   },
-  topTitle: { fontSize: 16, fontFamily: "Manrope_700Bold" },
-  topSub:   { fontSize: 12, fontFamily: "Manrope_400Regular", marginTop: 1 },
+  topTitle: { fontSize: 16, fontFamily: "PlusJakartaSans_700Bold" },
+  topSub:   { fontSize: 12, fontFamily: "PlusJakartaSans_400Regular", marginTop: 1 },
 
   heroCard: {
     height: 220,
@@ -237,8 +237,8 @@ const styles = StyleSheet.create({
   },
   dimBadgeLeft:  { bottom: 10, left: 10 },
   dimBadgeRight: { bottom: 10, right: 10 },
-  dimText: { color: "#fff", fontSize: 13, fontFamily: "Manrope_700Bold" },
-  dimSub:  { color: "rgba(255,255,255,0.7)", fontSize: 10, fontFamily: "Manrope_400Regular" },
+  dimText: { color: "#fff", fontSize: 13, fontFamily: "PlusJakartaSans_700Bold" },
+  dimSub:  { color: "rgba(255,255,255,0.7)", fontSize: 10, fontFamily: "PlusJakartaSans_400Regular" },
 
   quickRow: {
     flexDirection: "row",
@@ -250,8 +250,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRightWidth: 1,
   },
-  quickVal: { fontSize: 12, fontFamily: "Manrope_700Bold" },
-  quickLbl: { fontSize: 10, fontFamily: "Manrope_600SemiBold", marginTop: 2, letterSpacing: 0.3 },
+  quickVal: { fontSize: 12, fontFamily: "PlusJakartaSans_700Bold" },
+  quickLbl: { fontSize: 10, fontFamily: "PlusJakartaSans_600SemiBold", marginTop: 2, letterSpacing: 0.3 },
 
   sections: { padding: 14, gap: 12 },
 
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     textTransform: "uppercase",
     letterSpacing: 1,
   },
@@ -284,12 +284,12 @@ const styles = StyleSheet.create({
   },
   specLabel: {
     fontSize: 13,
-    fontFamily: "Manrope_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     flex: 1,
   },
   specValue: {
     fontSize: 13,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     flex: 1,
     textAlign: "right",
   },

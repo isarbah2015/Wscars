@@ -56,14 +56,14 @@ export function TrustScore({ score, size = "md", showLabel = true, style }: Prop
 const styles = StyleSheet.create({
   container: { gap: 8 },
   topRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  title: { fontSize: 13, fontFamily: "Manrope_600SemiBold", color: "#4A4A4A" },
+  title: { fontSize: 13, fontFamily: "PlusJakartaSans_600SemiBold", color: "#4A4A4A" },
   levelPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
-  levelText: { fontSize: 11, fontFamily: "Manrope_700Bold" },
+  levelText: { fontSize: 11, fontFamily: "PlusJakartaSans_700Bold" },
   track: { height: 8, backgroundColor: "#E8E8E8", borderRadius: 4, overflow: "hidden" },
   fill: { height: "100%", borderRadius: 4 },
   bottomRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  scoreNum: { fontSize: 14, fontFamily: "Manrope_700Bold" },
-  hint: { fontSize: 10, fontFamily: "Manrope_400Regular", color: "#9E9E9E" },
+  scoreNum: { fontSize: 14, fontFamily: "PlusJakartaSans_700Bold" },
+  hint: { fontSize: 10, fontFamily: "PlusJakartaSans_400Regular", color: "#9E9E9E" },
 
   smContainer: {
     alignItems: "center",
@@ -72,6 +72,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     gap: 0,
   },
-  smScore: { fontSize: 14, fontFamily: "Manrope_800ExtraBold" },
-  smLabel: { fontSize: 9, fontFamily: "Manrope_500Medium" },
+  smScore: { fontSize: 14, fontFamily: "PlusJakartaSans_800ExtraBold" },
+  smLabel: { fontSize: 9, fontFamily: "PlusJakartaSans_500Medium" },
 });

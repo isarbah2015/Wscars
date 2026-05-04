@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 14,
     lineHeight: 18,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     color: "#0098AA",
     letterSpacing: 3,
     textAlign: "center",
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   tagline: {
     fontSize: 10,
     lineHeight: 13,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#0098AA",
     letterSpacing: 1.1,
     textAlign: "center",
@@ -267,11 +267,11 @@ const styles = StyleSheet.create({
   },
 
   heroTitle: {
-    fontSize: 30, fontFamily: "Raleway_800ExtraBold",
+    fontSize: 30, fontFamily: "Sora_800ExtraBold",
     color: "#0F172A", letterSpacing: -1, marginTop: 4,
   },
   heroSub: {
-    fontSize: 14, fontFamily: "Manrope_400Regular",
+    fontSize: 14, fontFamily: "PlusJakartaSans_400Regular",
     color: "#64748B", lineHeight: 22, marginTop: -2,
   },
 
@@ -285,8 +285,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0,0,0,0.06)",
   },
   statItem: { flex: 1, alignItems: "center", gap: 2 },
-  statValue: { fontSize: 20, fontFamily: "Raleway_800ExtraBold", color: "#0F172A", letterSpacing: -0.3 },
-  statLabel: { fontSize: 11, fontFamily: "Manrope_400Regular", color: "#64748B" },
+  statValue: { fontSize: 20, fontFamily: "Sora_800ExtraBold", color: "#0F172A", letterSpacing: -0.3 },
+  statLabel: { fontSize: 11, fontFamily: "PlusJakartaSans_400Regular", color: "#64748B" },
 
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 16, paddingTop: 20 },
@@ -296,11 +296,11 @@ const styles = StyleSheet.create({
     shadowColor: "#000", shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08, shadowRadius: 16, elevation: 6,
   },
-  formTitle: { fontSize: 22, fontFamily: "Raleway_800ExtraBold", color: "#1A1A1A", marginBottom: 4, letterSpacing: -0.3 },
+  formTitle: { fontSize: 22, fontFamily: "Sora_800ExtraBold", color: "#1A1A1A", marginBottom: 4, letterSpacing: -0.3 },
 
   fieldWrap: { gap: 6 },
   fieldLabel: {
-    fontSize: 12, fontFamily: "Manrope_600SemiBold", color: "#6B6B6B",
+    fontSize: 12, fontFamily: "PlusJakartaSans_600SemiBold", color: "#6B6B6B",
     letterSpacing: 0.4, textTransform: "uppercase",
   },
   field: {
@@ -313,21 +313,21 @@ const styles = StyleSheet.create({
     shadowColor: "#0EB5CA", shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3, shadowRadius: 6, elevation: 2,
   },
-  input: { flex: 1, fontSize: 15, color: "#1A1A1A", fontFamily: "Manrope_400Regular", padding: 0 },
+  input: { flex: 1, fontSize: 15, color: "#1A1A1A", fontFamily: "PlusJakartaSans_400Regular", padding: 0 },
 
   forgotBtn: { alignSelf: "flex-end", marginTop: -4 },
-  forgotText: { fontSize: 13, color: "#0098AA", fontFamily: "Manrope_500Medium" },
+  forgotText: { fontSize: 13, color: "#0098AA", fontFamily: "PlusJakartaSans_500Medium" },
 
   signInBtn: { borderRadius: 12, overflow: "hidden", marginTop: 4 },
   signInGrad: {
     height: 52, flexDirection: "row",
     alignItems: "center", justifyContent: "center", gap: 8,
   },
-  signInText: { fontSize: 16, fontFamily: "Manrope_700Bold", color: "#fff", letterSpacing: 0.2 },
+  signInText: { fontSize: 16, fontFamily: "PlusJakartaSans_700Bold", color: "#fff", letterSpacing: 0.2 },
 
   divider: { flexDirection: "row", alignItems: "center", gap: 12 },
   divLine: { flex: 1, height: 1, backgroundColor: "#F0F0F0" },
-  divText: { fontSize: 13, color: "#BDBDBD", fontFamily: "Manrope_400Regular" },
+  divText: { fontSize: 13, color: "#BDBDBD", fontFamily: "PlusJakartaSans_400Regular" },
 
   registerBtn: {
     height: 52, flexDirection: "row", alignItems: "center",
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: "rgba(14,181,202,0.45)",
     borderRadius: 12, backgroundColor: "rgba(14,181,202,0.07)",
   },
-  registerText: { fontSize: 15, fontFamily: "Manrope_600SemiBold", color: "#0098AA" },
+  registerText: { fontSize: 15, fontFamily: "PlusJakartaSans_600SemiBold", color: "#0098AA" },
 
   socialBtn: {
     height: 52, flexDirection: "row", alignItems: "center",
@@ -343,21 +343,21 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: "#E2E8F0",
     borderRadius: 12, backgroundColor: "#fff",
   },
-  socialText: { fontSize: 14, fontFamily: "Manrope_700Bold", color: "#0F172A" },
+  socialText: { fontSize: 14, fontFamily: "PlusJakartaSans_700Bold", color: "#0F172A" },
   googleG: {
-    fontSize: 18, fontFamily: "Manrope_800ExtraBold",
+    fontSize: 18, fontFamily: "PlusJakartaSans_800ExtraBold",
     color: "#4285F4", lineHeight: 20,
   },
 
   guestBtn: { alignItems: "center", paddingVertical: 6 },
-  guestText: { fontSize: 13, color: "#9E9E9E", fontFamily: "Manrope_400Regular" },
+  guestText: { fontSize: 13, color: "#9E9E9E", fontFamily: "PlusJakartaSans_400Regular" },
 
   trustRow: {
     flexDirection: "row", justifyContent: "center",
     gap: 20, marginTop: 20, paddingHorizontal: 8,
   },
   trustItem: { flexDirection: "row", alignItems: "center", gap: 5 },
-  trustText: { fontSize: 11, color: "#BDBDBD", fontFamily: "Manrope_400Regular" },
+  trustText: { fontSize: 11, color: "#BDBDBD", fontFamily: "PlusJakartaSans_400Regular" },
 
 });
 

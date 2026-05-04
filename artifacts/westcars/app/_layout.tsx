@@ -1,14 +1,14 @@
 import {
-  Manrope_400Regular,
-  Manrope_500Medium,
-  Manrope_600SemiBold,
-  Manrope_700Bold,
-  Manrope_800ExtraBold,
-} from "@expo-google-fonts/manrope";
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
+} from "@expo-google-fonts/plus-jakarta-sans";
 import {
-  Raleway_700Bold,
-  Raleway_800ExtraBold,
-} from "@expo-google-fonts/raleway";
+  Sora_700Bold,
+  Sora_800ExtraBold,
+} from "@expo-google-fonts/sora";
 import { Feather } from "@expo/vector-icons";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Font from "expo-font";
@@ -56,13 +56,13 @@ export default function RootLayout() {
 
     Font.loadAsync({
       ...Feather.font,
-      Manrope_400Regular,
-      Manrope_500Medium,
-      Manrope_600SemiBold,
-      Manrope_700Bold,
-      Manrope_800ExtraBold,
-      Raleway_700Bold,
-      Raleway_800ExtraBold,
+      PlusJakartaSans_400Regular,
+      PlusJakartaSans_500Medium,
+      PlusJakartaSans_600SemiBold,
+      PlusJakartaSans_700Bold,
+      PlusJakartaSans_800ExtraBold,
+      Sora_700Bold,
+      Sora_800ExtraBold,
     })
       .then(() => {
         clearTimeout(timer);

@@ -320,8 +320,8 @@ export default function HomeScreen() {
                   <Text style={[
                     styles.mainTabLabel,
                     active
-                      ? { color: "#FFFFFF", fontFamily: "Manrope_800ExtraBold" }
-                      : { color: isDark ? "#94A3B8" : "#64748B", fontFamily: "Manrope_600SemiBold" },
+                      ? { color: "#FFFFFF", fontFamily: "PlusJakartaSans_800ExtraBold" }
+                      : { color: isDark ? "#94A3B8" : "#64748B", fontFamily: "PlusJakartaSans_600SemiBold" },
                   ]}>
                     {tab.label}
                   </Text>
@@ -649,10 +649,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarText: { fontSize: 15, fontFamily: "Manrope_700Bold" },
+  avatarText: { fontSize: 15, fontFamily: "PlusJakartaSans_700Bold" },
   profileTextBlock: { gap: 0 },
-  userName: { fontSize: 14, fontFamily: "Manrope_700Bold", lineHeight: 17 },
-  userSub: { fontSize: 11, fontFamily: "Manrope_500Medium", lineHeight: 14 },
+  userName: { fontSize: 14, fontFamily: "PlusJakartaSans_700Bold", lineHeight: 17 },
+  userSub: { fontSize: 11, fontFamily: "PlusJakartaSans_500Medium", lineHeight: 14 },
 
   notifBellBtn: {
     width: 42,
@@ -675,7 +675,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#fff",
   },
-  notifBellBadgeText: { fontSize: 9, fontFamily: "Manrope_700Bold", color: "#fff" },
+  notifBellBadgeText: { fontSize: 9, fontFamily: "PlusJakartaSans_700Bold", color: "#fff" },
 
   logoBadgeRight: { width: 36, height: 36, borderRadius: 8 },
 
@@ -691,11 +691,11 @@ const styles = StyleSheet.create({
   searchBoxText: { flex: 1 },
   searchBoxLabel: {
     fontSize: 15,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
   searchBoxCount: {
     fontSize: 11,
-    fontFamily: "Manrope_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     marginTop: 1,
   },
   filterBtn: {
@@ -728,7 +728,7 @@ const styles = StyleSheet.create({
   },
   mainTabLabel: {
     fontSize: 12,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     textAlign: "center",
   },
   mainTabImgWrap: {
@@ -776,7 +776,7 @@ const styles = StyleSheet.create({
   subTabImg: { width: 62, height: 40 },
   subTabLabel: {
     fontSize: 11,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     flex: 1,
     letterSpacing: 0.1,
   },
@@ -793,7 +793,7 @@ const styles = StyleSheet.create({
 
   brandStripName: {
     fontSize: 15,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     letterSpacing: 3.5,
     marginTop: -20,
     textAlign: "center",
@@ -802,7 +802,7 @@ const styles = StyleSheet.create({
 
   brandStripSub: {
     fontSize: 9.5,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: 1.1,
     marginTop: 0,
     textAlign: "center",
@@ -837,18 +837,18 @@ const styles = StyleSheet.create({
   },
   promoBadgeText: {
     fontSize: 9,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     color: "#fff",
     letterSpacing: 1.5,
   },
   promoBannerTitle: {
     fontSize: 16,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     color: "#fff",
   },
   promoBannerSub: {
     fontSize: 12,
-    fontFamily: "Manrope_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     color: "rgba(255,255,255,0.65)",
   },
   promoCta: { marginTop: 4 },
@@ -866,7 +866,7 @@ const styles = StyleSheet.create({
   },
   promoCtaText: {
     fontSize: 12,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     color: "#FFFFFF",
   },
   bannerCarImg: {
@@ -905,10 +905,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontFamily: "Raleway_800ExtraBold",
+    fontFamily: "Sora_800ExtraBold",
     letterSpacing: -0.2,
   },
-  seeAll: { fontSize: 13, fontFamily: "Manrope_600SemiBold" },
+  seeAll: { fontSize: 13, fontFamily: "PlusJakartaSans_600SemiBold" },
 
   gridBreakout: {
     marginHorizontal: -10,
@@ -943,7 +943,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   featSponsoredStar: { color: "#fff", fontSize: 10, lineHeight: 13 },
-  featSponsoredText: { color: "#fff", fontSize: 10, fontFamily: "Manrope_800ExtraBold", letterSpacing: 1.0 },
+  featSponsoredText: { color: "#fff", fontSize: 10, fontFamily: "PlusJakartaSans_800ExtraBold", letterSpacing: 1.0 },
 
   /* ── Featured Listings (1×1) ── */
   featuredList: { gap: 12 },
@@ -964,7 +964,7 @@ const styles = StyleSheet.create({
     position: "absolute", top: 12, left: 12,
     borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4,
   },
-  featCondText: { color: "#fff", fontSize: 11, fontFamily: "Manrope_700Bold" },
+  featCondText: { color: "#fff", fontSize: 11, fontFamily: "PlusJakartaSans_700Bold" },
   featPriceBadge: {
     position: "absolute", bottom: 12, left: 12,
     backgroundColor: "#0EB5CA",
@@ -972,24 +972,24 @@ const styles = StyleSheet.create({
     shadowColor: "#0EB5CA", shadowOpacity: 0.6, shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 }, elevation: 4,
   },
-  featPriceText: { color: "#fff", fontSize: 16, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.3 },
+  featPriceText: { color: "#fff", fontSize: 16, fontFamily: "PlusJakartaSans_800ExtraBold", letterSpacing: -0.3 },
   featViewsTag: {
     position: "absolute", bottom: 14, right: 12,
     flexDirection: "row", alignItems: "center", gap: 4,
     backgroundColor: "rgba(0,0,0,0.45)",
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6,
   },
-  featViewsText: { color: "rgba(255,255,255,0.9)", fontSize: 10, fontFamily: "Manrope_500Medium" },
+  featViewsText: { color: "rgba(255,255,255,0.9)", fontSize: 10, fontFamily: "PlusJakartaSans_500Medium" },
   featInfo: { padding: 14, gap: 7 },
-  featName: { fontSize: 16, fontFamily: "Manrope_700Bold" },
+  featName: { fontSize: 16, fontFamily: "PlusJakartaSans_700Bold" },
   featMetaRow: { flexDirection: "row", gap: 6, flexWrap: "wrap" },
   featChip: {
     flexDirection: "row", alignItems: "center", gap: 4,
     borderRadius: 8, paddingHorizontal: 9, paddingVertical: 4,
   },
-  featChipText: { fontSize: 12, fontFamily: "Manrope_500Medium" },
+  featChipText: { fontSize: 12, fontFamily: "PlusJakartaSans_500Medium" },
   featSellerRow: { flexDirection: "row", alignItems: "center", gap: 5 },
-  featSellerName: { fontSize: 12, fontFamily: "Manrope_500Medium", flex: 1 },
+  featSellerName: { fontSize: 12, fontFamily: "PlusJakartaSans_500Medium", flex: 1 },
 
   adBannerWrap: {
     marginHorizontal: 10,
@@ -1026,13 +1026,13 @@ const styles = StyleSheet.create({
   },
   adBannerTitle: {
     fontSize: 14,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     color: "#fff",
   },
   adBannerSub: {
     fontSize: 12,
     color: "rgba(255,255,255,0.75)",
-    fontFamily: "Manrope_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     marginTop: 2,
   },
   adBannerArrow: {
@@ -1065,7 +1065,7 @@ const styles = StyleSheet.create({
   },
   brandSectionTitle: {
     fontSize: 15,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
   brandStripBadge: {
     width: 28,
@@ -1099,11 +1099,11 @@ const styles = StyleSheet.create({
   },
   brandPillLogoInitial: {
     fontSize: 18,
-    fontFamily: "Raleway_800ExtraBold",
+    fontFamily: "Sora_800ExtraBold",
   },
   brandPillLabel: {
     fontSize: 10,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     textAlign: "center",
   },
 });

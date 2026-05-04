@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 14,
     lineHeight: 18,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     color: "#0098AA",
     letterSpacing: 3,
     textAlign: "center",
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   brandSub: {
     fontSize: 10,
     lineHeight: 13,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: "#0098AA",
     letterSpacing: 1.1,
     textAlign: "center",
@@ -296,11 +296,11 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   heroTitle: {
-    fontSize: 32, fontFamily: "Manrope_800ExtraBold",
+    fontSize: 32, fontFamily: "PlusJakartaSans_800ExtraBold",
     color: "#0F172A", letterSpacing: -0.5,
   },
   heroSubtitle: {
-    fontSize: 14, fontFamily: "Manrope_400Regular",
+    fontSize: 14, fontFamily: "PlusJakartaSans_400Regular",
     color: "#64748B", lineHeight: 22,
     marginTop: -4,
   },
@@ -314,9 +314,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   statItem: { flex: 1, alignItems: "center", gap: 2 },
-  statValue: { fontSize: 20, fontFamily: "Manrope_700Bold", color: "#0F172A" },
+  statValue: { fontSize: 20, fontFamily: "PlusJakartaSans_700Bold", color: "#0F172A" },
   statLabel: {
-    fontSize: 11, fontFamily: "Manrope_400Regular",
+    fontSize: 11, fontFamily: "PlusJakartaSans_400Regular",
     color: "#64748B",
   },
 
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
 
   fieldGroup: { gap: 7 },
   label: {
-    fontSize: 11, fontFamily: "Manrope_700Bold",
+    fontSize: 11, fontFamily: "PlusJakartaSans_700Bold",
     color: "#64748B", letterSpacing: 0.6, textTransform: "uppercase",
   },
   row: {
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1, fontSize: 15,
-    fontFamily: "Manrope_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     color: "#1A1A1A", padding: 0,
   },
 
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, paddingVertical: 5,
   },
   dialText: {
-    fontSize: 13, fontFamily: "Manrope_700Bold", color: "#0098AA",
+    fontSize: 13, fontFamily: "PlusJakartaSans_700Bold", color: "#0098AA",
   },
   sep: { width: 1, height: 22, backgroundColor: "#E0E0E0" },
 
@@ -373,16 +373,16 @@ const styles = StyleSheet.create({
   },
   strengthSeg: { flex: 1, height: 3, borderRadius: 2 },
   strengthLabel: {
-    fontSize: 11, fontFamily: "Manrope_600SemiBold",
+    fontSize: 11, fontFamily: "PlusJakartaSans_600SemiBold",
     minWidth: 36, textAlign: "right",
   },
 
   /* Terms */
   terms: {
-    fontSize: 12, fontFamily: "Manrope_400Regular",
+    fontSize: 12, fontFamily: "PlusJakartaSans_400Regular",
     color: "#9E9E9E", textAlign: "center", lineHeight: 18,
   },
-  termsLink: { color: "#0098AA", fontFamily: "Manrope_600SemiBold" },
+  termsLink: { color: "#0098AA", fontFamily: "PlusJakartaSans_600SemiBold" },
 
   /* CTA */
   cta: { borderRadius: 14, overflow: "hidden" },
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     height: 56, flexDirection: "row",
     alignItems: "center", justifyContent: "center", gap: 8,
   },
-  ctaText: { fontSize: 16, fontFamily: "Manrope_700Bold" },
+  ctaText: { fontSize: 16, fontFamily: "PlusJakartaSans_700Bold" },
 
   /* Sign in link */
   signinRow: {
@@ -398,10 +398,10 @@ const styles = StyleSheet.create({
     alignItems: "center", gap: 5,
   },
   signinPrompt: {
-    fontSize: 14, fontFamily: "Manrope_400Regular", color: "#9E9E9E",
+    fontSize: 14, fontFamily: "PlusJakartaSans_400Regular", color: "#9E9E9E",
   },
   signinLink: {
-    fontSize: 14, fontFamily: "Manrope_700Bold", color: "#0098AA",
+    fontSize: 14, fontFamily: "PlusJakartaSans_700Bold", color: "#0098AA",
   },
 
   /* Trust row */
@@ -414,6 +414,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(14,181,202,0.10)",
     borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5,
   },
-  trustText: { fontSize: 11, fontFamily: "Manrope_500Medium", color: "#0098AA" },
+  trustText: { fontSize: 11, fontFamily: "PlusJakartaSans_500Medium", color: "#0098AA" },
 
 });

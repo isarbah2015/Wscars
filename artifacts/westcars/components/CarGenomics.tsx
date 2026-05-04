@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     letterSpacing: -0.3,
     flex: 1,
   },
@@ -293,12 +293,12 @@ const styles = StyleSheet.create({
   },
   countBadgeText: {
     fontSize: 11,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     color: GENOMICS_ACCENT,
   },
   subtitle: {
     fontSize: 12,
-    fontFamily: "Manrope_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     marginTop: 4,
     marginBottom: 14,
   },
@@ -316,20 +316,20 @@ const styles = StyleSheet.create({
   heroLeft: { alignItems: "center", minWidth: 72 },
   heroValue: {
     fontSize: 38,
-    fontFamily: "Manrope_800ExtraBold",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     letterSpacing: -1.2,
     lineHeight: 42,
   },
   heroOf: {
     fontSize: 10,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: 0.5,
     textTransform: "uppercase",
   },
   heroRight: { flex: 1, gap: 4 },
   heroLabel: {
     fontSize: 12,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
   heroPillRow: { flexDirection: "row", marginTop: 4 },
   heroPill: {
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   },
   heroPillText: {
     fontSize: 10,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     color: GENOMICS_ACCENT,
     letterSpacing: 0.3,
   },
@@ -367,15 +367,15 @@ const styles = StyleSheet.create({
   },
   aspectLabel: {
     fontSize: 13,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
   aspectValue: {
     fontSize: 13,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
   },
   aspectValueOf: {
     fontSize: 11,
-    fontFamily: "Manrope_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
   },
   barTrack: {
     height: 8,
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   kwDot: { width: 6, height: 6, borderRadius: 3 },
   kwTitle: {
     fontSize: 13,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
   },
   chipRow: {
     flexDirection: "row",
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 11,
-    fontFamily: "Manrope_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
   },
 
   /* Footer */
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 10,
-    fontFamily: "Manrope_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     flex: 1,
   },
 
@@ -451,6 +451,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 13,
-    fontFamily: "Manrope_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
 });
