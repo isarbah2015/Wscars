@@ -91,6 +91,7 @@ const SECTION_ANY_ICON: Record<string, any> = {
 function FilterModal({
   visible, onClose, onApply, colors,
 }: { visible: boolean; onClose: () => void; onApply: (f: any) => void; colors: any }) {
+  const { bottom: safeBottom } = useSafeAreaInsets();
   const [brand,        setBrand]        = useState("Any");
   const [location,     setLocation]     = useState("Any");
   const [fuelType,     setFuelType]     = useState("Any");
@@ -224,7 +225,7 @@ function FilterModal({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={fStyles.overlay}>
+      <View style={[fStyles.overlay, { paddingBottom: safeBottom }]}>
         <View style={fStyles.sheet}>
           {/* Premium gradient header */}
           <LinearGradient

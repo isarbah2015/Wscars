@@ -67,6 +67,8 @@ export const CAR_BRANDS = [
   "Foton",
   "BAIC",
   "Dongfeng",
+  "Hongqi",
+  "Omoda",
   // Other
   "Tata",
   "Great Wall",
