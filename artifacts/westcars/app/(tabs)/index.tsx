@@ -47,45 +47,22 @@ const CONDITION_TABS: { id: Condition; label: string; img: any }[] = [
   { id: "moto", label: "Moto", img: CAR_MOTO },
 ];
 
-const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any }[]> = {
-  new: [
-    { label: "SUV / 4×4",     img: CAT_SUV    },
-    { label: "Sedan",          img: CAT_SEDAN  },
-    { label: "Hatchback",      img: CAT_HATCH  },
-    { label: "Pickup Truck",   img: CAT_PICKUP },
-    { label: "Van",            img: CAT_VAN    },
-    { label: "Coupe",          img: CAT_COUPE  },
-  ],
-  used: [
-    { label: "SUV / 4×4",     img: CAT_SUV    },
-    { label: "Sedan",          img: CAT_SEDAN  },
-    { label: "Pickup Truck",   img: CAT_PICKUP },
-    { label: "Van",            img: CAT_VAN    },
-    { label: "Hatchback",      img: CAT_HATCH  },
-    { label: "Coupe",          img: CAT_COUPE  },
-    { label: "Station Wagon",  img: CAT_SEDAN  },
-  ],
-  moto: [
-    { label: "Motorcycle",  img: CAT_MOTO     },
-    { label: "Scooter",     img: CAT_SCOOTER  },
-    { label: "ATV / Quad",  img: CAT_ATV      },
-    { label: "Dirt Bike",   img: CAT_DIRTBIKE },
-  ],
-};
-
-const TRUCKS_CATEGORIES: { label: string; img: any }[] = [
-  { label: "Pickup Truck",  img: CAT_PICKUP },
-  { label: "Cargo Truck",   img: CAT_PICKUP },
-  { label: "Tipper Truck",  img: CAT_PICKUP },
-  { label: "Tanker Truck",  img: CAT_PICKUP },
-  { label: "Flatbed Truck", img: CAT_PICKUP },
-  { label: "Box Truck",     img: CAT_VAN    },
-  { label: "Bus",           img: CAT_VAN    },
-  { label: "Minibus",       img: CAT_VAN    },
-  { label: "Coach Bus",     img: CAT_VAN    },
-];
-
-const HEAVY_CATEGORIES: { label: string; img: any }[] = [
+const ALL_VEHICLE_TYPES: { label: string; img: any }[] = [
+  { label: "SUV / 4×4",        img: CAT_SUV    },
+  { label: "Sedan",             img: CAT_SEDAN  },
+  { label: "Hatchback",         img: CAT_HATCH  },
+  { label: "Pickup Truck",      img: CAT_PICKUP },
+  { label: "Van",               img: CAT_VAN    },
+  { label: "Coupe",             img: CAT_COUPE  },
+  { label: "Station Wagon",     img: CAT_SEDAN  },
+  { label: "Cargo Truck",       img: CAT_PICKUP },
+  { label: "Tipper Truck",      img: CAT_PICKUP },
+  { label: "Tanker Truck",      img: CAT_PICKUP },
+  { label: "Flatbed Truck",     img: CAT_PICKUP },
+  { label: "Box Truck",         img: CAT_VAN    },
+  { label: "Bus",               img: CAT_VAN    },
+  { label: "Minibus",           img: CAT_VAN    },
+  { label: "Coach Bus",         img: CAT_VAN    },
   { label: "Excavator",         img: CAT_PICKUP },
   { label: "Bulldozer",         img: CAT_PICKUP },
   { label: "Crane",             img: CAT_PICKUP },
@@ -98,6 +75,13 @@ const HEAVY_CATEGORIES: { label: string; img: any }[] = [
   { label: "Combine Harvester", img: CAT_PICKUP },
   { label: "Ambulance",         img: CAT_VAN    },
   { label: "Fire Truck",        img: CAT_PICKUP },
+];
+
+const MOTO_TYPES: { label: string; img: any }[] = [
+  { label: "Motorcycle",  img: CAT_MOTO     },
+  { label: "Scooter",     img: CAT_SCOOTER  },
+  { label: "ATV / Quad",  img: CAT_ATV      },
+  { label: "Dirt Bike",   img: CAT_DIRTBIKE },
 ];
 
 export default function HomeScreen() {
@@ -336,7 +320,7 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.subCatsRow}
             >
-              {VEHICLE_CATEGORIES[condition].map((cat) => (
+              {(condition === "moto" ? MOTO_TYPES : ALL_VEHICLE_TYPES).map((cat) => (
                 <Pressable
                   key={cat.label}
                   style={[
@@ -396,50 +380,6 @@ export default function HomeScreen() {
                 </Pressable>
               );
             })}
-          </ScrollView>
-        </View>
-
-        {/* ── Trucks & Commercial ── */}
-        <View style={[styles.brandSection, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
-          <View style={styles.brandSectionHeader}>
-            <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#0EB5CA" />
-            <Text style={[styles.brandSectionTitle, { color: isDark ? "#CBD5E1" : "#334155" }]}>Trucks & Commercial</Text>
-          </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.subCatsRow}>
-            {TRUCKS_CATEGORIES.map((cat) => (
-              <Pressable
-                key={cat.label}
-                style={[styles.subTab, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA", borderColor: isDark ? "#2D3A4F" : "#E4E8EF" }]}
-                onPress={() => router.push({ pathname: "/(tabs)/search", params: { category: cat.label } })}
-              >
-                <Text style={[styles.subTabLabel, { color: isDark ? "#CBD5E1" : "#1E293B" }]} numberOfLines={1}>{cat.label}</Text>
-                <View style={styles.subTabImgWrap}>
-                  <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
-                </View>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* ── Heavy Equipment ── */}
-        <View style={[styles.brandSection, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
-          <View style={styles.brandSectionHeader}>
-            <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#0EB5CA" />
-            <Text style={[styles.brandSectionTitle, { color: isDark ? "#CBD5E1" : "#334155" }]}>Heavy Equipment</Text>
-          </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.subCatsRow}>
-            {HEAVY_CATEGORIES.map((cat) => (
-              <Pressable
-                key={cat.label}
-                style={[styles.subTab, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA", borderColor: isDark ? "#2D3A4F" : "#E4E8EF" }]}
-                onPress={() => router.push({ pathname: "/(tabs)/search", params: { category: cat.label } })}
-              >
-                <Text style={[styles.subTabLabel, { color: isDark ? "#CBD5E1" : "#1E293B" }]} numberOfLines={1}>{cat.label}</Text>
-                <View style={styles.subTabImgWrap}>
-                  <Image source={cat.img} style={styles.subTabImg} resizeMode="contain" />
-                </View>
-              </Pressable>
-            ))}
           </ScrollView>
         </View>
 
