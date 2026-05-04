@@ -63,7 +63,7 @@ export default function ProfileScreen() {
 
   if (!isAuthenticated || !currentUser) {
     return (
-      <View style={[styles.authWall, { paddingTop: topPad, backgroundColor: colors.backgroundSecondary }]}>
+      <View style={[styles.authWall, { paddingTop: topPad, backgroundColor: colors.background }]}>
         <View style={[styles.iconRing, { backgroundColor: colors.accentLight }]}>
           <Feather name="user" size={40} color={colors.accent} />
         </View>

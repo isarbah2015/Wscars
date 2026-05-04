@@ -20,6 +20,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
+import { isFirebaseReady } from "@/lib/firebase";
+import { updateCar, uploadCarImage } from "@/services/firebase";
 import {
   CAR_BRANDS,
   CONDITIONS,
@@ -206,32 +208,55 @@ export default function SellScreen() {
     }
     setSubmitting(true);
 
-    const mockImageUrl =
-      "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800";
+    try {
+      const PLACEHOLDER = "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800";
+      const initialImages = images.length > 0 ? images : [PLACEHOLDER];
 
-    addCar({
-      brand,
-      model,
-      year: parseInt(year),
-      price: parseFloat(price),
-      mileage: parseInt(mileage || "0"),
-      fuelType: fuelType || "Petrol",
-      transmission: transmission || "Automatic",
-      condition,
-      location,
-      description,
-      images: images.length > 0 ? images : [mockImageUrl],
-      sellerId: currentUser?.id || "currentUser",
-      isFeatured: false,
-      category: "sedan",
-    });
+      // Step 1 — create the Firestore doc (gets us a carId)
+      const carId = await addCar({
+        brand,
+        model,
+        year: parseInt(year),
+        price: parseFloat(price),
+        mileage: parseInt(mileage || "0"),
+        fuelType: fuelType || "Petrol",
+        transmission: transmission || "Automatic",
+        condition,
+        location,
+        description,
+        images: initialImages,
+        sellerId: currentUser?.id || "currentUser",
+        isFeatured: false,
+        category: "sedan",
+      });
 
-    setSubmitting(false);
-    Alert.alert(
-      "Listing Posted!",
-      "Your car has been listed successfully.",
-      [{ text: "View Listings", onPress: () => router.push("/(tabs)") }]
-    );
+      // Step 2 — upload real images to Firebase Storage (only when Firebase is live
+      //           and the user actually picked local files)
+      if (carId && isFirebaseReady() && currentUser?.id && images.length > 0) {
+        try {
+          const uploadedUrls = await Promise.all(
+            images.map((uri, idx) =>
+              uploadCarImage(currentUser.id, carId, uri, idx)
+            )
+          );
+          // Step 3 — patch the Firestore doc with the real Storage download URLs
+          await updateCar(carId, { images: uploadedUrls });
+        } catch (uploadErr) {
+          console.warn("[sell] image upload failed, listing saved with placeholder:", uploadErr);
+        }
+      }
+
+      Alert.alert(
+        "Listing Posted!",
+        "Your car has been listed successfully.",
+        [{ text: "View Listings", onPress: () => router.push("/(tabs)") }]
+      );
+    } catch (err) {
+      Alert.alert("Error", "Failed to post listing. Please try again.");
+      console.error("[sell] submit error:", err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const InputField = ({
