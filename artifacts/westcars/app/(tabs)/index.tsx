@@ -33,11 +33,31 @@ const CAT_PICKUP  = require("@/assets/images/cat-pickup.png");
 const CAT_VAN     = require("@/assets/images/cat-van.png");
 const CAT_COUPE   = require("@/assets/images/cat-coupe.png");
 const CAT_HATCH   = require("@/assets/images/cat-hatchback.png");
-const CAT_MOTO     = require("@/assets/images/cat-motorcycle.png");
-const CAT_SCOOTER  = require("@/assets/images/cat-scooter.png");
-const CAT_ATV      = require("@/assets/images/cat-atv.png");
-const CAT_DIRTBIKE = require("@/assets/images/cat-dirtbike.png");
-const BANNER_CAR  = require("@/assets/images/banner-car.png");
+const CAT_MOTO        = require("@/assets/images/cat-motorcycle.png");
+const CAT_SCOOTER     = require("@/assets/images/cat-scooter.png");
+const CAT_ATV         = require("@/assets/images/cat-atv.png");
+const CAT_DIRTBIKE    = require("@/assets/images/cat-dirtbike.png");
+const CAT_CARGO_TRUCK = require("@/assets/images/cat-cargo-truck.png");
+const CAT_TIPPER      = require("@/assets/images/cat-tipper-truck.png");
+const CAT_TANKER      = require("@/assets/images/cat-tanker-truck.png");
+const CAT_FLATBED     = require("@/assets/images/cat-flatbed-truck.png");
+const CAT_BOX_TRUCK   = require("@/assets/images/cat-box-truck.png");
+const CAT_BUS         = require("@/assets/images/cat-bus.png");
+const CAT_MINIBUS     = require("@/assets/images/cat-minibus.png");
+const CAT_COACH       = require("@/assets/images/cat-coach-bus.png");
+const CAT_EXCAVATOR   = require("@/assets/images/cat-excavator.png");
+const CAT_BULLDOZER   = require("@/assets/images/cat-bulldozer.png");
+const CAT_CRANE       = require("@/assets/images/cat-crane.png");
+const CAT_FORKLIFT    = require("@/assets/images/cat-forklift.png");
+const CAT_FRONTLOADER = require("@/assets/images/cat-front-loader.png");
+const CAT_GRADER      = require("@/assets/images/cat-grader.png");
+const CAT_COMPACTOR   = require("@/assets/images/cat-compactor.png");
+const CAT_MIXER       = require("@/assets/images/cat-concrete-mixer.png");
+const CAT_TRACTOR     = require("@/assets/images/cat-tractor.png");
+const CAT_COMBINE     = require("@/assets/images/cat-combine.png");
+const CAT_AMBULANCE   = require("@/assets/images/cat-ambulance.png");
+const CAT_FIRETRUCK   = require("@/assets/images/cat-firetruck.png");
+const BANNER_CAR      = require("@/assets/images/banner-car.png");
 
 type Condition = "new" | "used" | "moto";
 
@@ -48,33 +68,33 @@ const CONDITION_TABS: { id: Condition; label: string; img: any }[] = [
 ];
 
 const ALL_VEHICLE_TYPES: { label: string; img: any }[] = [
-  { label: "SUV / 4×4",        img: CAT_SUV    },
-  { label: "Sedan",             img: CAT_SEDAN  },
-  { label: "Hatchback",         img: CAT_HATCH  },
-  { label: "Pickup Truck",      img: CAT_PICKUP },
-  { label: "Van",               img: CAT_VAN    },
-  { label: "Coupe",             img: CAT_COUPE  },
-  { label: "Station Wagon",     img: CAT_SEDAN  },
-  { label: "Cargo Truck",       img: CAT_PICKUP },
-  { label: "Tipper Truck",      img: CAT_PICKUP },
-  { label: "Tanker Truck",      img: CAT_PICKUP },
-  { label: "Flatbed Truck",     img: CAT_PICKUP },
-  { label: "Box Truck",         img: CAT_VAN    },
-  { label: "Bus",               img: CAT_VAN    },
-  { label: "Minibus",           img: CAT_VAN    },
-  { label: "Coach Bus",         img: CAT_VAN    },
-  { label: "Excavator",         img: CAT_PICKUP },
-  { label: "Bulldozer",         img: CAT_PICKUP },
-  { label: "Crane",             img: CAT_PICKUP },
-  { label: "Forklift",          img: CAT_VAN    },
-  { label: "Front Loader",      img: CAT_PICKUP },
-  { label: "Grader",            img: CAT_PICKUP },
-  { label: "Compactor",         img: CAT_PICKUP },
-  { label: "Concrete Mixer",    img: CAT_VAN    },
-  { label: "Tractor",           img: CAT_PICKUP },
-  { label: "Combine Harvester", img: CAT_PICKUP },
-  { label: "Ambulance",         img: CAT_VAN    },
-  { label: "Fire Truck",        img: CAT_PICKUP },
+  { label: "SUV / 4×4",        img: CAT_SUV        },
+  { label: "Sedan",             img: CAT_SEDAN      },
+  { label: "Hatchback",         img: CAT_HATCH      },
+  { label: "Pickup Truck",      img: CAT_PICKUP     },
+  { label: "Van",               img: CAT_VAN        },
+  { label: "Coupe",             img: CAT_COUPE      },
+  { label: "Station Wagon",     img: CAT_SEDAN      },
+  { label: "Cargo Truck",       img: CAT_CARGO_TRUCK },
+  { label: "Tipper Truck",      img: CAT_TIPPER     },
+  { label: "Tanker Truck",      img: CAT_TANKER     },
+  { label: "Flatbed Truck",     img: CAT_FLATBED    },
+  { label: "Box Truck",         img: CAT_BOX_TRUCK  },
+  { label: "Bus",               img: CAT_BUS        },
+  { label: "Minibus",           img: CAT_MINIBUS    },
+  { label: "Coach Bus",         img: CAT_COACH      },
+  { label: "Excavator",         img: CAT_EXCAVATOR  },
+  { label: "Bulldozer",         img: CAT_BULLDOZER  },
+  { label: "Crane",             img: CAT_CRANE      },
+  { label: "Forklift",          img: CAT_FORKLIFT   },
+  { label: "Front Loader",      img: CAT_FRONTLOADER },
+  { label: "Grader",            img: CAT_GRADER     },
+  { label: "Compactor",         img: CAT_COMPACTOR  },
+  { label: "Concrete Mixer",    img: CAT_MIXER      },
+  { label: "Tractor",           img: CAT_TRACTOR    },
+  { label: "Combine Harvester", img: CAT_COMBINE    },
+  { label: "Ambulance",         img: CAT_AMBULANCE  },
+  { label: "Fire Truck",        img: CAT_FIRETRUCK  },
 ];
 
 const MOTO_TYPES: { label: string; img: any }[] = [
