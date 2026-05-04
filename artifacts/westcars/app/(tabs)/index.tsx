@@ -39,34 +39,64 @@ const CAT_ATV      = require("@/assets/images/cat-atv.png");
 const CAT_DIRTBIKE = require("@/assets/images/cat-dirtbike.png");
 const BANNER_CAR  = require("@/assets/images/banner-car.png");
 
-type Condition = "new" | "used" | "moto";
+type Condition = "new" | "used" | "moto" | "trucks" | "heavy";
 
 const CONDITION_TABS: { id: Condition; label: string; img: any }[] = [
-  { id: "new",  label: "New",  img: CAR_NEW  },
-  { id: "used", label: "Used", img: CAR_USED },
-  { id: "moto", label: "Moto", img: CAR_MOTO },
+  { id: "new",    label: "New",    img: CAR_NEW   },
+  { id: "used",   label: "Used",   img: CAR_USED  },
+  { id: "moto",   label: "Moto",   img: CAR_MOTO  },
+  { id: "trucks", label: "Trucks", img: CAT_PICKUP },
+  { id: "heavy",  label: "Heavy",  img: CAT_PICKUP },
 ];
 
 const VEHICLE_CATEGORIES: Record<Condition, { label: string; img: any; count: number }[]> = {
   new: [
-    { label: "SUV / 4×4", img: CAT_SUV,    count: 2 },
-    { label: "Sedan",     img: CAT_SEDAN,  count: 2 },
-    { label: "Hatchback", img: CAT_HATCH,  count: 1 },
-    { label: "Pickup",    img: CAT_PICKUP, count: 0 },
-    { label: "Van",       img: CAT_VAN,    count: 0 },
+    { label: "SUV / 4×4",   img: CAT_SUV,    count: 2 },
+    { label: "Sedan",        img: CAT_SEDAN,  count: 2 },
+    { label: "Hatchback",    img: CAT_HATCH,  count: 1 },
+    { label: "Pickup Truck", img: CAT_PICKUP, count: 0 },
+    { label: "Van",          img: CAT_VAN,    count: 0 },
+    { label: "Coupe",        img: CAT_COUPE,  count: 0 },
   ],
   used: [
-    { label: "SUV / 4×4", img: CAT_SUV,    count: 5 },
-    { label: "Sedan",     img: CAT_SEDAN,  count: 2 },
-    { label: "Pickup",    img: CAT_PICKUP, count: 1 },
-    { label: "Van",       img: CAT_VAN,    count: 1 },
-    { label: "Hatchback", img: CAT_HATCH,  count: 1 },
+    { label: "SUV / 4×4",   img: CAT_SUV,    count: 5 },
+    { label: "Sedan",        img: CAT_SEDAN,  count: 2 },
+    { label: "Pickup Truck", img: CAT_PICKUP, count: 1 },
+    { label: "Van",          img: CAT_VAN,    count: 1 },
+    { label: "Hatchback",    img: CAT_HATCH,  count: 1 },
+    { label: "Coupe",        img: CAT_COUPE,  count: 0 },
+    { label: "Station Wagon",img: CAT_SEDAN,  count: 0 },
   ],
   moto: [
-    { label: "Motorcycle", img: CAT_MOTO,    count: 2 },
-    { label: "Scooter",    img: CAT_SCOOTER, count: 0 },
-    { label: "ATV / Quad", img: CAT_ATV,     count: 0 },
-    { label: "Dirt Bike",  img: CAT_DIRTBIKE, count: 0 },
+    { label: "Motorcycle",  img: CAT_MOTO,     count: 2 },
+    { label: "Scooter",     img: CAT_SCOOTER,  count: 0 },
+    { label: "ATV / Quad",  img: CAT_ATV,      count: 0 },
+    { label: "Dirt Bike",   img: CAT_DIRTBIKE, count: 0 },
+  ],
+  trucks: [
+    { label: "Pickup Truck",  img: CAT_PICKUP, count: 0 },
+    { label: "Cargo Truck",   img: CAT_PICKUP, count: 0 },
+    { label: "Tipper Truck",  img: CAT_PICKUP, count: 0 },
+    { label: "Tanker Truck",  img: CAT_PICKUP, count: 0 },
+    { label: "Flatbed Truck", img: CAT_PICKUP, count: 0 },
+    { label: "Box Truck",     img: CAT_VAN,    count: 0 },
+    { label: "Bus",           img: CAT_VAN,    count: 0 },
+    { label: "Minibus",       img: CAT_VAN,    count: 0 },
+    { label: "Coach Bus",     img: CAT_VAN,    count: 0 },
+  ],
+  heavy: [
+    { label: "Excavator",      img: CAT_PICKUP, count: 0 },
+    { label: "Bulldozer",      img: CAT_PICKUP, count: 0 },
+    { label: "Crane",          img: CAT_PICKUP, count: 0 },
+    { label: "Forklift",       img: CAT_VAN,    count: 0 },
+    { label: "Front Loader",   img: CAT_PICKUP, count: 0 },
+    { label: "Grader",         img: CAT_PICKUP, count: 0 },
+    { label: "Compactor",      img: CAT_PICKUP, count: 0 },
+    { label: "Concrete Mixer", img: CAT_VAN,    count: 0 },
+    { label: "Tractor",        img: CAT_PICKUP, count: 0 },
+    { label: "Combine Harvester", img: CAT_PICKUP, count: 0 },
+    { label: "Ambulance",      img: CAT_VAN,    count: 0 },
+    { label: "Fire Truck",     img: CAT_PICKUP, count: 0 },
   ],
 };
 

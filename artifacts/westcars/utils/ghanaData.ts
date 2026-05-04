@@ -81,14 +81,81 @@ export const TRANSMISSIONS = ["Automatic", "Manual"];
 export const CONDITIONS = ["New", "Foreign Used", "Ghana Used", "Tokunbo"];
 
 export const CAR_CATEGORIES = [
-  { id: "all", label: "All Cars", icon: "grid" },
-  { id: "suv", label: "SUVs", icon: "truck" },
-  { id: "sedan", label: "Sedans", icon: "navigation" },
-  { id: "tokunbo", label: "Tokunbo", icon: "star" },
-  { id: "budget", label: "Budget", icon: "tag" },
-  { id: "luxury", label: "Luxury", icon: "award" },
-  { id: "pickup", label: "Pickups", icon: "package" },
-  { id: "bus", label: "Buses", icon: "users" },
+  { id: "all",       label: "All",           icon: "grid" },
+  { id: "suv",       label: "SUVs",          icon: "truck" },
+  { id: "sedan",     label: "Sedans",        icon: "navigation" },
+  { id: "hatchback", label: "Hatchbacks",    icon: "square" },
+  { id: "coupe",     label: "Coupes",        icon: "navigation" },
+  { id: "wagon",     label: "Station Wagons",icon: "navigation" },
+  { id: "van",       label: "Vans",          icon: "box" },
+  { id: "minibus",   label: "Minibuses",     icon: "users" },
+  { id: "bus",       label: "Buses",         icon: "users" },
+  { id: "pickup",    label: "Pickup Trucks", icon: "package" },
+  { id: "cargo",     label: "Cargo Trucks",  icon: "package" },
+  { id: "tipper",    label: "Tipper Trucks", icon: "package" },
+  { id: "tanker",    label: "Tankers",       icon: "package" },
+  { id: "flatbed",   label: "Flatbeds",      icon: "package" },
+  { id: "excavator", label: "Excavators",    icon: "tool" },
+  { id: "bulldozer", label: "Bulldozers",    icon: "tool" },
+  { id: "crane",     label: "Cranes",        icon: "tool" },
+  { id: "forklift",  label: "Forklifts",     icon: "tool" },
+  { id: "grader",    label: "Graders",       icon: "tool" },
+  { id: "loader",    label: "Front Loaders", icon: "tool" },
+  { id: "compactor", label: "Compactors",    icon: "tool" },
+  { id: "mixer",     label: "Concrete Mixers", icon: "tool" },
+  { id: "tractor",   label: "Tractors",      icon: "tool" },
+  { id: "harvester", label: "Harvesters",    icon: "tool" },
+  { id: "motorcycle",label: "Motorcycles",   icon: "zap" },
+  { id: "scooter",   label: "Scooters",      icon: "zap" },
+  { id: "atv",       label: "ATVs / Quads",  icon: "zap" },
+  { id: "dirtbike",  label: "Dirt Bikes",    icon: "zap" },
+  { id: "tokunbo",   label: "Tokunbo",       icon: "star" },
+  { id: "budget",    label: "Budget",        icon: "tag" },
+  { id: "luxury",    label: "Luxury",        icon: "award" },
+];
+
+export const VEHICLE_TYPES = [
+  // Cars
+  "Sedan",
+  "SUV / 4×4",
+  "Hatchback",
+  "Coupe",
+  "Station Wagon",
+  // Vans & People Carriers
+  "Van",
+  "Minibus",
+  "Minivan",
+  // Trucks
+  "Pickup Truck",
+  "Cargo Truck",
+  "Tipper Truck",
+  "Tanker Truck",
+  "Flatbed Truck",
+  "Box Truck",
+  // Buses
+  "Bus",
+  "Coach Bus",
+  "School Bus",
+  // Heavy Equipment
+  "Excavator",
+  "Bulldozer",
+  "Crane",
+  "Forklift",
+  "Front Loader",
+  "Grader",
+  "Compactor",
+  "Concrete Mixer",
+  // Agricultural
+  "Tractor",
+  "Combine Harvester",
+  // Specialty
+  "Ambulance",
+  "Fire Truck",
+  // Motorcycles & Powersport
+  "Motorcycle",
+  "Scooter",
+  "ATV / Quad",
+  "Dirt Bike",
 ];
 
 export const PAYMENT_METHODS = [

@@ -37,17 +37,27 @@ const PRICE_RANGES = [
   { label: "₵500k+", min: 500000, max: 9999999 },
 ];
 
-const QUICK_FILTERS = ["All", "SUV", "Sedan", "Tokunbo", "Budget", "Luxury", "Pickup", "New"];
+const QUICK_FILTERS = ["All", "SUV", "Sedan", "Tokunbo", "Budget", "Luxury", "Pickup", "Truck", "Bus", "Heavy", "Moto", "New"];
 
 function mapCategoryToFilter(cat: string): { quickFilter: string; query: string } {
   const l = cat.toLowerCase();
-  if (l.includes("suv") || l.includes("4x4") || l.includes("4×4")) return { quickFilter: "SUV",    query: "" };
-  if (l.includes("sedan"))                                             return { quickFilter: "Sedan",  query: "" };
-  if (l.includes("pickup"))                                            return { quickFilter: "Pickup", query: "" };
-  if (l.includes("hatchback") || l.includes("hatch"))                 return { quickFilter: "All",    query: "hatchback" };
-  if (l.includes("van") || l.includes("minibus"))                     return { quickFilter: "All",    query: "van" };
+  if (l.includes("suv") || l.includes("4x4") || l.includes("4×4"))              return { quickFilter: "SUV",    query: "" };
+  if (l.includes("sedan"))                                                         return { quickFilter: "Sedan",  query: "" };
+  if (l.includes("pickup"))                                                        return { quickFilter: "Pickup", query: "" };
+  if (l.includes("cargo truck") || l.includes("tipper") || l.includes("flatbed") ||
+      l.includes("tanker") || l.includes("box truck") || l.includes("cargo"))     return { quickFilter: "Truck",  query: "" };
+  if (l.includes("bus") || l.includes("minibus") || l.includes("coach"))         return { quickFilter: "Bus",    query: "" };
+  if (l.includes("excavator") || l.includes("bulldozer") || l.includes("crane") ||
+      l.includes("forklift") || l.includes("loader") || l.includes("grader") ||
+      l.includes("compactor") || l.includes("mixer") || l.includes("tractor") ||
+      l.includes("harvester") || l.includes("ambulance") || l.includes("fire"))  return { quickFilter: "Heavy",  query: "" };
+  if (l.includes("motorcycle") || l.includes("scooter") || l.includes("atv") ||
+      l.includes("dirt bike") || l.includes("quad"))                              return { quickFilter: "Moto",   query: "" };
+  if (l.includes("hatchback") || l.includes("hatch"))                            return { quickFilter: "All",    query: "hatchback" };
+  if (l.includes("van") || l.includes("minivan") || l.includes("station wagon")) return { quickFilter: "All",    query: l };
   return { quickFilter: "All", query: cat };
 }
+
 const CHIP_COLORS: Record<string, { bg: string; text: string; activeBg: string; activeText: string }> = {
   "All":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#0EB5CA", activeText: "#FFFFFF" },
   "SUV":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#818CF8", activeText: "#fff" },
@@ -56,6 +66,10 @@ const CHIP_COLORS: Record<string, { bg: string; text: string; activeBg: string; 
   "Budget":  { bg: "#F1F5F9", text: "#64748B", activeBg: "#F59E0B", activeText: "#fff" },
   "Luxury":  { bg: "#F1F5F9", text: "#64748B", activeBg: "#A855F7", activeText: "#fff" },
   "Pickup":  { bg: "#F1F5F9", text: "#64748B", activeBg: "#F97316", activeText: "#fff" },
+  "Truck":   { bg: "#F1F5F9", text: "#64748B", activeBg: "#DC2626", activeText: "#fff" },
+  "Bus":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#0284C7", activeText: "#fff" },
+  "Heavy":   { bg: "#F1F5F9", text: "#64748B", activeBg: "#78350F", activeText: "#fff" },
+  "Moto":    { bg: "#F1F5F9", text: "#64748B", activeBg: "#0F766E", activeText: "#fff" },
   "New":     { bg: "#F1F5F9", text: "#64748B", activeBg: "#06B6D4", activeText: "#fff" },
 };
 
@@ -265,13 +279,18 @@ export default function SearchScreen() {
     if (!matchQuery) return false;
 
     let matchQuick = true;
-    if (quickFilter === "SUV") matchQuick = car.category?.toLowerCase().includes("suv") ?? false;
-    else if (quickFilter === "Sedan") matchQuick = car.category?.toLowerCase().includes("sedan") ?? false;
+    const cat = car.category?.toLowerCase() ?? "";
+    if      (quickFilter === "SUV")     matchQuick = cat.includes("suv") || cat.includes("4x4") || cat.includes("4×4");
+    else if (quickFilter === "Sedan")   matchQuick = cat.includes("sedan");
     else if (quickFilter === "Tokunbo") matchQuick = car.condition === "Foreign Used";
-    else if (quickFilter === "Budget") matchQuick = car.price < 100000;
-    else if (quickFilter === "Luxury") matchQuick = car.price > 300000;
-    else if (quickFilter === "Pickup") matchQuick = car.category?.toLowerCase().includes("pickup") ?? false;
-    else if (quickFilter === "New") matchQuick = car.condition === "New";
+    else if (quickFilter === "Budget")  matchQuick = car.price < 100000;
+    else if (quickFilter === "Luxury")  matchQuick = car.price > 300000;
+    else if (quickFilter === "Pickup")  matchQuick = cat.includes("pickup");
+    else if (quickFilter === "Truck")   matchQuick = cat.includes("cargo") || cat.includes("tipper") || cat.includes("tanker") || cat.includes("flatbed") || cat.includes("box truck");
+    else if (quickFilter === "Bus")     matchQuick = cat.includes("bus") || cat.includes("minibus") || cat.includes("coach");
+    else if (quickFilter === "Heavy")   matchQuick = cat.includes("excavator") || cat.includes("bulldozer") || cat.includes("crane") || cat.includes("forklift") || cat.includes("loader") || cat.includes("grader") || cat.includes("compactor") || cat.includes("mixer") || cat.includes("tractor") || cat.includes("harvester") || cat.includes("ambulance") || cat.includes("fire truck");
+    else if (quickFilter === "Moto")    matchQuick = cat.includes("motorcycle") || cat.includes("scooter") || cat.includes("atv") || cat.includes("dirt bike") || cat.includes("quad");
+    else if (quickFilter === "New")     matchQuick = car.condition === "New";
 
     if (!matchQuick) return false;
     if (!activeFilters) return true;

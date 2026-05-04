@@ -28,6 +28,7 @@ import {
   FUEL_TYPES,
   GHANA_CITIES,
   TRANSMISSIONS,
+  VEHICLE_TYPES,
 } from "@/utils/ghanaData";
 
 function PickerRow({
@@ -100,6 +101,7 @@ export default function SellScreen() {
   const [condition, setCondition] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
+  const [vehicleType, setVehicleType] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const [vin, setVin] = useState("");
@@ -227,7 +229,7 @@ export default function SellScreen() {
         images: initialImages,
         sellerId: currentUser?.id || "currentUser",
         isFeatured: false,
-        category: "sedan",
+        category: vehicleType || "sedan",
       });
 
       // Step 2 — upload real images to Firebase Storage (only when Firebase is live
@@ -425,9 +427,15 @@ export default function SellScreen() {
           </ScrollView>
         </View>
 
-        {/* Car Details */}
+        {/* Vehicle Details */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Car Details</Text>
+          <Text style={styles.sectionTitle}>Vehicle Details</Text>
+          <PickerRow
+            label="Vehicle Type *"
+            value={vehicleType}
+            options={VEHICLE_TYPES}
+            onSelect={setVehicleType}
+          />
           <PickerRow
             label="Brand *"
             value={brand}
