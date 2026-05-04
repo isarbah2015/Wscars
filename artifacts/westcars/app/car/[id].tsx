@@ -637,7 +637,7 @@ export default function CarDetailScreen() {
           <LocationMap location={car.location} />
         </View>
 
-        <View style={{ height: 100 + (insets.bottom || 0) }} />
+        <View style={{ height: 16 }} />
       </ScrollView>
 
       {/* Equipment full-list modal */}
