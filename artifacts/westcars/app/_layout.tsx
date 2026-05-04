@@ -4,14 +4,13 @@ import {
   Manrope_600SemiBold,
   Manrope_700Bold,
   Manrope_800ExtraBold,
-  useFonts as useManropeFonts,
 } from "@expo-google-fonts/manrope";
 import {
   Raleway_700Bold,
   Raleway_800ExtraBold,
-  useFonts as useRalewayFonts,
 } from "@expo-google-fonts/raleway";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as Font from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
@@ -46,30 +45,35 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [manropeLoaded, manropeError] = useManropeFonts({
-    Manrope_400Regular,
-    Manrope_500Medium,
-    Manrope_600SemiBold,
-    Manrope_700Bold,
-    Manrope_800ExtraBold,
-  });
+  const [ready, setReady] = useState(false);
 
-  const [ralewayLoaded, ralewayError] = useRalewayFonts({
-    Raleway_700Bold,
-    Raleway_800ExtraBold,
-  });
-
-  // Safety net: if fonts don't resolve within 4 s (network slow / CDN blocked),
-  // proceed with system fonts rather than showing a blank screen or timeout error.
-  const [fontTimeout, setFontTimeout] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setFontTimeout(true), 4000);
-    return () => clearTimeout(t);
-  }, []);
+    // Hard timeout — show app with system fonts after 4 s no matter what.
+    // This MUST clear before fontfaceobserver's 6 s internal timeout fires
+    // so there is never an unhandled rejection that can crash the app.
+    const timer = setTimeout(() => setReady(true), 3500);
 
-  const fontsLoaded = manropeLoaded && ralewayLoaded;
-  const fontError   = manropeError  || ralewayError;
-  const ready       = fontsLoaded || fontError || fontTimeout;
+    Font.loadAsync({
+      Manrope_400Regular,
+      Manrope_500Medium,
+      Manrope_600SemiBold,
+      Manrope_700Bold,
+      Manrope_800ExtraBold,
+      Raleway_700Bold,
+      Raleway_800ExtraBold,
+    })
+      .then(() => {
+        clearTimeout(timer);
+        setReady(true);
+      })
+      .catch(() => {
+        // Fonts failed (CDN blocked, slow network, etc.) — proceed with system fonts.
+        clearTimeout(timer);
+        setReady(true);
+      });
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync().catch(() => {});

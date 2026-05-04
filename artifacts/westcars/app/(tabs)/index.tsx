@@ -339,7 +339,7 @@ export default function HomeScreen() {
         <View style={[styles.brandSection, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
           <View style={styles.brandSectionHeader}>
             <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#0EB5CA" />
-            <Text style={[styles.brandSectionTitle, { color: isDark ? "#CBD5E1" : "#334155" }]}>Browse by Brand</Text>
+            <Text style={[styles.brandSectionTitle, { color: isDark ? "#CBD5E1" : "#334155" }]}>Car Brands</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.brandRow}>
             {CAR_BRANDS.map((brand) => {
