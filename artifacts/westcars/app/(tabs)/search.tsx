@@ -822,10 +822,10 @@ const fStyles = StyleSheet.create({
   },
   applyBtn: {
     borderRadius: 14,
-    overflow: "hidden",
   },
   applyGrad: {
     height: 52,
+    borderRadius: 14,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
