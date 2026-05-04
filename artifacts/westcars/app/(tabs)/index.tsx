@@ -737,7 +737,8 @@ const styles = StyleSheet.create({
   subCatsRow: {
     flexDirection: "row",
     gap: 8,
-    paddingHorizontal: 2,
+    paddingLeft: 14,
+    paddingRight: 14,
     alignItems: "center",
   },
   subTab: {
