@@ -1079,23 +1079,23 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   brandPillLogo: {
-    width: 44,
-    height: 30,
+    width: 56,
+    height: 38,
   },
   brandPillLogoPlaceholder: {
-    width: 44,
-    height: 30,
+    width: 56,
+    height: 38,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },
   brandPillLogoInitial: {
-    fontSize: 16,
-    fontFamily: "Manrope_700Bold",
+    fontSize: 18,
+    fontFamily: "Raleway_800ExtraBold",
   },
   brandPillLabel: {
     fontSize: 10,
-    fontFamily: "Manrope_500Medium",
+    fontFamily: "Manrope_600SemiBold",
     textAlign: "center",
   },
 });

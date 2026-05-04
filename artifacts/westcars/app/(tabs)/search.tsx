@@ -807,7 +807,7 @@ const fStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  brandLogo: { width: 28, height: 28 },
+  brandLogo: { width: 34, height: 34 },
   brandInitial: {
     fontSize: 15,
     fontFamily: "Raleway_800ExtraBold",
