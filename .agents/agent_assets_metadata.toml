@@ -179,3 +179,93 @@ id = "0m5_DBa-Kp5YqmBmBsNsG"
 uri = "file://screenshots/westcars_home.jpg"
 type = "image"
 title = "Splash Screen"
+
+[[outputs]]
+id = "tdjHkDlJNgkBkHp7-dvWC"
+uri = "file://screenshots/phone_home.jpg"
+type = "image"
+title = "Phone — Home"
+
+[[outputs]]
+id = "h9zPUPB8xjijb13a6qmQ1"
+uri = "file://screenshots/phone_search.jpg"
+type = "image"
+title = "Phone — Search"
+
+[[outputs]]
+id = "ONMhEr_bUV7N7rof0LMkr"
+uri = "file://screenshots/phone_favourites.jpg"
+type = "image"
+title = "Phone — Saved Cars"
+
+[[outputs]]
+id = "7g4rh25wJu_OuTz_WuksA"
+uri = "file://screenshots/phone_messages.jpg"
+type = "image"
+title = "Phone — Messages"
+
+[[outputs]]
+id = "azeWFKlqbiRc88RpLoZZK"
+uri = "file://screenshots/phone_profile.jpg"
+type = "image"
+title = "Phone — Profile"
+
+[[outputs]]
+id = "wG1zqu8TXor_eecakpXS2"
+uri = "file://screenshots/tablet7_home.jpg"
+type = "image"
+title = "7\" Tablet — Home"
+
+[[outputs]]
+id = "XKzGMPqbAGaEAItlmCReN"
+uri = "file://screenshots/tablet7_search.jpg"
+type = "image"
+title = "7\" Tablet — Search"
+
+[[outputs]]
+id = "acSMvJf82AiPHMtO98WFu"
+uri = "file://screenshots/tablet7_favourites.jpg"
+type = "image"
+title = "7\" Tablet — Saved Cars"
+
+[[outputs]]
+id = "wfi17-YNgDiCaz6G17RCP"
+uri = "file://screenshots/tablet7_messages.jpg"
+type = "image"
+title = "7\" Tablet — Messages"
+
+[[outputs]]
+id = "Kqo1G2hDsvclSmZfa_HLm"
+uri = "file://screenshots/tablet7_profile.jpg"
+type = "image"
+title = "7\" Tablet — Profile"
+
+[[outputs]]
+id = "ibEoRXbO1bshr_1cIiUhb"
+uri = "file://screenshots/tablet10_home.jpg"
+type = "image"
+title = "10\" Tablet — Home"
+
+[[outputs]]
+id = "00Bx2HNZJuS-YaV3VTwK2"
+uri = "file://screenshots/tablet10_search.jpg"
+type = "image"
+title = "10\" Tablet — Search"
+
+[[outputs]]
+id = "jhlvKUSLM8fBfh1Qy_jcw"
+uri = "file://screenshots/tablet10_favourites.jpg"
+type = "image"
+title = "10\" Tablet — Saved Cars"
+
+[[outputs]]
+id = "92PCfaRkx8zx7ojQTjSOH"
+uri = "file://screenshots/tablet10_messages.jpg"
+type = "image"
+title = "10\" Tablet — Messages"
+
+[[outputs]]
+id = "M7woVXUkXvd4MiPgPAiqW"
+uri = "file://screenshots/tablet10_profile.jpg"
+type = "image"
+title = "10\" Tablet — Profile"
