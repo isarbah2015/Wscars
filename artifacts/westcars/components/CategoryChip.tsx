@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     color: Colors.light.textSecondary,
-    fontFamily: "PlusJakartaSans_500Medium",
+    fontFamily: "Inter_500Medium",
   },
   labelActive: {
     color: "#fff",

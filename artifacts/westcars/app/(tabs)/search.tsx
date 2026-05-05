@@ -152,7 +152,7 @@ function FilterModal({
                 ) : logo ? (
                   <Image source={{ uri: logo }} style={{ width: 22, height: 22 }} resizeMode="contain" />
                 ) : (
-                  <Text style={{ fontSize: 11, fontFamily: "Sora_800ExtraBold", color: active ? "#fff" : "#64748B" }}>{b.charAt(0)}</Text>
+                  <Text style={{ fontSize: 11, fontFamily: "Manrope_800ExtraBold", color: active ? "#fff" : "#64748B" }}>{b.charAt(0)}</Text>
                 )}
               </View>
               <Text style={[fStyles.chipText, active && fStyles.chipTextActive]}>{b}</Text>
@@ -503,13 +503,13 @@ const styles = StyleSheet.create({
   titleRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" },
   titleSub: {
     fontSize: 9,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     letterSpacing: 2,
     marginBottom: 1,
   },
   title: {
     fontSize: 17,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     letterSpacing: -0.2,
     lineHeight: 22,
   },
@@ -521,8 +521,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     marginBottom: 2,
   },
-  countText: { fontSize: 18, fontFamily: "Sora_800ExtraBold", color: "#fff", lineHeight: 22 },
-  countLabel: { fontSize: 9, fontFamily: "PlusJakartaSans_600SemiBold", color: "rgba(255,255,255,0.85)", letterSpacing: 1 },
+  countText: { fontSize: 18, fontFamily: "Manrope_800ExtraBold", color: "#fff", lineHeight: 22 },
+  countLabel: { fontSize: 9, fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.85)", letterSpacing: 1 },
 
   searchBar: {
     flexDirection: "row",
@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 14,
-    fontFamily: "PlusJakartaSans_500Medium",
+    fontFamily: "Inter_500Medium",
     padding: 0,
   },
   filterBtn: {
@@ -599,12 +599,12 @@ const styles = StyleSheet.create({
   },
   chipLabel: {
     fontSize: 12,
-    fontFamily: "PlusJakartaSans_700Bold",
+    fontFamily: "Inter_700Bold",
     color: "#334155",
   },
   chipLabelActive: {
     fontSize: 12,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     color: "#fff",
   },
 
@@ -621,12 +621,12 @@ const styles = StyleSheet.create({
   },
   filterBadgeText: {
     fontSize: 12,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     color: "#0EB5CA",
   },
 
-  row: { flexDirection: "row", paddingHorizontal: 10, gap: 10 },
-  half: { flex: 1, marginBottom: 12 },
+  row: { flexDirection: "row", paddingHorizontal: 8, gap: 8 },
+  half: { flex: 1, marginBottom: 10 },
 
   empty: { alignItems: "center", paddingVertical: 80, gap: 14 },
   emptyIconBg: {
@@ -636,8 +636,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  emptyTitle: { fontSize: 18, fontFamily: "Sora_800ExtraBold", letterSpacing: -0.3 },
-  emptyText: { fontSize: 13, fontFamily: "PlusJakartaSans_400Regular", textAlign: "center", lineHeight: 20 },
+  emptyTitle: { fontSize: 18, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.3 },
+  emptyText: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
 });
 
 const fStyles = StyleSheet.create({
@@ -666,7 +666,7 @@ const fStyles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     fontSize: 20,
-    fontFamily: "Sora_800ExtraBold",
+    fontFamily: "Manrope_800ExtraBold",
     color: "#fff",
     letterSpacing: -0.3,
   },
@@ -678,7 +678,7 @@ const fStyles = StyleSheet.create({
   },
   headerClearText: {
     fontSize: 13,
-    fontFamily: "PlusJakartaSans_700Bold",
+    fontFamily: "Inter_700Bold",
     color: "#fff",
   },
 
@@ -720,7 +720,7 @@ const fStyles = StyleSheet.create({
   },
   cardLabel: {
     fontSize: 13,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     color: "#0F172A",
     letterSpacing: 0.1,
   },
@@ -745,12 +745,12 @@ const fStyles = StyleSheet.create({
   },
   chipText: {
     fontSize: 13,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     color: "#334155",
   },
   chipTextActive: {
     color: "#fff",
-    fontFamily: "PlusJakartaSans_700Bold",
+    fontFamily: "Inter_700Bold",
   },
 
   // ── Brand chips ──
@@ -800,7 +800,7 @@ const fStyles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 11,
-    fontFamily: "PlusJakartaSans_700Bold",
+    fontFamily: "Inter_700Bold",
     color: "#1E293B",
     textAlign: "center",
     flexShrink: 1,
@@ -834,7 +834,7 @@ const fStyles = StyleSheet.create({
   },
   applyText: {
     fontSize: 16,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     color: "#fff",
     letterSpacing: 0.2,
   },

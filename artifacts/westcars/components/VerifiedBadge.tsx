@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 11,
     color: Colors.verified,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
   },
   textSmall: {
     fontSize: 10,

@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
   headerCenter: { flex: 1, alignItems: "center" },
-  headerTitle: { fontSize: 18, fontFamily: "PlusJakartaSans_700Bold", color: "#fff" },
-  headerSub: { fontSize: 11, fontFamily: "PlusJakartaSans_400Regular", color: "rgba(255,255,255,0.75)", marginTop: 2 },
+  headerTitle: { fontSize: 18, fontFamily: "Inter_700Bold", color: "#fff" },
+  headerSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.75)", marginTop: 2 },
   scroll: { flex: 1 },
   body: { padding: 16, gap: 12 },
 
@@ -180,34 +180,34 @@ const styles = StyleSheet.create({
     alignItems: "center", gap: 6,
   },
   logo: { width: 160, height: 160 },
-  tagline: { fontSize: 10, fontFamily: "PlusJakartaSans_600SemiBold", letterSpacing: 1, textAlign: "center" },
+  tagline: { fontSize: 10, fontFamily: "Inter_600SemiBold", letterSpacing: 1, textAlign: "center" },
   versionBadge: { borderRadius: 20, paddingHorizontal: 14, paddingVertical: 5, marginTop: 4 },
-  versionText: { fontSize: 12, fontFamily: "PlusJakartaSans_600SemiBold", color: "#0EB5CA" },
+  versionText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#0EB5CA" },
 
   card: {
     flexDirection: "row", alignItems: "flex-start", gap: 12,
     borderRadius: 16, borderWidth: 1, padding: 16,
     shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
-  cardTitle: { fontSize: 14, fontFamily: "PlusJakartaSans_700Bold" },
-  cardBody: { fontSize: 13, fontFamily: "PlusJakartaSans_400Regular", lineHeight: 20 },
+  cardTitle: { fontSize: 14, fontFamily: "Inter_700Bold" },
+  cardBody: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 20 },
 
   missionCard: { borderRadius: 16, borderWidth: 1.5, overflow: "hidden" },
   missionGrad: { padding: 20, alignItems: "center", gap: 8 },
-  missionTitle: { fontSize: 16, fontFamily: "PlusJakartaSans_700Bold" },
-  missionBody: { fontSize: 13, fontFamily: "PlusJakartaSans_400Regular", textAlign: "center", lineHeight: 20 },
+  missionTitle: { fontSize: 16, fontFamily: "Inter_700Bold" },
+  missionBody: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
 
-  sectionLabel: { fontSize: 11, fontFamily: "PlusJakartaSans_700Bold", letterSpacing: 1, marginTop: 4 },
+  sectionLabel: { fontSize: 11, fontFamily: "Inter_700Bold", letterSpacing: 1, marginTop: 4 },
   featuresGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   featureCard: {
     width: "47%", borderRadius: 14, borderWidth: 1, padding: 14, gap: 6,
     shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 1,
   },
   featureIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-  featureLabel: { fontSize: 13, fontFamily: "PlusJakartaSans_700Bold" },
-  featureDesc: { fontSize: 11, fontFamily: "PlusJakartaSans_400Regular", lineHeight: 16 },
+  featureLabel: { fontSize: 13, fontFamily: "Inter_700Bold" },
+  featureDesc: { fontSize: 11, fontFamily: "Inter_400Regular", lineHeight: 16 },
 
-  emailLink: { fontSize: 13, fontFamily: "PlusJakartaSans_600SemiBold", color: "#0EB5CA", textDecorationLine: "underline" },
+  emailLink: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#0EB5CA", textDecorationLine: "underline" },
 
   socialsRow: { flexDirection: "row", gap: 10 },
   socialBtn: {
@@ -215,11 +215,11 @@ const styles = StyleSheet.create({
     alignItems: "center", gap: 6,
     shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, elevation: 1,
   },
-  socialLabel: { fontSize: 11, fontFamily: "PlusJakartaSans_600SemiBold" },
+  socialLabel: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
 
   rateBtn: { borderRadius: 14, overflow: "hidden" },
   rateGrad: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 15 },
-  rateText: { fontSize: 15, fontFamily: "PlusJakartaSans_700Bold", color: "#fff" },
+  rateText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
 
-  credits: { fontSize: 12, fontFamily: "PlusJakartaSans_400Regular", textAlign: "center", lineHeight: 20 },
+  credits: { fontSize: 12, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
 });

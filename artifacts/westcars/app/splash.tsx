@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   },
   motto: {
     fontSize: 10,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     color: "#0098AA",
     letterSpacing: 1.4,
     textAlign: "center",

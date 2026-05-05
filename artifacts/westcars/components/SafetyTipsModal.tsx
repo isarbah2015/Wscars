@@ -92,12 +92,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     color: "#1A1A1A",
   },
   subtitle: {
     fontSize: 13,
-    fontFamily: "PlusJakartaSans_400Regular",
+    fontFamily: "Inter_400Regular",
     color: "#9E9E9E",
     textAlign: "center",
   },
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   tipText: {
     flex: 1,
     fontSize: 13,
-    fontFamily: "PlusJakartaSans_400Regular",
+    fontFamily: "Inter_400Regular",
     color: "#333",
     lineHeight: 20,
   },
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   },
   continueText: {
     fontSize: 15,
-    fontFamily: "PlusJakartaSans_700Bold",
+    fontFamily: "Inter_700Bold",
     color: "#fff",
   },
   cancelBtn: {
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     fontSize: 14,
-    fontFamily: "PlusJakartaSans_500Medium",
+    fontFamily: "Inter_500Medium",
     color: "#9E9E9E",
   },
 });

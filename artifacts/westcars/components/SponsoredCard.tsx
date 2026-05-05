@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   sponsoredLabel: {
     color: "#fff",
     fontSize: 9,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     letterSpacing: 1,
   },
 
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   priceText: {
     color: "#fff",
     fontSize: 14,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     letterSpacing: -0.3,
   },
 
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   },
   carName: {
     fontSize: 15,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     letterSpacing: 0.05,
   },
   chipRow: {
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 10,
-    fontFamily: "PlusJakartaSans_500Medium",
+    fontFamily: "Inter_500Medium",
   },
 
   arrowWrap: {},
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 10,
-    fontFamily: "PlusJakartaSans_500Medium",
+    fontFamily: "Inter_500Medium",
     color: "#FF8C00",
   },
   footerDot: {

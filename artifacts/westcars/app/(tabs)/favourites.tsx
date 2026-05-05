@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 17,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     letterSpacing: 0,
   },
   countBadge: {
@@ -139,22 +139,22 @@ const styles = StyleSheet.create({
   },
   countText: {
     fontSize: 13,
-    fontFamily: "PlusJakartaSans_700Bold",
+    fontFamily: "Inter_700Bold",
     color: "#FFFFFF",
   },
 
-  list: { paddingHorizontal: 10, paddingTop: 12, gap: 0 },
+  list: { paddingHorizontal: 8, paddingTop: 12, gap: 0 },
   countLabel: {
     fontSize: 13,
-    fontFamily: "PlusJakartaSans_400Regular",
+    fontFamily: "Inter_400Regular",
     marginBottom: 10,
     paddingHorizontal: 2,
   },
 
   gridRow: {
     flexDirection: "row",
-    gap: 10,
-    marginBottom: 12,
+    gap: 8,
+    marginBottom: 10,
   },
   gridCard: { flex: 1 },
 
@@ -173,10 +173,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  emptyTitle: { fontSize: 22, fontFamily: "Sora_800ExtraBold", letterSpacing: -0.3 },
+  emptyTitle: { fontSize: 22, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.3 },
   emptyText: {
     fontSize: 14,
-    fontFamily: "PlusJakartaSans_400Regular",
+    fontFamily: "Inter_400Regular",
     textAlign: "center",
     lineHeight: 20,
   },
@@ -186,14 +186,14 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     borderRadius: 14,
   },
-  browseBtnText: { fontSize: 15, fontFamily: "PlusJakartaSans_600SemiBold", color: "#fff" },
+  browseBtnText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" },
 
   /* ── Auth wall ── */
   authWall: { flex: 1, alignItems: "center", justifyContent: "center", gap: 14, padding: 40 },
   iconRing: { width: 90, height: 90, borderRadius: 45, alignItems: "center", justifyContent: "center" },
-  authTitle: { fontSize: 22, fontFamily: "Sora_800ExtraBold", letterSpacing: -0.3 },
-  authText: { fontSize: 14, fontFamily: "PlusJakartaSans_400Regular", textAlign: "center", lineHeight: 20 },
+  authTitle: { fontSize: 22, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.3 },
+  authText: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
   authBtn: { borderRadius: 14, marginTop: 8, width: "80%", paddingVertical: 15, alignItems: "center", justifyContent: "center" },
   authGradient: { paddingVertical: 14, alignItems: "center" },
-  authBtnText: { fontSize: 16, fontFamily: "PlusJakartaSans_600SemiBold", color: "#fff", textAlign: "center" },
+  authBtnText: { fontSize: 16, fontFamily: "Inter_600SemiBold", color: "#fff", textAlign: "center" },
 });

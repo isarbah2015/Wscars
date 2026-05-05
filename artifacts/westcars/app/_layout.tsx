@@ -1,13 +1,13 @@
 import {
-  PlusJakartaSans_400Regular,
-  PlusJakartaSans_500Medium,
-  PlusJakartaSans_600SemiBold,
-  PlusJakartaSans_700Bold,
-} from "@expo-google-fonts/plus-jakarta-sans";
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from "@expo-google-fonts/inter";
 import {
-  Sora_700Bold,
-  Sora_800ExtraBold,
-} from "@expo-google-fonts/sora";
+  Manrope_700Bold,
+  Manrope_800ExtraBold,
+} from "@expo-google-fonts/manrope";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
@@ -50,12 +50,12 @@ export default function RootLayout() {
     ...Feather.font,
     ...Ionicons.font,
     // Brand fonts
-    PlusJakartaSans_400Regular,
-    PlusJakartaSans_500Medium,
-    PlusJakartaSans_600SemiBold,
-    PlusJakartaSans_700Bold,
-    Sora_700Bold,
-    Sora_800ExtraBold,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Manrope_700Bold,
+    Manrope_800ExtraBold,
   });
 
   // Hide the native splash only after fonts are resolved (loaded or errored).

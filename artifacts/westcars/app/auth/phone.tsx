@@ -160,8 +160,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.05)",
     alignItems: "center", justifyContent: "center", marginBottom: 8,
   },
-  title:    { fontSize: 26, fontFamily: "Sora_800ExtraBold", color: "#0F172A", letterSpacing: -0.5 },
-  subtitle: { fontSize: 14, fontFamily: "PlusJakartaSans_400Regular", color: "#64748B", lineHeight: 20 },
+  title:    { fontSize: 26, fontFamily: "Manrope_800ExtraBold", color: "#0F172A", letterSpacing: -0.5 },
+  subtitle: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#64748B", lineHeight: 20 },
 
   scroll: { flex: 1 },
   scrollContent: { flexGrow: 1, padding: 16, gap: 16 },
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06, shadowRadius: 12, elevation: 4,
   },
   label: {
-    fontSize: 11, fontFamily: "PlusJakartaSans_700Bold",
+    fontSize: 11, fontFamily: "Inter_700Bold",
     color: "#64748B", letterSpacing: 0.6, textTransform: "uppercase",
   },
   row: {
@@ -180,20 +180,20 @@ const styles = StyleSheet.create({
     height: 54, borderWidth: 1.5, borderColor: "#E8E8E8",
     borderRadius: 12, paddingHorizontal: 14, backgroundColor: "#FAFAFA",
   },
-  input: { flex: 1, fontSize: 15, fontFamily: "PlusJakartaSans_400Regular", color: "#1A1A1A", padding: 0 },
+  input: { flex: 1, fontSize: 15, fontFamily: "Inter_400Regular", color: "#1A1A1A", padding: 0 },
   dialBadge: {
     backgroundColor: "rgba(14,181,202,0.10)",
     borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5,
   },
-  dialText: { fontSize: 13, fontFamily: "PlusJakartaSans_700Bold", color: "#0098AA" },
+  dialText: { fontSize: 13, fontFamily: "Inter_700Bold", color: "#0098AA" },
   sep: { width: 1, height: 22, backgroundColor: "#E0E0E0" },
 
   cta: {
     height: 52, borderRadius: 12, backgroundColor: "#0EB5CA",
     alignItems: "center", justifyContent: "center", marginTop: 4,
   },
-  ctaText: { fontSize: 16, color: "#fff", fontFamily: "PlusJakartaSans_700Bold" },
+  ctaText: { fontSize: 16, color: "#fff", fontFamily: "Inter_700Bold" },
 
-  linkText: { fontSize: 13, color: "#0098AA", fontFamily: "PlusJakartaSans_500Medium", textAlign: "center" },
-  disclaimer: { fontSize: 12, color: "#9E9E9E", textAlign: "center", fontFamily: "PlusJakartaSans_400Regular" },
+  linkText: { fontSize: 13, color: "#0098AA", fontFamily: "Inter_500Medium", textAlign: "center" },
+  disclaimer: { fontSize: 12, color: "#9E9E9E", textAlign: "center", fontFamily: "Inter_400Regular" },
 });

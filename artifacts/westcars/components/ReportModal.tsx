@@ -115,8 +115,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#E0E0E0", alignSelf: "center", marginTop: 10, marginBottom: 12,
   },
   headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 },
-  title: { fontSize: 17, fontFamily: "PlusJakartaSans_700Bold", color: "#1A1A1A", flex: 1 },
-  subtitle: { fontSize: 13, fontFamily: "PlusJakartaSans_600SemiBold", color: "#6B6B6B", marginBottom: 4, marginTop: 4 },
+  title: { fontSize: 17, fontFamily: "Inter_700Bold", color: "#1A1A1A", flex: 1 },
+  subtitle: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#6B6B6B", marginBottom: 4, marginTop: 4 },
   option: {
     flexDirection: "row", alignItems: "center", gap: 12,
     paddingVertical: 11, paddingHorizontal: 14,
@@ -131,11 +131,11 @@ const styles = StyleSheet.create({
   },
   radioSelected: { borderColor: "#0066CC" },
   radioDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#0066CC" },
-  optionText: { fontSize: 14, fontFamily: "PlusJakartaSans_400Regular", color: "#1A1A1A", flex: 1 },
-  optionTextSelected: { fontFamily: "PlusJakartaSans_600SemiBold", color: "#0066CC" },
+  optionText: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#1A1A1A", flex: 1 },
+  optionTextSelected: { fontFamily: "Inter_600SemiBold", color: "#0066CC" },
   details: {
     borderWidth: 1.5, borderColor: "#E8E8E8", borderRadius: 12,
-    padding: 12, fontSize: 14, fontFamily: "PlusJakartaSans_400Regular",
+    padding: 12, fontSize: 14, fontFamily: "Inter_400Regular",
     color: "#1A1A1A", minHeight: 72, textAlignVertical: "top",
     marginTop: 8, backgroundColor: "#FAFAFA",
   },
@@ -145,10 +145,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: "#E0E0E0",
     alignItems: "center", justifyContent: "center",
   },
-  cancelText: { fontSize: 15, fontFamily: "PlusJakartaSans_600SemiBold", color: "#6B6B6B" },
+  cancelText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#6B6B6B" },
   submitBtn: {
     flex: 2, height: 50, borderRadius: 12,
     backgroundColor: "#E53935", alignItems: "center", justifyContent: "center",
   },
-  submitText: { fontSize: 15, fontFamily: "PlusJakartaSans_700Bold", color: "#fff" },
+  submitText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
 });

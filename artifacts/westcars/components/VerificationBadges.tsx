@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 20,
   },
-  label: { fontFamily: "PlusJakartaSans_600SemiBold" },
+  label: { fontFamily: "Inter_600SemiBold" },
   singleBadge: {
     flexDirection: "row",
     alignItems: "center",

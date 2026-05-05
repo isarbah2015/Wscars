@@ -691,8 +691,8 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     borderWidth: 1.5, borderColor: "#fff",
   },
-  headerName: { fontSize: 15, fontFamily: "PlusJakartaSans_600SemiBold" },
-  headerSub:  { fontSize: 12, fontFamily: "PlusJakartaSans_400Regular" },
+  headerName: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  headerSub:  { fontSize: 12, fontFamily: "Inter_400Regular" },
   moreBtn: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
 
   profileCard: {
@@ -720,14 +720,14 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: "#fff",
   },
   profileInfo: { flex: 1, gap: 3 },
-  profileName: { fontSize: 16, fontFamily: "PlusJakartaSans_700Bold" },
+  profileName: { fontSize: 16, fontFamily: "Inter_700Bold" },
   verifiedTag: {
     paddingHorizontal: 7, paddingVertical: 2,
     borderRadius: 6,
   },
-  verifiedTagText: { fontSize: 11, fontFamily: "PlusJakartaSans_600SemiBold", color: "#16A34A" },
+  verifiedTagText: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: "#16A34A" },
   profileMetaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  profileMeta: { fontSize: 12, fontFamily: "PlusJakartaSans_400Regular" },
+  profileMeta: { fontSize: 12, fontFamily: "Inter_400Regular" },
   ratingRow: { flexDirection: "row", alignItems: "center", gap: 3, marginTop: 1 },
   profileActions: { flexDirection: "row", gap: 8, marginLeft: 8 },
   profileActionBtn: {
@@ -738,7 +738,7 @@ const styles = StyleSheet.create({
     flexDirection: "row", alignItems: "center", justifyContent: "center",
     gap: 8, paddingVertical: 10, borderRadius: 12, marginBottom: 12,
   },
-  viewFullProfileText: { fontSize: 13, fontFamily: "PlusJakartaSans_600SemiBold", color: "#fff" },
+  viewFullProfileText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#fff" },
 
   dropdown: {
     position: "absolute", top: 100, right: 14, zIndex: 99,
@@ -747,7 +747,7 @@ const styles = StyleSheet.create({
     minWidth: 180, overflow: "hidden",
   },
   dropItem: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingVertical: 13 },
-  dropText: { fontSize: 14, fontFamily: "PlusJakartaSans_500Medium", color: "#E53935" },
+  dropText: { fontSize: 14, fontFamily: "Inter_500Medium", color: "#E53935" },
 
   carBanner: {
     flexDirection: "row", alignItems: "center",
@@ -755,21 +755,21 @@ const styles = StyleSheet.create({
   },
   carBannerImage: { width: 52, height: 40, borderRadius: 8 },
   carBannerInfo: { flex: 1 },
-  carBannerTitle: { fontSize: 13, fontFamily: "PlusJakartaSans_600SemiBold" },
-  carBannerPrice: { fontSize: 12, fontFamily: "PlusJakartaSans_500Medium" },
-  soldTag: { color: "#E53935", fontFamily: "PlusJakartaSans_700Bold" },
+  carBannerTitle: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  carBannerPrice: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  soldTag: { color: "#E53935", fontFamily: "Inter_700Bold" },
 
   blockedBanner: {
     flexDirection: "row", alignItems: "center", gap: 8,
     backgroundColor: "#FEF2F2", paddingHorizontal: 14, paddingVertical: 10,
     borderBottomWidth: 1, borderBottomColor: "#FECACA",
   },
-  blockedText: { fontSize: 13, fontFamily: "PlusJakartaSans_500Medium", color: "#E53935" },
+  blockedText: { fontSize: 13, fontFamily: "Inter_500Medium", color: "#E53935" },
 
   messageList: { padding: 14, gap: 4 },
   emptyList: { flex: 1, justifyContent: "center" },
   emptyMessages: { alignItems: "center", gap: 10, paddingVertical: 40 },
-  emptyText: { fontSize: 14, fontFamily: "PlusJakartaSans_400Regular", textAlign: "center" },
+  emptyText: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },
 
   bubbleContainer: { maxWidth: "80%", marginVertical: 2 },
   bubbleContainerOwn: { alignSelf: "flex-end", alignItems: "flex-end" },
@@ -783,10 +783,10 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
     shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
   },
-  bubbleText: { fontSize: 14, fontFamily: "PlusJakartaSans_400Regular", lineHeight: 20 },
+  bubbleText: { fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20 },
   bubbleTextOwn: { color: "#fff" },
   bubbleMeta: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 4, marginTop: 3 },
-  bubbleTime: { fontSize: 10, fontFamily: "PlusJakartaSans_400Regular" },
+  bubbleTime: { fontSize: 10, fontFamily: "Inter_400Regular" },
   mediaImg: { width: 200, height: 140, borderRadius: 10, marginBottom: 4 },
 
   videoThumb: { position: "relative" },
@@ -815,7 +815,7 @@ const styles = StyleSheet.create({
   audioPlayBtnOwn: { backgroundColor: "#fff" },
   audioWaveWrap: { flex: 1, flexDirection: "row", alignItems: "center", gap: 2 },
   audioBar: { width: 3, borderRadius: 2, minHeight: 4 },
-  audioDuration: { fontSize: 11, fontFamily: "PlusJakartaSans_400Regular", color: "#64748B", minWidth: 28, textAlign: "right" },
+  audioDuration: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#64748B", minWidth: 28, textAlign: "right" },
 
   attachTray: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-around",
@@ -823,7 +823,7 @@ const styles = StyleSheet.create({
   },
   attachOption: { alignItems: "center", gap: 6 },
   attachIcon: { width: 52, height: 52, borderRadius: 16, alignItems: "center", justifyContent: "center" },
-  attachLabel: { fontSize: 12, fontFamily: "PlusJakartaSans_500Medium" },
+  attachLabel: { fontSize: 12, fontFamily: "Inter_500Medium" },
 
   recordingBanner: {
     flexDirection: "row", alignItems: "center", gap: 10,
@@ -831,14 +831,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: "#FECACA",
   },
   recordingDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#DC2626" },
-  recordingText: { flex: 1, fontSize: 13, fontFamily: "PlusJakartaSans_500Medium", color: "#DC2626" },
+  recordingText: { flex: 1, fontSize: 13, fontFamily: "Inter_500Medium", color: "#DC2626" },
 
   actions: {
     flexDirection: "row", gap: 8, marginTop: 4,
     backgroundColor: "#FFF5F5", borderRadius: 10, padding: 8,
   },
   actionBtn: { flexDirection: "row", alignItems: "center", gap: 4, padding: 4 },
-  actionText: { fontSize: 12, fontFamily: "PlusJakartaSans_500Medium", color: "#E53935" },
+  actionText: { fontSize: 12, fontFamily: "Inter_500Medium", color: "#E53935" },
 
   phoneWarn: {
     flexDirection: "row", alignItems: "flex-start", gap: 8,
@@ -846,7 +846,7 @@ const styles = StyleSheet.create({
     padding: 10, marginHorizontal: 4, marginBottom: 4,
     borderWidth: 1, borderColor: "#FDE68A",
   },
-  phoneWarnText: { flex: 1, fontSize: 12, fontFamily: "PlusJakartaSans_500Medium", color: "#92400E", lineHeight: 17 },
+  phoneWarnText: { flex: 1, fontSize: 12, fontFamily: "Inter_500Medium", color: "#92400E", lineHeight: 17 },
 
   typingRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, paddingVertical: 6 },
   typingBubble: {
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
     borderRadius: 18, borderBottomLeftRadius: 4,
   },
   typingDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: "#9E9E9E" },
-  typingLabel: { fontSize: 12, fontFamily: "PlusJakartaSans_400Regular" },
+  typingLabel: { fontSize: 12, fontFamily: "Inter_400Regular" },
 
   inputBar: {
     flexDirection: "row", alignItems: "flex-end",
@@ -864,7 +864,7 @@ const styles = StyleSheet.create({
   attachBtn: { width: 40, height: 42, alignItems: "center", justifyContent: "center" },
   input: {
     flex: 1, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10,
-    fontSize: 15, fontFamily: "PlusJakartaSans_400Regular", maxHeight: 100,
+    fontSize: 15, fontFamily: "Inter_400Regular", maxHeight: 100,
     borderWidth: 1,
   },
   sendBtn: {

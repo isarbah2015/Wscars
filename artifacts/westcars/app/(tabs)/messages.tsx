@@ -69,7 +69,7 @@ function ConversationRow({ conv, colors, isDark }: { conv: Conversation; colors:
             styles.lastMessage,
             {
               color: conv.unreadCount > 0 ? colors.text : colors.textSecondary,
-              fontFamily: conv.unreadCount > 0 ? "PlusJakartaSans_600SemiBold" : "PlusJakartaSans_400Regular",
+              fontFamily: conv.unreadCount > 0 ? "Inter_600SemiBold" : "Inter_400Regular",
             },
           ]}
           numberOfLines={1}
@@ -244,16 +244,16 @@ const styles = StyleSheet.create({
   userAvatarImg: { width: 42, height: 42, borderRadius: 13 },
   userAvatarInitial: {
     fontSize: 18,
-    fontFamily: "PlusJakartaSans_700Bold",
+    fontFamily: "Inter_700Bold",
   },
   headerTitle: {
     fontSize: 15,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     letterSpacing: -0.1,
   },
   headerSub: {
     fontSize: 12,
-    fontFamily: "PlusJakartaSans_400Regular",
+    fontFamily: "Inter_400Regular",
     marginTop: 1,
   },
   headerRight: {
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   },
   notifBadgeText: {
     fontSize: 9,
-    fontFamily: "PlusJakartaSans_700Bold",
+    fontFamily: "Inter_700Bold",
     color: "#fff",
   },
 
@@ -298,12 +298,12 @@ const styles = StyleSheet.create({
   },
   sectionLabelText: {
     fontSize: 11,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     letterSpacing: 0.8,
   },
   sectionLabelUnread: {
     fontSize: 12,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
   },
 
   convRow: {
@@ -341,9 +341,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  participantName: { fontSize: 15, fontFamily: "PlusJakartaSans_600SemiBold", flex: 1 },
-  time: { fontSize: 12, fontFamily: "PlusJakartaSans_400Regular" },
-  carName: { fontSize: 12, fontFamily: "PlusJakartaSans_500Medium" },
+  participantName: { fontSize: 15, fontFamily: "Inter_600SemiBold", flex: 1 },
+  time: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  carName: { fontSize: 12, fontFamily: "Inter_500Medium" },
   lastMessage: { fontSize: 13, lineHeight: 18 },
   badge: {
     width: 22,
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  badgeText: { fontSize: 11, fontFamily: "PlusJakartaSans_700Bold", color: "#fff" },
+  badgeText: { fontSize: 11, fontFamily: "Inter_700Bold", color: "#fff" },
   emptyState: {
     flex: 1,
     alignItems: "center",
@@ -367,10 +367,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  emptyTitle: { fontSize: 20, fontFamily: "Sora_800ExtraBold", letterSpacing: -0.3 },
+  emptyTitle: { fontSize: 20, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.3 },
   emptyText: {
     fontSize: 14,
-    fontFamily: "PlusJakartaSans_400Regular",
+    fontFamily: "Inter_400Regular",
     textAlign: "center",
     lineHeight: 20,
   },
@@ -383,5 +383,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minWidth: 180,
   },
-  signInText: { fontSize: 15, fontFamily: "PlusJakartaSans_600SemiBold", color: "#fff", textAlign: "center" },
+  signInText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff", textAlign: "center" },
 });

@@ -261,7 +261,7 @@ export default function VerificationCentreScreen() {
           <Feather name="lock" size={16} color="#0EB5CA" />
           <Text style={[styles.koraNoteText, { color: colors.textSecondary }]}>
             Identity verification is handled securely by{" "}
-            <Text style={{ color: "#0EB5CA", fontFamily: "PlusJakartaSans_700Bold" }}>Kora</Text>.
+            <Text style={{ color: "#0EB5CA", fontFamily: "Inter_700Bold" }}>Kora</Text>.
             Your documents are encrypted and never stored on Westcars servers.
           </Text>
         </View>
@@ -290,7 +290,7 @@ export default function VerificationCentreScreen() {
                 <Text style={[styles.sheetTitle, { color: colors.text }]}>Verify Phone Number</Text>
                 <Text style={[styles.sheetBody, { color: colors.textSecondary }]}>
                   A 6-digit OTP will be sent to{" "}
-                  <Text style={{ fontFamily: "PlusJakartaSans_700Bold", color: colors.text }}>
+                  <Text style={{ fontFamily: "Inter_700Bold", color: colors.text }}>
                     {currentUser?.phone || "your number"}
                   </Text>
                   . Standard SMS rates may apply.
@@ -479,10 +479,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   headerCenter: { flex: 1, alignItems: "center" },
-  headerTitle: { fontSize: 18, fontFamily: "PlusJakartaSans_700Bold", color: "#fff" },
+  headerTitle: { fontSize: 18, fontFamily: "Inter_700Bold", color: "#fff" },
   headerSub: {
     fontSize: 11,
-    fontFamily: "PlusJakartaSans_400Regular",
+    fontFamily: "Inter_400Regular",
     color: "rgba(255,255,255,0.75)",
     marginTop: 2,
   },
@@ -501,9 +501,9 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   scoreTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  scoreLabel: { fontSize: 12, fontFamily: "PlusJakartaSans_500Medium" },
-  scoreNum: { fontSize: 32, fontFamily: "PlusJakartaSans_600SemiBold", lineHeight: 38 },
-  scoreDen: { fontSize: 16, fontFamily: "PlusJakartaSans_400Regular" },
+  scoreLabel: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  scoreNum: { fontSize: 32, fontFamily: "Inter_600SemiBold", lineHeight: 38 },
+  scoreDen: { fontSize: 16, fontFamily: "Inter_400Regular" },
   scoreBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -512,14 +512,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
-  scoreBadgeText: { fontSize: 12, fontFamily: "PlusJakartaSans_700Bold" },
+  scoreBadgeText: { fontSize: 12, fontFamily: "Inter_700Bold" },
   scoreBarBg: { height: 8, borderRadius: 4, overflow: "hidden" },
   scoreBarFill: { height: 8, borderRadius: 4 },
-  scoreTip: { fontSize: 11, fontFamily: "PlusJakartaSans_400Regular", lineHeight: 16 },
+  scoreTip: { fontSize: 11, fontFamily: "Inter_400Regular", lineHeight: 16 },
 
   sectionLabel: {
     fontSize: 11,
-    fontFamily: "PlusJakartaSans_700Bold",
+    fontFamily: "Inter_700Bold",
     letterSpacing: 1,
     marginTop: 4,
   },
@@ -544,12 +544,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  stepTitle: { fontSize: 14, fontFamily: "PlusJakartaSans_700Bold" },
-  stepSub: { fontSize: 12, fontFamily: "PlusJakartaSans_400Regular" },
+  stepTitle: { fontSize: 14, fontFamily: "Inter_700Bold" },
+  stepSub: { fontSize: 12, fontFamily: "Inter_400Regular" },
   providerRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
-  providerText: { fontSize: 11, fontFamily: "PlusJakartaSans_600SemiBold", color: "#0EB5CA" },
+  providerText: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: "#0EB5CA" },
   statusBadge: { borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
-  statusText: { fontSize: 12, fontFamily: "PlusJakartaSans_700Bold" },
+  statusText: { fontSize: 12, fontFamily: "Inter_700Bold" },
 
   benefitsCard: {
     borderRadius: 16,
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  benefitText: { fontSize: 13, fontFamily: "PlusJakartaSans_400Regular", flex: 1 },
+  benefitText: { fontSize: 13, fontFamily: "Inter_400Regular", flex: 1 },
 
   koraNote: {
     flexDirection: "row",
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 14,
   },
-  koraNoteText: { fontSize: 12, fontFamily: "PlusJakartaSans_400Regular", lineHeight: 18, flex: 1 },
+  koraNoteText: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18, flex: 1 },
 
   overlay: {
     flex: 1,
@@ -612,18 +612,18 @@ const styles = StyleSheet.create({
   },
   sheetTitle: {
     fontSize: 18,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     textAlign: "center",
   },
   sheetBody: {
     fontSize: 14,
-    fontFamily: "PlusJakartaSans_400Regular",
+    fontFamily: "Inter_400Regular",
     textAlign: "center",
     lineHeight: 22,
   },
   sheetNote: {
     fontSize: 12,
-    fontFamily: "PlusJakartaSans_400Regular",
+    fontFamily: "Inter_400Regular",
     textAlign: "center",
     lineHeight: 18,
   },
@@ -640,7 +640,7 @@ const styles = StyleSheet.create({
   otpInput: {
     flex: 1,
     fontSize: 16,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     letterSpacing: 4,
   },
   koraTagRow: {
@@ -654,12 +654,12 @@ const styles = StyleSheet.create({
   },
   koraTagText: {
     fontSize: 12,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     color: "#0EB5CA",
   },
   requiresTitle: {
     fontSize: 13,
-    fontFamily: "PlusJakartaSans_700Bold",
+    fontFamily: "Inter_700Bold",
     alignSelf: "flex-start",
   },
   requireRow: {
@@ -670,7 +670,7 @@ const styles = StyleSheet.create({
   },
   requireText: {
     fontSize: 13,
-    fontFamily: "PlusJakartaSans_400Regular",
+    fontFamily: "Inter_400Regular",
   },
   sheetBtn: {
     flexDirection: "row",
@@ -684,7 +684,7 @@ const styles = StyleSheet.create({
   },
   sheetBtnText: {
     fontSize: 15,
-    fontFamily: "PlusJakartaSans_700Bold",
+    fontFamily: "Inter_700Bold",
     color: "#fff",
   },
   sheetCancelBtn: {
@@ -692,7 +692,7 @@ const styles = StyleSheet.create({
   },
   sheetCancelText: {
     fontSize: 14,
-    fontFamily: "PlusJakartaSans_500Medium",
+    fontFamily: "Inter_500Medium",
   },
 
   successSheet: {
@@ -712,12 +712,12 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 20,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "Inter_600SemiBold",
     textAlign: "center",
   },
   successBody: {
     fontSize: 14,
-    fontFamily: "PlusJakartaSans_400Regular",
+    fontFamily: "Inter_400Regular",
     textAlign: "center",
     lineHeight: 22,
   },

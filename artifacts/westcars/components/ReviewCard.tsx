@@ -81,17 +81,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F4F6", alignItems: "center", justifyContent: "center",
   },
   meta: { flex: 1, gap: 3 },
-  name: { fontSize: 14, fontFamily: "PlusJakartaSans_600SemiBold", color: "#1A1A1A" },
+  name: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#1A1A1A" },
   ratingRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  date: { fontSize: 11, fontFamily: "PlusJakartaSans_400Regular", color: "#9E9E9E" },
+  date: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#9E9E9E" },
   scorePill: {
     backgroundColor: "#FEF3C7", borderRadius: 8,
     paddingHorizontal: 8, paddingVertical: 3,
   },
-  scoreText: { fontSize: 12, fontFamily: "PlusJakartaSans_700Bold", color: "#D97706" },
-  comment: { fontSize: 13, fontFamily: "PlusJakartaSans_400Regular", color: "#4A4A4A", lineHeight: 20 },
+  scoreText: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#D97706" },
+  comment: { fontSize: 13, fontFamily: "Inter_400Regular", color: "#4A4A4A", lineHeight: 20 },
 
   ratingBig: { flexDirection: "row", alignItems: "center", gap: 6 },
-  ratingNum: { fontSize: 22, fontFamily: "PlusJakartaSans_600SemiBold", color: "#1A1A1A" },
-  ratingCount: { fontSize: 12, fontFamily: "PlusJakartaSans_400Regular", color: "#9E9E9E" },
+  ratingNum: { fontSize: 22, fontFamily: "Inter_600SemiBold", color: "#1A1A1A" },
+  ratingCount: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#9E9E9E" },
 });

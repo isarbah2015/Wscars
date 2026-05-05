@@ -260,13 +260,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  userName: { fontSize: 22, fontFamily: "PlusJakartaSans_700Bold" },
+  userName: { fontSize: 22, fontFamily: "Inter_700Bold" },
   metaRow: { flexDirection: "row", alignItems: "center", gap: 5 },
-  metaText: { fontSize: 12, fontFamily: "PlusJakartaSans_400Regular" },
+  metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
   dot: { width: 4, height: 4, borderRadius: 2 },
   ratingRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  ratingNum: { fontSize: 14, fontFamily: "PlusJakartaSans_700Bold" },
-  ratingCount: { fontSize: 12, fontFamily: "PlusJakartaSans_400Regular" },
+  ratingNum: { fontSize: 14, fontFamily: "Inter_700Bold" },
+  ratingCount: { fontSize: 12, fontFamily: "Inter_400Regular" },
   statsRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -278,8 +278,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   statItem: { alignItems: "center" },
-  statValue: { fontSize: 18, fontFamily: "PlusJakartaSans_700Bold" },
-  statLabel: { fontSize: 11, fontFamily: "PlusJakartaSans_400Regular" },
+  statValue: { fontSize: 18, fontFamily: "Inter_700Bold" },
+  statLabel: { fontSize: 11, fontFamily: "Inter_400Regular" },
   statDivider: { width: 1, height: 30 },
 
   // Action buttons section
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   },
   contactLabel: {
     fontSize: 10,
-    fontFamily: "PlusJakartaSans_700Bold",
+    fontFamily: "Inter_700Bold",
     letterSpacing: 1.2,
     textTransform: "uppercase",
   },
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.22)",
     alignItems: "center", justifyContent: "center",
   },
-  callBtnText: { fontSize: 12, fontFamily: "PlusJakartaSans_700Bold", color: "#FFFFFF" },
+  callBtnText: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#FFFFFF" },
 
   // WhatsApp button — green
   waBtn: { backgroundColor: "#25D366" },
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.22)",
     alignItems: "center", justifyContent: "center",
   },
-  waBtnText: { fontSize: 12, fontFamily: "PlusJakartaSans_700Bold", color: "#FFFFFF" },
+  waBtnText: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#FFFFFF" },
 
   // Chat button — outline style
   chatBtn: { borderWidth: 1.5 },
@@ -331,19 +331,19 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(14,181,202,0.12)",
     alignItems: "center", justifyContent: "center",
   },
-  chatBtnText: { fontSize: 12, fontFamily: "PlusJakartaSans_700Bold" },
+  chatBtnText: { fontSize: 12, fontFamily: "Inter_700Bold" },
 
   // Listings
   listingsSection: { padding: 16, gap: 12 },
   sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
   sectionAccent: { width: 4, height: 18, borderRadius: 2 },
-  sectionTitle: { fontSize: 17, fontFamily: "PlusJakartaSans_700Bold" },
+  sectionTitle: { fontSize: 17, fontFamily: "Inter_700Bold" },
   gridRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   halfCard: { width: "47%" },
   empty: { alignItems: "center", paddingVertical: 40, gap: 10 },
-  emptyText: { fontSize: 15, fontFamily: "PlusJakartaSans_400Regular" },
+  emptyText: { fontSize: 15, fontFamily: "Inter_400Regular" },
 
   notFound: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
-  notFoundText: { fontSize: 18, fontFamily: "PlusJakartaSans_600SemiBold" },
-  backLink: { fontSize: 14, color: Colors.primary, fontFamily: "PlusJakartaSans_600SemiBold" },
+  notFoundText: { fontSize: 18, fontFamily: "Inter_600SemiBold" },
+  backLink: { fontSize: 14, color: Colors.primary, fontFamily: "Inter_600SemiBold" },
 });
