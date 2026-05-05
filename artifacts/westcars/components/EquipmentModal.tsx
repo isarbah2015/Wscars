@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -11,26 +12,23 @@ import {
   Text,
   View,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const EQUIPMENT: {
   icon: string;
   category: string;
   iconColor: string;
-  iconBg: string;
-  gradientFrom: string;
-  gradientTo: string;
+  accentColor: string;
+  chipBg: string;
   count: number;
   items: string[];
 }[] = [
   {
     icon: "shield",
     category: "Safety",
-    iconColor: "#E53935",
-    iconBg: "#FCE4EC",
-    gradientFrom: "#EF5350",
-    gradientTo: "#E53935",
+    iconColor: "#DC2626",
+    accentColor: "#DC2626",
+    chipBg: "#FEF2F2",
     count: 14,
     items: [
       "ABS (Anti-lock braking system)",
@@ -52,10 +50,9 @@ const EQUIPMENT: {
   {
     icon: "star",
     category: "Comfort",
-    iconColor: "#1565C0",
-    iconBg: "#E3F2FD",
-    gradientFrom: "#42A5F5",
-    gradientTo: "#1565C0",
+    iconColor: "#1D4ED8",
+    accentColor: "#1D4ED8",
+    chipBg: "#EFF6FF",
     count: 20,
     items: [
       "Adaptive cruise control",
@@ -83,10 +80,9 @@ const EQUIPMENT: {
   {
     icon: "sun",
     category: "Interior",
-    iconColor: "#F59E0B",
-    iconBg: "#FFF3E0",
-    gradientFrom: "#FBBF24",
-    gradientTo: "#F59E0B",
+    iconColor: "#D97706",
+    accentColor: "#D97706",
+    chipBg: "#FFFBEB",
     count: 14,
     items: [
       "Leather upholstery",
@@ -108,10 +104,9 @@ const EQUIPMENT: {
   {
     icon: "music",
     category: "Multimedia",
-    iconColor: "#7B1FA2",
-    iconBg: "#F3E5F5",
-    gradientFrom: "#AB47BC",
-    gradientTo: "#7B1FA2",
+    iconColor: "#7C3AED",
+    accentColor: "#7C3AED",
+    chipBg: "#F5F3FF",
     count: 7,
     items: [
       "10.1\" touchscreen display",
@@ -127,9 +122,8 @@ const EQUIPMENT: {
     icon: "eye",
     category: "Visibility",
     iconColor: "#0EB5CA",
-    iconBg: "#E0F8FB",
-    gradientFrom: "#26C6DA",
-    gradientTo: "#0EB5CA",
+    accentColor: "#0EB5CA",
+    chipBg: "#ECFEFF",
     count: 6,
     items: [
       "LED headlights",
@@ -143,10 +137,9 @@ const EQUIPMENT: {
   {
     icon: "layers",
     category: "Exterior",
-    iconColor: "#2E7D32",
-    iconBg: "#E8F5E9",
-    gradientFrom: "#66BB6A",
-    gradientTo: "#2E7D32",
+    iconColor: "#16A34A",
+    accentColor: "#16A34A",
+    chipBg: "#F0FDF4",
     count: 3,
     items: [
       "18\" alloy wheels",
@@ -157,10 +150,9 @@ const EQUIPMENT: {
   {
     icon: "lock",
     category: "Anti-theft",
-    iconColor: "#37474F",
-    iconBg: "#ECEFF1",
-    gradientFrom: "#546E7A",
-    gradientTo: "#37474F",
+    iconColor: "#475569",
+    accentColor: "#475569",
+    chipBg: "#F8FAFC",
     count: 2,
     items: [
       "Immobiliser",
@@ -170,10 +162,9 @@ const EQUIPMENT: {
   {
     icon: "more-horizontal",
     category: "Other",
-    iconColor: "#E65100",
-    iconBg: "#FBE9E7",
-    gradientFrom: "#FB8C00",
-    gradientTo: "#E65100",
+    iconColor: "#EA580C",
+    accentColor: "#EA580C",
+    chipBg: "#FFF7ED",
     count: 9,
     items: [
       "Towing hook (detachable)",
@@ -200,11 +191,11 @@ const useNative = Platform.OS !== "web";
 export function EquipmentModal({ visible, trimName = "Standard", onClose }: Props) {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
+  const chipScrollRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({}).current;
   const sectionsWrapY = useRef(0);
   const [activeCategory, setActiveCategory] = useState<string>("Safety");
 
-  // Per-section appear animation
   const sectionAnims = useRef<Record<string, Animated.Value>>(
     Object.fromEntries(EQUIPMENT.map((c) => [c.category, new Animated.Value(0)]))
   ).current;
@@ -215,8 +206,8 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
       sectionAnims[c.category].setValue(0);
       Animated.timing(sectionAnims[c.category], {
         toValue: 1,
-        duration: 380,
-        delay: 80 + i * 60,
+        duration: 420,
+        delay: 60 + i * 55,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: useNative,
       }).start();
@@ -231,7 +222,7 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
     const y = sectionPositions[category];
     if (typeof y === "number") {
       scrollRef.current?.scrollTo({
-        y: Math.max(0, sectionsWrapY.current + y - 8),
+        y: Math.max(0, sectionsWrapY.current + y - 12),
         animated: true,
       });
     }
@@ -240,148 +231,149 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[styles.root, { paddingTop: insets.top || 0 }]}>
-        {/* ── Premium Header ── */}
+
+        {/* ── Header ── */}
         <LinearGradient
-          colors={["#0EB5CA", "#0098AA"]}
+          colors={["#0A1628", "#0D2137", "#0A3554"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.header}
         >
+          {/* Top row */}
           <View style={styles.headerTopRow}>
-            <View style={styles.headerLeft}>
-              <View style={styles.headerIconWrap}>
-                <Feather name="award" size={20} color="#fff" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.headerTitle}>All Equipment</Text>
-                <Text style={styles.headerSub}>{trimName} trim</Text>
-              </View>
+            <View style={styles.headerIconRing}>
+              <Feather name="award" size={19} color="#0EB5CA" />
             </View>
-            <Pressable style={styles.closeBtn} onPress={onClose} hitSlop={12}>
-              <Feather name="x" size={18} color="#fff" />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.headerTitle}>All Equipment</Text>
+              <Text style={styles.headerSub}>{trimName} trim</Text>
+            </View>
+            <Pressable
+              style={({ pressed }) => [styles.closeBtn, pressed && { opacity: 0.7 }]}
+              onPress={onClose}
+              hitSlop={14}
+            >
+              <Feather name="x" size={16} color="rgba(255,255,255,0.9)" />
             </Pressable>
           </View>
 
-          {/* Stats strip */}
+          {/* Stats */}
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statValue}>{totalItems}</Text>
-              <Text style={styles.statLabel}>Total options</Text>
+              <Text style={styles.statLabel}>OPTIONS</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statBox}>
               <Text style={styles.statValue}>{totalCategories}</Text>
-              <Text style={styles.statLabel}>Categories</Text>
+              <Text style={styles.statLabel}>CATEGORIES</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statBox}>
-              <Text style={styles.statValue}>100%</Text>
-              <Text style={styles.statLabel}>Verified</Text>
+              <Text style={[styles.statValue, { color: "#34D399" }]}>100%</Text>
+              <Text style={styles.statLabel}>VERIFIED</Text>
             </View>
           </View>
         </LinearGradient>
 
+        {/* ── Category chip rail ── */}
+        <View style={styles.chipRailWrap}>
+          <ScrollView
+            ref={chipScrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipRail}
+          >
+            {EQUIPMENT.map((cat) => {
+              const active = activeCategory === cat.category;
+              return (
+                <Pressable
+                  key={cat.category}
+                  style={({ pressed }) => [
+                    styles.chip,
+                    active
+                      ? [styles.chipActive, { backgroundColor: cat.accentColor }]
+                      : { backgroundColor: cat.chipBg },
+                    pressed && { opacity: 0.78 },
+                  ]}
+                  onPress={() => jumpToCategory(cat.category)}
+                >
+                  <Feather
+                    name={cat.icon as any}
+                    size={13}
+                    color={active ? "#fff" : cat.iconColor}
+                  />
+                  <Text
+                    style={[
+                      styles.chipLabel,
+                      { color: active ? "#fff" : cat.iconColor },
+                    ]}
+                  >
+                    {cat.category}
+                  </Text>
+                  <View
+                    style={[
+                      styles.chipBadge,
+                      { backgroundColor: active ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.07)" },
+                    ]}
+                  >
+                    <Text style={[styles.chipBadgeText, { color: active ? "#fff" : cat.iconColor }]}>
+                      {cat.count}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        {/* ── Sections ── */}
         <ScrollView
           ref={scrollRef}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* ── Category Card Grid ── */}
-          <View style={styles.gridWrap}>
-            <View style={styles.gridHeaderRow}>
-              <Text style={styles.gridTitle}>Browse by category</Text>
-              <Text style={styles.gridSubtitle}>Tap a card to jump</Text>
-            </View>
-            <View style={styles.grid}>
-              {EQUIPMENT.map((cat) => {
-                const isActive = activeCategory === cat.category;
-                return (
-                  <Pressable
-                    key={cat.category}
-                    style={({ pressed }) => [
-                      styles.gridCard,
-                      isActive && styles.gridCardActive,
-                      pressed && { opacity: 0.85 },
-                    ]}
-                    onPress={() => jumpToCategory(cat.category)}
-                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                  >
-                    {/* Top accent bar */}
-                    <View style={[styles.gridCardAccent, { backgroundColor: cat.iconColor }]} />
-                    {/* Icon bubble */}
-                    <View style={[styles.gridIconWrap, { backgroundColor: cat.iconBg }]}>
-                      <Feather name={cat.icon as any} size={18} color={cat.iconColor} />
-                    </View>
-                    {/* Category name */}
-                    <Text style={styles.gridCardName} numberOfLines={1}>{cat.category}</Text>
-                    {/* Count row */}
-                    <View style={styles.gridCardFooter}>
-                      <Text style={[styles.gridCardCount, { color: cat.iconColor }]}>
-                        {cat.count}
-                      </Text>
-                      <Text style={styles.gridCardCountLabel}>items</Text>
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-
-          {/* ── Section List (always expanded — premium feel) ── */}
           <View
-            style={styles.sectionsWrap}
-            onLayout={(e) => {
-              sectionsWrapY.current = e.nativeEvent.layout.y;
-            }}
+            onLayout={(e) => { sectionsWrapY.current = e.nativeEvent.layout.y; }}
           >
-            <Text style={styles.sectionsHeader}>Detailed list</Text>
-
-            {EQUIPMENT.map((cat) => {
+            {EQUIPMENT.map((cat, catIdx) => {
               const opac = sectionAnims[cat.category];
-              const translate = opac.interpolate({
-                inputRange: [0, 1],
-                outputRange: [12, 0],
-              });
+              const slide = opac.interpolate({ inputRange: [0, 1], outputRange: [16, 0] });
 
               return (
                 <Animated.View
                   key={cat.category}
-                  onLayout={(e) => {
-                    sectionPositions[cat.category] = e.nativeEvent.layout.y;
-                  }}
-                  style={[
-                    styles.sectionCard,
-                    { opacity: opac, transform: [{ translateY: translate }] },
-                  ]}
+                  onLayout={(e) => { sectionPositions[cat.category] = e.nativeEvent.layout.y; }}
+                  style={[styles.section, { opacity: opac, transform: [{ translateY: slide }] }]}
                 >
-                  {/* Premium gradient header */}
-                  <LinearGradient
-                    colors={[cat.gradientFrom, cat.gradientTo]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.sectionHeader}
-                  >
-                    <View style={styles.sectionHeaderIcon}>
-                      <Feather name={cat.icon as any} size={20} color="#fff" />
+                  {/* Section header */}
+                  <View style={styles.sectionHead}>
+                    <View style={[styles.sectionAccentDot, { backgroundColor: cat.accentColor }]} />
+                    <View style={[styles.sectionIconWrap, { backgroundColor: cat.chipBg }]}>
+                      <Feather name={cat.icon as any} size={15} color={cat.iconColor} />
                     </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.sectionHeaderTitle}>{cat.category}</Text>
-                      <Text style={styles.sectionHeaderSub}>{cat.count} included options</Text>
+                    <Text style={styles.sectionTitle}>{cat.category}</Text>
+                    <View style={[styles.sectionBadge, { backgroundColor: cat.chipBg }]}>
+                      <Text style={[styles.sectionBadgeText, { color: cat.accentColor }]}>
+                        {cat.count}
+                      </Text>
                     </View>
-                    <View style={styles.sectionHeaderBadge}>
-                      <Feather name="check" size={11} color="#fff" />
-                      <Text style={styles.sectionHeaderBadgeText}>{cat.count}</Text>
-                    </View>
-                  </LinearGradient>
+                  </View>
 
-                  {/* Items in 2-column layout */}
-                  <View style={styles.itemsGrid}>
-                    {cat.items.map((item) => (
-                      <View key={item} style={styles.itemPill}>
-                        <View style={[styles.itemCheck, { backgroundColor: cat.iconBg }]}>
+                  {/* Item rows */}
+                  <View style={styles.itemList}>
+                    {cat.items.map((item, idx) => (
+                      <View
+                        key={item}
+                        style={[
+                          styles.itemRow,
+                          idx < cat.items.length - 1 && styles.itemRowBorder,
+                        ]}
+                      >
+                        <View style={[styles.itemCheckWrap, { backgroundColor: cat.chipBg }]}>
                           <Feather name="check" size={11} color={cat.iconColor} />
                         </View>
-                        <Text style={styles.itemText} numberOfLines={2}>{item}</Text>
+                        <Text style={styles.itemText}>{item}</Text>
                       </View>
                     ))}
                   </View>
@@ -390,7 +382,7 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
             })}
           </View>
 
-          <View style={{ height: 32 + (insets.bottom || 0) }} />
+          <View style={{ height: 36 + (insets.bottom || 0) }} />
         </ScrollView>
       </View>
     </Modal>
@@ -398,254 +390,206 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#F1F5F9" },
+  root: { flex: 1, backgroundColor: "#F8FAFC" },
 
   /* Header */
   header: {
-    paddingHorizontal: 18,
-    paddingTop: 14,
-    paddingBottom: 18,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 20,
   },
   headerTopRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
+    gap: 14,
+    marginBottom: 18,
   },
-  headerLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
-  headerIconWrap: {
-    width: 42, height: 42, borderRadius: 13,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    alignItems: "center", justifyContent: "center",
+  headerIconRing: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: "rgba(14,181,202,0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(14,181,202,0.3)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
-    fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
+    fontSize: 20,
+    fontFamily: "Manrope_800ExtraBold",
     color: "#fff",
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   headerSub: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.85)",
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Inter_400Regular",
+    color: "rgba(255,255,255,0.55)",
     marginTop: 2,
   },
   closeBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    alignItems: "center", justifyContent: "center",
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
   },
+
+  /* Stats */
   statsRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.13)",
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginTop: 14,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.09)",
+    paddingVertical: 13,
+    paddingHorizontal: 8,
   },
-  statBox: { flex: 1, alignItems: "center" },
+  statBox: { flex: 1, alignItems: "center", gap: 3 },
   statValue: {
-    fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
+    fontSize: 22,
+    fontFamily: "Manrope_800ExtraBold",
     color: "#fff",
-    letterSpacing: -0.5,
+    letterSpacing: -0.6,
   },
   statLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: "Inter_600SemiBold",
-    color: "rgba(255,255,255,0.85)",
-    letterSpacing: 0.4,
-    marginTop: 2,
-    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.4)",
+    letterSpacing: 0.8,
   },
   statDivider: {
-    width: 1, height: 26,
-    backgroundColor: "rgba(255,255,255,0.22)",
+    width: 1,
+    height: 28,
+    backgroundColor: "rgba(255,255,255,0.12)",
+  },
+
+  /* Chip rail */
+  chipRailWrap: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#E9EEF4",
+    backgroundColor: "#fff",
+  },
+  chipRail: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+    flexDirection: "row",
+  },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+  },
+  chipActive: {},
+  chipLabel: {
+    fontSize: 13,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: -0.1,
+  },
+  chipBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 10,
+    minWidth: 20,
+    alignItems: "center",
+  },
+  chipBadgeText: {
+    fontSize: 11,
+    fontFamily: "Inter_700Bold",
   },
 
   /* Scroll */
-  scrollContent: { paddingTop: 16 },
+  scrollContent: { paddingTop: 14, paddingHorizontal: 16 },
 
-  /* Grid */
-  gridWrap: {
-    paddingHorizontal: 14,
-    marginBottom: 18,
-  },
-  gridHeaderRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    justifyContent: "space-between",
-    paddingHorizontal: 4,
-    marginBottom: 10,
-  },
-  gridTitle: {
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
-    color: "#0F172A",
-    letterSpacing: -0.2,
-  },
-  gridSubtitle: {
-    fontSize: 11,
-    fontFamily: "Inter_500Medium",
-    color: "#64748B",
-  },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  gridCard: {
-    width: "48%",
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingTop: 14,
-    paddingBottom: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    overflow: "hidden",
-    shadowColor: "#0F172A",
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
-  },
-  gridCardActive: {
-    borderColor: "#0EB5CA",
-    shadowColor: "#0EB5CA",
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  gridCardAccent: {
-    position: "absolute",
-    top: 0, left: 0, right: 0,
-    height: 3,
-  },
-  gridIconWrap: {
-    width: 38, height: 38, borderRadius: 12,
-    alignItems: "center", justifyContent: "center",
-    marginBottom: 10,
-  },
-  gridCardName: {
-    fontSize: 13,
-    fontFamily: "Inter_700Bold",
-    color: "#0F172A",
-    letterSpacing: -0.1,
-  },
-  gridCardFooter: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: 4,
-    marginTop: 4,
-  },
-  gridCardCount: {
-    fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
-    letterSpacing: -0.5,
-  },
-  gridCardCountLabel: {
-    fontSize: 10,
-    fontFamily: "Inter_600SemiBold",
-    color: "#64748B",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-
-  /* Sections */
-  sectionsWrap: { paddingHorizontal: 14 },
-  sectionsHeader: {
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
-    color: "#0F172A",
-    letterSpacing: -0.2,
-    paddingHorizontal: 4,
-    marginBottom: 10,
-  },
-  sectionCard: {
+  /* Section */
+  section: {
     backgroundColor: "#fff",
     borderRadius: 18,
+    marginBottom: 12,
     overflow: "hidden",
-    marginBottom: 14,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    shadowColor: "#0F172A",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
+    borderColor: "#EEF2F7",
+    shadowColor: "#0A1628",
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
     shadowOffset: { width: 0, height: 3 },
     elevation: 2,
   },
-  sectionHeader: {
+  sectionHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
+  },
+  sectionAccentDot: {
+    width: 4,
+    height: 36,
+    borderRadius: 2,
+    marginRight: 2,
+  },
+  sectionIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionTitle: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: "Manrope_800ExtraBold",
+    color: "#0F172A",
+    letterSpacing: -0.2,
+  },
+  sectionBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  sectionBadgeText: {
+    fontSize: 13,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: -0.2,
+  },
+
+  /* Items */
+  itemList: {
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+  },
+  itemRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
+    paddingVertical: 11,
   },
-  sectionHeaderIcon: {
-    width: 38, height: 38, borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.20)",
-    alignItems: "center", justifyContent: "center",
+  itemRowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9",
   },
-  sectionHeaderTitle: {
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
-    color: "#fff",
-    letterSpacing: -0.2,
-  },
-  sectionHeaderSub: {
-    fontSize: 11,
-    fontFamily: "Inter_500Medium",
-    color: "rgba(255,255,255,0.85)",
-    marginTop: 2,
-  },
-  sectionHeaderBadge: {
-    flexDirection: "row",
+  itemCheckWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
     alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(255,255,255,0.22)",
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  sectionHeaderBadgeText: {
-    fontSize: 11,
-    fontFamily: "Inter_600SemiBold",
-    color: "#fff",
-    letterSpacing: 0.3,
-  },
-
-  itemsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    padding: 12,
-  },
-  itemPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 9,
-    borderWidth: 1,
-    borderColor: "#EDF2F7",
-    width: "48.5%",
-  },
-  itemCheck: {
-    width: 22, height: 22, borderRadius: 7,
-    alignItems: "center", justifyContent: "center",
+    justifyContent: "center",
     flexShrink: 0,
   },
   itemText: {
     flex: 1,
-    fontSize: 11,
-    fontFamily: "Inter_600SemiBold",
-    color: "#0F172A",
-    lineHeight: 14,
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: "#334155",
+    lineHeight: 18,
   },
 });
