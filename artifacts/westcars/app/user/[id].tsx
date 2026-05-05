@@ -15,7 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { RatingStars } from "@/components/RatingStars";
-import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { VerificationBadges } from "@/components/VerificationBadges";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -129,7 +129,7 @@ export default function UserProfileScreen() {
           <Text style={[styles.metaText, { color: colors.textSecondary }]}>Joined {user.memberSince.slice(0, 7)}</Text>
         </View>
 
-        {user.isVerified && <VerifiedBadge />}
+        <VerificationBadges user={user} size="sm" style={styles.veriBadges} />
 
         <View style={styles.ratingRow}>
           <RatingStars rating={user.rating} size={14} />
@@ -333,13 +333,16 @@ const styles = StyleSheet.create({
   },
   chatBtnText: { fontSize: 12, fontFamily: "Inter_700Bold" },
 
-  // Listings
-  listingsSection: { padding: 16, gap: 12 },
-  sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
+  // Verification badges row — centered under name/rating
+  veriBadges: { justifyContent: "center", paddingHorizontal: 16 },
+
+  // Listings — tighter 2x2 grid matching "you may also like" card size
+  listingsSection: { paddingHorizontal: 8, paddingVertical: 16, gap: 12 },
+  sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 8 },
   sectionAccent: { width: 4, height: 18, borderRadius: 2 },
-  sectionTitle: { fontSize: 17, fontFamily: "Inter_700Bold" },
-  gridRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  halfCard: { width: "47%" },
+  sectionTitle: { fontSize: 17, fontFamily: "Inter_700Bold", paddingHorizontal: 8 },
+  gridRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, paddingHorizontal: 8 },
+  halfCard: { width: "48%" },
   empty: { alignItems: "center", paddingVertical: 40, gap: 10 },
   emptyText: { fontSize: 15, fontFamily: "Inter_400Regular" },
 

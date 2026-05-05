@@ -58,11 +58,12 @@ export function VerifiedBadge({ user, size = "sm" }: { user: User; size?: "sm" |
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row", flexWrap: "wrap", gap: 5 },
-  col: { gap: 5 },
+  row: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 5, width: "100%" },
+  col: { gap: 5, alignItems: "center" },
   badge: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 4,
     paddingVertical: 3,
     borderRadius: 20,
