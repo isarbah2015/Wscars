@@ -60,6 +60,12 @@
       "expo-font",
       "expo-web-browser",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Westcars uses your location to show cars near you and to attach a location to your listings."
+        }
+      ],
+      [
         "expo-audio",
         {
           "microphonePermission": "Westcars needs microphone access to send voice messages."

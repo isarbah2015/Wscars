@@ -1,9 +1,18 @@
+/**
+ * Firebase initialization for the Westcars Expo app.
+ *
+ * Firebase v12 automatically detects the React Native environment and uses
+ * @react-native-async-storage/async-storage for auth persistence when that
+ * package is installed — no manual initializeAuth call is needed.
+ *
+ * Reads config from EXPO_PUBLIC_FIREBASE_* env vars (set as Replit secrets).
+ * If any required value is missing, isFirebaseReady() returns false and
+ * AppContext falls back to mock data.
+ */
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
-import { getAuth, initializeAuth, type Auth } from "firebase/auth";
+import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Platform } from "react-native";
 
 const firebaseConfig = {
   apiKey:            process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -26,27 +35,12 @@ if (missing.length === 0) {
   try {
     app = getApps().length ? getApp() : initializeApp(firebaseConfig as any);
 
-    if (Platform.OS === "web") {
-      auth = getAuth(app);
-    } else {
-      try {
-        // getReactNativePersistence is available at runtime in firebase/auth
-        // but not always reflected in TypeScript types for every Firebase version.
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { getReactNativePersistence } = require("firebase/auth") as {
-          getReactNativePersistence: (storage: typeof AsyncStorage) => unknown;
-        };
-        auth = initializeAuth(app, {
-          persistence: getReactNativePersistence(AsyncStorage) as any,
-        });
-      } catch {
-        // Falls here on Fast Refresh (already initialised) or if persistence
-        // factory is unavailable — getAuth returns the existing instance.
-        auth = getAuth(app);
-      }
-    }
+    // Firebase v12 auto-handles AsyncStorage persistence on React Native
+    // when @react-native-async-storage/async-storage is installed.
+    // getAuth() is the correct entry point for all platforms.
+    auth = getAuth(app);
 
-    // Default to the named database used by this project.
+    // Fall back to the named database used by this project.
     const databaseId =
       process.env.EXPO_PUBLIC_FIREBASE_DATABASE_ID ?? "westcar-5c1e6";
     db      = getFirestore(app, databaseId);
