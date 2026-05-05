@@ -16,7 +16,6 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -48,9 +47,6 @@ export default function RootLayout() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Hard timeout — show app with system fonts after 4 s no matter what.
-    // This MUST clear before fontfaceobserver's 6 s internal timeout fires
-    // so there is never an unhandled rejection that can crash the app.
     const timer = setTimeout(() => setReady(true), 3500);
 
     Font.loadAsync({
@@ -67,7 +63,6 @@ export default function RootLayout() {
         setReady(true);
       })
       .catch(() => {
-        // Fonts failed (CDN blocked, slow network, etc.) — proceed with system fonts.
         clearTimeout(timer);
         setReady(true);
       });
@@ -99,9 +94,7 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <AppProvider>
               <GestureHandlerRootView style={{ flex: 1 }}>
-                <KeyboardProvider>
-                  <RootLayoutNav />
-                </KeyboardProvider>
+                <RootLayoutNav />
               </GestureHandlerRootView>
             </AppProvider>
           </QueryClientProvider>

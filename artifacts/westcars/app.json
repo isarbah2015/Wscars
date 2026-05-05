@@ -31,6 +31,7 @@
     "android": {
       "package": "gh.westcars.app",
       "versionCode": 2,
+      "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/wc-logo.png",
         "backgroundColor": "#0A1628"
@@ -38,15 +39,9 @@
       "permissions": [
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.RECORD_AUDIO"
       ],
       "blockedPermissions": [
-        "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
