@@ -58,11 +58,11 @@
     "plugins": [
       [
         "expo-router",
-        "react-native-keyboard-controller"
         {
           "origin": "https://replit.com/"
         }
       ],
+      "react-native-keyboard-controller",
       "expo-font",
       "expo-web-browser",
       [
