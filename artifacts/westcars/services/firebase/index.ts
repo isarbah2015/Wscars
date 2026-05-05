@@ -11,6 +11,7 @@ export {
   signInWithGoogleIdToken,
   signInWithGooglePopup,
   signOut,
+  sendPasswordResetEmail,
   subscribeAuth,
   authErrorMessage,
 } from "./auth";

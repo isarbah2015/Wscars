@@ -9,6 +9,7 @@ import {
   signOut as fbSignOut,
   onAuthStateChanged,
   updateProfile,
+  sendPasswordResetEmail as fbSendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithCredential,
   signInWithPopup,
@@ -117,6 +118,12 @@ export async function signInWithGooglePopup(): Promise<User> {
 export async function signOut(): Promise<void> {
   ensureReady();
   await fbSignOut(auth!);
+}
+
+/** Send a password-reset email to the given address. */
+export async function sendPasswordResetEmail(email: string): Promise<void> {
+  ensureReady();
+  await fbSendPasswordResetEmail(auth!, email.trim());
 }
 
 /** Subscribe to auth state changes; resolves the user-doc on each login. */

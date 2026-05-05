@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 import { isFirebaseReady } from "@/lib/firebase";
+import { sendPasswordResetEmail, authErrorMessage } from "@/services/firebase";
 import { GoogleAuthBridge } from "@/components/GoogleAuthBridge";
 
 const WC_LOGO = require("@/assets/images/wc-logo.png");
@@ -39,13 +40,36 @@ export default function LoginScreen() {
       return;
     }
     setLoading(true);
-    const ok = await login(email.trim(), password);
-    setLoading(false);
-    if (ok) router.replace("/(tabs)");
-    else Alert.alert(
-      "Sign In Failed",
-      "No account found with those details. Please check your email and password, or tap 'Create account' to register.",
-    );
+    try {
+      const ok = await login(email.trim(), password);
+      if (ok) router.replace("/(tabs)");
+      else Alert.alert("Sign In Failed", "No account found with those details. Check your email and password, or tap 'Create account'.");
+    } catch (err) {
+      Alert.alert("Sign In Failed", authErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    const trimmed = email.trim();
+    if (!trimmed) {
+      Alert.alert("Enter your email", "Type your email address in the field above, then tap 'Forgot password?'");
+      return;
+    }
+    if (!isFirebaseReady()) {
+      Alert.alert("Not configured", "Firebase is not set up yet.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(trimmed);
+      Alert.alert("Reset email sent", `A password reset link has been sent to ${trimmed}. Check your inbox.`);
+    } catch (err) {
+      Alert.alert("Failed", authErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ── Google Sign-In ──
@@ -174,7 +198,7 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          <Pressable style={styles.forgotBtn}>
+          <Pressable style={styles.forgotBtn} onPress={handleForgotPassword} disabled={loading}>
             <Text style={styles.forgotText}>Forgot password?</Text>
           </Pressable>
 
