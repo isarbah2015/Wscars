@@ -1,0 +1,130 @@
+n artifacts/westcars, before the full audit run a complete clean of everything that could cause misfunctions, then audit every feature. Do all of the following:
+STEP 1 — Full Clean (run first, in parallel where possible)
+
+Delete all caches and temp files:
+
+bashrm -rf .expo
+rm -rf node_modules/.cache
+rm -rf /tmp/metro-*
+rm -rf /tmp/haste-*
+rm -rf .turbo
+rm -rf dist
+rm -rf .next
+pnpm store prune
+
+Clear Expo and Metro cache completely:
+
+bashpnpm exec expo start --clear
+
+Remove and reinstall all dependencies fresh:
+
+bashrm -rf node_modules
+pnpm install --frozen-lockfile
+
+Check for duplicate packages that could cause double-registration crashes:
+
+bashpnpm dedupe
+pnpm list firebase react-native react expo --depth=2
+
+Check for mismatched or conflicting versions between monorepo root and app:
+
+bashpnpm why firebase
+pnpm why react-native
+pnpm why expo
+STEP 2 — Asset Audit
+
+Verify every asset referenced in app.json physically exists:
+
+./assets/images/wc-new-logo.jpg (icon + favicon)
+./assets/images/wc-logo.png (splash + adaptive icon)
+
+
+Confirm wc-new-logo.jpg is converted to a real PNG for the Android icon — .jpg files cause native build failures
+Confirm all image assets imported in screens exist and are not broken
+Find and delete any unused or duplicate asset files in assets/
+
+STEP 3 — Code Audit (in parallel)
+
+Run TypeScript clean check:
+
+bashpnpm exec tsc --noEmit
+
+Find all console.error, unhandled promise rejections, and TODO comments left in production code
+Find any hardcoded API keys, secrets, or Firebase config values sitting in source files instead of environment variables
+Check every useEffect has a proper cleanup and no memory leaks
+Find any undefined or null access that isn't guarded
+
+STEP 4 — Full Feature Audit
+Auth Flow
+
+Email/password login — validates, signs in, redirects
+Sign up — creates account, handles duplicate email error
+Google Sign In — OAuth opens, returns token, signs in
+Phone auth — OTP sends, code verifies
+Logout — clears session, redirects to login
+Forgot password — sends reset email
+Auth session persists after app is fully closed and reopened
+
+Navigation
+
+All tab bar icons visible, correct, and tappable
+All stack screens push and pop correctly
+Back button works on every screen
+No screen renders blank or undefined
+Deep links work with scheme westcars://
+
+Firebase
+
+Firestore reads work after login
+Firestore writes work (create, update, delete)
+Firebase Storage image uploads work
+Auth token refreshes correctly after expiry
+
+Forms and Keyboard
+
+Every form screen — keyboard comes up, stays up, typing works
+Form validation shows errors correctly
+Submit buttons work and show loading state
+No form resets unexpectedly
+
+Permissions
+
+Location permission prompt appears and map loads
+Photo library picker opens and returns image
+Microphone permission works for voice messages
+
+UI and Layout
+
+All fonts render — no boxes, blanks, or missing glyphs
+All images load — no broken or missing assets
+No layout overflow or clipping on standard Android screens
+Dark/light mode renders correctly if supported
+All buttons have visible press feedback
+Loading states and spinners show correctly
+Error states show user-friendly messages
+
+Performance and Stability
+
+No Metro warnings or errors in logs
+No unhandled promise rejections
+App doesn't freeze when switching tabs rapidly
+No memory leaks from unmounted components
+App recovers gracefully from network loss
+
+STEP 5 — Pre-build Final Checks
+
+Confirm google-services.json is present in artifacts/westcars/
+Confirm app.json android.package exactly matches Firebase console package name gh.westcars.app
+Confirm eas.json has a valid production profile configured
+Confirm EXPO_TOKEN is set and authenticated as lyon7sarbah
+Run one final:
+
+bashpnpm exec tsc --noEmit && echo "READY FOR PRODUCTION BUILD"
+Report back with:
+
+Every issue found with exact file and line number
+Any duplicate packages resolved
+Any missing or broken assets
+Any hardcoded secrets found
+Final TypeScript result
+Confirmation all 5 steps completed clean before the production build
