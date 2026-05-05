@@ -49,7 +49,8 @@ function Stars({ n }: { n: number }) {
 export default function ProfileScreen() {
   const { currentUser, isAuthenticated, logout, cars, favorites,
           getUserReviews, getSellerTrustScore, toggleAnonymous,
-          blockUser, blockedUsers, unblockUser, verifyPhone, verifyId } = useApp();
+          blockUser, blockedUsers, unblockUser, verifyPhone, verifyId,
+          updateUserProfile } = useApp();
   const { isDark, colors, toggleTheme } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);

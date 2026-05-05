@@ -32,7 +32,7 @@ interface AppContextType {
   toggleFavorite: (carId: string) => void;
   isFavorite: (carId: string) => boolean;
   addCar: (car: Omit<Car, "id" | "seller" | "rating" | "createdAt" | "isSponsored">) => Promise<string | null>;
-  sendMessage: (conversationId: string, text: string, mediaUrl?: string, mediaType?: "image" | "voice") => void;
+  sendMessage: (conversationId: string, text: string, mediaUrl?: string, mediaType?: "image" | "video" | "audio") => void;
   startConversation: (car: Car) => Promise<string>;
   updateUserProfile: (updates: Partial<User>) => void;
   markAsSold: (carId: string) => void;
@@ -380,7 +380,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return id;
   }, [conversations, currentUser?.id, useFirebase]);
 
-  const sendMessage = useCallback((conversationId: string, text: string, mediaUrl?: string, mediaType?: "image" | "voice") => {
+  const sendMessage = useCallback((conversationId: string, text: string, mediaUrl?: string, mediaType?: "image" | "video" | "audio") => {
     if (useFirebase && currentUser?.id) {
       fb.sendMessage(conversationId, currentUser.id, text, mediaUrl, mediaType)
         .catch((e) => console.warn("[sendMessage]", e));

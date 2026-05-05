@@ -211,7 +211,7 @@ export default function ConversationScreen() {
   const [isRecording,   setIsRecording]  = useState(false);
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const flatListRef = useRef<FlatList>(null);
-  const typingTimer = useRef<ReturnType<typeof setTimeout>>();
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const conv = conversations.find((c) => c.id === id);
   const convMessages = (messages[id] || []).filter((m) => !m.isDeletedForSelf);

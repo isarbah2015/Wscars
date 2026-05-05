@@ -96,7 +96,7 @@ export async function sendMessage(
   senderId: string,
   text: string,
   mediaUrl?: string,
-  mediaType?: "image" | "voice",
+  mediaType?: "image" | "video" | "audio",
 ): Promise<void> {
   ensureReady();
   await addDoc(collection(db!, CONV, conversationId, "messages"), {

@@ -97,7 +97,7 @@ const ALL_VEHICLE_TYPES: { label: string; img: any; imgScale?: number }[] = [
   { label: "Fire Truck",        img: CAT_FIRETRUCK  },
 ];
 
-const MOTO_TYPES: { label: string; img: any }[] = [
+const MOTO_TYPES: { label: string; img: any; imgScale?: number }[] = [
   { label: "Motorcycle",  img: CAT_MOTO     },
   { label: "Scooter",     img: CAT_SCOOTER  },
   { label: "ATV / Quad",  img: CAT_ATV      },
@@ -365,10 +365,10 @@ export default function HomeScreen() {
                       source={cat.img}
                       style={[
                         styles.subTabImg,
-                        cat.imgScale && {
+                        cat.imgScale != null ? {
                           width: 62 * cat.imgScale,
                           height: 40 * cat.imgScale,
-                        },
+                        } : null,
                       ]}
                       resizeMode="contain"
                     />
@@ -789,7 +789,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
     paddingBottom: 0,
   },
-  brandStripBadge: { width: 200, height: 72 },
+  brandStripBadge: { width: 28, height: 28 },
 
   brandStripName: {
     fontSize: 15,
@@ -1066,10 +1066,6 @@ const styles = StyleSheet.create({
   brandSectionTitle: {
     fontSize: 15,
     fontFamily: "PlusJakartaSans_600SemiBold",
-  },
-  brandStripBadge: {
-    width: 28,
-    height: 28,
   },
   brandRow: {
     paddingHorizontal: 10,
