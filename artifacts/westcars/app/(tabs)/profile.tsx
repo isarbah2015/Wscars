@@ -326,12 +326,12 @@ export default function ProfileScreen() {
                 <View key={car.id} style={styles.halfCard}>
                   <CarCard car={car} />
                   {car.isSold && (
-                    <View style={styles.soldOverlay}>
+                    <View style={styles.soldOverlay} pointerEvents="none">
                       <Text style={styles.soldOverlayText}>SOLD</Text>
                     </View>
                   )}
                   {car.expiresAt && !car.isSold && (
-                    <View style={styles.expiry}>
+                    <View style={styles.expiry} pointerEvents="none">
                       <Feather name="clock" size={9} color="#F59E0B" />
                       <Text style={styles.expiryText}>
                         Expires {new Date(car.expiresAt).toLocaleDateString("en-GH", { day: "numeric", month: "short" })}

@@ -136,9 +136,8 @@ export default function MessagesScreen() {
           </Pressable>
 
           <View style={styles.headerRight}>
-            <Pressable
+            <View
               style={[styles.notifBtn, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "#F1F5F9" }]}
-              onPress={() => {}}
             >
               <Feather name="bell" size={20} color={isDark ? "#94A3B8" : "#64748B"} />
               {totalUnread > 0 && (
@@ -146,7 +145,7 @@ export default function MessagesScreen() {
                   <Text style={styles.notifBadgeText}>{totalUnread > 9 ? "9+" : totalUnread}</Text>
                 </View>
               )}
-            </Pressable>
+            </View>
           </View>
         </View>
       </View>
