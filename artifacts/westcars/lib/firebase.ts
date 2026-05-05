@@ -1,18 +1,22 @@
 /**
  * Firebase initialization for the Westcars Expo app.
  *
- * Firebase v12 automatically detects the React Native environment and uses
- * @react-native-async-storage/async-storage for auth persistence when that
- * package is installed — no manual initializeAuth call is needed.
- *
  * Reads config from EXPO_PUBLIC_FIREBASE_* env vars (set as Replit secrets).
  * If any required value is missing, isFirebaseReady() returns false and
  * AppContext falls back to mock data.
+ *
+ * Auth persistence strategy:
+ *   Native (Android/iOS) — initAuthNative() in firebase-persistence.native.ts
+ *     uses Metro's react-native conditional export to get
+ *     getReactNativePersistence, giving proper AsyncStorage-backed persistence.
+ *   Web — initAuthNative() in firebase-persistence.ts calls getAuth(app) which
+ *     uses browser localStorage automatically.
  */
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
+import { initAuthNative } from "./firebase-persistence";
 
 const firebaseConfig = {
   apiKey:            process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -35,12 +39,15 @@ if (missing.length === 0) {
   try {
     app = getApps().length ? getApp() : initializeApp(firebaseConfig as any);
 
-    // Firebase v12 auto-handles AsyncStorage persistence on React Native
-    // when @react-native-async-storage/async-storage is installed.
-    // getAuth() is the correct entry point for all platforms.
-    auth = getAuth(app);
+    // initAuthNative() resolves to the .native.ts file on Android/iOS (gives
+    // AsyncStorage persistence) and the .ts stub on web (getAuth, localStorage).
+    // Falls back to plain getAuth if already initialized (Fast Refresh).
+    try {
+      auth = initAuthNative(app);
+    } catch {
+      auth = getAuth(app);
+    }
 
-    // Fall back to the named database used by this project.
     const databaseId =
       process.env.EXPO_PUBLIC_FIREBASE_DATABASE_ID ?? "westcar-5c1e6";
     db      = getFirestore(app, databaseId);

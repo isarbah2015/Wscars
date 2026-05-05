@@ -15,4 +15,12 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, "node_modules"),
 ];
 
+// Exclude Replit-internal and non-app directories from Metro's file watcher.
+// Without this, Metro's FallbackWatcher crashes on transient temp paths inside
+// .local/skills that are deleted between directory enumeration and fs.watch().
+config.resolver.blockList = [
+  /\/\.local\/.*/,
+  /\/\.git\/.*/,
+];
+
 module.exports = config;
