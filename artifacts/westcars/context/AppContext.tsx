@@ -28,6 +28,7 @@ interface AppContextType {
   login: (email: string, password: string) => Promise<boolean>;
   signup: (name: string, email: string, phone: string, password: string) => Promise<boolean>;
   loginWithGoogle: (idToken: string, accessToken?: string) => Promise<boolean>;
+  loginWithGooglePopup: () => Promise<boolean>;
   logout: () => void;
   toggleFavorite: (carId: string) => void;
   isFavorite: (carId: string) => boolean;
@@ -276,6 +277,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return true;
     } catch (err) {
       console.warn("[google-login] failed:", err);
+      return false;
+    }
+  }, [useFirebase]);
+
+  const loginWithGooglePopup = useCallback(async (): Promise<boolean> => {
+    if (!useFirebase) {
+      console.warn("[google-popup] requires Firebase to be configured.");
+      return false;
+    }
+    try {
+      const user = await fb.signInWithGooglePopup();
+      setCurrentUser(user); setIsAuthenticated(true);
+      return true;
+    } catch (err) {
+      console.warn("[google-popup] failed:", err);
       return false;
     }
   }, [useFirebase]);
@@ -636,7 +652,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const ctxValue = useMemo<AppContextType>(() => ({
     currentUser, isAuthenticated, favorites, cars, conversations, messages,
     isLoading, reviews, reports, transactions, blockedUsers,
-    login, signup, loginWithGoogle, logout, toggleFavorite, isFavorite, addCar, sendMessage,
+    login, signup, loginWithGoogle, loginWithGooglePopup, logout, toggleFavorite, isFavorite, addCar, sendMessage,
     startConversation, updateUserProfile, markAsSold, renewListing, submitReview,
     reportItem, blockUser, unblockUser, isBlocked, verifyPhone, verifyId,
     toggleAnonymous, getUserReviews, getSellerTrustScore, deleteMessage, markMessagesRead,
@@ -644,7 +660,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }), [
     currentUser, isAuthenticated, favorites, cars, conversations, messages, isLoading,
     reviews, reports, transactions, blockedUsers,
-    login, signup, loginWithGoogle, logout, toggleFavorite, isFavorite, addCar, sendMessage,
+    login, signup, loginWithGoogle, loginWithGooglePopup, logout, toggleFavorite, isFavorite, addCar, sendMessage,
     startConversation, updateUserProfile, markAsSold, renewListing, submitReview,
     reportItem, blockUser, unblockUser, isBlocked, verifyPhone, verifyId,
     toggleAnonymous, getUserReviews, getSellerTrustScore, deleteMessage, markMessagesRead,

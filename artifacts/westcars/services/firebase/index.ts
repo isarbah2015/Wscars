@@ -9,6 +9,7 @@ export {
   signInEmail,
   signUpEmail,
   signInWithGoogleIdToken,
+  signInWithGooglePopup,
   signOut,
   subscribeAuth,
   authErrorMessage,

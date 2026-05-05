@@ -11,6 +11,7 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithCredential,
+  signInWithPopup,
   type User as FirebaseUser,
   type Unsubscribe,
 } from "firebase/auth";
@@ -97,6 +98,19 @@ export async function signInWithGoogleIdToken(idToken: string, accessToken?: str
   ensureReady();
   const credential = GoogleAuthProvider.credential(idToken, accessToken);
   const result = await signInWithCredential(auth!, credential);
+  return loadOrCreateUserDoc(result.user);
+}
+
+/**
+ * Open Firebase's built-in Google sign-in popup (web only).
+ * Works with just the Firebase config — no separate OAuth client ID needed.
+ */
+export async function signInWithGooglePopup(): Promise<User> {
+  ensureReady();
+  const provider = new GoogleAuthProvider();
+  provider.addScope("email");
+  provider.addScope("profile");
+  const result = await signInWithPopup(auth!, provider);
   return loadOrCreateUserDoc(result.user);
 }
 

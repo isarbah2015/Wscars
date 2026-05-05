@@ -25,7 +25,7 @@ const GOOGLE_IOS_CLIENT_ID     = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
 const GOOGLE_ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
 
 export default function LoginScreen() {
-  const { login, loginWithGoogle } = useApp();
+  const { login, loginWithGoogle, loginWithGooglePopup } = useApp();
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,20 +48,17 @@ export default function LoginScreen() {
     );
   };
 
-  // ── Google Sign-In via expo-auth-session ──
-  // The Google.useIdTokenAuthRequest hook throws synchronously when the
-  // platform-required client ID is missing, so we delegate the hook call to a
-  // child component that only mounts when the right ID for this platform is
-  // configured.
-  // - Web always needs `clientId` (= web client ID).
-  // - iOS needs iosClientId; Android needs androidClientId.
-  // On web we use signInWithPopup — no OAuth client ID needed, just Firebase config.
-  // On native we need the platform-specific client ID from Google Console.
-  const googleConfigured =
-    Platform.OS === "web"     ? isFirebaseReady() :
+  // ── Google Sign-In ──
+  // Web:    Firebase signInWithPopup — works with just the Firebase config, no
+  //         extra OAuth client IDs needed.
+  // Native: expo-auth-session — needs EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID or
+  //         EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID to be set.
+  const isWeb = Platform.OS === "web";
+  const nativeGoogleConfigured =
     Platform.OS === "ios"     ? !!GOOGLE_IOS_CLIENT_ID :
     Platform.OS === "android" ? !!GOOGLE_ANDROID_CLIENT_ID :
     false;
+
   const promptGoogleRef = useRef<(() => Promise<void>) | null>(null);
 
   const onGoogleIdToken = useCallback(async (idToken: string, accessToken?: string) => {
@@ -72,15 +69,25 @@ export default function LoginScreen() {
     else Alert.alert("Sign in failed", "Could not sign in with Google.");
   }, [loginWithGoogle]);
 
-  const handleGoogle = () => {
+  const handleGoogle = async () => {
     if (!isFirebaseReady()) {
       Alert.alert("Not configured", "Firebase is not configured yet. Please add the Firebase secrets first.");
       return;
     }
-    if (!googleConfigured || !promptGoogleRef.current) {
+    // Web: use Firebase's built-in popup — no extra OAuth client IDs needed
+    if (isWeb) {
+      setLoading(true);
+      const ok = await loginWithGooglePopup();
+      setLoading(false);
+      if (ok) router.replace("/(tabs)");
+      else Alert.alert("Sign in failed", "Could not sign in with Google. Make sure Google is enabled as a sign-in provider in your Firebase console.");
+      return;
+    }
+    // Native: needs platform OAuth client ID
+    if (!nativeGoogleConfigured || !promptGoogleRef.current) {
       Alert.alert(
         "Google Sign-In unavailable",
-        "Google sign-in requires a native build with OAuth credentials configured.",
+        "Add EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID (Android) or EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID (iOS) to enable Google sign-in on device.",
       );
       return;
     }
@@ -98,7 +105,7 @@ export default function LoginScreen() {
       style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      {googleConfigured && (
+      {!isWeb && nativeGoogleConfigured && (
         <GoogleAuthBridge onIdToken={onGoogleIdToken} promptRef={promptGoogleRef} />
       )}
       {/* Hero */}
