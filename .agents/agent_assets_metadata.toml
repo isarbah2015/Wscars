@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "9Ds4OF2jHzj0F3MXsWu0M"
@@ -144,3 +143,75 @@ id = "jUJTGoWzyP5iAC8npeXVW"
 uri = "file://artifacts/westcars/assets/images/car-used.png"
 type = "image"
 title = "generated_image"
+
+[[generated]]
+id = "tff9yYtIjWrAvKXQrR2gq"
+uri = "file://attached_assets/playstore/feature_graphic.png"
+type = "image"
+title = "westcars feature graphic"
+
+[[generated]]
+id = "t7WhSLQN8_iWBIpMCpywD"
+uri = "file://attached_assets/playstore/screenshot_01_home.png"
+type = "image"
+title = "westcars home screen screenshot"
+
+[[generated]]
+id = "sUfCFxYDBMEQmI2LTQrXO"
+uri = "file://attached_assets/playstore/screenshot_02_car_detail.png"
+type = "image"
+title = "westcars car detail screenshot"
+
+[[generated]]
+id = "wEEI0w-QXlq1jgs2pqPQ6"
+uri = "file://attached_assets/playstore/screenshot_03_search.png"
+type = "image"
+title = "westcars search screen screenshot"
+
+[[generated]]
+id = "66Y0-kuIo3xOtrydcspVt"
+uri = "file://attached_assets/playstore/screenshot_04_messaging.png"
+type = "image"
+title = "westcars messaging screenshot"
+
+[[generated]]
+id = "97nGzCdL6UlXVFZlRQRtO"
+uri = "file://attached_assets/playstore/screenshot_05_profile.png"
+type = "image"
+title = "westcars verified seller profile screenshot"
+
+[[outputs]]
+id = "W3e4cdkeCSOFkujgEtEhu"
+uri = "file://attached_assets/playstore/feature_graphic.png"
+type = "image"
+title = "Feature Graphic (16:9) — Hero Banner"
+
+[[outputs]]
+id = "XN7aEJYV7Oo5O23txFNzF"
+uri = "file://attached_assets/playstore/screenshot_01_home.png"
+type = "image"
+title = "Screenshot 1 — Home / Browse"
+
+[[outputs]]
+id = "aqobysD9-BcD1aMljI3u0"
+uri = "file://attached_assets/playstore/screenshot_02_car_detail.png"
+type = "image"
+title = "Screenshot 2 — Car Detail"
+
+[[outputs]]
+id = "5eUT_7t6Oo8YlX8qqW6Q2"
+uri = "file://attached_assets/playstore/screenshot_03_search.png"
+type = "image"
+title = "Screenshot 3 — Search & Filter"
+
+[[outputs]]
+id = "49EKsTmBxrrUyyW9eVj-6"
+uri = "file://attached_assets/playstore/screenshot_04_messaging.png"
+type = "image"
+title = "Screenshot 4 — Secure Messaging"
+
+[[outputs]]
+id = "mz7aIBz-GKuY9r5FmjrxS"
+uri = "file://attached_assets/playstore/screenshot_05_profile.png"
+type = "image"
+title = "Screenshot 5 — Verified Seller Profile"
