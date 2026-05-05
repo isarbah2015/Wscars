@@ -95,7 +95,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (useFirebase) {
       // Firebase mode — auth state is the source of truth.
       const unsub = fb.subscribeAuth((u) => {
-        setCurrentUser(u);
+        setCurrentUser((prev) => {
+          // Skip redundant re-render when same user is already in state
+          if (prev?.id && prev.id === u?.id) return prev;
+          return u;
+        });
         setIsAuthenticated(!!u);
         setFavorites(u?.favorites as string[] | undefined ?? []);
         setBlockedUsers(u?.blockedUsers ?? []);

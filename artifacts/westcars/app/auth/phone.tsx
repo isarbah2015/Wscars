@@ -20,9 +20,8 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert, KeyboardAvoidingView, Platform, Pressable,
-  StyleSheet, Text, TextInput, View,
+  ScrollView, StyleSheet, Text, TextInput, View,
 } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { COUNTRY_CODE } from "@/utils/ghanaData";
 
