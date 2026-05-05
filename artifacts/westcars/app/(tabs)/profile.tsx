@@ -1,9 +1,11 @@
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Image,
@@ -15,6 +17,8 @@ import {
   Text,
   View,
 } from "react-native";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { ReviewCard, StarRating } from "@/components/ReviewCard";
@@ -61,6 +65,7 @@ export default function ProfileScreen() {
   const [verifyingId, setVerifyingId] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [locLoading, setLocLoading] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   if (!isAuthenticated || !currentUser) {
     return (
@@ -159,13 +164,51 @@ export default function ProfileScreen() {
     ]);
   };
 
+  const handlePickAvatar = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Required", "Please allow photo access in settings to change your profile picture.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.75,
+    });
+    if (result.canceled || !result.assets?.[0]) return;
+    const uri = result.assets[0].uri;
+    setAvatarUploading(true);
+    try {
+      if (storage && currentUser) {
+        const ext = uri.split(".").pop()?.split("?")[0] ?? "jpg";
+        const storageRef = ref(storage, `avatars/${currentUser.id}.${ext}`);
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        await uploadBytes(storageRef, blob, { contentType: `image/${ext}` });
+        const downloadURL = await getDownloadURL(storageRef);
+        await updateUserProfile({ avatar: downloadURL });
+      } else {
+        await updateUserProfile({ avatar: uri });
+      }
+    } catch (err) {
+      Alert.alert("Upload Failed", "Could not update your profile picture. Please try again.");
+      console.warn("[avatar upload]", err);
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
   const v = currentUser.verification;
 
   return (
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      contentContainerStyle={[styles.content, { paddingTop: topPad + 10, paddingBottom: insets.bottom + 100 }]}
+      style={styles.container}
+      contentContainerStyle={[styles.content, { paddingTop: topPad + 10, paddingBottom: insets.bottom + 100, backgroundColor: colors.background }]}
       showsVerticalScrollIndicator={false}
+      bounces={false}
+      overScrollMode="never"
     >
       {/* ── Profile Header ── */}
       <View style={[styles.profileHeader, {
@@ -184,8 +227,10 @@ export default function ProfileScreen() {
               <Feather name="user" size={36} color="#0098AA" />
             </View>
           )}
-          <Pressable style={styles.editAvatarBtn}>
-            <Feather name="camera" size={14} color="#FFFFFF" />
+          <Pressable style={styles.editAvatarBtn} onPress={handlePickAvatar} disabled={avatarUploading}>
+            {avatarUploading
+              ? <ActivityIndicator size={12} color="#FFFFFF" />
+              : <Feather name="camera" size={14} color="#FFFFFF" />}
           </Pressable>
         </View>
 
@@ -573,10 +618,12 @@ export default function ProfileScreen() {
         </View>
       )}
     </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
   container: { flex: 1 },
   content: { gap: 0 },
 
