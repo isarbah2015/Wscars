@@ -127,10 +127,9 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   headerTitle: {
-    fontSize: 28,
-    fontFamily: "Sora_800ExtraBold",
-    letterSpacing: -0.5,
-    lineHeight: 32,
+    fontSize: 17,
+    fontFamily: "PlusJakartaSans_600SemiBold",
+    letterSpacing: 0,
   },
   countBadge: {
     backgroundColor: "#0EB5CA",

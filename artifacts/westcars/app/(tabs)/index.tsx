@@ -396,7 +396,9 @@ export default function HomeScreen() {
                   onPress={() => router.push({ pathname: "/(tabs)/search", params: { brand } })}
                 >
                   {logoUrl ? (
-                    <Image source={{ uri: logoUrl }} style={styles.brandPillLogo} resizeMode="contain" />
+                    <View style={styles.brandPillLogoWrap}>
+                      <Image source={{ uri: logoUrl }} style={styles.brandPillLogo} resizeMode="contain" />
+                    </View>
                   ) : (
                     <View style={[styles.brandPillLogoPlaceholder, { backgroundColor: isDark ? "#2D3A4F" : "#E2E8F0" }]}>
                       <Text style={[styles.brandPillLogoInitial, { color: isDark ? "#94A3B8" : "#475569" }]}>
@@ -1082,9 +1084,18 @@ const styles = StyleSheet.create({
     width: 80,
     gap: 5,
   },
-  brandPillLogo: {
+  brandPillLogoWrap: {
     width: 56,
     height: 38,
+    borderRadius: 8,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 4,
+  },
+  brandPillLogo: {
+    width: 48,
+    height: 30,
   },
   brandPillLogoPlaceholder: {
     width: 56,

@@ -345,7 +345,7 @@ export default function ProfileScreen() {
         <View style={[styles.tabContent, { backgroundColor: colors.background }]}>
 
           {/* Preferences */}
-          <View style={[styles.settingsCard, { backgroundColor: colors.card }]}>
+          <View style={[styles.settingsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[styles.settingsSection, { color: colors.textTertiary }]}>Preferences</Text>
 
             <View style={[styles.settingRow, { borderTopColor: colors.border }]}>
@@ -413,7 +413,7 @@ export default function ProfileScreen() {
 
           {/* Verification Centre */}
           <Pressable
-            style={[styles.settingsCard, { backgroundColor: colors.card }]}
+            style={[styles.settingsCard, { backgroundColor: colors.card, borderColor: colors.border }]}
             onPress={() => router.push("/verification-centre")}
           >
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
@@ -471,7 +471,7 @@ export default function ProfileScreen() {
           </Pressable>
 
           {/* Privacy & Safety */}
-          <View style={[styles.settingsCard, { backgroundColor: colors.card }]}>
+          <View style={[styles.settingsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[styles.settingsSection, { color: colors.textTertiary }]}>Privacy & Safety</Text>
             <Pressable
               style={[styles.settingRow, { borderTopColor: colors.border }]}
@@ -500,7 +500,7 @@ export default function ProfileScreen() {
           </View>
 
           {/* Account */}
-          <View style={[styles.settingsCard, { backgroundColor: colors.card }]}>
+          <View style={[styles.settingsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[styles.settingsSection, { color: colors.textTertiary }]}>Account</Text>
 
             <Pressable
@@ -535,7 +535,7 @@ export default function ProfileScreen() {
           </View>
 
           {/* Support & Legal */}
-          <View style={[styles.settingsCard, { backgroundColor: colors.card }]}>
+          <View style={[styles.settingsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[styles.settingsSection, { color: colors.textTertiary }]}>Support & Legal</Text>
 
             <Pressable style={[styles.settingRow, { borderTopColor: colors.border }]} onPress={() => router.push("/legal/faq")}>
@@ -564,7 +564,7 @@ export default function ProfileScreen() {
           </View>
 
           <Pressable
-            style={[styles.settingsCard, styles.logoutCard, { backgroundColor: colors.card }]}
+            style={[styles.settingsCard, styles.logoutCard, { backgroundColor: colors.card, borderColor: colors.border }]}
             onPress={handleLogout}
           >
             <Feather name="log-out" size={20} color={Colors.danger} />
@@ -630,7 +630,6 @@ const styles = StyleSheet.create({
   trustCard: {
     margin: 12, borderRadius: 14, padding: 16,
     borderWidth: 1,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
   },
 
   // Tabs
@@ -683,7 +682,7 @@ const styles = StyleSheet.create({
   // Settings
   settingsCard: {
     borderRadius: 16, overflow: "hidden",
-    shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
+    borderWidth: 1,
   },
   settingsSection: {
     fontSize: 11, fontFamily: "PlusJakartaSans_600SemiBold",
