@@ -7,7 +7,7 @@
     "icon": "./assets/images/wc-new-logo.jpg",
     "scheme": "westcars",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/wc-logo.png",
       "resizeMode": "contain",
