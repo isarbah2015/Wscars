@@ -1,10 +1,3 @@
-/**
- * Firebase initialization for the Westcars Expo app.
- *
- * Reads config from EXPO_PUBLIC_FIREBASE_* env vars (must be set as Replit
- * secrets). If any value is missing, isFirebaseReady() returns false and the
- * AppContext falls back to mock data so dev keeps working without secrets.
- */
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, initializeAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
@@ -36,25 +29,27 @@ if (missing.length === 0) {
     if (Platform.OS === "web") {
       auth = getAuth(app);
     } else {
-      // RN needs initializeAuth with AsyncStorage persistence the first time.
-      // getReactNativePersistence is only available in the RN build of
-      // firebase/auth, so we resolve it dynamically to avoid import errors
-      // on web.
       try {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { getReactNativePersistence } = require("firebase/auth") as any;
+        // getReactNativePersistence is available at runtime in firebase/auth
+        // but not always reflected in TypeScript types for every Firebase version.
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { getReactNativePersistence } = require("firebase/auth") as {
+          getReactNativePersistence: (storage: typeof AsyncStorage) => unknown;
+        };
         auth = initializeAuth(app, {
-          persistence: getReactNativePersistence
-            ? getReactNativePersistence(AsyncStorage)
-            : undefined,
+          persistence: getReactNativePersistence(AsyncStorage) as any,
         });
       } catch {
-        // initializeAuth throws if it was already initialised (Fast Refresh)
+        // Falls here on Fast Refresh (already initialised) or if persistence
+        // factory is unavailable — getAuth returns the existing instance.
         auth = getAuth(app);
       }
     }
-    const databaseId = process.env.EXPO_PUBLIC_FIREBASE_DATABASE_ID;
-    db      = databaseId ? getFirestore(app, databaseId) : getFirestore(app);
+
+    // Default to the named database used by this project.
+    const databaseId =
+      process.env.EXPO_PUBLIC_FIREBASE_DATABASE_ID ?? "westcar-5c1e6";
+    db      = getFirestore(app, databaseId);
     storage = getStorage(app);
   } catch (err) {
     console.warn("[firebase] init failed:", err);
@@ -62,10 +57,11 @@ if (missing.length === 0) {
 } else if (__DEV__) {
   console.warn(
     `[firebase] Missing config keys: ${missing.join(", ")}. ` +
-    `App is running in mock-data mode. Set EXPO_PUBLIC_FIREBASE_* secrets to enable Firebase.`,
+    `Set EXPO_PUBLIC_FIREBASE_* secrets to enable Firebase.`,
   );
 }
 
-export const isFirebaseReady = (): boolean => app !== null && auth !== null && db !== null;
+export const isFirebaseReady = (): boolean =>
+  app !== null && auth !== null && db !== null;
 
 export { app, auth, db, storage };

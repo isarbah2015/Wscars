@@ -15,11 +15,9 @@ const LOGO_W = 260;
 const LOGO_H = 170;
 
 function goToLogin() {
-  if (Platform.OS === "web") {
-    try { router.replace("/auth/login"); } catch (_) {}
-  } else {
+  try {
     router.replace("/auth/login");
-  }
+  } catch (_) {}
 }
 
 export default function SplashScreen() {
