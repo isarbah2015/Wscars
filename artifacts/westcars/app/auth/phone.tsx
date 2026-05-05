@@ -19,9 +19,10 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView,
+  Alert, KeyboardAvoidingView, Platform, Pressable,
   StyleSheet, Text, TextInput, View,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { COUNTRY_CODE } from "@/utils/ghanaData";
 
@@ -80,7 +81,11 @@ export default function PhoneAuthScreen() {
         </Text>
       </View>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.card}>
           {step === "phone" ? (
             <>
@@ -159,7 +164,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 14, fontFamily: "PlusJakartaSans_400Regular", color: "#64748B", lineHeight: 20 },
 
   scroll: { flex: 1 },
-  scrollContent: { padding: 16, gap: 16 },
+  scrollContent: { flexGrow: 1, padding: 16, gap: 16 },
 
   card: {
     backgroundColor: "#fff", borderRadius: 16, padding: 20, gap: 14,
