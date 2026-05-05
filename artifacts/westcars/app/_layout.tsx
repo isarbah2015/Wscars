@@ -8,12 +8,12 @@ import {
   Sora_700Bold,
   Sora_800ExtraBold,
 } from "@expo-google-fonts/sora";
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import * as Font from "expo-font";
+import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -22,6 +22,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 
+// Keep the native splash visible until all fonts are confirmed loaded.
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
@@ -44,35 +45,26 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [ready, setReady] = useState(false);
+  const [fontsLoaded, fontError] = useFonts({
+    // Vector-icon glyph fonts — must be loaded for icons to render on native.
+    ...Feather.font,
+    ...Ionicons.font,
+    // Brand fonts
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    Sora_700Bold,
+    Sora_800ExtraBold,
+  });
 
+  // Hide the native splash only after fonts are resolved (loaded or errored).
+  // Never called while fontsLoaded is still false so the splash never flashes.
   useEffect(() => {
-    const timer = setTimeout(() => setReady(true), 3500);
-
-    Font.loadAsync({
-      ...Feather.font,
-      PlusJakartaSans_400Regular,
-      PlusJakartaSans_500Medium,
-      PlusJakartaSans_600SemiBold,
-      PlusJakartaSans_700Bold,
-      Sora_700Bold,
-      Sora_800ExtraBold,
-    })
-      .then(() => {
-        clearTimeout(timer);
-        setReady(true);
-      })
-      .catch(() => {
-        clearTimeout(timer);
-        setReady(true);
-      });
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (ready) SplashScreen.hideAsync().catch(() => {});
-  }, [ready]);
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsLoaded, fontError]);
 
   useEffect(() => {
     if (Platform.OS !== "web") return;
@@ -85,7 +77,8 @@ export default function RootLayout() {
     return () => { document.head.removeChild(style); };
   }, []);
 
-  if (!ready) return null;
+  // Keep the view tree empty (native splash stays visible) until fonts resolve.
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <SafeAreaProvider>
