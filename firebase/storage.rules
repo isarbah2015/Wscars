@@ -9,7 +9,7 @@ service firebase.storage {
     function isUnder10MB() { return request.resource.size < 10 * 1024 * 1024; }
     function isAdmin() {
       return isSignedIn()
-        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+        && firestore.get(/databases/westcar-5c1e6/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
 
     // ── Car listing photos ─────────────────────────────────────────
@@ -44,10 +44,10 @@ service firebase.storage {
     match /chat/{conversationId}/{userId}/{file} {
       allow read:  if isSignedIn()
                    && request.auth.uid in
-                      firestore.get(/databases/(default)/documents/conversations/$(conversationId)).data.participantIds;
+                      firestore.get(/databases/westcar-5c1e6/documents/conversations/$(conversationId)).data.participantIds;
       allow write: if isOwner(userId) && isUnder10MB()
                    && request.auth.uid in
-                      firestore.get(/databases/(default)/documents/conversations/$(conversationId)).data.participantIds;
+                      firestore.get(/databases/westcar-5c1e6/documents/conversations/$(conversationId)).data.participantIds;
     }
   }
 }
