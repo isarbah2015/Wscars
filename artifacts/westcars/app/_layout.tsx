@@ -22,6 +22,12 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 
+// Local copies of icon font TTFs — bypasses Metro's unreliable symlink
+// asset resolution in pnpm monorepos. Font family names must match what
+// @expo/vector-icons createIconSet registers: 'feather' and 'Ionicons'.
+const FEATHER_TTF = require("../assets/fonts/Feather.ttf");
+const IONICONS_TTF = require("../assets/fonts/Ionicons.ttf");
+
 // Keep the native splash visible until all fonts are confirmed loaded.
 SplashScreen.preventAutoHideAsync();
 
@@ -46,9 +52,10 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    // Vector-icon glyph fonts — must be loaded for icons to render on native.
-    ...Feather.font,
-    ...Ionicons.font,
+    // Icon fonts loaded from local assets/ — font family names must exactly
+    // match what @expo/vector-icons createIconSet registers internally.
+    feather: FEATHER_TTF,
+    Ionicons: IONICONS_TTF,
     // Brand fonts
     Inter_400Regular,
     Inter_500Medium,
@@ -59,7 +66,6 @@ export default function RootLayout() {
   });
 
   // Hide the native splash only after fonts are resolved (loaded or errored).
-  // Never called while fontsLoaded is still false so the splash never flashes.
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync().catch(() => {});
