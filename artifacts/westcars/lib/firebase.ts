@@ -5,18 +5,16 @@
  * If any required value is missing, isFirebaseReady() returns false and
  * AppContext falls back to mock data.
  *
- * Auth persistence strategy:
- *   Native (Android/iOS) — initAuthNative() in firebase-persistence.native.ts
- *     uses Metro's react-native conditional export to get
- *     getReactNativePersistence, giving proper AsyncStorage-backed persistence.
- *   Web — initAuthNative() in firebase-persistence.ts calls getAuth(app) which
- *     uses browser localStorage automatically.
+ * Auth persistence strategy (inlined — no Metro extension helper needed):
+ *   Native (Android/iOS) — initializeAuth + getReactNativePersistence(AsyncStorage)
+ *     loaded via require() so web bundler never tries to import it.
+ *   Web — getAuth(app) which uses browser localStorage automatically.
+ *   Fast Refresh / already-initialized — caught and falls back to getAuth(app).
  */
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
-import { initAuthNative } from "./firebase-persistence";
 
 const firebaseConfig = {
   apiKey:            process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -39,11 +37,20 @@ if (missing.length === 0) {
   try {
     app = getApps().length ? getApp() : initializeApp(firebaseConfig as any);
 
-    // initAuthNative() resolves to the .native.ts file on Android/iOS (gives
-    // AsyncStorage persistence) and the .ts stub on web (getAuth, localStorage).
-    // Falls back to plain getAuth if already initialized (Fast Refresh).
+    // Try AsyncStorage-backed persistence (Android/iOS).
+    // Both initializeAuth/getReactNativePersistence and AsyncStorage are loaded
+    // via require() so:
+    //   • TypeScript sees only the typed getAuth import above (no missing-type error).
+    //   • Web bundlers never try to resolve @react-native-async-storage.
+    // Falls back to getAuth() on web or when already initialized (Fast Refresh).
     try {
-      auth = initAuthNative(app);
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { initializeAuth, getReactNativePersistence } = require("firebase/auth");
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+      auth = initializeAuth(app, {
+        persistence: getReactNativePersistence(AsyncStorage),
+      });
     } catch {
       auth = getAuth(app);
     }

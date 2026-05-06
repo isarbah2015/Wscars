@@ -25,4 +25,13 @@ config.resolver.blockList = [
 
 config.resolver.platforms = ["android", "ios", "web", "native"];
 
+// Pin Firebase to the app's local symlink (firebase@11.6.0) so Metro never
+// accidentally resolves a second copy from the monorepo root (admin uses
+// firebase@12.x). Two Firebase copies create duplicate singletons where
+// the auth component registers in one copy but the app lives in the other,
+// causing "Component auth has not been registered yet" at runtime.
+config.resolver.extraNodeModules = {
+  firebase: path.resolve(projectRoot, "node_modules/firebase"),
+};
+
 module.exports = config;

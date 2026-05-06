@@ -1,75 +1,79 @@
 # Westcars — Ghana's Car Marketplace
 
-## Overview
-Westcars is a full-featured mobile application built with React Native and Expo, designed to be Ghana's trusted car marketplace. The project aims to provide a robust platform for buying and selling vehicles, featuring detailed listings, secure messaging, and comprehensive user profiles. The application incorporates a modern, glassmorphic design with a soft teal primary accent, and supports both light and dark modes. Key capabilities include advanced search and filtering, real-time simulated messaging, and a robust admin dashboard for moderation and analytics.
+A full-stack mobile + web platform for buying and selling cars in Ghana.
 
-## User Preferences
-I prefer detailed explanations and iterative development.
+## Run & Operate
 
-## System Architecture
+| Command | What it does |
+|---|---|
+| `pnpm --filter @workspace/westcars run dev` | Start Expo mobile app (Metro bundler) |
+| `pnpm --filter @workspace/westcars-admin run dev` | Start admin dashboard (Vite) |
+| `pnpm --filter @workspace/api-server run dev` | Start API server |
+| `cd artifacts/westcars && npx tsc --noEmit` | Type-check mobile app |
+| `cd artifacts/westcars-admin && npx tsc --noEmit` | Type-check admin (2 pre-existing @types/react version warnings in calendar.tsx + spinner.tsx — not our code) |
 
-### Design System
-The application features a premium dark/light themed design. Typography: **Sora** (700Bold, 800ExtraBold) for display headings; **Plus Jakarta Sans** (400–700, capped at SemiBold for UI text) for body/interface text. Feather icons throughout. The global font weight cap is `PlusJakartaSans_600SemiBold` for all non-display UI text (previously 800ExtraBold was used but felt too heavy). Sora 800ExtraBold is preserved for section headings and brand display only.
+**Required secrets (all set):**
+- `EXPO_PUBLIC_FIREBASE_*` — 6 vars for mobile app
+- `VITE_FIREBASE_*` — 6 vars for admin dashboard
+- `EXPO_TOKEN` — EAS build/submit
 
-A premium redesign (v4) introduces an `#FF6B00` orange accent for gradients, active tabs, and price badges. Condition tabs are horizontal pills with orange active states. Sub-category tiles use glassmorphic rgba colors. Car cards are upgraded with a linear gradient scrim, a floating orange price badge, and meta chips for car details. Sponsored and advertise banners feature distinct gradient designs. All screen headers consistently use an orange gradient.
+## Stack
 
-### Technical Implementation
-The mobile application (`westcars`) is built with Expo / React Native, using Expo Router for navigation. The backend is an Express API server (`api-server`) running on port 8080.
+- **Mobile**: Expo 54, Expo Router 6, React Native 0.81, TypeScript, `newArchEnabled: true`
+- **Admin**: Vite + React + TypeScript, TailwindCSS, Wouter router, Recharts, Firebase v12
+- **Backend**: Express API server (port from `$PORT`)
+- **Database**: Firebase Firestore (named DB: `westcar-5c1e6`), Firebase Auth, Firebase Storage
+- **Fonts**: Inter (body), Manrope (display)
+- **Android package**: `gh.westcars.app`
 
-**Core Features:**
-- Car listings with Ghana Cedis (GHS/₵) pricing.
-- Detailed car ratings (comfort, ergonomics, performance, safety, reliability).
-- Auto-rotating ad carousel and sponsored listings.
-- Car selling screen with image upload (expo-image-picker).
-- Real-time simulated messaging with auto-reply.
-- User profiles with verification badges and a Trust Score (0–100) derived from verification, ratings, sales, and account age.
-- Comprehensive search and filtering by brand, location, fuel type, transmission, condition, and price range.
-- Ghana-specific data, including 20 cities and 28 brands, and mobile money payment methods.
-- Category chips for various car types (SUVs, Sedans, Tokunbo, Budget, Luxury, Pickups).
-- Flag & Report System for listings and users, with admin review.
-- Safety Tips Modal displayed before new chats.
-- "Mark as Sold" functionality for sellers.
-- Anonymous contact option to hide phone numbers.
-- User blocking feature.
-- 30-day listing expiration with renewal option.
-- Admin Dashboard (`/admin/index`) for managing reports, users, listings, and analytics.
-- Phone safety warning in chat for mismatched numbers.
-- Rich media messaging: image, video, and audio (voice) sending. Chat input has a "+" button that reveals a tray with Photo / Video / Audio options. Audio recording via `expo-audio` (AudioModule + useAudioRecorder). Audio playback in bubbles via `useAudioPlayer`. Video shows thumbnail + play overlay. Typing indicators, read receipts, timestamps.
-- Dark/Light theme toggle with AsyncStorage persistence.
+## Where things live
 
-**Screens:**
-- **Splash:** Animated logo leading to the app.
-- **Login / Signup:** Simulated authentication with AsyncStorage.
-- **Home:** Greeting, search bar, categories, sponsored content, car grid.
-- **Search:** Live search and filter modal.
-- **Sell:** Photo upload, spec pickers, price entry.
-- **Messages:** Conversation list.
-- **Profile:** User details, listings, saved items, reviews, settings, verification center, dark mode toggle, block list, admin access.
-- **Car Detail:** Image carousel, specs, ratings, seller info, actions.
-- **Conversation:** Chat interface with safety features and media support.
-- **Admin Dashboard:** Reports, user management, listing moderation, analytics.
+```
+artifacts/westcars/          — Expo mobile app
+  lib/firebase.ts            — Firebase init (auth + db + storage) ← single source of truth
+  context/AppContext.tsx     — global state, Firebase ↔ mock data switch
+  services/firebase/         — Firestore CRUD (cars, users, messages, reports, reviews, storage)
+  app/                       — Expo Router screens
+  utils/mockData.ts          — fallback mock data (only used if Firebase secrets missing)
 
-### System Design Choices
-The application uses a dual-mode data layer: when Firebase secrets are present, it live-subscribes to Firestore; otherwise, it falls back to mock data (`MOCK_CARS`, `MOCK_USERS`) for continued development. Authentication supports Email + password, Google sign-in (via `expo-auth-session`), and a scaffolded Phone OTP (requires `@react-native-firebase/auth` or a Twilio-backed Cloud Function). Admin login verifies `users/{uid}.isAdmin == true` after Firebase Auth.
+artifacts/westcars-admin/src/
+  lib/firebase.ts            — Admin Firebase init (same project, same DB: westcar-5c1e6)
+  lib/firestore.ts           — Firestore subscriptions + mutations for admin
+  context/AdminContext.tsx   — live Firestore state for all admin pages
+  pages/                     — Dashboard, Listings, Users, Reports, Analytics
+```
 
-## External Dependencies
+## Architecture decisions
 
-- **Expo 54 + Expo Router 6**
-- **React Native 0.81**
-- **TypeScript**
-- **@expo-google-fonts/manrope**
-- **expo-linear-gradient**
-- **expo-blur**
-- **expo-image-picker**
-- **expo-auth-session**
-- **expo-crypto**
-- **expo-web-browser**
-- **@expo/vector-icons** (Feather, AntDesign)
-- **AsyncStorage** (for persistence)
-- **react-native-safe-area-context**
-- **Firebase JS SDK**:
-    - **Firestore** (live data subscriptions, rules, indexes)
-    - **Cloud Storage** (image uploads, rules)
-    - **Cloud Functions** (sendMessageNotification, processCarImages, calculateCarRating, sendVerificationEmail, reportContent, expireListings)
-- **Firebase Admin SDK** (for `scripts/seed-firestore.mjs`)
-- **Google Play Android Developer API** (for `eas submit` to Play Console)
+- **Single named Firestore DB (`westcar-5c1e6`)**: Both mobile app and admin hardcode this ID as default. Override via `EXPO_PUBLIC_FIREBASE_DATABASE_ID` / `VITE_FIREBASE_DATABASE_ID` for staging.
+- **Firebase auth init via `require()`**: `initializeAuth` + `getReactNativePersistence` + `AsyncStorage` are all loaded with `require()` in `lib/firebase.ts`. This (a) keeps the TypeScript import layer clean, (b) prevents web bundlers from trying to import the RN-only AsyncStorage package, and (c) avoids pnpm duplicate-module issues between firebase@11 (mobile) and firebase@12 (admin) in the monorepo.
+- **Metro `extraNodeModules.firebase`**: Pins the mobile bundler to `firebase@11.6.0` via the app's local symlink, preventing Metro's dual `nodeModulesPaths` from ever picking up the admin's `firebase@12` copy.
+- **Dual-mode data layer**: `isFirebaseReady()` gates all data access. When `true`, live Firestore subscriptions run. When `false` (secrets missing), mock data renders. Auth guards exist on like/contact/chat screens.
+- **Admin `isAdmin` check**: Login verifies `users/{uid}.isAdmin === true` in Firestore after Firebase Auth sign-in. Non-admin accounts are immediately signed out.
+
+## Product
+
+- **Mobile app**: Browse/search car listings, contact sellers (call/WhatsApp), save favourites, create listings with photo upload, real-time messaging with safety tips, user profiles with Trust Score, flag/report system, dark/light theme.
+- **Admin dashboard**: Login with admin credentials → live Dashboard (stats), Listings (approve/hide/delete with double-confirm), Users (verify/block), Reports (resolve/dismiss), Analytics (charts by category, location, condition, views).
+
+## User preferences
+
+- Ghana Cedis (GHS / ₵) pricing throughout
+- Ghana-specific data: 20 cities, 28 car brands
+- Fonts: Inter (body), Manrope (display)
+- Target: Google Play Store
+
+## Gotchas
+
+- `firebase-persistence.native.ts` and `firebase-persistence.ts` were deleted — auth init is now inlined in `lib/firebase.ts` using `require()`.
+- Admin has 2 pre-existing TypeScript warnings in `src/components/ui/calendar.tsx` and `src/components/ui/spinner.tsx` caused by a `@types/react` version conflict in the pnpm monorepo. These do not affect runtime.
+- `EAS_NO_VCS=1` must be set for EAS builds in this environment.
+- `newArchEnabled: true` in `app.json` — new React Native architecture is on.
+- Firestore collections (`cars`, `users`, `messages`, `reports`, `reviews`) are created automatically on first write — no manual setup needed.
+
+## Pointers
+
+- Firebase init: `artifacts/westcars/lib/firebase.ts`
+- Admin Firebase: `artifacts/westcars-admin/src/lib/firebase.ts`
+- Metro config: `artifacts/westcars/metro.config.js`
+- Firestore security rules: set in Firebase Console for project matching `EXPO_PUBLIC_FIREBASE_PROJECT_ID`

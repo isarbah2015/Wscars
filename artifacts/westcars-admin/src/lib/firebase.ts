@@ -28,8 +28,10 @@ if (missing.length === 0) {
   try {
     app = getApps().length ? getApp() : initializeApp(cfg as any);
     auth = getAuth(app);
-    const databaseId = import.meta.env.VITE_FIREBASE_DATABASE_ID as string | undefined;
-    db = databaseId ? getFirestore(app, databaseId) : getFirestore(app);
+    // Always use the named Westcars database — same as the mobile app.
+    // VITE_FIREBASE_DATABASE_ID overrides for local dev or staging environments.
+    const databaseId = (import.meta.env.VITE_FIREBASE_DATABASE_ID as string | undefined) ?? "westcar-5c1e6";
+    db = getFirestore(app, databaseId);
     storage = getStorage(app);
   } catch (err) {
     console.warn("[firebase] init failed:", err);
