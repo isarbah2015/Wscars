@@ -89,21 +89,10 @@ export default function WelcomeScreen() {
         <Text style={styles.brandTag}>GHANA'S TRUSTED CAR MARKETPLACE</Text>
       </View>
 
-      {/* Hero car image — soft halo around the car + mirrored reflection beneath */}
+      {/* Hero car image + mirrored reflection (gradient fade on reflection only) */}
       <View style={styles.carWrap}>
-        {/* Soft cyan halo around the entire car silhouette */}
-        <View pointerEvents="none" style={styles.carHalo}>
-          <LinearGradient
-            colors={["rgba(14,181,202,0.45)", "rgba(14,181,202,0.18)", "rgba(14,181,202,0.04)", "transparent"]}
-            locations={[0, 0.45, 0.75, 1]}
-            style={StyleSheet.absoluteFill}
-          />
-        </View>
-
-        {/* Main car */}
         <Image source={CAR} style={styles.carImg} resizeMode="contain" fadeDuration={250} />
 
-        {/* Mirrored reflection — same width as the car, faded into bg */}
         <View style={styles.reflectionWrap} pointerEvents="none">
           <Image
             source={CAR}
@@ -112,7 +101,7 @@ export default function WelcomeScreen() {
             fadeDuration={250}
           />
           <LinearGradient
-            colors={["rgba(10,22,40,0.50)", "rgba(10,22,40,0.92)", "rgba(10,22,40,1)"]}
+            colors={["rgba(10,22,40,0.55)", "rgba(10,22,40,0.92)", "rgba(10,22,40,1)"]}
             locations={[0, 0.7, 1]}
             style={StyleSheet.absoluteFill}
             pointerEvents="none"
@@ -180,16 +169,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 14,
     paddingHorizontal: 28,
-    position: "relative",
-  },
-  carHalo: {
-    position: "absolute",
-    alignSelf: "center",
-    top: CAR_H * 0.18,
-    width: "115%",
-    height: CAR_H * 0.78,
-    borderRadius: 999,
-    overflow: "hidden",
   },
   carImg: {
     width: "100%",
@@ -199,7 +178,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: CAR_H * 0.30,
     marginTop: -CAR_H * 0.40,
-    opacity: 0.32,
+    opacity: 0.35,
     overflow: "hidden",
   },
   reflectionImg: {
