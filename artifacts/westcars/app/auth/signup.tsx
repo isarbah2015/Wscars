@@ -139,7 +139,10 @@ export default function SignupScreen() {
                 value={phone}
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
+                autoCapitalize="none"
                 autoCorrect={false}
+                blurOnSubmit={false}
+                pointerEvents="auto"
                 returnKeyType="next"
                 onFocus={() => setFocused("phone")}
                 onBlur={() => setFocused(null)}
@@ -159,6 +162,10 @@ export default function SignupScreen() {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                blurOnSubmit={false}
+                pointerEvents="auto"
                 returnKeyType="done"
                 onSubmitEditing={handleSignup}
                 onFocus={() => setFocused("pass")}
@@ -260,6 +267,8 @@ function InputField({
           autoCorrect={false}
           keyboardType={keyboardType}
           returnKeyType={returnKeyType}
+          blurOnSubmit={false}
+          pointerEvents="auto"
           onFocus={onFocus}
           onBlur={onBlur}
         />

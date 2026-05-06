@@ -171,6 +171,8 @@ export default function LoginScreen() {
                 autoCapitalize="none"
                 autoCorrect={false}
                 autoComplete="email"
+                blurOnSubmit={false}
+                pointerEvents="auto"
                 onFocus={() => setFocusedField("email")}
                 onBlur={() => setFocusedField(null)}
                 returnKeyType="next"
@@ -189,8 +191,11 @@ export default function LoginScreen() {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
+                autoCapitalize="none"
                 autoCorrect={false}
                 autoComplete="password"
+                blurOnSubmit={false}
+                pointerEvents="auto"
                 onFocus={() => setFocusedField("pass")}
                 onBlur={() => setFocusedField(null)}
                 returnKeyType="done"
