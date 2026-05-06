@@ -125,6 +125,13 @@ export default function CarDetailScreen() {
   };
 
   const handleCall = () => {
+    if (!isAuthenticated) {
+      Alert.alert("Sign In Required", "Please sign in to contact the seller.", [
+        { text: "Sign In", onPress: () => router.push("/auth/login") },
+        { text: "Cancel", style: "cancel" },
+      ]);
+      return;
+    }
     const phone = car.seller?.phone || "+233000000000";
     Linking.openURL(`tel:${phone.replace(/\s/g, "")}`).catch(() =>
       Alert.alert("Cannot open phone dialler.")
@@ -132,6 +139,13 @@ export default function CarDetailScreen() {
   };
 
   const handleWhatsApp = () => {
+    if (!isAuthenticated) {
+      Alert.alert("Sign In Required", "Please sign in to contact the seller.", [
+        { text: "Sign In", onPress: () => router.push("/auth/login") },
+        { text: "Cancel", style: "cancel" },
+      ]);
+      return;
+    }
     const raw = car.seller?.phone?.replace(/[\s+\-()]/g, "") || "233000000000";
     const phone = raw.startsWith("0") ? "233" + raw.slice(1) : raw;
     const msg = encodeURIComponent(
