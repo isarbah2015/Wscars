@@ -17,6 +17,7 @@ import {
   Text,
   View,
 } from "react-native";
+import Svg, { Path } from "react-native-svg";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -69,23 +70,52 @@ export default function ProfileScreen() {
 
   if (!isAuthenticated || !currentUser) {
     return (
-      <View style={[styles.authWall, { paddingTop: topPad, backgroundColor: colors.background }]}>
-        <View style={[styles.iconRing, { backgroundColor: colors.accentLight }]}>
-          <Feather name="user" size={40} color={colors.accent} />
+      <View style={styles.authRoot}>
+        {/* Cyan top section */}
+        <View style={[styles.authTopSection, { paddingTop: topPad + 14 }]}>
+          <View style={styles.authIconRing}>
+            <Feather name="user" size={36} color="#0A1628" />
+          </View>
+          <Text style={styles.authTitle}>Join Westcars</Text>
         </View>
-        <Text style={[styles.authTitle, { color: colors.text }]}>Join Westcars</Text>
-        <Text style={[styles.authText, { color: colors.textSecondary }]}>
-          Create an account to list cars, save favourites, and message sellers.
-        </Text>
-        <Pressable
-          style={[styles.authBtn, { backgroundColor: "#0EB5CA" }]}
-          onPress={() => router.push("/auth/login")}
-        >
-          <Text style={[styles.authBtnText, { color: "#FFFFFF" }]}>Sign In</Text>
-        </Pressable>
-        <Pressable onPress={() => router.push("/auth/signup")}>
-          <Text style={[styles.signupLink, { color: colors.accent }]}>Create Account</Text>
-        </Pressable>
+
+        {/* Wave divider */}
+        <Svg width="100%" height={70} viewBox="0 0 1440 320" preserveAspectRatio="none" style={{ marginTop: -1 }}>
+          <Path
+            d="M0,96L60,128C120,160,240,224,360,224C480,224,600,160,720,138.7C840,117,960,139,1080,160C1200,181,1320,203,1380,213.3L1440,224L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"
+            fill="#0EB5CA"
+          />
+        </Svg>
+
+        {/* Dark navy form */}
+        <View style={styles.authBottom}>
+          <Text style={styles.authText}>
+            Create an account to list cars, save favourites, and message sellers.
+          </Text>
+
+          <Pressable
+            style={styles.authCtaWrap}
+            onPress={() => router.push("/auth/login")}
+          >
+            <LinearGradient
+              colors={["#0EB5CA", "#5DDFEF", "#0EB5CA"]}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+              style={styles.authCtaBorder}
+            >
+              <View style={styles.authCtaInner}>
+                <Feather name="log-in" size={16} color="#FFFFFF" />
+                <Text style={styles.authCtaText}>Sign In</Text>
+              </View>
+            </LinearGradient>
+          </Pressable>
+
+          <View style={styles.authSignupRow}>
+            <Text style={styles.authSignupPrompt}>New to WestCars?</Text>
+            <Pressable onPress={() => router.push("/auth/signup")}>
+              <Text style={styles.authSignupLink}>Create Account</Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
     );
   }
@@ -632,15 +662,45 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { gap: 0 },
 
-  // Auth wall
-  authWall: { flex: 1, alignItems: "center", justifyContent: "center", gap: 14, padding: 40 },
-  iconRing: { width: 88, height: 88, borderRadius: 44, alignItems: "center", justifyContent: "center" },
-  authTitle: { fontSize: 24, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.3 },
-  authText: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
-  authBtn: { borderRadius: 14, width: "100%", paddingVertical: 15, alignItems: "center", justifyContent: "center" },
-  authGradient: { paddingVertical: 14, alignItems: "center" },
-  authBtnText: { fontSize: 16, fontFamily: "Inter_600SemiBold", color: "#fff", textAlign: "center" },
-  signupLink: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  // Auth wall (matches Sign In design — cyan top + wave + dark navy form)
+  authRoot: { flex: 1, backgroundColor: "#0A1628" },
+  authTopSection: {
+    backgroundColor: "#0EB5CA",
+    paddingHorizontal: 22,
+    paddingBottom: 16,
+    alignItems: "center",
+    gap: 14,
+  },
+  authIconRing: {
+    width: 84, height: 84, borderRadius: 42,
+    backgroundColor: "rgba(255,255,255,0.85)",
+    alignItems: "center", justifyContent: "center",
+  },
+  authTitle: {
+    fontSize: 32, color: "#0A1628", textAlign: "center",
+    fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.6,
+  },
+  authBottom: {
+    flex: 1, paddingHorizontal: 28, paddingTop: 22, alignItems: "center",
+  },
+  authText: {
+    fontSize: 14, color: "rgba(255,255,255,0.72)", lineHeight: 22,
+    fontFamily: "Inter_400Regular", textAlign: "center",
+    marginBottom: 24, paddingHorizontal: 8,
+  },
+  authCtaWrap: { width: "100%", borderRadius: 30, overflow: "hidden" },
+  authCtaBorder: { padding: 1.5, borderRadius: 30 },
+  authCtaInner: {
+    height: 53, borderRadius: 28.5, backgroundColor: "#0A1628",
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10,
+  },
+  authCtaText: { fontSize: 15, color: "#FFFFFF", fontFamily: "Inter_600SemiBold", letterSpacing: 0.3 },
+  authSignupRow: {
+    flexDirection: "row", justifyContent: "center", alignItems: "center",
+    gap: 6, marginTop: 22,
+  },
+  authSignupPrompt: { fontSize: 13, color: "rgba(255,255,255,0.55)", fontFamily: "Inter_400Regular" },
+  authSignupLink:   { fontSize: 13, color: "#0EB5CA", fontFamily: "Inter_700Bold" },
 
   // Profile header
   profileHeader: { padding: 20, alignItems: "center", gap: 6, paddingBottom: 24 },

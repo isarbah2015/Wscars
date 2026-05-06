@@ -144,6 +144,12 @@ uri = "file://attached_assets/playstore/screenshot_05_profile.png"
 type = "image"
 title = "westcars verified seller profile screenshot"
 
+[[generated]]
+id = "Nzpflr-yqkLT8-XdLGR7i"
+uri = "file://artifacts/westcars/assets/images/welcome-car.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "lOh_1LBmwe16IZ0ZEawtv"
 uri = "file://screenshots/westcars_home_tab.jpg"
