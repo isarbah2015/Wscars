@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -15,26 +16,30 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import Svg, { Path } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { useApp } from "@/context/AppContext";
 import { authErrorMessage } from "@/services/firebase";
 import { COUNTRY_CODE } from "@/utils/ghanaData";
 
+const WC_LOGO  = require("@/assets/images/wc-logo.png");
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const WC_LOGO      = require("@/assets/images/wc-logo.png");
-const WC_LOGO_FULL = require("@/assets/images/wc-logo-full.png");
+const CYAN = "#0EB5CA";
+const NAVY = "#0A1628";
+const NAVY_FIELD = "#14233A";
 
 function SignupScreen() {
   const { signup } = useApp();
   const insets = useSafeAreaInsets();
+
   const [name,         setName]         = useState("");
   const [email,        setEmail]        = useState("");
   const [phone,        setPhone]        = useState("");
   const [password,     setPassword]     = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading,      setLoading]      = useState(false);
-  const [focused,      setFocused]      = useState<string | null>(null);
 
   const handleSignup = async () => {
     const trimmedName  = name.trim();
@@ -59,7 +64,9 @@ function SignupScreen() {
     }
     setLoading(true);
     try {
-      const fullPhone = trimmedPhone.startsWith("+") ? trimmedPhone : `${COUNTRY_CODE}${trimmedPhone.replace(/^0+/, "")}`;
+      const fullPhone = trimmedPhone.startsWith("+")
+        ? trimmedPhone
+        : `${COUNTRY_CODE}${trimmedPhone.replace(/^0+/, "")}`;
       await signup(trimmedName, trimmedEmail, fullPhone, password);
       router.replace("/(tabs)");
     } catch (err) {
@@ -69,88 +76,87 @@ function SignupScreen() {
     }
   };
 
-  const strength =
-    password.length === 0 ? 0
-    : password.length < 4 ? 1
-    : password.length < 7 ? 2
-    : password.length < 10 ? 3 : 4;
-
-  const strengthColor = ["#E8E8E8","#E8192C","#FF8C00","#F5C400","#22C55E"][strength];
-  const strengthLabel = ["","Weak","Fair","Good","Strong"][strength];
-
-  const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
-
   return (
     <KeyboardAvoidingView
       style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
+      {/* ── Cyan top ── */}
+      <View style={[styles.topSection, { paddingTop: insets.top + 14 }]}>
+        <View style={styles.topRow}>
+          <View style={styles.iconBtn}>
+            <Image source={WC_LOGO} style={styles.topLogo} resizeMode="contain" tintColor={NAVY} />
+          </View>
+          <Pressable style={styles.signInLink} onPress={() => router.replace("/auth/login")} hitSlop={10}>
+            <Feather name="log-in" size={16} color={NAVY} />
+            <Text style={styles.signInText}>Sign In</Text>
+          </Pressable>
+        </View>
+        <Text style={styles.title}>Sign Up</Text>
+      </View>
+
+      {/* ── Wave ── */}
+      <Svg width="100%" height={70} viewBox="0 0 1440 320" preserveAspectRatio="none" style={styles.wave}>
+        <Path
+          d="M0,96L60,128C120,160,240,224,360,224C480,224,600,160,720,138.7C840,117,960,139,1080,160C1200,181,1320,203,1380,213.3L1440,224L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"
+          fill={CYAN}
+        />
+      </Svg>
+
+      {/* ── Dark form ── */}
       <ScrollView
-        showsVerticalScrollIndicator={false}
+        style={styles.scroll}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: (insets.bottom || 0) + 24, flexGrow: 1 }]}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View style={{ flex: 1 }}>
-        {/* ── Hero ── */}
-        <View style={[styles.hero, styles.heroWhite, { paddingTop: topPad + 14 }]}>
-          {/* Badge + motto */}
-          <View style={styles.brandCol}>
-            <Image source={WC_LOGO} style={styles.heroBadge} resizeMode="contain" tintColor="#0EB5CA" />
-            <Text style={styles.brandName}>WESTCARS</Text>
-            <Text style={styles.brandSub}>Ghana's Trusted Car Marketplace</Text>
-          </View>
+            <Text style={styles.label}>Full name</Text>
+            <View style={styles.field}>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g. Kwame Mensah"
+                placeholderTextColor="rgba(255,255,255,0.35)"
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+                autoCorrect={false}
+                blurOnSubmit={false}
+                pointerEvents="auto"
+                underlineColorAndroid="transparent"
+                returnKeyType="next"
+              />
+            </View>
 
-          <Text style={styles.heroTitle}>Create account</Text>
-          <Text style={styles.heroSubtitle}>
-            Join thousands of buyers {"&"} sellers.{"\n"}List your car for free.
-          </Text>
-        </View>
+            <Text style={[styles.label, { marginTop: 14 }]}>Email</Text>
+            <View style={styles.field}>
+              <TextInput
+                style={styles.input}
+                placeholder="you@example.com"
+                placeholderTextColor="rgba(255,255,255,0.35)"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                blurOnSubmit={false}
+                pointerEvents="auto"
+                underlineColorAndroid="transparent"
+                returnKeyType="next"
+              />
+            </View>
 
-        {/* ── White form sheet ── */}
-        <View style={styles.sheet}>
-          {/* Full name */}
-          <InputField
-            label="Full name"
-            icon="user"
-            placeholder="e.g. Kwame Mensah"
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="words"
-            keyboardType="default"
-            returnKeyType="next"
-            focused={focused === "name"}
-            onFocus={() => setFocused("name")}
-            onBlur={() => setFocused(null)}
-          />
-
-          {/* Email */}
-          <InputField
-            label="Email address"
-            icon="mail"
-            placeholder="you@example.com"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            returnKeyType="next"
-            focused={focused === "email"}
-            onFocus={() => setFocused("email")}
-            onBlur={() => setFocused(null)}
-          />
-
-          {/* Phone with country code */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Phone number</Text>
-            <View style={[styles.row, focused === "phone" && styles.rowFocused]}>
+            <Text style={[styles.label, { marginTop: 14 }]}>Phone number</Text>
+            <View style={styles.field}>
               <View style={styles.dialBadge}>
                 <Text style={styles.dialText}>{COUNTRY_CODE}</Text>
               </View>
-              <View style={styles.sep} />
               <TextInput
-                style={[styles.input, { flex: 1 }]}
+                style={[styles.input, { paddingLeft: 70 }]}
                 placeholder="024 000 0000"
-                placeholderTextColor="#C0C0C0"
+                placeholderTextColor="rgba(255,255,255,0.35)"
                 value={phone}
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
@@ -160,21 +166,15 @@ function SignupScreen() {
                 pointerEvents="auto"
                 underlineColorAndroid="transparent"
                 returnKeyType="next"
-                onFocus={() => setFocused("phone")}
-                onBlur={() => setFocused(null)}
               />
             </View>
-          </View>
 
-          {/* Password */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={[styles.row, focused === "pass" && styles.rowFocused]}>
-              <Feather name="lock" size={16} color={focused === "pass" ? "#0EB5CA" : "#AAAAAA"} />
+            <Text style={[styles.label, { marginTop: 14 }]}>Password</Text>
+            <View style={styles.field}>
               <TextInput
-                style={[styles.input, { flex: 1 }]}
+                style={[styles.input, { paddingRight: 36 }]}
                 placeholder="Min. 6 characters"
-                placeholderTextColor="#C0C0C0"
+                placeholderTextColor="rgba(255,255,255,0.35)"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -185,79 +185,47 @@ function SignupScreen() {
                 underlineColorAndroid="transparent"
                 returnKeyType="done"
                 onSubmitEditing={handleSignup}
-                onFocus={() => setFocused("pass")}
-                onBlur={() => setFocused(null)}
               />
-              <Pressable onPress={() => setShowPassword(!showPassword)} hitSlop={10}>
-                <Feather name={showPassword ? "eye-off" : "eye"} size={16} color="#AAAAAA" />
+              <Pressable style={styles.eyeBtn} onPress={() => setShowPassword((v) => !v)} hitSlop={10}>
+                <Feather name={showPassword ? "eye-off" : "eye"} size={16} color="rgba(255,255,255,0.55)" />
               </Pressable>
             </View>
 
-            {/* Strength bar */}
-            {password.length > 0 && (
-              <View style={styles.strengthWrap}>
-                {[1,2,3,4].map((n) => (
-                  <View
-                    key={n}
-                    style={[
-                      styles.strengthSeg,
-                      { backgroundColor: n <= strength ? strengthColor : "#EEEEEE" },
-                    ]}
-                  />
-                ))}
-                <Text style={[styles.strengthLabel, { color: strengthColor }]}>
-                  {strengthLabel}
-                </Text>
-              </View>
-            )}
-          </View>
+            <Text style={styles.terms}>
+              By creating an account you agree to our{" "}
+              <Text style={styles.termsLink}>Terms</Text> and{" "}
+              <Text style={styles.termsLink}>Privacy Policy</Text>.
+            </Text>
 
-          {/* Terms */}
-          <Text style={styles.terms}>
-            By creating an account you agree to our{" "}
-            <Text style={styles.termsLink}>Terms of Service</Text>
-            {" "}and{" "}
-            <Text style={styles.termsLink}>Privacy Policy</Text>.
-          </Text>
-
-          {/* CTA button */}
-          <Pressable
-            style={[styles.cta, { backgroundColor: "#0EB5CA" }, loading && { opacity: 0.7 }]}
-            onPress={handleSignup}
-            disabled={loading}
-          >
-            <View style={styles.ctaGrad}>
-              {loading ? (
-                <Text style={[styles.ctaText, { color: "#FFFFFF" }]}>Creating account…</Text>
-              ) : (
-                <>
-                  <Text style={[styles.ctaText, { color: "#FFFFFF" }]}>Create account</Text>
-                  <Feather name="arrow-right" size={18} color="#FFFFFF" />
-                </>
-              )}
-            </View>
-          </Pressable>
-
-          {/* Sign in link */}
-          <View style={styles.signinRow}>
-            <Text style={styles.signinPrompt}>Already have an account?</Text>
-            <Pressable onPress={() => router.back()}>
-              <Text style={styles.signinLink}>Sign in</Text>
+            <Pressable
+              style={[styles.ctaWrap, loading && { opacity: 0.7 }]}
+              onPress={handleSignup}
+              disabled={loading}
+            >
+              <LinearGradient
+                colors={["#0EB5CA", "#5DDFEF", "#0EB5CA"]}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={styles.ctaBorder}
+              >
+                <View style={styles.ctaInner}>
+                  {loading ? (
+                    <Text style={styles.ctaText}>Creating account…</Text>
+                  ) : (
+                    <>
+                      <Feather name="user-plus" size={16} color="#FFFFFF" />
+                      <Text style={styles.ctaText}>Create Account</Text>
+                    </>
+                  )}
+                </View>
+              </LinearGradient>
             </Pressable>
-          </View>
 
-          {/* Trust badges */}
-          <View style={styles.trustRow}>
-            {["Secure & private", "Free to join", "Verified listings"].map((t) => (
-              <View key={t} style={styles.trustPill}>
-                <Feather name="check" size={11} color="#FFFFFF" />
-                <Text style={styles.trustText}>{t}</Text>
-              </View>
-            ))}
-          </View>
-
-          <View style={{ height: (insets.bottom || 0) + 24 }} />
-        </View>
+            <View style={styles.signinRow}>
+              <Text style={styles.signinPrompt}>Already have an account?</Text>
+              <Pressable onPress={() => router.replace("/auth/login")}>
+                <Text style={styles.signinLink}>Sign in</Text>
+              </Pressable>
+            </View>
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>
@@ -267,195 +235,80 @@ function SignupScreen() {
 
 export default React.memo(SignupScreen);
 
-/* ── Reusable field ── */
-function InputField({
-  label, icon, placeholder, value, onChangeText,
-  autoCapitalize, keyboardType, returnKeyType,
-  focused, onFocus, onBlur,
-}: any) {
-  return (
-    <View style={styles.fieldGroup}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={[styles.row, focused && styles.rowFocused]}>
-        <Feather name={icon} size={16} color={focused ? "#0EB5CA" : "#AAAAAA"} />
-        <TextInput
-          style={styles.input}
-          placeholder={placeholder}
-          placeholderTextColor="#C0C0C0"
-          value={value}
-          onChangeText={onChangeText}
-          autoCapitalize={autoCapitalize}
-          autoCorrect={false}
-          keyboardType={keyboardType}
-          returnKeyType={returnKeyType}
-          blurOnSubmit={false}
-          pointerEvents="auto"
-          underlineColorAndroid="transparent"
-          onFocus={onFocus}
-          onBlur={onBlur}
-        />
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#EDF4F7" },
+  root: { flex: 1, backgroundColor: NAVY },
 
-  /* Hero */
-  hero: {
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-    gap: 6,
+  topSection: {
+    backgroundColor: CYAN,
+    paddingHorizontal: 22,
+    paddingBottom: 8,
   },
-  heroWhite: { backgroundColor: "#FFFFFF" },
-  backBtn: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: "rgba(0,0,0,0.05)",
-    alignItems: "center", justifyContent: "center",
-    marginBottom: 4,
-  },
-  brandCol: { alignItems: "center", gap: 0, paddingVertical: 0 },
-  heroBadge: { width: 200, height: 84 },
-  brandName: {
-    fontSize: 14,
-    lineHeight: 18,
-    fontFamily: "Inter_600SemiBold",
-    color: "#0098AA",
-    letterSpacing: 3,
-    textAlign: "center",
-    includeFontPadding: false,
-    marginTop: -4,
-  },
-  brandSub: {
-    fontSize: 10,
-    lineHeight: 13,
-    fontFamily: "Inter_600SemiBold",
-    color: "#0098AA",
-    letterSpacing: 1.1,
-    textAlign: "center",
-    includeFontPadding: false,
-    marginTop: 1,
-  },
-  heroTitle: {
-    fontSize: 32, fontFamily: "Inter_600SemiBold",
-    color: "#0F172A", letterSpacing: -0.5,
-  },
-  heroSubtitle: {
-    fontSize: 14, fontFamily: "Inter_400Regular",
-    color: "#64748B", lineHeight: 22,
-    marginTop: -4,
-  },
-  statsRow: {
-    flexDirection: "row",
-    backgroundColor: "rgba(0,0,0,0.03)",
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.06)",
-    paddingVertical: 14,
-    marginTop: 4,
-  },
-  statItem: { flex: 1, alignItems: "center", gap: 2 },
-  statValue: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#0F172A" },
-  statLabel: {
-    fontSize: 11, fontFamily: "Inter_400Regular",
-    color: "#64748B",
+  topRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  iconBtn: { width: 44, height: 44, alignItems: "flex-start", justifyContent: "center" },
+  topLogo: { width: 64, height: 28 },
+  signInLink: { flexDirection: "row", alignItems: "center", gap: 6 },
+  signInText: { fontSize: 14, color: NAVY, fontFamily: "Inter_700Bold" },
+  title: {
+    fontSize: 36, color: NAVY, textAlign: "center",
+    fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.8,
+    marginTop: 12, marginBottom: 4,
   },
 
-  /* Form sheet */
-  sheet: {
-    flex: 1,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    marginTop: -20,
-    paddingHorizontal: 24,
-    paddingTop: 28,
-    gap: 16,
-  },
+  wave: { marginTop: -1 },
 
-  fieldGroup: { gap: 7 },
+  scroll: { flex: 1, backgroundColor: NAVY },
+  scrollContent: { paddingHorizontal: 28, paddingTop: 14 },
+
   label: {
-    fontSize: 11, fontFamily: "Inter_700Bold",
-    color: "#64748B", letterSpacing: 0.6, textTransform: "uppercase",
+    fontSize: 13, color: "rgba(255,255,255,0.65)",
+    fontFamily: "Inter_500Medium", textAlign: "center",
+    marginBottom: 6,
   },
-  row: {
-    flexDirection: "row", alignItems: "center", gap: 10,
-    height: 54, borderWidth: 1.5, borderColor: "#E8E8E8",
-    borderRadius: 14, paddingHorizontal: 14,
-    backgroundColor: "#F9F9F9",
-  },
-  rowFocused: {
-    borderColor: "#0EB5CA", backgroundColor: "#fff",
-    shadowColor: "#0EB5CA",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3, shadowRadius: 8,
+  field: {
+    height: 54, borderRadius: 27,
+    backgroundColor: NAVY_FIELD,
+    paddingHorizontal: 22,
+    justifyContent: "center",
+    position: "relative",
   },
   input: {
-    flex: 1, fontSize: 15,
-    fontFamily: "Inter_400Regular",
-    color: "#1A1A1A", padding: 0,
+    fontSize: 15, color: "#FFFFFF",
+    fontFamily: "Inter_500Medium", padding: 0,
+    textAlign: "center",
   },
-
-  /* Phone prefix */
   dialBadge: {
-    backgroundColor: "rgba(14,181,202,0.10)",
-    borderRadius: 8,
-    paddingHorizontal: 10, paddingVertical: 5,
+    position: "absolute", left: 14, top: 0, bottom: 0,
+    paddingHorizontal: 10, justifyContent: "center",
+    backgroundColor: "rgba(14,181,202,0.18)",
+    borderRadius: 18, marginVertical: 8,
   },
-  dialText: {
-    fontSize: 13, fontFamily: "Inter_700Bold", color: "#0098AA",
-  },
-  sep: { width: 1, height: 22, backgroundColor: "#E0E0E0" },
-
-  /* Password strength */
-  strengthWrap: {
-    flexDirection: "row", alignItems: "center",
-    gap: 4, marginTop: 2,
-  },
-  strengthSeg: { flex: 1, height: 3, borderRadius: 2 },
-  strengthLabel: {
-    fontSize: 11, fontFamily: "Inter_600SemiBold",
-    minWidth: 36, textAlign: "right",
+  dialText: { fontSize: 13, color: CYAN, fontFamily: "Inter_700Bold" },
+  eyeBtn: {
+    position: "absolute", right: 18, top: 0, bottom: 0,
+    justifyContent: "center",
   },
 
-  /* Terms */
   terms: {
-    fontSize: 12, fontFamily: "Inter_400Regular",
-    color: "#9E9E9E", textAlign: "center", lineHeight: 18,
+    fontSize: 12, color: "rgba(255,255,255,0.55)",
+    fontFamily: "Inter_400Regular", textAlign: "center",
+    marginTop: 16, lineHeight: 18,
   },
-  termsLink: { color: "#0098AA", fontFamily: "Inter_600SemiBold" },
+  termsLink: { color: CYAN, fontFamily: "Inter_600SemiBold" },
 
-  /* CTA */
-  cta: { borderRadius: 14, overflow: "hidden" },
-  ctaGrad: {
-    height: 56, flexDirection: "row",
-    alignItems: "center", justifyContent: "center", gap: 8,
+  ctaWrap: { marginTop: 16, borderRadius: 30, overflow: "hidden" },
+  ctaBorder: { padding: 1.5, borderRadius: 30 },
+  ctaInner: {
+    height: 53, borderRadius: 28.5,
+    backgroundColor: NAVY,
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 10,
   },
-  ctaText: { fontSize: 16, fontFamily: "Inter_700Bold" },
+  ctaText: { fontSize: 15, color: "#FFFFFF", fontFamily: "Inter_600SemiBold", letterSpacing: 0.3 },
 
-  /* Sign in link */
   signinRow: {
     flexDirection: "row", justifyContent: "center",
-    alignItems: "center", gap: 5,
+    alignItems: "center", gap: 6, marginTop: 18,
   },
-  signinPrompt: {
-    fontSize: 14, fontFamily: "Inter_400Regular", color: "#9E9E9E",
-  },
-  signinLink: {
-    fontSize: 14, fontFamily: "Inter_700Bold", color: "#0098AA",
-  },
-
-  /* Trust row */
-  trustRow: {
-    flexDirection: "row", justifyContent: "center",
-    flexWrap: "wrap", gap: 8,
-  },
-  trustPill: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    backgroundColor: "rgba(14,181,202,0.10)",
-    borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5,
-  },
-  trustText: { fontSize: 11, fontFamily: "Inter_500Medium", color: "#0098AA" },
-
+  signinPrompt: { fontSize: 13, color: "rgba(255,255,255,0.55)", fontFamily: "Inter_400Regular" },
+  signinLink:   { fontSize: 13, color: CYAN, fontFamily: "Inter_700Bold" },
 });
