@@ -1,0 +1,75 @@
+n artifacts/westcars, the app is stuck on the WC splash screen forever on Android. Fix the exact same issue as before — router.replace("/auth/login") is silently failing on Android because splash.tsx uses the static router import instead of the useRouter() hook. Also add the 5 second safety net to _layout.tsx. Fix all of the following:
+FIX 1 — app/splash.tsx
+
+Replace import { router } from "expo-router" with the useRouter() hook:
+
+tsximport { useRouter } from 'expo-router';
+
+export default function SplashScreen() {
+  const router = useRouter();
+
+Remove any standalone goToLogin() function that references the old static router
+Update the navigation timer to use the hook-based router directly with a retry:
+
+tsxuseEffect(() => {
+  const navTimer = setTimeout(async () => {
+    try {
+      router.replace('/auth/login');
+    } catch (e) {
+      // Retry once after 400ms if Android navigation container not ready
+      setTimeout(() => {
+        try {
+          router.replace('/auth/login');
+        } catch (e2) {
+          console.error('Navigation retry failed:', e2);
+        }
+      }, 400);
+    }
+  }, 2600);
+  return () => clearTimeout(navTimer);
+}, [router]);
+FIX 2 — app/_layout.tsx
+
+Add a 5 second hard safety net at the top level so the native splash can NEVER hang forever:
+
+tsxuseEffect(() => {
+  const timeout = setTimeout(async () => {
+    try {
+      await SplashScreen.hideAsync();
+    } catch (e) {}
+  }, 5000);
+  return () => clearTimeout(timeout);
+}, []);
+
+Make sure SplashScreen.hideAsync() is also called when fontsLoaded || fontError AND appReady are both true — whichever comes first
+Make sure SplashScreen.preventAutoHideAsync() is at module level outside the component
+
+FIX 3 — Firebase never blocks render
+
+Confirm Firebase initializes inside a try/catch and never blocks the initial render
+Confirm no top level await exists outside async functions in _layout.tsx
+Confirm auth state listener is wrapped with a useRef guard to prevent re-triggering:
+
+tsxconst listenerSet = useRef(false);
+useEffect(() => {
+  if (listenerSet.current) return;
+  listenerSet.current = true;
+  const unsub = onAuthStateChanged(auth, (user) => {
+    setUser(user);
+  });
+  return unsub;
+}, []);
+FIX 4 — Clean and restart
+bashrm -rf .expo
+rm -rf node_modules/.cache
+rm -rf /tmp/metro-*
+rm -rf /tmp/haste-*
+pnpm exec expo start --clear
+Verify:
+
+SplashScreen.preventAutoHideAsync() is at module level
+useRouter() hook used in splash.tsx — NOT static router import
+5 second safety net is in _layout.tsx
+Firebase never blocks render
+Run tsc --noEmit — must exit clean
+Report every file changed
