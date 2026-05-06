@@ -199,10 +199,20 @@ export default function UserProfileScreen() {
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No active listings</Text>
           </View>
         ) : (
-          <View style={styles.gridRow}>
-            {userListings.map((car) => (
-              <CarCard key={car.id} car={car} style={styles.halfCard} />
-            ))}
+          <View>
+            {Array.from({ length: Math.ceil(userListings.length / 2) }, (_, i) => {
+              const left = userListings[i * 2];
+              const right = userListings[i * 2 + 1];
+              return (
+                <View key={i} style={styles.gridRow}>
+                  <CarCard car={left} style={styles.halfCard} />
+                  {right
+                    ? <CarCard car={right} style={styles.halfCard} />
+                    : <View style={styles.halfCard} />
+                  }
+                </View>
+              );
+            })}
           </View>
         )}
       </View>
@@ -214,10 +224,20 @@ export default function UserProfileScreen() {
             <View style={[styles.sectionAccent, { backgroundColor: colors.accent }]} />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Similar Cars</Text>
           </View>
-          <View style={styles.gridRow}>
-            {similarCars.map((car) => (
-              <CarCard key={car.id} car={car} style={styles.halfCard} />
-            ))}
+          <View>
+            {Array.from({ length: Math.ceil(similarCars.length / 2) }, (_, i) => {
+              const left = similarCars[i * 2];
+              const right = similarCars[i * 2 + 1];
+              return (
+                <View key={i} style={styles.gridRow}>
+                  <CarCard car={left} style={styles.halfCard} />
+                  {right
+                    ? <CarCard car={right} style={styles.halfCard} />
+                    : <View style={styles.halfCard} />
+                  }
+                </View>
+              );
+            })}
           </View>
         </View>
       )}
@@ -341,8 +361,8 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 8 },
   sectionAccent: { width: 4, height: 18, borderRadius: 2 },
   sectionTitle: { fontSize: 17, fontFamily: "Inter_700Bold", paddingHorizontal: 8 },
-  gridRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, paddingHorizontal: 8 },
-  halfCard: { width: "48%" },
+  gridRow: { flexDirection: "row", paddingHorizontal: 8, gap: 8 },
+  halfCard: { flex: 1, marginBottom: 8 },
   empty: { alignItems: "center", paddingVertical: 40, gap: 10 },
   emptyText: { fontSize: 15, fontFamily: "Inter_400Regular" },
 

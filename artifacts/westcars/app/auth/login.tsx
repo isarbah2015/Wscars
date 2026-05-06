@@ -169,6 +169,8 @@ export default function LoginScreen() {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
                 onFocus={() => setFocusedField("email")}
                 onBlur={() => setFocusedField(null)}
                 returnKeyType="next"
@@ -187,6 +189,8 @@ export default function LoginScreen() {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
+                autoCorrect={false}
+                autoComplete="password"
                 onFocus={() => setFocusedField("pass")}
                 onBlur={() => setFocusedField(null)}
                 returnKeyType="done"
@@ -345,7 +349,7 @@ const styles = StyleSheet.create({
   fieldFocused: {
     borderColor: "#0EB5CA", backgroundColor: "#fff",
     shadowColor: "#0EB5CA", shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3, shadowRadius: 6, elevation: 2,
+    shadowOpacity: 0.3, shadowRadius: 6,
   },
   input: { flex: 1, fontSize: 15, color: "#1A1A1A", fontFamily: "Inter_400Regular", padding: 0 },
 

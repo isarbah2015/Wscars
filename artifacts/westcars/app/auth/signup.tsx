@@ -41,10 +41,19 @@ export default function SignupScreen() {
       return;
     }
     setLoading(true);
-    const fullPhone = phone.startsWith("+") ? phone : `${COUNTRY_CODE}${phone}`;
-    const ok = await signup(name.trim(), email.trim(), fullPhone, password);
-    setLoading(false);
-    if (ok) router.replace("/(tabs)");
+    try {
+      const fullPhone = phone.startsWith("+") ? phone : `${COUNTRY_CODE}${phone}`;
+      const ok = await signup(name.trim(), email.trim(), fullPhone, password);
+      if (ok) {
+        router.replace("/(tabs)");
+      } else {
+        Alert.alert("Sign Up Failed", "Could not create your account. The email may already be in use, or there was a network issue. Please try again.");
+      }
+    } catch (err: any) {
+      Alert.alert("Sign Up Failed", err?.message || "An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const strength =
@@ -247,6 +256,7 @@ function InputField({
           value={value}
           onChangeText={onChangeText}
           autoCapitalize={autoCapitalize}
+          autoCorrect={false}
           keyboardType={keyboardType}
           returnKeyType={returnKeyType}
           onFocus={onFocus}
@@ -347,7 +357,7 @@ const styles = StyleSheet.create({
     borderColor: "#0EB5CA", backgroundColor: "#fff",
     shadowColor: "#0EB5CA",
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3, shadowRadius: 8, elevation: 3,
+    shadowOpacity: 0.3, shadowRadius: 8,
   },
   input: {
     flex: 1, fontSize: 15,

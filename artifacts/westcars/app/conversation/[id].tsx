@@ -42,7 +42,6 @@ import { SafetyTipsModal } from "@/components/SafetyTipsModal";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Message } from "@/types";
-import { MOCK_USERS } from "@/utils/mockData";
 
 // Phone number pattern — detects GH formats (+233, 0xx)
 const PHONE_RE = /(?:\+233|0)[0-9]{9}/g;
@@ -198,7 +197,7 @@ function MessageBubble({
 export default function ConversationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { conversations, messages, sendMessage, deleteMessage, markMessagesRead,
-          currentUser, blockUser, isBlocked, reportItem } = useApp();
+          currentUser, blockUser, isBlocked, reportItem, isAuthenticated } = useApp();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -217,7 +216,7 @@ export default function ConversationScreen() {
   const convMessages = (messages[id] || []).filter((m) => !m.isDeletedForSelf);
   const participantId = conv?.participantId || "";
   const blocked = isBlocked(participantId);
-  const participantFull = MOCK_USERS.find((u) => u.id === participantId);
+  const participantFull = conv?.participant ?? null;
   const [profileExpanded, setProfileExpanded] = useState(false);
 
   // Mark messages read on open
@@ -321,6 +320,26 @@ export default function ConversationScreen() {
       ]
     );
   };
+
+  if (!isAuthenticated) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, alignItems: "center", justifyContent: "center", padding: 32, gap: 16 }]}>
+        <Feather name="lock" size={48} color={colors.accent} />
+        <Text style={{ fontSize: 20, fontFamily: "Inter_700Bold", color: colors.text, textAlign: "center" }}>
+          Sign in required
+        </Text>
+        <Text style={{ fontSize: 14, fontFamily: "Inter_400Regular", color: colors.textSecondary, textAlign: "center", lineHeight: 20 }}>
+          You need to be signed in to view this conversation.
+        </Text>
+        <Pressable
+          style={{ backgroundColor: colors.accent, paddingHorizontal: 36, paddingVertical: 14, borderRadius: 14, marginTop: 4 }}
+          onPress={() => router.replace("/auth/login")}
+        >
+          <Text style={{ color: "#fff", fontSize: 15, fontFamily: "Inter_600SemiBold" }}>Sign In</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   if (showSafety) {
     return (
