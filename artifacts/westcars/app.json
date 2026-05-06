@@ -9,9 +9,11 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
+      "image": "./assets/images/splash-blank.png",
       "backgroundColor": "#0A1628",
       "resizeMode": "contain",
       "dark": {
+        "image": "./assets/images/splash-blank.png",
         "backgroundColor": "#0A1628",
         "resizeMode": "contain"
       }

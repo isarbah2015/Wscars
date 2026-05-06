@@ -45,3 +45,4 @@ play-store-service-account.json
 GoogleService-Info.plist
 
 android/
+!google-services.json
