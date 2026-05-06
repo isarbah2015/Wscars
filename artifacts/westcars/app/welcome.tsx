@@ -93,22 +93,10 @@ export default function WelcomeScreen() {
       <View style={styles.carWrap}>
         <Image source={CAR} style={styles.carImg} resizeMode="contain" fadeDuration={250} />
 
-        <View style={styles.reflectionWrap} pointerEvents="none">
-          <Image
-            source={CAR}
-            style={styles.reflectionImg}
-            resizeMode="contain"
-            fadeDuration={250}
-          />
-          {/* Gradient starts fully transparent so there's no hard top edge,
-              reaches solid navy well before the overflow:hidden clip kicks in */}
-          <LinearGradient
-            colors={["transparent", "rgba(10,22,40,0.70)", "#0A1628", "#0A1628"]}
-            locations={[0, 0.42, 0.72, 1]}
-            style={StyleSheet.absoluteFill}
-            pointerEvents="none"
-          />
-        </View>
+        {/* Soft contact shadow — outer wide pale oval */}
+        <View style={styles.shadowOuter} pointerEvents="none" />
+        {/* Inner denser oval directly under the car */}
+        <View style={styles.shadowInner} pointerEvents="none" />
       </View>
 
 
@@ -176,18 +164,20 @@ const styles = StyleSheet.create({
     width: "100%",
     height: CAR_H,
   },
-  reflectionWrap: {
-    width: "100%",
-    height: CAR_H * 0.38,
-    marginTop: -CAR_H * 0.40,
-    opacity: 0.42,
-    overflow: "hidden",
+  shadowOuter: {
+    width: "86%",
+    height: 14,
+    borderRadius: 999,
+    backgroundColor: "rgba(0,0,0,0.20)",
+    marginTop: -CAR_H * 0.13,
   },
-  reflectionImg: {
-    width: "100%",
-    height: CAR_H,
-    transform: [{ scaleY: -1 }],
-    marginTop: -CAR_H * 0.18,
+  shadowInner: {
+    width: "52%",
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: "rgba(0,0,0,0.26)",
+    marginTop: -2,
+    marginBottom: 6,
   },
 
   cardWrap: {
