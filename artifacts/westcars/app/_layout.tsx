@@ -99,18 +99,18 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontError) return null;
 
   return (
-    <SafeAreaProvider>
-      <ErrorBoundary>
-        <ThemeProvider>
-          <QueryClientProvider client={queryClient}>
-            <AppProvider>
-              <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#0A1628" }}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ErrorBoundary>
+          <ThemeProvider>
+            <QueryClientProvider client={queryClient}>
+              <AppProvider>
                 <RootLayoutNav />
-              </GestureHandlerRootView>
-            </AppProvider>
-          </QueryClientProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
-    </SafeAreaProvider>
+              </AppProvider>
+            </QueryClientProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

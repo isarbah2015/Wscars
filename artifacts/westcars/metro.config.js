@@ -7,14 +7,12 @@ const monorepoRoot = path.resolve(projectRoot, "../..");
 
 const config = getDefaultConfig(projectRoot);
 
-// Allow Metro to resolve modules through pnpm's symlinked node_modules.
 config.watchFolders = [monorepoRoot];
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(monorepoRoot, "node_modules"),
 ];
 
-// Exclude Replit-internal directories from Metro's file watcher.
 config.resolver.blockList = [
   /\/\.local\/.*/,
   /\/\.git\/.*/,
@@ -24,69 +22,58 @@ config.resolver.platforms = ["android", "ios", "web", "native"];
 
 // ── Firebase singleton pinning ──────────────────────────────────────────────
 //
-// The monorepo contains TWO Firebase versions:
-//   • firebase@11.6.0  — mobile app (artifacts/westcars)
-//   • firebase@12.x    — admin dashboard (artifacts/westcars-admin)
+// Problem: the monorepo has firebase@11 (mobile) and firebase@12 (admin) side
+// by side. pnpm hoists @firebase/component@0.7.2 (v12) to the root. When
+// @firebase/app imports @firebase/component it gets v12; when @firebase/auth
+// imports @firebase/component it gets v11 from its own node_modules. Two
+// separate singleton registries → "Component auth has not been registered yet".
 //
-// Root cause of the crash "Component auth has not been registered yet":
-//   @firebase/component is the SHARED registry where every Firebase service
-//   registers itself (auth, firestore, etc.) and where getAuth(app) looks
-//   them up. If @firebase/component resolves from two different file paths,
-//   they produce TWO SEPARATE singleton registries. auth registers into one;
-//   getAuth(app) looks in the other → "not registered yet".
+// extraNodeModules alone is NOT enough: it is only a fallback and is skipped
+// when pnpm hoisting already resolves the module through normal Node paths.
 //
-// Fix: Pin ALL @firebase/* scoped packages to the v11-compatible copies.
-//
-// Package locations in pnpm's virtual store:
-//
-//   Lookup A — firebase@11.6.0's own pnpm dir:
-//     .pnpm/firebase@11.6.0_.../node_modules/@firebase/
-//       app, auth, firestore, storage, util, … (most packages)
-//
-//   Lookup B — @firebase/auth@1.10.0's own pnpm dir:
-//     .pnpm/@firebase+auth@1.10.0_.../node_modules/@firebase/
-//       app, auth, component, logger, util  ← component & logger ONLY here
-//
-//   We follow the real symlinks so paths remain correct after `pnpm install`.
+// resolveRequest is a TRUE intercept that runs BEFORE any other resolution.
+// We use it to redirect every bare @firebase/* import (from anywhere in the
+// bundle) to the correct v11-compatible copy in the pnpm store.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── Lookup A: firebase@11 ────────────────────────────────────────────────────
+// Derive pinned directories by following local symlinks.
 const FIREBASE_LOCAL    = path.resolve(projectRoot, "node_modules/firebase");
 const FIREBASE_REAL     = fs.realpathSync(FIREBASE_LOCAL);
-// FIREBASE_REAL = …/.pnpm/firebase@11.6.0_.../node_modules/firebase
-// Peer @firebase/* packages live one directory up:
 const FIREBASE11_PEERS  = path.resolve(FIREBASE_REAL, "..", "@firebase");
-// FIREBASE11_PEERS = …/.pnpm/firebase@11.6.0_.../node_modules/@firebase
+const AUTH_LINK         = path.join(FIREBASE11_PEERS, "auth");
+const AUTH_REAL         = fs.realpathSync(AUTH_LINK);
+const AUTH10_PEERS      = path.resolve(AUTH_REAL, "..");
 
-// ── Lookup B: @firebase/auth@1.10.0 ─────────────────────────────────────────
-// @firebase/auth lives inside Lookup A but has its OWN pnpm store entry with
-// @firebase/component, @firebase/logger, and @firebase/util as siblings.
-const AUTH_LINK    = path.join(FIREBASE11_PEERS, "auth");
-const AUTH_REAL    = fs.realpathSync(AUTH_LINK);
-// AUTH_REAL = …/.pnpm/@firebase+auth@1.10.0_.../node_modules/@firebase/auth
-// component, logger, util are siblings (NOT sub-subdirs):
-const AUTH10_PEERS = path.resolve(AUTH_REAL, "..");
-// AUTH10_PEERS = …/.pnpm/@firebase+auth@1.10.0_.../node_modules/@firebase
-
-/** Resolve a @firebase/<name> package from Lookup A then Lookup B. */
-function firebasePkg(name) {
+function findPinnedDir(name) {
   for (const dir of [FIREBASE11_PEERS, AUTH10_PEERS]) {
-    const resolved = path.resolve(dir, name);
-    if (fs.existsSync(resolved)) return resolved;
+    const p = path.resolve(dir, name);
+    if (fs.existsSync(p)) return p;
   }
   return null;
 }
 
-// Every @firebase/* package that firebase/auth, firebase/app etc. import.
-// Pinning all of them to v11 copies ensures a single component registry.
-const FIREBASE_SCOPED = [
-  // Core
+/**
+ * Given a pinned package directory, return the correct entry-point file for
+ * the current platform.  Metro needs an actual file path, not a directory.
+ */
+function pinnedMain(dir, platform) {
+  const pkg = JSON.parse(fs.readFileSync(path.join(dir, "package.json"), "utf8"));
+  const isNative = platform === "android" || platform === "ios" || platform === "native";
+  const mainField =
+    isNative && pkg["react-native"] ? pkg["react-native"] : pkg.main || "index.js";
+  const resolved = path.resolve(dir, mainField);
+  // Add .js extension if the field points to a bare path
+  for (const ext of ["", ".js", ".jsx", ".ts", ".tsx"]) {
+    if (fs.existsSync(resolved + ext)) return resolved + ext;
+  }
+  return resolved;
+}
+
+// Build the pinned-package map: { "@firebase/component": "/abs/path/to/dir", … }
+const SCOPED_PKGS = [
   "app", "app-types", "app-compat",
-  // Auth
   "auth", "auth-compat",
-  // Registry & utilities — THE actual root cause
   "component", "logger", "util",
-  // Other services used by the app
   "firestore", "firestore-compat",
   "storage",   "storage-compat",
   "installations", "installations-compat",
@@ -94,17 +81,29 @@ const FIREBASE_SCOPED = [
   "functions",  "functions-compat",
 ];
 
-const scopedAliases = {};
-for (const name of FIREBASE_SCOPED) {
-  const resolved = firebasePkg(name);
-  if (resolved) scopedAliases[`@firebase/${name}`] = resolved;
+const FIREBASE_PINS = {};
+for (const name of SCOPED_PKGS) {
+  const dir = findPinnedDir(name);
+  if (dir) FIREBASE_PINS[`@firebase/${name}`] = dir;
 }
 
+// ── resolveRequest: intercepts every require/import before normal resolution ─
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  const pinnedDir = FIREBASE_PINS[moduleName];
+  if (pinnedDir) {
+    return { type: "sourceFile", filePath: pinnedMain(pinnedDir, platform) };
+  }
+  // Fall through to Metro's default resolver for everything else.
+  return context.resolveRequest(context, moduleName, platform);
+};
+
+// Keep extraNodeModules for `firebase` sub-paths (firebase/auth, firebase/app,
+// etc.) — resolveRequest only fires for bare module names, not sub-paths.
 config.resolver.extraNodeModules = {
-  // Bare `firebase` → local v11 (prevents picking up admin's v12)
   firebase: FIREBASE_LOCAL,
-  // All @firebase/* scoped packages → correct v11-compatible copies
-  ...scopedAliases,
+  ...Object.fromEntries(
+    Object.entries(FIREBASE_PINS).map(([k, v]) => [k, v]),
+  ),
 };
 
 module.exports = config;
