@@ -89,14 +89,9 @@ export default function WelcomeScreen() {
         <Text style={styles.brandTag}>GHANA'S TRUSTED CAR MARKETPLACE</Text>
       </View>
 
-      {/* Hero car image + mirrored reflection (gradient fade on reflection only) */}
+      {/* Hero car */}
       <View style={styles.carWrap}>
         <Image source={CAR} style={styles.carImg} resizeMode="contain" fadeDuration={250} />
-
-        {/* Soft contact shadow — outer wide pale oval */}
-        <View style={styles.shadowOuter} pointerEvents="none" />
-        {/* Inner denser oval directly under the car */}
-        <View style={styles.shadowInner} pointerEvents="none" />
       </View>
 
 
@@ -163,21 +158,6 @@ const styles = StyleSheet.create({
   carImg: {
     width: "100%",
     height: CAR_H,
-  },
-  shadowOuter: {
-    width: "86%",
-    height: 14,
-    borderRadius: 999,
-    backgroundColor: "rgba(0,0,0,0.20)",
-    marginTop: -CAR_H * 0.13,
-  },
-  shadowInner: {
-    width: "52%",
-    height: 6,
-    borderRadius: 999,
-    backgroundColor: "rgba(0,0,0,0.26)",
-    marginTop: -2,
-    marginBottom: 6,
   },
 
   cardWrap: {
