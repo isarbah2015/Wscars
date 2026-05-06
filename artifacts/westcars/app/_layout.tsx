@@ -13,7 +13,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -73,14 +73,17 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
-  // Hard safety-net — always hide native splash after 5 s max,
-  // even if a font hangs indefinitely on a slow Android device.
+  // Hard safety-net — always hide native splash AND force-render the app
+  // after 5 s max, even if a font hangs indefinitely on a slow Android device
+  // or in production where Google Fonts may fail silently with no error.
+  const [forceShow, setForceShow] = useState(false);
   const safetyFired = useRef(false);
   useEffect(() => {
     const id = setTimeout(() => {
       if (safetyFired.current) return;
       safetyFired.current = true;
       SplashScreen.hideAsync().catch(() => {});
+      setForceShow(true);
     }, 5000);
     return () => clearTimeout(id);
   }, []);
@@ -96,8 +99,10 @@ export default function RootLayout() {
     return () => { document.head.removeChild(style); };
   }, []);
 
-  // Keep the view tree empty (native splash stays visible) until fonts resolve.
-  if (!fontsLoaded && !fontError) return null;
+  // Keep the view tree empty (native splash stays visible) until fonts resolve
+  // OR the 5 s safety timer fires — prevents a permanent blank screen if fonts
+  // hang indefinitely on a production device.
+  if (!fontsLoaded && !fontError && !forceShow) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
