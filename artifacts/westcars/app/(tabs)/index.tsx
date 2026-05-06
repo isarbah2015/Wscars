@@ -1052,11 +1052,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingTop: 10,
     paddingBottom: 10,
+    overflow: "visible",
     shadowColor: "#0A1628",
     shadowOpacity: 0.05,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
   },
   brandSectionHeader: {
     flexDirection: "row",
