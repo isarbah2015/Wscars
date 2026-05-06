@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -11,6 +12,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,7 +25,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const WC_LOGO      = require("@/assets/images/wc-logo.png");
 const WC_LOGO_FULL = require("@/assets/images/wc-logo-full.png");
 
-export default function SignupScreen() {
+function SignupScreen() {
   const { signup } = useApp();
   const insets = useSafeAreaInsets();
   const [name,         setName]         = useState("");
@@ -88,6 +90,8 @@ export default function SignupScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ flexGrow: 1 }}
       >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View style={{ flex: 1 }}>
         {/* ── Hero ── */}
         <View style={[styles.hero, styles.heroWhite, { paddingTop: topPad + 14 }]}>
           {/* Badge + motto */}
@@ -154,6 +158,7 @@ export default function SignupScreen() {
                 autoCorrect={false}
                 blurOnSubmit={false}
                 pointerEvents="auto"
+                underlineColorAndroid="transparent"
                 returnKeyType="next"
                 onFocus={() => setFocused("phone")}
                 onBlur={() => setFocused(null)}
@@ -177,6 +182,7 @@ export default function SignupScreen() {
                 autoCorrect={false}
                 blurOnSubmit={false}
                 pointerEvents="auto"
+                underlineColorAndroid="transparent"
                 returnKeyType="done"
                 onSubmitEditing={handleSignup}
                 onFocus={() => setFocused("pass")}
@@ -252,10 +258,14 @@ export default function SignupScreen() {
 
           <View style={{ height: (insets.bottom || 0) + 24 }} />
         </View>
+          </View>
+        </TouchableWithoutFeedback>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
+
+export default React.memo(SignupScreen);
 
 /* ── Reusable field ── */
 function InputField({
@@ -280,6 +290,7 @@ function InputField({
           returnKeyType={returnKeyType}
           blurOnSubmit={false}
           pointerEvents="auto"
+          underlineColorAndroid="transparent"
           onFocus={onFocus}
           onBlur={onBlur}
         />

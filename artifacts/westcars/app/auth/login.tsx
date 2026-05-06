@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -11,6 +12,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -27,7 +29,7 @@ const GOOGLE_WEB_CLIENT_ID     = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
 const GOOGLE_IOS_CLIENT_ID     = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
 const GOOGLE_ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
 
-export default function LoginScreen() {
+function LoginScreen() {
   const { login, loginWithGoogle, loginWithGooglePopup } = useApp();
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState("");
@@ -165,10 +167,12 @@ export default function LoginScreen() {
       {/* Form card */}
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { flexGrow: 1 }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View style={{ flex: 1 }}>
         <View style={styles.formCard}>
           <Text style={styles.formTitle}>Sign in to your account</Text>
 
@@ -188,6 +192,7 @@ export default function LoginScreen() {
                 autoComplete="email"
                 blurOnSubmit={false}
                 pointerEvents="auto"
+                underlineColorAndroid="transparent"
                 onFocus={() => setFocusedField("email")}
                 onBlur={() => setFocusedField(null)}
                 returnKeyType="next"
@@ -211,6 +216,7 @@ export default function LoginScreen() {
                 autoComplete="password"
                 blurOnSubmit={false}
                 pointerEvents="auto"
+                underlineColorAndroid="transparent"
                 onFocus={() => setFocusedField("pass")}
                 onBlur={() => setFocusedField(null)}
                 returnKeyType="done"
@@ -284,10 +290,14 @@ export default function LoginScreen() {
         </View>
 
         <View style={{ height: (insets.bottom || 0) + 20 }} />
+          </View>
+        </TouchableWithoutFeedback>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
+
+export default React.memo(LoginScreen);
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#EDF4F7" },
