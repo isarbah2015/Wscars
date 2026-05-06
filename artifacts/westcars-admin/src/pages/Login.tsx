@@ -40,13 +40,7 @@ export default function Login({ onLogin }: LoginProps) {
     setLoading(true);
 
     if (!isFirebaseReady() || !auth || !db) {
-      // Mock fallback for local dev without secrets.
-      await new Promise((r) => setTimeout(r, 400));
-      if (email === "admin@westcars.gh" && password === "admin2024") {
-        onLogin();
-      } else {
-        setError("Invalid credentials. (Firebase not configured — using demo creds.)");
-      }
+      setError("Firebase is not configured. Set VITE_FIREBASE_* environment variables to enable login.");
       setLoading(false);
       return;
     }
@@ -164,7 +158,7 @@ export default function Login({ onLogin }: LoginProps) {
 
           {!isFirebaseReady() && (
             <p className="text-xs text-center text-amber-600 pt-1">
-              Firebase not configured — demo creds: admin@westcars.gh / admin2024
+              Firebase is not configured. Contact your administrator.
             </p>
           )}
         </form>
