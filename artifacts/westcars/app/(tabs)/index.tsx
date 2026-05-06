@@ -386,7 +386,7 @@ export default function HomeScreen() {
             <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#0EB5CA" />
             <Text style={[styles.brandSectionTitle, { color: isDark ? "#CBD5E1" : "#334155" }]}>Car Brands</Text>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.brandRow, { paddingHorizontal: 16 }]}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.brandRow}>
             {CAR_BRANDS.map((brand) => {
               const logoUrl = BRAND_LOGOS[brand];
               return (
@@ -1047,15 +1047,8 @@ const styles = StyleSheet.create({
   },
 
   brandSection: {
-    marginHorizontal: 6,
+    paddingVertical: 8,
     marginTop: 6,
-    borderRadius: 16,
-    paddingTop: 10,
-    paddingBottom: 10,
-    shadowColor: "#0A1628",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
   },
   brandSectionHeader: {
     flexDirection: "row",
@@ -1069,9 +1062,11 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
   },
   brandRow: {
-    paddingHorizontal: 10,
+    flexDirection: "row",
     gap: 8,
-    paddingBottom: 2,
+    paddingLeft: 14,
+    paddingRight: 14,
+    alignItems: "center",
   },
   brandPill: {
     alignItems: "center",
