@@ -139,6 +139,7 @@ export default function SignupScreen() {
                 value={phone}
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
+                autoCorrect={false}
                 returnKeyType="next"
                 onFocus={() => setFocused("phone")}
                 onBlur={() => setFocused(null)}

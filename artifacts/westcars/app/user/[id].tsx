@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   sectionAccent: { width: 4, height: 18, borderRadius: 2 },
   sectionTitle: { fontSize: 17, fontFamily: "Inter_700Bold", paddingHorizontal: 8 },
   gridRow: { flexDirection: "row", paddingHorizontal: 8, gap: 8 },
-  halfCard: { flex: 1, marginBottom: 8 },
+  halfCard: { flex: 1, marginBottom: 10 },
   empty: { alignItems: "center", paddingVertical: 40, gap: 10 },
   emptyText: { fontSize: 15, fontFamily: "Inter_400Regular" },
 

@@ -550,21 +550,29 @@ export default function HomeScreen() {
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Just for you</Text>
             </View>
           </View>
-          <View style={styles.gridBreakout}>
-            {Array.from({ length: Math.ceil(displayCars.length / 2) }, (_, i) => {
-              const left = displayCars[i * 2];
-              const right = displayCars[i * 2 + 1];
-              return (
-                <View key={i} style={styles.cardRow}>
-                  <CarCard car={left} style={styles.halfCard} />
-                  {right
-                    ? <CarCard car={right} style={styles.halfCard} />
-                    : <View style={styles.halfCard} />
-                  }
-                </View>
-              );
-            })}
-          </View>
+          {displayCars.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Feather name="truck" size={40} color={colors.textTertiary} />
+              <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>No listings yet</Text>
+              <Text style={[styles.emptyStateSub, { color: colors.textTertiary }]}>Be the first to list a car!</Text>
+            </View>
+          ) : (
+            <View style={styles.gridBreakout}>
+              {Array.from({ length: Math.ceil(displayCars.length / 2) }, (_, i) => {
+                const left = displayCars[i * 2];
+                const right = displayCars[i * 2 + 1];
+                return (
+                  <View key={i} style={styles.cardRow}>
+                    <CarCard car={left} style={styles.halfCard} />
+                    {right
+                      ? <CarCard car={right} style={styles.halfCard} />
+                      : <View style={styles.halfCard} />
+                    }
+                  </View>
+                );
+              })}
+            </View>
+          )}
         </View>
 
         <View style={[styles.sep, { backgroundColor: colors.background }]} />
@@ -923,6 +931,20 @@ const styles = StyleSheet.create({
   halfCard: {
     flex: 1,
     marginBottom: 10,
+  },
+
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: 40,
+    gap: 8,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontFamily: "Inter_600SemiBold",
+  },
+  emptyStateSub: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
   },
 
   sep: { height: 6 },

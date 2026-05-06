@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   formCard: {
     backgroundColor: "#fff", borderRadius: 20, padding: 24, gap: 14,
     shadowColor: "#000", shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08, shadowRadius: 16, elevation: 6,
+    shadowOpacity: 0.08, shadowRadius: 16,
   },
   formTitle: { fontSize: 22, fontFamily: "Manrope_800ExtraBold", color: "#1A1A1A", marginBottom: 4, letterSpacing: -0.3 },
 
