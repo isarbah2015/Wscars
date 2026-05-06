@@ -13,7 +13,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -71,6 +71,18 @@ export default function RootLayout() {
       SplashScreen.hideAsync().catch(() => {});
     }
   }, [fontsLoaded, fontError]);
+
+  // Hard safety-net — always hide native splash after 5 s max,
+  // even if a font hangs indefinitely on a slow Android device.
+  const safetyFired = useRef(false);
+  useEffect(() => {
+    const id = setTimeout(() => {
+      if (safetyFired.current) return;
+      safetyFired.current = true;
+      SplashScreen.hideAsync().catch(() => {});
+    }, 5000);
+    return () => clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     if (Platform.OS !== "web") return;

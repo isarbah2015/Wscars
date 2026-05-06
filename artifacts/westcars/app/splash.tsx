@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import {
   Animated,
@@ -14,13 +14,8 @@ const LOGO  = require("@/assets/images/wc-logo.png");
 const LOGO_W = 260;
 const LOGO_H = 170;
 
-function goToLogin() {
-  try {
-    router.replace("/auth/login");
-  } catch (_) {}
-}
-
 export default function SplashScreen() {
+  const router = useRouter();
   const topY    = useRef(new Animated.Value(-(LOGO_H / 2 + 40))).current;
   const botY    = useRef(new Animated.Value(LOGO_H / 2 + 40)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -60,13 +55,26 @@ export default function SplashScreen() {
       Animated.timing(mottoOp, { toValue: 1, duration: 500, useNativeDriver: false }).start();
     }, 700);
 
-    const navTimer = setTimeout(goToLogin, 2600);
+    // Navigate to login after the animation completes.
+    // Uses the hook-based router (not the static import) so it is always
+    // bound to the live navigation state on Android.
+    const navTimer = setTimeout(() => {
+      try {
+        router.replace("/auth/login");
+      } catch {
+        // On Android the navigation container can take an extra frame to be
+        // ready — retry once after a short delay rather than swallowing silently.
+        setTimeout(() => {
+          try { router.replace("/auth/login"); } catch {}
+        }, 400);
+      }
+    }, 2600);
 
     return () => {
       clearTimeout(mottoTimer);
       clearTimeout(navTimer);
     };
-  }, []);
+  }, [router]);
 
   return (
     <View style={styles.root}>
