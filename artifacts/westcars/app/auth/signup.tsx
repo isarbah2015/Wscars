@@ -15,7 +15,10 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
+import { authErrorMessage } from "@/services/firebase";
 import { COUNTRY_CODE } from "@/utils/ghanaData";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const WC_LOGO      = require("@/assets/images/wc-logo.png");
 const WC_LOGO_FULL = require("@/assets/images/wc-logo-full.png");
@@ -32,8 +35,20 @@ export default function SignupScreen() {
   const [focused,      setFocused]      = useState<string | null>(null);
 
   const handleSignup = async () => {
-    if (!name.trim() || !email.trim() || !phone.trim() || !password.trim()) {
+    const trimmedName  = name.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPhone = phone.trim().replace(/\s/g, "");
+
+    if (!trimmedName || !trimmedEmail || !trimmedPhone || !password.trim()) {
       Alert.alert("Required", "Please fill in all fields.");
+      return;
+    }
+    if (!EMAIL_RE.test(trimmedEmail)) {
+      Alert.alert("Invalid email", "Please enter a valid email address.");
+      return;
+    }
+    if (trimmedPhone.replace(/\D/g, "").length < 9) {
+      Alert.alert("Invalid phone", "Please enter a valid Ghanaian phone number (at least 9 digits).");
       return;
     }
     if (password.length < 6) {
@@ -42,15 +57,11 @@ export default function SignupScreen() {
     }
     setLoading(true);
     try {
-      const fullPhone = phone.startsWith("+") ? phone : `${COUNTRY_CODE}${phone}`;
-      const ok = await signup(name.trim(), email.trim(), fullPhone, password);
-      if (ok) {
-        router.replace("/(tabs)");
-      } else {
-        Alert.alert("Sign Up Failed", "Could not create your account. The email may already be in use, or there was a network issue. Please try again.");
-      }
-    } catch (err: any) {
-      Alert.alert("Sign Up Failed", err?.message || "An unexpected error occurred. Please try again.");
+      const fullPhone = trimmedPhone.startsWith("+") ? trimmedPhone : `${COUNTRY_CODE}${trimmedPhone.replace(/^0+/, "")}`;
+      await signup(trimmedName, trimmedEmail, fullPhone, password);
+      router.replace("/(tabs)");
+    } catch (err) {
+      Alert.alert("Sign Up Failed", authErrorMessage(err));
     } finally {
       setLoading(false);
     }

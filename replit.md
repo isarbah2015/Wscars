@@ -47,7 +47,8 @@ artifacts/westcars-admin/src/
 
 - **Single named Firestore DB (`westcar-5c1e6`)**: Both mobile app and admin hardcode this ID as default. Override via `EXPO_PUBLIC_FIREBASE_DATABASE_ID` / `VITE_FIREBASE_DATABASE_ID` for staging.
 - **Firebase auth init via `require()`**: `initializeAuth` + `getReactNativePersistence` + `AsyncStorage` are all loaded with `require()` in `lib/firebase.ts`. This (a) keeps the TypeScript import layer clean, (b) prevents web bundlers from trying to import the RN-only AsyncStorage package, and (c) avoids pnpm duplicate-module issues between firebase@11 (mobile) and firebase@12 (admin) in the monorepo.
-- **Metro `extraNodeModules.firebase`**: Pins the mobile bundler to `firebase@11.6.0` via the app's local symlink, preventing Metro's dual `nodeModulesPaths` from ever picking up the admin's `firebase@12` copy.
+- **Metro `resolveRequest` pins all `@firebase/*`**: Intercepts every bare `@firebase/` import before normal resolution and forces v11-compatible copies from the pnpm store. `pinnedMain()` respects the `browser` field for web, `react-native` for native — this prevents `@firebase/firestore`'s Node.js build (which contains `@grpc/grpc-js`) from landing in the web bundle.
+- **Auth errors propagate from context to UI**: `AppContext` auth methods (`login`, `signup`, `loginWithGoogle`, `loginWithGooglePopup`) do NOT catch Firebase errors — they let them throw. All call-sites wrap in `try/catch` and call `authErrorMessage(err)` to show the exact Firebase error (wrong password, email in use, network error, etc.).
 - **Dual-mode data layer**: `isFirebaseReady()` gates all data access. When `true`, live Firestore subscriptions run. When `false` (secrets missing), mock data renders. Auth guards exist on like/contact/chat screens.
 - **Admin `isAdmin` check**: Login verifies `users/{uid}.isAdmin === true` in Firestore after Firebase Auth sign-in. Non-admin accounts are immediately signed out.
 

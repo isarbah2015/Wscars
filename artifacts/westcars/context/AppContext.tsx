@@ -192,16 +192,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // ── Auth ─────────────────────────────────────────────────────────────────
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     if (useFirebase) {
-      try {
-        const user = await fb.signInEmail(email, password);
-        // onAuthStateChanged will populate currentUser; pre-fill for snappier UX.
-        setCurrentUser(user);
-        setIsAuthenticated(true);
-        return true;
-      } catch (err) {
-        console.warn("[login] failed:", err);
-        return false;
-      }
+      // Let Firebase errors propagate — callers handle them with authErrorMessage().
+      const user = await fb.signInEmail(email, password);
+      // onAuthStateChanged will populate currentUser; pre-fill for snappier UX.
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      return true;
     }
     // ── Mock fallback ──
     const normalised = email.toLowerCase().trim();
@@ -239,15 +235,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const signup = useCallback(async (name: string, email: string, phone: string, password: string): Promise<boolean> => {
     if (useFirebase) {
-      try {
-        const user = await fb.signUpEmail(name, email, phone, password);
-        setCurrentUser(user);
-        setIsAuthenticated(true);
-        return true;
-      } catch (err) {
-        console.warn("[signup] failed:", err);
-        return false;
-      }
+      // Let Firebase errors propagate — callers handle them with authErrorMessage().
+      const user = await fb.signUpEmail(name, email, phone, password);
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      return true;
     }
     // ── Mock fallback ──
     const normalised = email.toLowerCase().trim();
@@ -272,32 +264,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const loginWithGoogle = useCallback(async (idToken: string, accessToken?: string): Promise<boolean> => {
     if (!useFirebase) {
-      console.warn("[google-login] requires Firebase to be configured.");
-      return false;
+      throw new Error("Firebase is not configured. Add EXPO_PUBLIC_FIREBASE_* secrets to enable sign-in.");
     }
-    try {
-      const user = await fb.signInWithGoogleIdToken(idToken, accessToken);
-      setCurrentUser(user); setIsAuthenticated(true);
-      return true;
-    } catch (err) {
-      console.warn("[google-login] failed:", err);
-      return false;
-    }
+    // Let Firebase errors propagate — callers handle them with authErrorMessage().
+    const user = await fb.signInWithGoogleIdToken(idToken, accessToken);
+    setCurrentUser(user); setIsAuthenticated(true);
+    return true;
   }, [useFirebase]);
 
   const loginWithGooglePopup = useCallback(async (): Promise<boolean> => {
     if (!useFirebase) {
-      console.warn("[google-popup] requires Firebase to be configured.");
-      return false;
+      throw new Error("Firebase is not configured. Add EXPO_PUBLIC_FIREBASE_* secrets to enable sign-in.");
     }
-    try {
-      const user = await fb.signInWithGooglePopup();
-      setCurrentUser(user); setIsAuthenticated(true);
-      return true;
-    } catch (err) {
-      console.warn("[google-popup] failed:", err);
-      return false;
-    }
+    // Let Firebase errors propagate — callers handle them with authErrorMessage().
+    const user = await fb.signInWithGooglePopup();
+    setCurrentUser(user); setIsAuthenticated(true);
+    return true;
   }, [useFirebase]);
 
   const logout = useCallback(async () => {

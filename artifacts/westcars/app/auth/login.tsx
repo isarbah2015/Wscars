@@ -21,6 +21,8 @@ import { GoogleAuthBridge } from "@/components/GoogleAuthBridge";
 
 const WC_LOGO = require("@/assets/images/wc-logo.png");
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const GOOGLE_WEB_CLIENT_ID     = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
 const GOOGLE_IOS_CLIENT_ID     = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
 const GOOGLE_ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
@@ -35,15 +37,20 @@ export default function LoginScreen() {
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    if (!trimmedEmail || !trimmedPassword) {
       Alert.alert("Required", "Please enter your email and password.");
+      return;
+    }
+    if (!EMAIL_RE.test(trimmedEmail)) {
+      Alert.alert("Invalid email", "Please enter a valid email address.");
       return;
     }
     setLoading(true);
     try {
-      const ok = await login(email.trim(), password);
-      if (ok) router.replace("/(tabs)");
-      else Alert.alert("Sign In Failed", "No account found with those details. Check your email and password, or tap 'Create account'.");
+      await login(trimmedEmail, trimmedPassword);
+      router.replace("/(tabs)");
     } catch (err) {
       Alert.alert("Sign In Failed", authErrorMessage(err));
     } finally {
@@ -87,10 +94,14 @@ export default function LoginScreen() {
 
   const onGoogleIdToken = useCallback(async (idToken: string, accessToken?: string) => {
     setLoading(true);
-    const ok = await loginWithGoogle(idToken, accessToken);
-    setLoading(false);
-    if (ok) router.replace("/(tabs)");
-    else Alert.alert("Sign in failed", "Could not sign in with Google.");
+    try {
+      await loginWithGoogle(idToken, accessToken);
+      router.replace("/(tabs)");
+    } catch (err) {
+      Alert.alert("Google Sign-In Failed", authErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
   }, [loginWithGoogle]);
 
   const handleGoogle = async () => {
@@ -101,10 +112,14 @@ export default function LoginScreen() {
     // Web: use Firebase's built-in popup — no extra OAuth client IDs needed
     if (isWeb) {
       setLoading(true);
-      const ok = await loginWithGooglePopup();
-      setLoading(false);
-      if (ok) router.replace("/(tabs)");
-      else Alert.alert("Sign in failed", "Could not sign in with Google. Make sure Google is enabled as a sign-in provider in your Firebase console.");
+      try {
+        await loginWithGooglePopup();
+        router.replace("/(tabs)");
+      } catch (err) {
+        Alert.alert("Google Sign-In Failed", authErrorMessage(err));
+      } finally {
+        setLoading(false);
+      }
       return;
     }
     // Native: needs platform OAuth client ID

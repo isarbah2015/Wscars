@@ -59,8 +59,11 @@ function findPinnedDir(name) {
 function pinnedMain(dir, platform) {
   const pkg = JSON.parse(fs.readFileSync(path.join(dir, "package.json"), "utf8"));
   const isNative = platform === "android" || platform === "ios" || platform === "native";
+  const isWeb    = platform === "web";
   const mainField =
-    isNative && pkg["react-native"] ? pkg["react-native"] : pkg.main || "index.js";
+    isNative && pkg["react-native"] ? pkg["react-native"] :
+    isWeb    && pkg["browser"]      ? pkg["browser"]      :
+    pkg.main || "index.js";
   const resolved = path.resolve(dir, mainField);
   // Add .js extension if the field points to a bare path
   for (const ext of ["", ".js", ".jsx", ".ts", ".tsx"]) {
