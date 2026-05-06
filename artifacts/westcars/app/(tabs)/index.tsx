@@ -381,7 +381,9 @@ export default function HomeScreen() {
         </Animated.View>{/* end inner opacity Animated.View */}
         </Animated.View>{/* end outer maxHeight Animated.View */}
         {/* ── Browse by Brand ── */}
-        <View style={[styles.brandSection, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
+        <View style={styles.brandSection}>
+          {/* Rounded card background sits absolutely so it never clips the ScrollView */}
+          <View style={[styles.brandSectionBg, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]} pointerEvents="none" />
           <View style={styles.brandSectionHeader}>
             <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#0EB5CA" />
             <Text style={[styles.brandSectionTitle, { color: isDark ? "#CBD5E1" : "#334155" }]}>Car Brands</Text>
@@ -1049,10 +1051,12 @@ const styles = StyleSheet.create({
   brandSection: {
     marginHorizontal: 6,
     marginTop: 6,
-    borderRadius: 16,
     paddingTop: 10,
     paddingBottom: 10,
-    overflow: "visible",
+  },
+  brandSectionBg: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 16,
     shadowColor: "#0A1628",
     shadowOpacity: 0.05,
     shadowRadius: 8,
