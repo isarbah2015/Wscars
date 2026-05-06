@@ -91,11 +91,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const messageSubsRef = useRef<Record<string, () => void>>({});
 
   // ── Bootstrap ────────────────────────────────────────────────────────────
-  const listenerSet = useRef(false);
   useEffect(() => {
     if (useFirebase) {
-      if (listenerSet.current) return;
-      listenerSet.current = true;
       // Firebase mode — auth state is the source of truth.
       const unsub = fb.subscribeAuth((u) => {
         setCurrentUser((prev) => {

@@ -77,7 +77,7 @@ if (missing.length === 0) {
 
     // ── Firestore ─────────────────────────────────────────────────────────
     const databaseId =
-      process.env.EXPO_PUBLIC_FIREBASE_DATABASE_ID ?? "westcar-5c1e6";
+      process.env.EXPO_PUBLIC_FIREBASE_DATABASE_ID ?? "(default)";
     db = getFirestore(app, databaseId);
 
     // ── Storage ───────────────────────────────────────────────────────────
