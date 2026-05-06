@@ -100,9 +100,11 @@ export default function WelcomeScreen() {
             resizeMode="contain"
             fadeDuration={250}
           />
+          {/* Gradient starts fully transparent so there's no hard top edge,
+              reaches solid navy well before the overflow:hidden clip kicks in */}
           <LinearGradient
-            colors={["rgba(10,22,40,0.55)", "rgba(10,22,40,0.92)", "rgba(10,22,40,1)"]}
-            locations={[0, 0.7, 1]}
+            colors={["transparent", "rgba(10,22,40,0.70)", "#0A1628", "#0A1628"]}
+            locations={[0, 0.42, 0.72, 1]}
             style={StyleSheet.absoluteFill}
             pointerEvents="none"
           />
@@ -176,9 +178,9 @@ const styles = StyleSheet.create({
   },
   reflectionWrap: {
     width: "100%",
-    height: CAR_H * 0.30,
+    height: CAR_H * 0.38,
     marginTop: -CAR_H * 0.40,
-    opacity: 0.35,
+    opacity: 0.42,
     overflow: "hidden",
   },
   reflectionImg: {
