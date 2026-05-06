@@ -89,10 +89,11 @@ export default function WelcomeScreen() {
         <Text style={styles.brandTag}>GHANA'S TRUSTED CAR MARKETPLACE</Text>
       </View>
 
-      {/* Hero car image */}
+      {/* Hero car image — fits nicely inside the screen, no edge bleed */}
       <View style={styles.carWrap}>
         <Image source={CAR} style={styles.carImg} resizeMode="contain" />
       </View>
+
 
       {/* Premium glass card */}
       <View style={[styles.cardWrap, { paddingBottom: insets.bottom + 24 }]}>
@@ -153,10 +154,11 @@ const styles = StyleSheet.create({
     height: CAR_H,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 8,
+    marginTop: 18,
+    paddingHorizontal: 24,
   },
   carImg: {
-    width: "112%",
+    width: "100%",
     height: CAR_H,
   },
 
