@@ -126,7 +126,7 @@ export default function WelcomeScreen() {
   );
 }
 
-const CAR_H = 280;
+const CAR_H = 340;
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#0A1628" },
