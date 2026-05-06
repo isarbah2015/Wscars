@@ -89,9 +89,34 @@ export default function WelcomeScreen() {
         <Text style={styles.brandTag}>GHANA'S TRUSTED CAR MARKETPLACE</Text>
       </View>
 
-      {/* Hero car image — fits nicely inside the screen, no edge bleed */}
+      {/* Hero car image — soft glow + ground reflection */}
       <View style={styles.carWrap}>
-        <Image source={CAR} style={styles.carImg} resizeMode="contain" />
+        {/* Elliptical cyan ground glow behind/under the car so edges don't look cut */}
+        <View pointerEvents="none" style={styles.carGlow}>
+          <LinearGradient
+            colors={["rgba(14,181,202,0.45)", "rgba(14,181,202,0.10)", "transparent"]}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
+
+        <Image source={CAR} style={styles.carImg} resizeMode="contain" fadeDuration={250} />
+
+        {/* Mirrored reflection */}
+        <View style={styles.reflectionWrap} pointerEvents="none">
+          <Image
+            source={CAR}
+            style={styles.reflectionImg}
+            resizeMode="contain"
+            fadeDuration={250}
+          />
+          {/* Fade-out overlay so the reflection blends into the background */}
+          <LinearGradient
+            colors={["rgba(10,22,40,0.55)", "rgba(10,22,40,0.95)", "rgba(10,22,40,1)"]}
+            locations={[0, 0.7, 1]}
+            style={StyleSheet.absoluteFill}
+            pointerEvents="none"
+          />
+        </View>
       </View>
 
 
@@ -151,15 +176,41 @@ const styles = StyleSheet.create({
 
   carWrap: {
     width: "100%",
-    height: CAR_H,
+    height: CAR_H + 80,
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: 18,
+    justifyContent: "flex-start",
+    marginTop: 14,
     paddingHorizontal: 24,
+    position: "relative",
+  },
+  carGlow: {
+    position: "absolute",
+    top: CAR_H * 0.55,
+    left: 0,
+    right: 0,
+    height: 110,
+    borderRadius: 200,
+    overflow: "hidden",
+    transform: [{ scaleX: 1.1 }],
   },
   carImg: {
     width: "100%",
     height: CAR_H,
+  },
+  reflectionWrap: {
+    position: "absolute",
+    top: CAR_H - 20,
+    left: 24,
+    right: 24,
+    height: 90,
+    overflow: "hidden",
+    opacity: 0.35,
+    transform: [{ scaleY: -1 }],
+  },
+  reflectionImg: {
+    width: "100%",
+    height: CAR_H,
+    marginTop: -CAR_H + 90,
   },
 
   cardWrap: {
