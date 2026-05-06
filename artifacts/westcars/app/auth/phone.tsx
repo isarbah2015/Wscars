@@ -67,7 +67,7 @@ export default function PhoneAuthScreen() {
   const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
 
   return (
-    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <View style={[styles.hero, { paddingTop: topPad + 16 }]}>
         <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
           <Feather name="arrow-left" size={20} color="#0F172A" />

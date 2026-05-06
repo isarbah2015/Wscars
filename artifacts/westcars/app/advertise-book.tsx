@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
@@ -214,7 +215,7 @@ export default function AdvertiseBookScreen() {
   };
 
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       {/* Top bar */}
       <View style={[styles.topBar, { paddingTop: topPad + 8 }]}>
         <Pressable style={styles.backBtn} onPress={() => router.back()}>
@@ -451,7 +452,7 @@ export default function AdvertiseBookScreen() {
           <Text style={styles.submitBtnText}>Confirm Booking</Text>
         </Pressable>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

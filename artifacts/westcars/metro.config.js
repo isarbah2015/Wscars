@@ -23,4 +23,6 @@ config.resolver.blockList = [
   /\/\.git\/.*/,
 ];
 
+config.resolver.platforms = ["android", "ios", "web", "native"];
+
 module.exports = config;
