@@ -9,13 +9,11 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/wc-logo.png",
-      "resizeMode": "contain",
       "backgroundColor": "#0A1628",
+      "resizeMode": "contain",
       "dark": {
-        "image": "./assets/images/wc-logo.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#0A1628"
+        "backgroundColor": "#0A1628",
+        "resizeMode": "contain"
       }
     },
     "ios": {

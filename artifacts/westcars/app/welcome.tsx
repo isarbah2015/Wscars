@@ -197,8 +197,8 @@ const styles = StyleSheet.create({
   },
   reflectionWrap: {
     width: "100%",
-    height: CAR_H * 0.32,
-    marginTop: -CAR_H * 0.18,
+    height: CAR_H * 0.30,
+    marginTop: -CAR_H * 0.40,
     opacity: 0.32,
     overflow: "hidden",
   },
