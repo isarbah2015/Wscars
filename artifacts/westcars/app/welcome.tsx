@@ -126,7 +126,7 @@ export default function WelcomeScreen() {
   );
 }
 
-const CAR_H = 340;
+const CAR_H = 390;
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#0A1628" },
@@ -152,8 +152,8 @@ const styles = StyleSheet.create({
   carWrap: {
     width: "100%",
     alignItems: "center",
-    marginTop: 14,
-    paddingHorizontal: 28,
+    marginTop: 8,
+    paddingHorizontal: 10,
   },
   carImg: {
     width: "100%",
