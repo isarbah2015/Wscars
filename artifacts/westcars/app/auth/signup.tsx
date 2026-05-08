@@ -60,12 +60,11 @@ export default function SignupScreen() {
         keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
       >
-        {/* ── Card ── */}
         <View style={styles.card}>
 
           {/* Logo + nav row */}
           <View style={styles.topRow}>
-            <Image source={WC_LOGO} style={styles.logo} resizeMode="contain" tintColor="#FF6B00" />
+            <Image source={WC_LOGO} style={styles.logo} resizeMode="contain" />
             <TouchableOpacity onPress={() => router.push('/auth/login')} activeOpacity={0.7} style={styles.navBtn}>
               <Text style={styles.navBtnText}>Sign In</Text>
             </TouchableOpacity>
@@ -89,7 +88,6 @@ export default function SignupScreen() {
             returnKeyType="next"
             blurOnSubmit={false}
             editable={!loading}
-            textAlign="left"
             onSubmitEditing={() => emailRef.current?.focus()}
           />
 
@@ -108,7 +106,6 @@ export default function SignupScreen() {
             returnKeyType="next"
             blurOnSubmit={false}
             editable={!loading}
-            textAlign="left"
             onSubmitEditing={() => passwordRef.current?.focus()}
           />
 
@@ -127,7 +124,6 @@ export default function SignupScreen() {
             returnKeyType="next"
             blurOnSubmit={false}
             editable={!loading}
-            textAlign="left"
             onSubmitEditing={() => confirmRef.current?.focus()}
           />
 
@@ -145,7 +141,6 @@ export default function SignupScreen() {
             autoComplete="new-password"
             returnKeyType="done"
             editable={!loading}
-            textAlign="left"
             onSubmitEditing={handleSignup}
           />
 
@@ -165,7 +160,6 @@ export default function SignupScreen() {
             )}
           </TouchableOpacity>
 
-          {/* ── Browse as guest ── */}
           <TouchableOpacity
             onPress={() => router.replace('/(tabs)' as any)}
             activeOpacity={0.7}
@@ -178,6 +172,8 @@ export default function SignupScreen() {
     </KeyboardAvoidingView>
   );
 }
+
+const TEAL = '#0EB5CA';
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#EDF4F7' },
@@ -207,15 +203,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 24,
   },
-  logo: { width: 100, height: 34 },
+  logo: { width: 100, height: 40 },
   navBtn: {
     paddingHorizontal: 16,
     paddingVertical: 7,
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: '#FF6B00',
+    borderColor: TEAL,
   },
-  navBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#FF6B00' },
+  navBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: TEAL },
 
   title: {
     fontSize: 32,
@@ -250,7 +246,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#0F172A',
     marginBottom: 14,
-    textAlign: 'left',
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
     fontFamily: 'Inter_400Regular',
@@ -266,14 +261,14 @@ const styles = StyleSheet.create({
   primaryBtn: {
     width: '100%',
     height: 52,
-    backgroundColor: '#FF6B00',
+    backgroundColor: TEAL,
     borderRadius: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
     gap: 12,
-    shadowColor: '#FF6B00',
+    shadowColor: TEAL,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
     shadowRadius: 12,

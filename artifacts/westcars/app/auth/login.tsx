@@ -17,18 +17,17 @@ import { auth } from '../../lib/firebase-persistence';
 import { GoogleAuthBridge } from '../../components/GoogleAuthBridge';
 import { signInWithGoogleIdToken } from '../../services/firebase/auth';
 
-const CAR_IMAGE = require('../../assets/images/car-hero.png');
-const WC_LOGO   = require('../../assets/images/wc-logo.png');
+const WC_LOGO = require('../../assets/images/wc-logo.png');
 
 export default function LoginScreen() {
   const router = useRouter();
   const passwordRef = useRef<TextInput>(null);
   const googlePromptRef = useRef<(() => Promise<void>) | null>(null);
-  const [email, setEmail]                   = useState('');
-  const [password, setPassword]             = useState('');
-  const [loading, setLoading]               = useState(false);
-  const [googleLoading, setGoogleLoading]   = useState(false);
-  const [error, setError]                   = useState('');
+  const [email, setEmail]                 = useState('');
+  const [password, setPassword]           = useState('');
+  const [loading, setLoading]             = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [error, setError]                 = useState('');
 
   const handleLogin = async () => {
     setError('');
@@ -72,12 +71,11 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-        {/* ── Card ── */}
         <View style={styles.card}>
 
           {/* Logo + nav row */}
           <View style={styles.topRow}>
-            <Image source={WC_LOGO} style={styles.logo} resizeMode="contain" tintColor="#FF6B00" />
+            <Image source={WC_LOGO} style={styles.logo} resizeMode="contain" />
             <TouchableOpacity onPress={() => router.push('/auth/signup')} activeOpacity={0.7} style={styles.navBtn}>
               <Text style={styles.navBtnText}>Sign Up</Text>
             </TouchableOpacity>
@@ -102,7 +100,6 @@ export default function LoginScreen() {
             returnKeyType="next"
             blurOnSubmit={false}
             editable={!busy}
-            textAlign="left"
             onSubmitEditing={() => passwordRef.current?.focus()}
           />
 
@@ -120,11 +117,9 @@ export default function LoginScreen() {
             autoComplete="password"
             returnKeyType="done"
             editable={!busy}
-            textAlign="left"
             onSubmitEditing={handleLogin}
           />
 
-          {/* Sign In button */}
           <TouchableOpacity
             style={[styles.primaryBtn, busy && styles.btnDisabled]}
             onPress={handleLogin}
@@ -145,14 +140,12 @@ export default function LoginScreen() {
             <Text style={styles.forgotText}>Forgot password?</Text>
           </TouchableOpacity>
 
-          {/* ── Social divider ── */}
           <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>or continue with</Text>
             <View style={styles.dividerLine} />
           </View>
 
-          {/* ── Social pills ── */}
           <View style={styles.socialRow}>
             <TouchableOpacity
               style={[styles.socialPill, styles.socialGoogle, busy && styles.btnDisabled]}
@@ -179,7 +172,6 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* ── Browse as guest ── */}
           <TouchableOpacity
             onPress={() => router.replace('/(tabs)' as any)}
             activeOpacity={0.7}
@@ -192,6 +184,9 @@ export default function LoginScreen() {
     </KeyboardAvoidingView>
   );
 }
+
+const TEAL = '#0EB5CA';
+const TEAL_DARK = '#0098AA';
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#EDF4F7' },
@@ -221,15 +216,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 24,
   },
-  logo: { width: 100, height: 34 },
+  logo: { width: 100, height: 40 },
   navBtn: {
     paddingHorizontal: 16,
     paddingVertical: 7,
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: '#FF6B00',
+    borderColor: TEAL,
   },
-  navBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#FF6B00' },
+  navBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: TEAL },
 
   title: {
     fontSize: 32,
@@ -264,7 +259,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#0F172A',
     marginBottom: 14,
-    textAlign: 'left',
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
     fontFamily: 'Inter_400Regular',
@@ -280,14 +274,14 @@ const styles = StyleSheet.create({
   primaryBtn: {
     width: '100%',
     height: 52,
-    backgroundColor: '#FF6B00',
+    backgroundColor: TEAL,
     borderRadius: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 6,
     gap: 12,
-    shadowColor: '#FF6B00',
+    shadowColor: TEAL,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
     shadowRadius: 12,
@@ -311,13 +305,8 @@ const styles = StyleSheet.create({
 
   socialRow: { flexDirection: 'row', gap: 12, justifyContent: 'center', width: '100%' },
   socialPill: {
-    flex: 1,
-    height: 50,
-    borderRadius: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
+    flex: 1, height: 50, borderRadius: 14,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
   },
   socialGoogle: {
     backgroundColor: '#F8FAFC',
@@ -325,8 +314,8 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
   },
   socialPhone: {
-    backgroundColor: '#FF6B00',
-    shadowColor: '#FF6B00',
+    backgroundColor: TEAL,
+    shadowColor: TEAL,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 8,

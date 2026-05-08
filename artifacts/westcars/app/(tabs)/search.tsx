@@ -75,7 +75,7 @@ const PRICE_RANGES = [
 type QuickFilterKey = "All"|"SUV"|"Sedan"|"Tokunbo"|"Budget"|"Luxury"|"Pickup"|"Truck"|"Bus"|"Heavy"|"Moto"|"New";
 
 const QUICK_FILTERS: { key: QuickFilterKey; label: string; icon: any; color: string }[] = [
-  { key: "All",     label: "All",     icon: "grid",        color: "#FF6B00" },
+  { key: "All",     label: "All",     icon: "grid",        color: "#0EB5CA" },
   { key: "SUV",     label: "SUV",     icon: "box",         color: "#6366F1" },
   { key: "Sedan",   label: "Sedan",   icon: "minus-circle",color: "#EC4899" },
   { key: "Tokunbo", label: "Tokunbo", icon: "package",     color: "#22C55E" },
@@ -141,7 +141,7 @@ function FilterModal({
     <View style={fStyles.section}>
       <View style={fStyles.sectionHeader}>
         <View style={fStyles.sectionIconWrap}>
-          <Feather name={icon} size={13} color="#FF6B00" />
+          <Feather name={icon} size={13} color="#0EB5CA" />
         </View>
         <Text style={fStyles.sectionLabel}>{label}</Text>
       </View>
@@ -177,10 +177,10 @@ function FilterModal({
               style={[fStyles.brandChip, active && fStyles.chipActive]}>
               <View style={[fStyles.brandLogoWrap, active && fStyles.brandLogoWrapActive]}>
                 {b === "Any"
-                  ? <Feather name="layers" size={14} color={active ? "#FF6B00" : "#64748B"} />
+                  ? <Feather name="layers" size={14} color={active ? "#0EB5CA" : "#64748B"} />
                   : logo
                     ? <Image source={{ uri: logo }} style={{ width: 20, height: 20 }} resizeMode="contain" />
-                    : <Text style={{ fontSize: 10, fontFamily: "Manrope_800ExtraBold", color: active ? "#FF6B00" : "#64748B" }}>{b.charAt(0)}</Text>
+                    : <Text style={{ fontSize: 10, fontFamily: "Manrope_800ExtraBold", color: active ? "#0EB5CA" : "#64748B" }}>{b.charAt(0)}</Text>
                 }
               </View>
               <Text style={[fStyles.chipText, active && fStyles.chipTextActive]}>{b}</Text>
@@ -199,7 +199,7 @@ function FilterModal({
         return (
           <Pressable key={pr.label} onPress={() => setPriceRange(pr)}
             style={[fStyles.priceCard, active && fStyles.priceCardActive]}>
-            <Feather name={pr.icon} size={13} color={active ? "#fff" : "#FF6B00"} />
+            <Feather name={pr.icon} size={13} color={active ? "#fff" : "#0EB5CA"} />
             <Text style={[fStyles.priceLabel, active && fStyles.priceLabelActive]}>{pr.label}</Text>
           </Pressable>
         );
@@ -214,7 +214,7 @@ function FilterModal({
         {/* ── Dark header ── */}
         <View style={fStyles.header}>
           <Pressable style={fStyles.headerBack} onPress={onClose}>
-            <Feather name="arrow-left" size={20} color="#fff" />
+            <Feather name="arrow-left" size={20} color="#0F172A" />
           </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={fStyles.headerTitle}>Filters</Text>
@@ -269,7 +269,7 @@ function FilterModal({
             onPress={() => { onApply({ brand, model, location, fuelType, transmission, condition, priceRange }); onClose(); }}
           >
             <LinearGradient
-              colors={["#FF6B00", "#C85000"]}
+              colors={["#0EB5CA", "#0098AA"]}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
               style={fStyles.applyGrad}
             >
@@ -370,7 +370,7 @@ export default function SearchScreen() {
 
   const bgHeader = isDark ? "#111827" : "#FFFFFF";
   const borderHeader = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)";
-  const ORANGE = "#FF6B00";
+  const TEAL = "#0EB5CA";
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -379,11 +379,11 @@ export default function SearchScreen() {
         {/* Title row */}
         <View style={styles.titleRow}>
           <View>
-            <Text style={[styles.titleSub, { color: ORANGE }]}>WESTCARS</Text>
+            <Text style={[styles.titleSub, { color: TEAL }]}>WESTCARS</Text>
             <Text style={[styles.title, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Search</Text>
           </View>
           {filtered.length > 0 && (
-            <View style={[styles.countBadge, { backgroundColor: ORANGE }]}>
+            <View style={[styles.countBadge, { backgroundColor: TEAL }]}>
               <Text style={styles.countText}>{filtered.length}</Text>
               <Text style={styles.countLabel}>found</Text>
             </View>
@@ -413,7 +413,7 @@ export default function SearchScreen() {
             style={[styles.filterBtn, activeFilters && styles.filterBtnActive]}
           >
             <LinearGradient
-              colors={["#FF6B00", "#E05A00"]}
+              colors={["#0EB5CA", "#0098AA"]}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
               style={styles.filterBtnGrad}
             >
@@ -463,14 +463,14 @@ export default function SearchScreen() {
         {activeFilters && (
           <View style={styles.filterBadgeRow}>
             <LinearGradient
-              colors={["rgba(255,107,0,0.10)", "rgba(224,90,0,0.10)"]}
+              colors={["rgba(14,181,202,0.10)", "rgba(0,152,170,0.10)"]}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
               style={styles.filterBadge}
             >
-              <Feather name="filter" size={11} color="#FF6B00" />
+              <Feather name="filter" size={11} color="#0EB5CA" />
               <Text style={styles.filterBadgeText}>Filters active</Text>
               <Pressable onPress={() => setActiveFilters(null)} hitSlop={10}>
-                <Feather name="x" size={12} color="#FF6B00" />
+                <Feather name="x" size={12} color="#0EB5CA" />
               </Pressable>
             </LinearGradient>
           </View>
@@ -494,10 +494,10 @@ export default function SearchScreen() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <LinearGradient
-              colors={["rgba(255,107,0,0.10)", "rgba(224,90,0,0.10)"]}
+              colors={["rgba(14,181,202,0.12)", "rgba(0,152,170,0.08)"]}
               style={styles.emptyIconBg}
             >
-              <Feather name="search" size={34} color="#FF6B00" />
+              <Feather name="search" size={34} color="#0EB5CA" />
             </LinearGradient>
             <Text style={[styles.emptyTitle, { color: colors.text }]}>No vehicles found</Text>
             <Text style={[styles.emptyText, { color: colors.textTertiary }]}>
@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
   },
   countBadge: {
     alignItems: "center",
-    backgroundColor: "#FF6B00",
+    backgroundColor: "#0EB5CA",
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   filterBtnActive: {
-    shadowColor: "#FF6B00",
+    shadowColor: "#0EB5CA",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.4,
     shadowRadius: 6,
@@ -653,12 +653,12 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,107,0,0.20)",
+    borderColor: "rgba(14,181,202,0.25)",
   },
   filterBadgeText: {
     fontSize: 12,
     fontFamily: "Inter_600SemiBold",
-    color: "#FF6B00",
+    color: "#0EB5CA",
   },
 
   row: { flexDirection: "row", paddingHorizontal: 8, gap: 8 },
@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
 });
 
 const fStyles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#0D0D1A" },
+  safeArea: { flex: 1, backgroundColor: "#FFFFFF" },
 
   // ── Header ──
   header: {
@@ -686,27 +686,28 @@ const fStyles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.06)",
+    borderBottomColor: "#E2E8F0",
+    backgroundColor: "#FFFFFF",
     gap: 12,
   },
   headerBack: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center",
   },
   headerTitle: {
     fontSize: 22,
     fontFamily: "Manrope_800ExtraBold",
-    color: "#FFFFFF",
+    color: "#0F172A",
     letterSpacing: -0.5,
   },
   headerSub: {
     fontSize: 11,
     fontFamily: "Inter_500Medium",
-    color: "#FF6B00",
+    color: "#0EB5CA",
     marginTop: 1,
   },
   clearBtn: {
@@ -714,16 +715,16 @@ const fStyles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,107,0,0.40)",
+    borderColor: "rgba(14,181,202,0.40)",
   },
   clearBtnText: {
     fontSize: 13,
     fontFamily: "Inter_600SemiBold",
-    color: "#FF6B00",
+    color: "#0EB5CA",
   },
 
   // ── Body ──
-  body: { flex: 1 },
+  body: { flex: 1, backgroundColor: "#F8FAFC" },
   bodyContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
@@ -744,14 +745,14 @@ const fStyles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 7,
-    backgroundColor: "rgba(255,107,0,0.15)",
+    backgroundColor: "rgba(14,181,202,0.12)",
     alignItems: "center",
     justifyContent: "center",
   },
   sectionLabel: {
     fontSize: 11,
     fontFamily: "Inter_700Bold",
-    color: "rgba(255,255,255,0.45)",
+    color: "#64748B",
     letterSpacing: 1.2,
     textTransform: "uppercase",
   },
@@ -761,23 +762,23 @@ const fStyles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 9,
     borderRadius: 50,
-    backgroundColor: "#1A1A2E",
+    backgroundColor: "#F1F5F9",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "#E2E8F0",
   },
   chipActive: {
-    backgroundColor: "#FF6B00",
-    borderColor: "#FF6B00",
-    shadowColor: "#FF6B00",
+    backgroundColor: "#0EB5CA",
+    borderColor: "#0EB5CA",
+    shadowColor: "#0EB5CA",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.50,
+    shadowOpacity: 0.35,
     shadowRadius: 8,
     elevation: 6,
   },
   chipText: {
     fontSize: 13,
     fontFamily: "Inter_600SemiBold",
-    color: "rgba(255,255,255,0.55)",
+    color: "#475569",
   },
   chipTextActive: {
     color: "#fff",
@@ -792,20 +793,20 @@ const fStyles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 50,
-    backgroundColor: "#1A1A2E",
+    backgroundColor: "#F1F5F9",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "#E2E8F0",
   },
   brandLogoWrap: {
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "#E2E8F0",
     alignItems: "center",
     justifyContent: "center",
   },
   brandLogoWrapActive: {
-    backgroundColor: "rgba(255,255,255,0.20)",
+    backgroundColor: "rgba(255,255,255,0.30)",
   },
 
   // ── Price grid ──
@@ -819,23 +820,23 @@ const fStyles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 6,
     borderRadius: 14,
-    backgroundColor: "#1A1A2E",
+    backgroundColor: "#F1F5F9",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "#E2E8F0",
   },
   priceCardActive: {
-    backgroundColor: "#FF6B00",
-    borderColor: "#FF6B00",
-    shadowColor: "#FF6B00",
+    backgroundColor: "#0EB5CA",
+    borderColor: "#0EB5CA",
+    shadowColor: "#0EB5CA",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.50,
+    shadowOpacity: 0.35,
     shadowRadius: 8,
     elevation: 6,
   },
   priceLabel: {
     fontSize: 11,
     fontFamily: "Inter_700Bold",
-    color: "rgba(255,255,255,0.50)",
+    color: "#64748B",
     textAlign: "center",
     flexShrink: 1,
   },
@@ -848,9 +849,9 @@ const fStyles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 14,
     paddingBottom: 12,
-    backgroundColor: "#0D0D1A",
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.07)",
+    borderTopColor: "#E2E8F0",
   },
   applyBtn: {
     borderRadius: 28,
