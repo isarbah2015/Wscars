@@ -13,7 +13,7 @@ import {
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const CAR  = require("@/assets/images/welcome-car.png");
+const CAR  = require("@/assets/images/welcome-car-porsche.png");
 const LOGO = require("@/assets/images/wc-logo.png");
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
@@ -71,12 +71,12 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.root}>
 
-      {/* ── Full-screen cinematic car image (top ~65%) ── */}
+      {/* ── Car image — half cut from left edge ── */}
       <Image
         source={CAR}
         style={styles.carFull}
         resizeMode="contain"
-        fadeDuration={250}
+        fadeDuration={200}
       />
 
       {/* ── Gradient scrim — transparent at top, solid dark at bottom ── */}
@@ -142,11 +142,10 @@ const styles = StyleSheet.create({
 
   carFull: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    width: SCREEN_W,
-    height: SCREEN_H * 0.65,
-    backgroundColor: "#050812",
+    top: SCREEN_H * 0.04,
+    left: -SCREEN_W * 0.52,
+    width: SCREEN_W * 1.65,
+    height: SCREEN_H * 0.60,
   },
 
   topRow: {
