@@ -75,7 +75,7 @@ export default function WelcomeScreen() {
       <Image
         source={CAR}
         style={styles.carFull}
-        resizeMode="cover"
+        resizeMode="contain"
         fadeDuration={250}
       />
 
@@ -145,7 +145,8 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     width: SCREEN_W,
-    height: SCREEN_H * 0.68,
+    height: SCREEN_H * 0.65,
+    backgroundColor: "#050812",
   },
 
   topRow: {
