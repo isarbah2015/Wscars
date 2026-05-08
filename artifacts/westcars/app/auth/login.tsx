@@ -153,7 +153,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0A1628' },
-  scroll: { flexGrow: 1 },
+  scroll: { flexGrow: 0 },
 
   heroWrap: {
     width: SCREEN_W,
@@ -167,13 +167,13 @@ const styles = StyleSheet.create({
     width: SCREEN_W * 1.08,
     height: SCREEN_W * 0.78,
     marginLeft: -SCREEN_W * 0.04,
-    marginBottom: -16,
+    marginBottom: -38,
   },
 
   formCard: {
     paddingHorizontal: 24,
     paddingTop: 20,
-    paddingBottom: 24,
+    paddingBottom: 8,
   },
   title: { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 6 },
   subtitle: { fontSize: 15, color: '#aaa', marginBottom: 28 },
