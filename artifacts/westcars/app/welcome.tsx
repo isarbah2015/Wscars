@@ -1,10 +1,11 @@
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
+  Easing,
   Image,
   StyleSheet,
   Text,
@@ -18,8 +19,6 @@ const LOGO = require("@/assets/images/wc-logo.png");
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
-const TEAL      = "#0EB5CA";
-const TEAL_MID  = "#0098AA";
 const TEAL_DEEP = "#006F80";
 
 export default function WelcomeScreen() {
@@ -30,8 +29,54 @@ export default function WelcomeScreen() {
   const THUMB      = BTN_H - 8;
   const trackWidth = Math.min(SCREEN_W - 48, 340);
   const MAX_X      = trackWidth - THUMB - 8;
+
   const translateX = useRef(new Animated.Value(0)).current;
+  const shimmerX   = useRef(new Animated.Value(-trackWidth)).current;
+  const thumbPulse = useRef(new Animated.Value(1)).current;
   const [unlocked, setUnlocked] = useState(false);
+
+  // Shimmer sweeps left → right on a 1.8s loop
+  useEffect(() => {
+    const shimmer = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerX, {
+          toValue: trackWidth,
+          duration: 1300,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.delay(600),
+        Animated.timing(shimmerX, {
+          toValue: -trackWidth,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    // Thumb gentle pulse: scale 1 → 1.10 → 1 every 1.4s
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(thumbPulse, {
+          toValue: 1.12,
+          duration: 600,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(thumbPulse, {
+          toValue: 1,
+          duration: 600,
+          easing: Easing.in(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.delay(200),
+      ])
+    );
+
+    shimmer.start();
+    pulse.start();
+    return () => { shimmer.stop(); pulse.stop(); };
+  }, []);
 
   const goToLogin = () => {
     if (unlocked) return;
@@ -77,7 +122,7 @@ export default function WelcomeScreen() {
 
       {/* ── Background gradient: white → teal ── */}
       <LinearGradient
-        colors={["#FFFFFF", "#E8F9FC", TEAL, TEAL_DEEP]}
+        colors={["#FFFFFF", "#E8F9FC", "#0EB5CA", TEAL_DEEP]}
         locations={[0, 0.30, 0.70, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -90,13 +135,13 @@ export default function WelcomeScreen() {
         fadeDuration={200}
       />
 
-      {/* ── Scrim: transparent at top (white bg shows) → teal-dark at bottom ── */}
+      {/* ── Bottom scrim ── */}
       <LinearGradient
         colors={[
           "transparent",
           "transparent",
-          `rgba(0,111,128,0.30)`,
-          `rgba(0,111,128,0.82)`,
+          "rgba(0,111,128,0.30)",
+          "rgba(0,111,128,0.82)",
           TEAL_DEEP,
         ]}
         locations={[0, 0.38, 0.55, 0.72, 1]}
@@ -104,7 +149,7 @@ export default function WelcomeScreen() {
         pointerEvents="none"
       />
 
-      {/* ── Logo pinned top-left (teal on white bg) ── */}
+      {/* ── Logo pinned top-left ── */}
       <View style={[styles.topRow, { paddingTop: insets.top + 16 }]}>
         <Image source={LOGO} style={styles.logo} resizeMode="contain" />
       </View>
@@ -119,20 +164,44 @@ export default function WelcomeScreen() {
           Experience the perfect blend of quality, trust, and{"\n"}affordability with thousands of verified car listings.
         </Text>
 
-        {/* ── Slide-to-start track ── */}
+        {/* ── Slide track with shimmer ── */}
         <View style={[styles.slideTrack, { width: trackWidth }]}>
 
+          {/* Shimmer overlay — sweeps right to hint swipe */}
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.shimmer,
+              { transform: [{ translateX: shimmerX }] },
+            ]}
+          >
+            <LinearGradient
+              colors={["transparent", "rgba(255,255,255,0.28)", "rgba(255,255,255,0.55)", "rgba(255,255,255,0.28)", "transparent"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ flex: 1 }}
+            />
+          </Animated.View>
+
+          {/* Centred label */}
           <Animated.Text style={[styles.slideLabel, { opacity: labelOpacity }]}>
-            Get Started
+            Slide to Get Started
           </Animated.Text>
 
+          {/* ">>" hint on right */}
           <Text style={styles.chevrons}>{">>"}</Text>
 
+          {/* Teal thumb with white arrow — fully visible */}
           <PanGestureHandler
             onGestureEvent={onGestureEvent}
             onHandlerStateChange={onHandlerStateChange}
           >
-            <Animated.View style={[styles.slideThumb, { transform: [{ translateX }] }]}>
+            <Animated.View
+              style={[
+                styles.slideThumb,
+                { transform: [{ translateX }, { scale: thumbPulse }] },
+              ]}
+            >
               <Feather name="arrow-right" size={24} color="#fff" />
             </Animated.View>
           </PanGestureHandler>
@@ -169,7 +238,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 24,
-    gap: 0,
   },
 
   headline: {
@@ -193,7 +261,7 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     backgroundColor: "rgba(255,255,255,0.18)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.35)",
+    borderColor: "rgba(255,255,255,0.40)",
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 4,
@@ -201,37 +269,48 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
   },
+  shimmer: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 100,
+    zIndex: 1,
+    pointerEvents: "none",
+  },
   slideLabel: {
     position: "absolute",
     left: 0,
     right: 0,
     textAlign: "center",
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Inter_600SemiBold",
     letterSpacing: 0.2,
+    zIndex: 0,
     pointerEvents: "none",
   },
   chevrons: {
     position: "absolute",
     right: 20,
-    color: "rgba(255,255,255,0.50)",
+    color: "rgba(255,255,255,0.55)",
     fontSize: 15,
     fontFamily: "Inter_600SemiBold",
     letterSpacing: 2,
+    zIndex: 0,
     pointerEvents: "none",
   },
   slideThumb: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#0EB5CA",      // teal — arrow stays white, fully visible
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    zIndex: 10,
+    shadowColor: "#0EB5CA",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.20,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOpacity: 0.70,
+    shadowRadius: 14,
+    elevation: 10,
   },
 });
