@@ -9,9 +9,7 @@ import {
   StyleSheet,
   Image,
   View,
-  Dimensions,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -21,7 +19,6 @@ import { signInWithGoogleIdToken } from '../../services/firebase/auth';
 
 const CAR_IMAGE = require('../../assets/images/car-hero.png');
 const WC_LOGO   = require('../../assets/images/wc-logo.png');
-const { width: SCREEN_W } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -75,26 +72,27 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-        {/* ── White wave top ── */}
-        <View style={styles.waveSection}>
-          <View style={styles.waveHeader}>
-            <Image source={WC_LOGO} style={styles.waveLogo} resizeMode="contain" tintColor="#FF6B00" />
-            <TouchableOpacity onPress={() => router.push('/auth/signup')} activeOpacity={0.7} style={styles.waveSignUpBtn}>
-              <Text style={styles.waveSignUpText}>Sign Up</Text>
+        {/* ── Card ── */}
+        <View style={styles.card}>
+
+          {/* Logo + nav row */}
+          <View style={styles.topRow}>
+            <Image source={WC_LOGO} style={styles.logo} resizeMode="contain" tintColor="#FF6B00" />
+            <TouchableOpacity onPress={() => router.push('/auth/signup')} activeOpacity={0.7} style={styles.navBtn}>
+              <Text style={styles.navBtnText}>Sign Up</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.waveTitle}>Sign In</Text>
-        </View>
 
-        {/* ── Dark form section ── */}
-        <View style={styles.darkSection}>
+          <Text style={styles.title}>Sign In</Text>
+          <Text style={styles.subtitle}>Welcome back to Westcars</Text>
+
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <Text style={styles.label}>Email</Text>
           <TextInput
-            style={styles.darkInput}
+            style={styles.input}
             placeholder="your@email.com"
-            placeholderTextColor="rgba(255,255,255,0.22)"
+            placeholderTextColor="#94A3B8"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -111,9 +109,9 @@ export default function LoginScreen() {
           <Text style={styles.label}>Password</Text>
           <TextInput
             ref={passwordRef}
-            style={styles.darkInput}
+            style={styles.input}
             placeholder="••••••••••"
-            placeholderTextColor="rgba(255,255,255,0.22)"
+            placeholderTextColor="#94A3B8"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -128,17 +126,17 @@ export default function LoginScreen() {
 
           {/* Sign In button */}
           <TouchableOpacity
-            style={[styles.signInBtn, busy && styles.btnDisabled]}
+            style={[styles.primaryBtn, busy && styles.btnDisabled]}
             onPress={handleLogin}
             disabled={busy}
             activeOpacity={0.85}
           >
             {loading ? <ActivityIndicator color="#fff" /> : (
               <>
-                <View style={styles.signInArrow}>
-                  <Text style={styles.signInArrowIcon}>→</Text>
+                <View style={styles.btnArrow}>
+                  <Text style={styles.btnArrowIcon}>→</Text>
                 </View>
-                <Text style={styles.signInText}>Sign In</Text>
+                <Text style={styles.primaryBtnText}>Sign In</Text>
               </>
             )}
           </TouchableOpacity>
@@ -154,11 +152,10 @@ export default function LoginScreen() {
             <View style={styles.dividerLine} />
           </View>
 
-          {/* ── Social pill buttons (centered) ── */}
+          {/* ── Social pills ── */}
           <View style={styles.socialRow}>
-            {/* Google */}
             <TouchableOpacity
-              style={[styles.socialPill, styles.socialPillGoogle, busy && styles.btnDisabled]}
+              style={[styles.socialPill, styles.socialGoogle, busy && styles.btnDisabled]}
               onPress={handleGooglePress}
               disabled={busy}
               activeOpacity={0.8}
@@ -166,20 +163,19 @@ export default function LoginScreen() {
               {googleLoading ? <ActivityIndicator color="#444" size="small" /> : (
                 <>
                   <Text style={styles.googleG}>G</Text>
-                  <Text style={styles.socialPillTextDark}>Google</Text>
+                  <Text style={styles.socialTextDark}>Google</Text>
                 </>
               )}
             </TouchableOpacity>
 
-            {/* Phone */}
             <TouchableOpacity
-              style={[styles.socialPill, styles.socialPillPhone, busy && styles.btnDisabled]}
+              style={[styles.socialPill, styles.socialPhone, busy && styles.btnDisabled]}
               onPress={() => router.push('/auth/phone' as any)}
               disabled={busy}
               activeOpacity={0.8}
             >
               <Text style={styles.phoneEmoji}>📱</Text>
-              <Text style={styles.socialPillTextLight}>Phone</Text>
+              <Text style={styles.socialTextLight}>Phone</Text>
             </TouchableOpacity>
           </View>
 
@@ -198,86 +194,94 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0D0D1A' },
-  scroll: { flexGrow: 1 },
-
-  /* White wave top */
-  waveSection: {
-    backgroundColor: '#FFFFFF',
-    borderBottomLeftRadius: 56,
-    borderBottomRightRadius: 56,
-    paddingTop: Platform.OS === 'ios' ? 60 : 48,
-    paddingBottom: 36,
-    paddingHorizontal: 26,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.14,
-    shadowRadius: 24,
-    elevation: 12,
+  container: { flex: 1, backgroundColor: '#EDF4F7' },
+  scroll: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 32,
   },
-  waveHeader: {
+
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 28,
+    shadowColor: '#0A1628',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.10,
+    shadowRadius: 20,
+    elevation: 6,
+  },
+
+  topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 20,
+    marginBottom: 24,
   },
-  waveLogo: { width: 100, height: 36 },
-  waveSignUpBtn: {
+  logo: { width: 100, height: 34 },
+  navBtn: {
     paddingHorizontal: 16,
     paddingVertical: 7,
     borderRadius: 20,
     borderWidth: 1.5,
     borderColor: '#FF6B00',
   },
-  waveSignUpText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#FF6B00' },
-  waveTitle: {
-    fontSize: 40,
+  navBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#FF6B00' },
+
+  title: {
+    fontSize: 32,
     fontFamily: 'Manrope_800ExtraBold',
-    color: '#0D0D1A',
-    letterSpacing: -1,
+    color: '#0F172A',
+    letterSpacing: -0.8,
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    color: '#64748B',
+    marginBottom: 24,
   },
 
-  /* Dark form */
-  darkSection: {
-    flex: 1,
-    paddingHorizontal: 26,
-    paddingTop: 28,
-    paddingBottom: 28,
-    backgroundColor: '#0D0D1A',
-    alignItems: 'center',
-  },
   label: {
     alignSelf: 'flex-start',
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    color: 'rgba(255,255,255,0.40)',
+    color: '#475569',
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 7,
     marginTop: 4,
   },
-  darkInput: {
+  input: {
     width: '100%',
     height: 52,
-    backgroundColor: '#1C1C2E',
-    borderRadius: 28,
-    paddingHorizontal: 20,
+    backgroundColor: '#F5FBFC',
+    borderRadius: 16,
+    paddingHorizontal: 18,
     fontSize: 15,
-    color: '#fff',
+    color: '#0F172A',
     marginBottom: 14,
     textAlign: 'left',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    fontFamily: 'Inter_400Regular',
   },
-  error: { color: '#FF6B6B', fontSize: 13, textAlign: 'center', marginBottom: 12, fontFamily: 'Inter_500Medium' },
+  error: {
+    color: '#EF4444',
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 12,
+    fontFamily: 'Inter_500Medium',
+  },
 
-  signInBtn: {
+  primaryBtn: {
     width: '100%',
     height: 52,
     backgroundColor: '#FF6B00',
-    borderRadius: 28,
+    borderRadius: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -285,59 +289,54 @@ const styles = StyleSheet.create({
     gap: 12,
     shadowColor: '#FF6B00',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.45,
-    shadowRadius: 14,
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
     elevation: 8,
   },
   btnDisabled: { opacity: 0.55 },
-  signInArrow: {
-    width: 30, height: 30, borderRadius: 15,
+  btnArrow: {
+    width: 28, height: 28, borderRadius: 14,
     backgroundColor: 'rgba(255,255,255,0.25)',
     alignItems: 'center', justifyContent: 'center',
   },
-  signInArrowIcon: { color: '#fff', fontSize: 18, lineHeight: 22 },
-  signInText: { color: '#fff', fontSize: 16, fontFamily: 'Inter_700Bold', letterSpacing: 0.3 },
+  btnArrowIcon: { color: '#fff', fontSize: 16, lineHeight: 20 },
+  primaryBtnText: { color: '#fff', fontSize: 16, fontFamily: 'Inter_700Bold', letterSpacing: 0.3 },
 
   forgotWrap: { alignItems: 'center', marginTop: 14, marginBottom: 4 },
-  forgotText: { color: 'rgba(255,255,255,0.30)', fontSize: 13, fontFamily: 'Inter_500Medium' },
+  forgotText: { color: '#94A3B8', fontSize: 13, fontFamily: 'Inter_500Medium' },
 
   dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 20, width: '100%' },
-  dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.08)' },
-  dividerText: { color: 'rgba(255,255,255,0.28)', fontSize: 12, marginHorizontal: 12, fontFamily: 'Inter_500Medium' },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#E2E8F0' },
+  dividerText: { color: '#94A3B8', fontSize: 12, marginHorizontal: 12, fontFamily: 'Inter_500Medium' },
 
-  /* Social pills */
   socialRow: { flexDirection: 'row', gap: 12, justifyContent: 'center', width: '100%' },
   socialPill: {
     flex: 1,
     height: 50,
-    borderRadius: 25,
+    borderRadius: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
   },
-  socialPillGoogle: {
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.10,
-    shadowRadius: 8,
-    elevation: 4,
+  socialGoogle: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
   },
-  socialPillPhone: {
+  socialPhone: {
     backgroundColor: '#FF6B00',
     shadowColor: '#FF6B00',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.45,
-    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
     elevation: 6,
   },
   googleG: { fontSize: 18, fontFamily: 'Manrope_800ExtraBold', color: '#4285F4', lineHeight: 22 },
   phoneEmoji: { fontSize: 18, lineHeight: 22 },
-  socialPillTextDark: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#222' },
-  socialPillTextLight: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#fff' },
+  socialTextDark: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#0F172A' },
+  socialTextLight: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#fff' },
 
-  /* Browse as guest */
   guestBtn: { alignItems: 'center', marginTop: 22, paddingVertical: 6 },
-  guestText: { color: 'rgba(255,255,255,0.35)', fontSize: 13, fontFamily: 'Inter_500Medium' },
+  guestText: { color: '#94A3B8', fontSize: 13, fontFamily: 'Inter_500Medium' },
 });
