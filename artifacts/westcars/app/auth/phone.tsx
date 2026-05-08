@@ -12,7 +12,7 @@
  *   2. A third-party SMS verification provider (e.g. Twilio Verify) with a
  *      Cloud Function that mints a Firebase custom token after OTP success.
  *
- * This screen is wired to the UI flow; the OTP send/verify is mocked until
+ * This screen is wired to the UI flow; the OTP send/verify is scaffolded until
  * one of the above is integrated.
  */
 import { Feather } from "@expo/vector-icons";
