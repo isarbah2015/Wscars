@@ -1,0 +1,23 @@
+{
+  "firestore": {
+    "database": "westcar-5c1e6",
+    "location": "eur3",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "emulators": {
+    "singleProjectMode": true
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "WestCars",
+        "supportEmail": "support@westcarsgh.com"
+      }
+    }
+  }
+}

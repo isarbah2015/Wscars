@@ -57,11 +57,13 @@
     "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",
     "@expo-google-fonts/raleway": "^0.4.2",
     "@expo-google-fonts/sora": "^0.4.2",
+    "@firebase/app": "^0.14.11",
+    "@firebase/auth": "^1.13.0",
     "expo-audio": "^1.1.1",
     "expo-auth-session": "^7.0.11",
     "expo-crypto": "^15.0.9",
     "expo-document-picker": "^14.0.8",
     "expo-updates": "~29.0.17",
-    "firebase": "11.6.0"
+    "firebase": "^11.10.0"
   }
 }
