@@ -86,12 +86,15 @@
     },
     "extra": {
       "eas": {
-        "projectId": "REPLACE_AFTER_EAS_INIT"
+        "projectId": "20590194-347e-4bb7-812b-82543467bdb5"
       }
     },
     "owner": "davidsarb",
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/20590194-347e-4bb7-812b-82543467bdb5"
     }
   }
 }
