@@ -51,22 +51,22 @@ const sellStyles = StyleSheet.create({
     width: 54,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "rgba(255,107,0,0.12)",
+    backgroundColor: "rgba(14,181,202,0.12)",
     alignItems: "center",
     justifyContent: "center",
     marginTop: -2,
   },
   outerActive: {
-    backgroundColor: "rgba(255,107,0,0.22)",
+    backgroundColor: "rgba(14,181,202,0.22)",
   },
   box: {
     width: 44,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#FF6B00",
+    backgroundColor: "#0EB5CA",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#FF6B00",
+    shadowColor: "#0EB5CA",
     shadowOpacity: 0.55,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 3 },
@@ -86,8 +86,8 @@ export default function TabLayout() {
   const isIOS = Platform.OS === "ios";
 
   const inactiveColor = isDark ? "#4A5E7A" : "#8A9AB5";
-  const ORANGE = "#FF6B00";
-  const ORANGE_BG = isDark ? "rgba(255,107,0,0.18)" : "rgba(255,107,0,0.10)";
+  const ORANGE = "#0EB5CA";
+  const ORANGE_BG = isDark ? "rgba(14,181,202,0.18)" : "rgba(14,181,202,0.10)";
 
   return (
     <Tabs
@@ -188,7 +188,7 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarBadge: profileBadge,
-          tabBarBadgeStyle: { backgroundColor: "#FF6B00", fontSize: 10, minWidth: 16, height: 16, borderRadius: 8 },
+          tabBarBadgeStyle: { backgroundColor: "#0EB5CA", fontSize: 10, minWidth: 16, height: 16, borderRadius: 8 },
           tabBarIcon: ({ focused, color }) => (
             <TabIcon name="user" focused={focused} color={color} activeColor={ORANGE} activeBg={ORANGE_BG} />
           ),
