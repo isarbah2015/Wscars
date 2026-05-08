@@ -1,0 +1,149 @@
+FIX the following authentication issues in Westcars. DO NOT change any other functionality.
+
+## ISSUE 1: Sign-In and Sign-Up Pages Colors Not Changed
+
+**Problem:** Auth screens still have wrong colors.
+
+**Fix:** Match auth screen colors EXACTLY to the working home page colors:
+
+- Open your home screen (app/(tabs)/home.tsx) and COPY the exact colors being used
+- Apply those SAME colors to:
+  - app/welcome.tsx
+  - app/auth/login.tsx
+  - app/auth/signup.tsx
+
+**Do NOT invent new colors. Extract from existing working home screen.**
+
+## ISSUE 2: Google Sign-In Does Not Work
+
+**Problem:** Google Sign-In button does nothing.
+
+**Fix - Complete rewrite in both welcome.tsx and login.tsx:**
+
+```javascript
+import { GoogleAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { auth } from '../lib/firebase';
+import { useEffect } from 'react';
+import { useRouter } from 'expo-router';
+
+// Add this useEffect to handle redirect result
+useEffect(() => {
+  getRedirectResult(auth).then((result) => {
+    if (result) {
+      router.replace('/(tabs)/home');
+    }
+  }).catch((error) => {
+    console.error('Google auth error:', error);
+    alert(error.message);
+  });
+}, []);
+
+const handleGoogleSignIn = async () => {
+  const provider = new GoogleAuthProvider();
+  provider.addScope('profile');
+  provider.addScope('email');
+  try {
+    await signInWithRedirect(auth, provider);
+  } catch (error) {
+    alert(error.message);
+  }
+};
+Also verify Firebase Console:
+
+Authentication → Sign-in methods → Google is ENABLED
+
+SHA-1 fingerprint added (for Android)
+
+ISSUE 3: Create Account Does Not Work
+Problem: Sign-up button does nothing.
+
+Fix - Complete rewrite in signup.tsx:
+
+javascript
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
+
+const handleSignUp = async (email, password, name, phone) => {
+  if (!email || !password || !name) {
+    alert('Please fill all required fields');
+    return;
+  }
+  
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    await updateProfile(user, { displayName: name });
+    
+    await setDoc(doc(db, 'users', user.uid), {
+      name: name,
+      email: email,
+      phone: phone || '',
+      createdAt: new Date().toISOString(),
+      isVerified: false,
+      trustScore: 0
+    });
+    
+    router.replace('/(tabs)/home');
+  } catch (error) {
+    if (error.code === 'auth/email-already-in-use') {
+      alert('Email already in use. Please login.');
+    } else if (error.code === 'auth/weak-password') {
+      alert('Password must be at least 6 characters.');
+    } else {
+      alert(error.message);
+    }
+  }
+};
+ISSUE 4: Sign-In Page Layout – Top and Bottom Unequal
+Problem: Content not centered vertically; unequal space above and below.
+
+Fix: Update the container styles:
+
+javascript
+container: {
+  flex: 1,
+  justifyContent: 'center',  // Centers content vertically
+  alignItems: 'center',
+  paddingHorizontal: 20,
+  paddingTop: 20,   // Equal top padding
+  paddingBottom: 20, // Equal bottom padding
+  backgroundColor: 'YOUR_HOME_SCREEN_BG_COLOR'
+}
+
+cardContainer: {
+  width: '100%',
+  maxWidth: 400,
+  backgroundColor: 'YOUR_HOME_SCREEN_CARD_COLOR',
+  borderRadius: 24,
+  padding: 24,
+  marginVertical: 20  // Equal margin top and bottom
+}
+ISSUE 5: "Browse as Guest" Button Missing
+Fix: Add guest mode button below sign-in options:
+
+javascript
+const handleGuestBrowse = () => {
+  router.replace('/(tabs)/home');
+};
+
+// In JSX:
+<TouchableOpacity onPress={handleGuestBrowse} style={styles.guestButton}>
+  <Text style={styles.guestButtonText}>Browse as Guest</Text>
+</TouchableOpacity>
+FILES TO UPDATE (ONLY these):
+app/welcome.tsx or app/index.tsx
+
+app/auth/login.tsx
+
+app/auth/signup.tsx
+
+FILES TO LEAVE EXACTLY AS IS:
+app/(tabs)/home.tsx - DO NOT CHANGE
+
+app/(tabs)/search.tsx - DO NOT CHANGE
+
+app/car/[id].tsx - DO NOT CHANGE
+
+Generate complete, working code for ONLY the auth files. Use colors EXACTLY as they appear on your home screen. Google Sign-In and Create Account MUST work after these changes.

@@ -75,7 +75,7 @@ const PRICE_RANGES = [
 type QuickFilterKey = "All"|"SUV"|"Sedan"|"Tokunbo"|"Budget"|"Luxury"|"Pickup"|"Truck"|"Bus"|"Heavy"|"Moto"|"New";
 
 const QUICK_FILTERS: { key: QuickFilterKey; label: string; icon: any; color: string }[] = [
-  { key: "All",     label: "All",     icon: "grid",        color: "#0EB5CA" },
+  { key: "All",     label: "All",     icon: "grid",        color: "#FF6B00" },
   { key: "SUV",     label: "SUV",     icon: "box",         color: "#6366F1" },
   { key: "Sedan",   label: "Sedan",   icon: "minus-circle",color: "#EC4899" },
   { key: "Tokunbo", label: "Tokunbo", icon: "package",     color: "#22C55E" },
@@ -494,10 +494,10 @@ export default function SearchScreen() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <LinearGradient
-              colors={["#0EB5CA18", "#0098AA18"]}
+              colors={["rgba(255,107,0,0.10)", "rgba(224,90,0,0.10)"]}
               style={styles.emptyIconBg}
             >
-              <Feather name="search" size={34} color="#0EB5CA" />
+              <Feather name="search" size={34} color="#FF6B00" />
             </LinearGradient>
             <Text style={[styles.emptyTitle, { color: colors.text }]}>No vehicles found</Text>
             <Text style={[styles.emptyText, { color: colors.textTertiary }]}>
@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
   },
   countBadge: {
     alignItems: "center",
-    backgroundColor: "#0EB5CA",
+    backgroundColor: "#FF6B00",
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   filterBtnActive: {
-    shadowColor: "#0EB5CA",
+    shadowColor: "#FF6B00",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.4,
     shadowRadius: 6,
@@ -653,12 +653,12 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#0EB5CA33",
+    borderColor: "rgba(255,107,0,0.20)",
   },
   filterBadgeText: {
     fontSize: 12,
     fontFamily: "Inter_600SemiBold",
-    color: "#0EB5CA",
+    color: "#FF6B00",
   },
 
   row: { flexDirection: "row", paddingHorizontal: 8, gap: 8 },
