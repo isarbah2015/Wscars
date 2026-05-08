@@ -39,7 +39,7 @@ const tabIconStyles = StyleSheet.create({
 function SellTabIcon({ focused }: { focused: boolean }) {
   return (
     <View style={[sellStyles.outer, focused && sellStyles.outerActive]}>
-      <View style={sellStyles.box}>
+      <View style={[sellStyles.box, focused && sellStyles.boxActive]}>
         <Feather name="plus" size={20} color="#FFFFFF" />
       </View>
     </View>
@@ -51,26 +51,29 @@ const sellStyles = StyleSheet.create({
     width: 54,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "rgba(14,181,202,0.15)",
+    backgroundColor: "rgba(255,107,0,0.12)",
     alignItems: "center",
     justifyContent: "center",
     marginTop: -2,
   },
   outerActive: {
-    backgroundColor: "rgba(14,181,202,0.22)",
+    backgroundColor: "rgba(255,107,0,0.22)",
   },
   box: {
     width: 44,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#0EB5CA",
+    backgroundColor: "#FF6B00",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#0EB5CA",
+    shadowColor: "#FF6B00",
     shadowOpacity: 0.55,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 3 },
     elevation: 6,
+  },
+  boxActive: {
+    shadowOpacity: 0.75,
   },
 });
 
@@ -83,11 +86,13 @@ export default function TabLayout() {
   const isIOS = Platform.OS === "ios";
 
   const inactiveColor = isDark ? "#4A5E7A" : "#8A9AB5";
+  const ORANGE = "#FF6B00";
+  const ORANGE_BG = isDark ? "rgba(255,107,0,0.18)" : "rgba(255,107,0,0.10)";
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#0098AA",
+        tabBarActiveTintColor: ORANGE,
         tabBarInactiveTintColor: inactiveColor,
         headerShown: false,
         tabBarShowLabel: false,
@@ -145,7 +150,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ focused, color }) => (
-            <TabIcon name="home" focused={focused} color={color} activeColor={colors.accent} activeBg={colors.accentLight} />
+            <TabIcon name="home" focused={focused} color={color} activeColor={ORANGE} activeBg={ORANGE_BG} />
           ),
         }}
       />
@@ -185,7 +190,7 @@ export default function TabLayout() {
           tabBarBadge: profileBadge,
           tabBarBadgeStyle: { backgroundColor: "#FF6B00", fontSize: 10, minWidth: 16, height: 16, borderRadius: 8 },
           tabBarIcon: ({ focused, color }) => (
-            <TabIcon name="user" focused={focused} color={color} activeColor={colors.accent} activeBg={colors.accentLight} />
+            <TabIcon name="user" focused={focused} color={color} activeColor={ORANGE} activeBg={ORANGE_BG} />
           ),
         }}
       />

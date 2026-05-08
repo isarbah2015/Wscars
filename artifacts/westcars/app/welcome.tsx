@@ -16,15 +16,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const CAR  = require("@/assets/images/welcome-car.png");
 const LOGO = require("@/assets/images/wc-logo.png");
 
-const { width: SCREEN_W } = Dimensions.get("window");
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const trackWidth = Math.min(SCREEN_W - 80, 320);
-  const THUMB     = 52;
-  const MAX_X     = trackWidth - THUMB - 8;
+  const THUMB      = 56;
+  const MAX_X      = trackWidth - THUMB - 8;
   const translateX = useRef(new Animated.Value(0)).current;
   const [unlocked, setUnlocked] = useState(false);
 
@@ -68,151 +68,166 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.root}>
-      {/* Premium dark gradient backdrop */}
+      {/* ── Full-screen cinematic car image ── */}
+      <Image source={CAR} style={styles.carFull} resizeMode="cover" fadeDuration={250} />
+
+      {/* ── Multi-stop scrim — transparent top → near-black bottom ── */}
       <LinearGradient
-        colors={["#04111F", "#0A1628", "#0E2540", "#0A1628"]}
-        locations={[0, 0.35, 0.7, 1]}
+        colors={[
+          "transparent",
+          "rgba(2,5,14,0.20)",
+          "rgba(2,5,14,0.65)",
+          "rgba(2,5,14,0.92)",
+          "#02060F",
+        ]}
+        locations={[0, 0.30, 0.52, 0.72, 1]}
         style={StyleSheet.absoluteFill}
+        pointerEvents="none"
       />
 
-      {/* Subtle cyan glow halo behind car */}
-      <View pointerEvents="none" style={styles.glow}>
-        <LinearGradient
-          colors={["rgba(14,181,202,0.45)", "rgba(14,181,202,0.12)", "transparent"]}
-          style={StyleSheet.absoluteFill}
-        />
-      </View>
-
-      {/* Top brand row */}
+      {/* ── Top: brand identity ── */}
       <View style={[styles.brandRow, { paddingTop: insets.top + 18 }]}>
         <Image source={LOGO} style={styles.logo} resizeMode="contain" tintColor="#FFFFFF" />
         <Text style={styles.brandTag}>GHANA'S TRUSTED CAR MARKETPLACE</Text>
       </View>
 
-      {/* Hero car */}
-      <View style={styles.carWrap}>
-        <Image source={CAR} style={styles.carImg} resizeMode="contain" fadeDuration={250} />
-      </View>
+      {/* ── Orange accent line ── */}
+      <View style={styles.accentLine} />
 
+      {/* ── Bottom content ── */}
+      <View style={[styles.bottomWrap, { paddingBottom: insets.bottom + 28 }]}>
+        <Text style={styles.headline}>Buy. Sell.{"\n"}Drive Smart.</Text>
+        <Text style={styles.sub}>
+          Thousands of verified listings across Ghana.{"\n"}Find your perfect ride today.
+        </Text>
 
-      {/* Premium glass card */}
-      <View style={[styles.cardWrap, { paddingBottom: insets.bottom + 24 }]}>
-        <View style={styles.card}>
-          <LinearGradient
-            colors={["rgba(255,255,255,0.06)", "rgba(255,255,255,0.02)"]}
-            style={StyleSheet.absoluteFill}
-          />
+        <Text style={styles.cueLabel}>GET STARTED</Text>
 
-          <Text style={styles.welcome}>Welcome to{"\n"}WestCars</Text>
-          <Text style={styles.sub}>
-            Buy, sell and discover your next ride from thousands of verified listings across Ghana.
-          </Text>
-
-          <Text style={styles.getStarted}>Get started</Text>
-
-          <View style={[styles.slideTrack, { width: trackWidth }]}>
-            <Animated.Text style={[styles.slideLabel, { opacity: labelOpacity }]}>
-              Slide to sign in
-            </Animated.Text>
-            <PanGestureHandler onGestureEvent={onGestureEvent} onHandlerStateChange={onHandlerStateChange}>
-              <Animated.View style={[styles.slideThumb, { transform: [{ translateX }] }]}>
-                <Feather name="arrow-right" size={22} color="#0A1628" />
-              </Animated.View>
-            </PanGestureHandler>
-          </View>
+        {/* Slide-to-unlock CTA */}
+        <View style={[styles.slideTrack, { width: trackWidth }]}>
+          <Animated.Text style={[styles.slideLabel, { opacity: labelOpacity }]}>
+            Slide to sign in →
+          </Animated.Text>
+          <PanGestureHandler
+            onGestureEvent={onGestureEvent}
+            onHandlerStateChange={onHandlerStateChange}
+          >
+            <Animated.View style={[styles.slideThumb, { transform: [{ translateX }] }]}>
+              <Feather name="arrow-right" size={24} color="#fff" />
+            </Animated.View>
+          </PanGestureHandler>
         </View>
       </View>
     </View>
   );
 }
 
-const CAR_H = 390;
-
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#0A1628" },
+  root: { flex: 1, backgroundColor: "#02060F" },
 
-  glow: {
+  carFull: {
     position: "absolute",
-    top: 60, left: -60, right: -60,
-    height: 360,
-    borderRadius: 360,
-    overflow: "hidden",
-    transform: [{ scaleX: 1.2 }],
+    top: 0,
+    left: 0,
+    width: SCREEN_W,
+    height: SCREEN_H * 0.72,
   },
 
   brandRow: {
-    alignItems: "center", gap: 6, paddingHorizontal: 24,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 24,
   },
   logo: { width: 130, height: 50 },
   brandTag: {
-    fontSize: 10, color: "rgba(224,251,255,0.85)", letterSpacing: 2.6,
-    fontFamily: "Inter_600SemiBold", textAlign: "center",
+    fontSize: 10,
+    color: "rgba(224,251,255,0.85)",
+    letterSpacing: 2.6,
+    fontFamily: "Inter_600SemiBold",
+    textAlign: "center",
   },
 
-  carWrap: {
-    width: "100%",
-    alignItems: "center",
-    marginTop: 8,
-    paddingHorizontal: 10,
-  },
-  carImg: {
-    width: "100%",
-    height: CAR_H,
-  },
-
-  cardWrap: {
-    flex: 1,
-    paddingHorizontal: 18,
-    justifyContent: "flex-end",
-  },
-  card: {
-    borderRadius: 28,
-    paddingHorizontal: 22,
-    paddingTop: 28,
-    paddingBottom: 22,
-    alignItems: "center",
-    gap: 10,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-    backgroundColor: "rgba(10,22,40,0.55)",
-    shadowColor: "#0EB5CA",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 24,
+  accentLine: {
+    position: "absolute",
+    left: 28,
+    bottom: "38%",
+    width: 48,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: "#FF6B00",
   },
 
-  welcome: {
-    fontSize: 36, lineHeight: 40, color: "#FFFFFF",
-    fontFamily: "Manrope_800ExtraBold", letterSpacing: -1, textAlign: "center",
+  bottomWrap: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 28,
+    gap: 0,
+  },
+
+  headline: {
+    fontSize: 46,
+    lineHeight: 52,
+    color: "#FFFFFF",
+    fontFamily: "Manrope_800ExtraBold",
+    letterSpacing: -1.5,
+    marginBottom: 14,
   },
   sub: {
-    fontSize: 14, lineHeight: 22, color: "rgba(255,255,255,0.72)",
-    fontFamily: "Inter_400Regular", textAlign: "center",
-    paddingHorizontal: 6, marginBottom: 4,
+    fontSize: 14,
+    lineHeight: 22,
+    color: "rgba(255,255,255,0.65)",
+    fontFamily: "Inter_400Regular",
+    marginBottom: 28,
   },
-  getStarted: {
-    fontSize: 11, color: "#0EB5CA", letterSpacing: 3.2,
-    fontFamily: "Inter_700Bold", textTransform: "uppercase",
-    marginTop: 4, marginBottom: 6,
+
+  cueLabel: {
+    fontSize: 10,
+    color: "#FF6B00",
+    letterSpacing: 3.5,
+    fontFamily: "Inter_700Bold",
+    textTransform: "uppercase",
+    marginBottom: 14,
   },
 
   slideTrack: {
-    height: 60, borderRadius: 30,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: "rgba(255,255,255,0.08)",
-    borderWidth: 1, borderColor: "rgba(14,181,202,0.35)",
-    justifyContent: "center", padding: 4,
-    position: "relative", overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255,107,0,0.40)",
+    justifyContent: "center",
+    padding: 4,
+    position: "relative",
+    overflow: "hidden",
+    marginBottom: 8,
   },
   slideLabel: {
-    position: "absolute", left: 0, right: 0, textAlign: "center",
-    color: "rgba(255,255,255,0.85)", fontSize: 14,
-    fontFamily: "Inter_600SemiBold", letterSpacing: 0.5,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    textAlign: "center",
+    color: "rgba(255,255,255,0.70)",
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.4,
   },
   slideThumb: {
-    width: 52, height: 52, borderRadius: 26,
-    backgroundColor: "#0EB5CA", alignItems: "center", justifyContent: "center",
-    shadowColor: "#0EB5CA", shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5, shadowRadius: 10,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#FF6B00",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#FF6B00",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    elevation: 8,
   },
 });

@@ -32,6 +32,37 @@ import { BRAND_LOGOS } from "@/utils/brandLogos";
 
 const SHEET_H = Dimensions.get("window").height * 0.80;
 
+const BRAND_MODELS: Record<string, string[]> = {
+  Toyota:      ["Camry","Corolla","RAV4","Highlander","Land Cruiser","Prado","Fortuner","Venza","Yaris","Hiace","Avensis","Auris"],
+  Honda:       ["Accord","Civic","CR-V","HR-V","Pilot","Odyssey","Fit","Jazz","Vezel"],
+  Nissan:      ["Altima","Sentra","Pathfinder","Murano","X-Trail","Patrol","Navara","Note","Micra","Kicks","Armada"],
+  Hyundai:     ["Elantra","Sonata","Tucson","Santa Fe","i10","i20","i30","Creta","Accent","Kona"],
+  Kia:         ["Sportage","Sorento","Cerato","Picanto","Rio","Telluride","Seltos","Stinger"],
+  Mercedes:    ["C-Class","E-Class","S-Class","GLC","GLE","GLS","A-Class","B-Class","GLA","GLK","ML","G-Class"],
+  BMW:         ["3 Series","5 Series","7 Series","X1","X3","X5","X6","X7","M3","M5","4 Series"],
+  Ford:        ["Focus","Ranger","Explorer","F-150","Fusion","Edge","Expedition","EcoSport","Escape"],
+  Volkswagen:  ["Golf","Passat","Tiguan","Touareg","Polo","Jetta","Amarok","Caddy"],
+  Chevrolet:   ["Cruze","Trax","Equinox","Traverse","Malibu","Silverado","Captiva","Trailblazer"],
+  Mitsubishi:  ["Outlander","Pajero","Eclipse Cross","Galant","Lancer","L200","ASX","Montero"],
+  Mazda:       ["Mazda3","Mazda6","CX-5","CX-9","CX-3","MX-5","BT-50"],
+  Subaru:      ["Forester","Outback","Impreza","Legacy","XV","Tribeca"],
+  Lexus:       ["RX","ES","GX","LX","IS","LS","NX","UX"],
+  Isuzu:       ["D-Max","MU-X","Trooper","Rodeo","Bighorn"],
+  Suzuki:      ["Swift","Vitara","Jimny","Ertiga","Baleno","Grand Vitara","Ignis"],
+  Peugeot:     ["208","308","508","2008","3008","5008","407","Partner"],
+  Renault:     ["Clio","Megane","Duster","Kadjar","Koleos","Scenic","Captur"],
+  "Land Rover":["Defender","Discovery","Range Rover","Freelander","Evoque","Velar","Sport"],
+  Jeep:        ["Wrangler","Cherokee","Grand Cherokee","Compass","Renegade","Commander","Gladiator"],
+  Porsche:     ["911","Cayenne","Macan","Panamera","Taycan","Boxster","Cayman"],
+  Audi:        ["A3","A4","A6","A8","Q3","Q5","Q7","Q8","TT","R8","e-tron"],
+  Volvo:       ["XC40","XC60","XC90","S60","S90","V60","V90","C40"],
+  Cadillac:    ["Escalade","XT5","XT6","CT5","CT6","SRX"],
+  GMC:         ["Terrain","Acadia","Yukon","Sierra","Canyon","Envoy"],
+  Dodge:       ["Durango","Charger","Challenger","Journey","Ram 1500"],
+  Infiniti:    ["Q50","QX50","QX60","QX80","G35","FX"],
+  Acura:       ["TLX","RDX","MDX","ILX","NSX"],
+};
+
 const PRICE_RANGES = [
   { label: "Any Price",     min: 0,      max: 9999999, icon: "layers" as const },
   { label: "Under ₵50k",   min: 0,      max: 50000,   icon: "tag" as const },
@@ -82,6 +113,7 @@ function FilterModal({
   visible, onClose, onApply,
 }: { visible: boolean; onClose: () => void; onApply: (f: any) => void; colors?: any }) {
   const [brand,        setBrand]        = useState("Any");
+  const [model,        setModel]        = useState("Any");
   const [location,     setLocation]     = useState("Any");
   const [fuelType,     setFuelType]     = useState("Any");
   const [transmission, setTransmission] = useState("Any");
@@ -89,12 +121,17 @@ function FilterModal({
   const [priceRange,   setPriceRange]   = useState(PRICE_RANGES[0]);
 
   const reset = () => {
-    setBrand("Any"); setLocation("Any"); setFuelType("Any");
+    setBrand("Any"); setModel("Any"); setLocation("Any"); setFuelType("Any");
     setTransmission("Any"); setCondition("Any"); setPriceRange(PRICE_RANGES[0]);
   };
 
+  const handleBrandSelect = (b: string) => {
+    setBrand(b);
+    setModel("Any");
+  };
+
   const hasFilters =
-    brand !== "Any" || location !== "Any" || fuelType !== "Any" ||
+    brand !== "Any" || model !== "Any" || location !== "Any" || fuelType !== "Any" ||
     transmission !== "Any" || condition !== "Any" || priceRange.label !== "Any Price";
 
   // ── Section card ──
@@ -143,7 +180,7 @@ function FilterModal({
           return (
             <Pressable
               key={b}
-              onPress={() => setBrand(b)}
+              onPress={() => handleBrandSelect(b)}
               style={[fStyles.brandChip, active && fStyles.chipActive]}
             >
               <View style={[fStyles.brandLogoWrap, active && { backgroundColor: "rgba(255,255,255,0.2)" }]}>
@@ -187,7 +224,7 @@ function FilterModal({
       <SafeAreaView style={fStyles.safeArea} edges={["top", "bottom"]}>
         {/* ── Header ── */}
         <LinearGradient
-          colors={["#0EB5CA", "#008FA0"]}
+          colors={["#FF6B00", "#C85000"]}
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
           style={fStyles.header}
         >
@@ -209,6 +246,16 @@ function FilterModal({
           <SectionCard icon="layers" label="Brand">
             <BrandRow />
           </SectionCard>
+
+          {brand !== "Any" && BRAND_MODELS[brand] && (
+            <SectionCard icon="tag" label={`${brand} Models`}>
+              <ChipRow
+                options={BRAND_MODELS[brand]}
+                selected={model}
+                onSelect={setModel}
+              />
+            </SectionCard>
+          )}
 
           <SectionCard icon="map-pin" label="Location">
             <ChipRow options={GHANA_CITIES} selected={location} onSelect={setLocation} />
@@ -235,10 +282,10 @@ function FilterModal({
         <View style={fStyles.footer}>
           <Pressable
             style={fStyles.applyBtn}
-            onPress={() => { onApply({ brand, location, fuelType, transmission, condition, priceRange }); onClose(); }}
+            onPress={() => { onApply({ brand, model, location, fuelType, transmission, condition, priceRange }); onClose(); }}
           >
             <LinearGradient
-              colors={["#0EB5CA", "#008FA0"]}
+              colors={["#FF6B00", "#C85000"]}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
               style={fStyles.applyGrad}
             >
@@ -312,9 +359,10 @@ export default function SearchScreen() {
     if (!matchQuick) return false;
     if (!activeFilters) return true;
 
-    const { brand, location, fuelType, transmission, condition, priceRange } = activeFilters;
+    const { brand, model, location, fuelType, transmission, condition, priceRange } = activeFilters;
     return (
       (brand === "Any" || car.brand === brand) &&
+      (model === "Any" || car.model.toLowerCase().includes(model.toLowerCase())) &&
       (location === "Any" || car.location === location) &&
       (fuelType === "Any" || car.fuelType === fuelType) &&
       (transmission === "Any" || car.transmission === transmission) &&
@@ -335,6 +383,7 @@ export default function SearchScreen() {
 
   const bgHeader = isDark ? "#111827" : "#FFFFFF";
   const borderHeader = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)";
+  const ORANGE = "#FF6B00";
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -343,11 +392,11 @@ export default function SearchScreen() {
         {/* Title row */}
         <View style={styles.titleRow}>
           <View>
-            <Text style={[styles.titleSub, { color: "#0EB5CA" }]}>WESTCARS</Text>
+            <Text style={[styles.titleSub, { color: ORANGE }]}>WESTCARS</Text>
             <Text style={[styles.title, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Search</Text>
           </View>
           {filtered.length > 0 && (
-            <View style={styles.countBadge}>
+            <View style={[styles.countBadge, { backgroundColor: ORANGE }]}>
               <Text style={styles.countText}>{filtered.length}</Text>
               <Text style={styles.countLabel}>found</Text>
             </View>
@@ -377,7 +426,7 @@ export default function SearchScreen() {
             style={[styles.filterBtn, activeFilters && styles.filterBtnActive]}
           >
             <LinearGradient
-              colors={["#0EB5CA", "#0098AA"]}
+              colors={["#FF6B00", "#E05A00"]}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
               style={styles.filterBtnGrad}
             >
@@ -427,14 +476,14 @@ export default function SearchScreen() {
         {activeFilters && (
           <View style={styles.filterBadgeRow}>
             <LinearGradient
-              colors={["#0EB5CA18", "#0098AA18"]}
+              colors={["rgba(255,107,0,0.10)", "rgba(224,90,0,0.10)"]}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
               style={styles.filterBadge}
             >
-              <Feather name="filter" size={11} color="#0EB5CA" />
+              <Feather name="filter" size={11} color="#FF6B00" />
               <Text style={styles.filterBadgeText}>Filters active</Text>
               <Pressable onPress={() => setActiveFilters(null)} hitSlop={10}>
-                <Feather name="x" size={12} color="#0EB5CA" />
+                <Feather name="x" size={12} color="#FF6B00" />
               </Pressable>
             </LinearGradient>
           </View>
@@ -714,7 +763,7 @@ const fStyles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 8,
-    backgroundColor: "#E6F8FB",
+    backgroundColor: "#FFF0E6",
     alignItems: "center",
     justifyContent: "center",
   },
