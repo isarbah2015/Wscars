@@ -157,23 +157,23 @@ const styles = StyleSheet.create({
 
   heroWrap: {
     width: SCREEN_W,
-    height: SCREEN_W * 0.52,
+    height: SCREEN_W * 0.68,
     backgroundColor: '#0A1628',
     alignItems: 'center',
     justifyContent: 'flex-end',
     overflow: 'hidden',
   },
   carImage: {
-    width: SCREEN_W,
-    height: SCREEN_W * 0.58,
-    marginBottom: -8,
+    width: SCREEN_W * 1.08,
+    height: SCREEN_W * 0.78,
+    marginLeft: -SCREEN_W * 0.04,
+    marginBottom: -16,
   },
 
   formCard: {
-    flex: 1,
     paddingHorizontal: 24,
     paddingTop: 20,
-    paddingBottom: 32,
+    paddingBottom: 24,
   },
   title: { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 6 },
   subtitle: { fontSize: 15, color: '#aaa', marginBottom: 28 },
