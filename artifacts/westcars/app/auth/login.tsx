@@ -7,11 +7,17 @@ import {
   Platform,
   KeyboardAvoidingView,
   StyleSheet,
+  Image,
+  View,
+  Dimensions,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase-persistence';
+
+const CAR_IMAGE = require('../../assets/images/car-hero.png');
+const { width: SCREEN_W } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -56,76 +62,89 @@ export default function LoginScreen() {
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Sign in to your Westcars account</Text>
+        {/* Car hero — edge to edge, no horizontal padding */}
+        <View style={styles.heroWrap}>
+          <Image
+            source={CAR_IMAGE}
+            style={styles.carImage}
+            resizeMode="contain"
+          />
+        </View>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {/* Form card */}
+        <View style={styles.formCard}>
+          <Text style={styles.title}>Welcome Back</Text>
+          <Text style={styles.subtitle}>Sign in to your Westcars account</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email address"
-          placeholderTextColor="#999"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          autoComplete="email"
-          returnKeyType="next"
-          blurOnSubmit={false}
-          editable={!loading}
-          textAlign="left"
-          onSubmitEditing={() => passwordRef.current?.focus()}
-        />
+          {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TextInput
-          ref={passwordRef}
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#999"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoCapitalize="none"
-          autoCorrect={false}
-          autoComplete="password"
-          returnKeyType="done"
-          editable={!loading}
-          textAlign="left"
-          onSubmitEditing={handleLogin}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Email address"
+            placeholderTextColor="#999"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="email"
+            returnKeyType="next"
+            blurOnSubmit={false}
+            editable={!loading}
+            textAlign="left"
+            onSubmitEditing={() => passwordRef.current?.focus()}
+          />
 
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={loading}
-          activeOpacity={0.8}
-        >
-          {loading
-            ? <ActivityIndicator color="#fff" />
-            : <Text style={styles.buttonText}>Sign In</Text>
-          }
-        </TouchableOpacity>
+          <TextInput
+            ref={passwordRef}
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor="#999"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="password"
+            returnKeyType="done"
+            editable={!loading}
+            textAlign="left"
+            onSubmitEditing={handleLogin}
+          />
 
-        <TouchableOpacity
-          onPress={() => router.push('/auth/signup')}
-          activeOpacity={0.7}
-          style={styles.link}
-        >
-          <Text style={styles.linkText}>
-            Don't have an account?{' '}
-            <Text style={styles.linkBold}>Create one</Text>
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            {loading
+              ? <ActivityIndicator color="#fff" />
+              : <Text style={styles.buttonText}>Sign In</Text>
+            }
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => router.push('/auth/forgot-password' as any)}
-          activeOpacity={0.7}
-          style={styles.link}
-        >
-          <Text style={styles.linkText}>Forgot password?</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push('/auth/signup')}
+            activeOpacity={0.7}
+            style={styles.link}
+          >
+            <Text style={styles.linkText}>
+              Don't have an account?{' '}
+              <Text style={styles.linkBold}>Create one</Text>
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/auth/forgot-password' as any)}
+            activeOpacity={0.7}
+            style={styles.link}
+          >
+            <Text style={styles.linkText}>Forgot password?</Text>
+          </TouchableOpacity>
+        </View>
 
       </ScrollView>
     </KeyboardAvoidingView>
@@ -134,9 +153,30 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0A1628' },
-  scroll: { flexGrow: 1, padding: 24, justifyContent: 'center' },
-  title: { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 8 },
-  subtitle: { fontSize: 16, color: '#aaa', marginBottom: 32 },
+  scroll: { flexGrow: 1 },
+
+  heroWrap: {
+    width: SCREEN_W,
+    height: SCREEN_W * 0.52,
+    backgroundColor: '#0A1628',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    overflow: 'hidden',
+  },
+  carImage: {
+    width: SCREEN_W,
+    height: SCREEN_W * 0.58,
+    marginBottom: -8,
+  },
+
+  formCard: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 32,
+  },
+  title: { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 6 },
+  subtitle: { fontSize: 15, color: '#aaa', marginBottom: 28 },
   input: {
     height: 52,
     backgroundColor: '#fff',
