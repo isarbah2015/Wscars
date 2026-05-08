@@ -11,6 +11,7 @@ import {
   View,
   Dimensions,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -19,11 +20,7 @@ import { GoogleAuthBridge } from '../../components/GoogleAuthBridge';
 import { signInWithGoogleIdToken } from '../../services/firebase/auth';
 
 const CAR_IMAGE = require('../../assets/images/car-hero.png');
-const { width: SCREEN_W } = Dimensions.get('window');
-
-const HAS_GOOGLE =
-  !!process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ||
-  !!process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -75,19 +72,36 @@ export default function LoginScreen() {
   }, [router]);
 
   const handleGooglePress = async () => {
-    if (googlePromptRef.current) {
-      await googlePromptRef.current();
-    }
+    if (googlePromptRef.current) await googlePromptRef.current();
   };
+
+  const busy = loading || googleLoading;
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {HAS_GOOGLE && (
-        <GoogleAuthBridge onIdToken={handleGoogleIdToken} promptRef={googlePromptRef} />
-      )}
+      {/* ── Fintech background ── */}
+      <LinearGradient
+        colors={['#04111F', '#0A1628', '#0E2540', '#0A1628']}
+        locations={[0, 0.35, 0.7, 1]}
+        style={StyleSheet.absoluteFill}
+      />
+
+      {/* Teal glow halo */}
+      <View pointerEvents="none" style={styles.glow}>
+        <LinearGradient
+          colors={['rgba(0,200,151,0.28)', 'rgba(14,181,202,0.10)', 'transparent']}
+          style={StyleSheet.absoluteFill}
+        />
+      </View>
+
+      {/* Decorative accent circles */}
+      <View pointerEvents="none" style={styles.circleTopRight} />
+      <View pointerEvents="none" style={styles.circleBottomLeft} />
+
+      <GoogleAuthBridge onIdToken={handleGoogleIdToken} promptRef={googlePromptRef} />
 
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -95,20 +109,18 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-        {/* Spacer pushes content to the lower portion of the screen */}
-        <View style={styles.topSpacer} />
-
-        {/* Car hero — edge to edge, no horizontal padding */}
+        {/* Car hero */}
         <View style={styles.heroWrap}>
-          <Image
-            source={CAR_IMAGE}
-            style={styles.carImage}
-            resizeMode="contain"
-          />
+          <Image source={CAR_IMAGE} style={styles.carImage} resizeMode="contain" />
         </View>
 
-        {/* Form card */}
-        <View style={styles.formCard}>
+        {/* Glass form card */}
+        <View style={styles.card}>
+          <LinearGradient
+            colors={['rgba(255,255,255,0.06)', 'rgba(255,255,255,0.02)']}
+            style={StyleSheet.absoluteFill}
+          />
+
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to your Westcars account</Text>
 
@@ -117,7 +129,7 @@ export default function LoginScreen() {
           <TextInput
             style={styles.input}
             placeholder="Email address"
-            placeholderTextColor="#999"
+            placeholderTextColor="#6b8099"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -126,7 +138,7 @@ export default function LoginScreen() {
             autoComplete="email"
             returnKeyType="next"
             blurOnSubmit={false}
-            editable={!loading && !googleLoading}
+            editable={!busy}
             textAlign="left"
             onSubmitEditing={() => passwordRef.current?.focus()}
           />
@@ -135,7 +147,7 @@ export default function LoginScreen() {
             ref={passwordRef}
             style={styles.input}
             placeholder="Password"
-            placeholderTextColor="#999"
+            placeholderTextColor="#6b8099"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -143,16 +155,16 @@ export default function LoginScreen() {
             autoCorrect={false}
             autoComplete="password"
             returnKeyType="done"
-            editable={!loading && !googleLoading}
+            editable={!busy}
             textAlign="left"
             onSubmitEditing={handleLogin}
           />
 
           <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
+            style={[styles.button, busy && styles.buttonDisabled]}
             onPress={handleLogin}
-            disabled={loading || googleLoading}
-            activeOpacity={0.8}
+            disabled={busy}
+            activeOpacity={0.85}
           >
             {loading
               ? <ActivityIndicator color="#fff" />
@@ -160,32 +172,44 @@ export default function LoginScreen() {
             }
           </TouchableOpacity>
 
-          {/* Google sign-in */}
-          {HAS_GOOGLE && (
-            <>
-              <View style={styles.dividerRow}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or</Text>
-                <View style={styles.dividerLine} />
-              </View>
+          {/* Divider */}
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or continue with</Text>
+            <View style={styles.dividerLine} />
+          </View>
 
-              <TouchableOpacity
-                style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
-                onPress={handleGooglePress}
-                disabled={loading || googleLoading}
-                activeOpacity={0.8}
-              >
-                {googleLoading ? (
-                  <ActivityIndicator color="#444" />
-                ) : (
+          {/* Social buttons row */}
+          <View style={styles.socialRow}>
+            {/* Google */}
+            <TouchableOpacity
+              style={[styles.socialBtn, busy && styles.buttonDisabled]}
+              onPress={handleGooglePress}
+              disabled={busy}
+              activeOpacity={0.8}
+            >
+              {googleLoading
+                ? <ActivityIndicator color="#444" size="small" />
+                : (
                   <>
                     <Text style={styles.googleG}>G</Text>
-                    <Text style={styles.googleText}>Continue with Google</Text>
+                    <Text style={styles.socialBtnText}>Google</Text>
                   </>
-                )}
-              </TouchableOpacity>
-            </>
-          )}
+                )
+              }
+            </TouchableOpacity>
+
+            {/* Phone */}
+            <TouchableOpacity
+              style={[styles.socialBtn, busy && styles.buttonDisabled]}
+              onPress={() => router.push('/auth/phone' as any)}
+              disabled={busy}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.phoneIcon}>📱</Text>
+              <Text style={styles.socialBtnText}>Phone</Text>
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             onPress={() => router.push('/auth/signup')}
@@ -214,14 +238,38 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0A1628' },
-  scroll: { flexGrow: 1, justifyContent: 'center' },
+  scroll: { flexGrow: 1, justifyContent: 'center', paddingBottom: 16 },
 
-  topSpacer: { display: 'none' },
+  /* Fintech background decorations */
+  glow: {
+    position: 'absolute',
+    top: 0, left: -60, right: -60,
+    height: SCREEN_H * 0.55,
+    borderRadius: SCREEN_H * 0.55,
+    overflow: 'hidden',
+    transform: [{ scaleX: 1.3 }],
+  },
+  circleTopRight: {
+    position: 'absolute',
+    top: -60, right: -60,
+    width: 200, height: 200,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(0,200,151,0.15)',
+  },
+  circleBottomLeft: {
+    position: 'absolute',
+    bottom: 80, left: -80,
+    width: 240, height: 240,
+    borderRadius: 120,
+    borderWidth: 1,
+    borderColor: 'rgba(14,181,202,0.10)',
+  },
 
+  /* Car hero */
   heroWrap: {
     width: SCREEN_W,
     height: SCREEN_W * 0.68,
-    backgroundColor: '#0A1628',
     alignItems: 'center',
     justifyContent: 'flex-end',
     overflow: 'hidden',
@@ -233,62 +281,84 @@ const styles = StyleSheet.create({
     marginBottom: -38,
   },
 
-  formCard: {
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 8,
+  /* Glass card */
+  card: {
+    marginHorizontal: 18,
+    borderRadius: 24,
+    paddingHorizontal: 22,
+    paddingTop: 24,
+    paddingBottom: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(10,22,40,0.60)',
+    shadowColor: '#0EB5CA',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 12,
   },
-  title: { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 6 },
-  subtitle: { fontSize: 15, color: '#aaa', marginBottom: 28 },
+
+  title: { fontSize: 26, fontWeight: '700', color: '#fff', marginBottom: 4 },
+  subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.55)', marginBottom: 20 },
   input: {
-    height: 52,
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    height: 50,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
     paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#000',
-    marginBottom: 16,
+    fontSize: 15,
+    color: '#fff',
+    marginBottom: 12,
     textAlign: 'left',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   button: {
-    height: 52,
+    height: 50,
     backgroundColor: '#00C897',
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
+    marginTop: 4,
+    shadowColor: '#00C897',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
   },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  error: { color: '#ff4444', marginBottom: 16, fontSize: 14, textAlign: 'center' },
+  buttonDisabled: { opacity: 0.55 },
+  buttonText: { color: '#fff', fontSize: 15, fontWeight: '700', letterSpacing: 0.3 },
+  error: { color: '#ff6b6b', marginBottom: 12, fontSize: 13, textAlign: 'center' },
 
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 4,
+    marginTop: 18,
+    marginBottom: 14,
   },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#2a3a52' },
-  dividerText: { color: '#666', fontSize: 13, marginHorizontal: 12 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.10)' },
+  dividerText: { color: 'rgba(255,255,255,0.40)', fontSize: 12, marginHorizontal: 10 },
 
-  googleButton: {
-    height: 52,
-    backgroundColor: '#fff',
-    borderRadius: 10,
+  socialRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  socialBtn: {
+    flex: 1,
+    height: 48,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
-    gap: 10,
+    gap: 8,
   },
-  googleG: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#4285F4',
-  },
-  googleText: { color: '#333', fontSize: 15, fontWeight: '600' },
+  googleG: { fontSize: 16, fontWeight: '800', color: '#4285F4' },
+  phoneIcon: { fontSize: 16 },
+  socialBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
 
-  link: { marginTop: 16, alignItems: 'center' },
-  linkText: { color: '#aaa', fontSize: 14 },
+  link: { marginTop: 14, alignItems: 'center' },
+  linkText: { color: 'rgba(255,255,255,0.45)', fontSize: 13 },
   linkBold: { color: '#00C897', fontWeight: '700' },
 });
