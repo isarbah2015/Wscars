@@ -121,9 +121,9 @@ const EQUIPMENT: {
   {
     icon: "eye",
     category: "Visibility",
-    iconColor: "#0EB5CA",
-    accentColor: "#0EB5CA",
-    chipBg: "#ECFEFF",
+    iconColor: "#FF6B00",
+    accentColor: "#FF6B00",
+    chipBg: "#FFF1E5",
     count: 6,
     items: [
       "LED headlights",
@@ -242,7 +242,7 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
           {/* Top row */}
           <View style={styles.headerTopRow}>
             <View style={styles.headerIconRing}>
-              <Feather name="award" size={19} color="#0EB5CA" />
+              <Feather name="award" size={19} color="#FF6B00" />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.headerTitle}>All Equipment</Text>
@@ -408,9 +408,9 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: "rgba(14,181,202,0.15)",
+    backgroundColor: "rgba(255,107,0,0.15)",
     borderWidth: 1,
-    borderColor: "rgba(14,181,202,0.3)",
+    borderColor: "rgba(255,107,0,0.3)",
     alignItems: "center",
     justifyContent: "center",
   },

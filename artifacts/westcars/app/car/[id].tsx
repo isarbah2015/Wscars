@@ -49,7 +49,7 @@ const EQUIP_CATEGORIES = [
     items: ["Leather upholstery", "3-spoke wheel", "Aluminium pedals", "Wood trim accents", "Leather dashboard", "Panoramic glass roof", "Rear window shade", "Power-adjust front seats", "Lumbar support", "Flat-fold rear seats", "Centre armrest", "Rear centre armrest", "Illuminated door sills", "Grab handles"] },
   { icon: "music",           label: "Multimedia", count: 7,  iconColor: "#7B1FA2", iconBg: "#F3E5F5",
     items: ["10.1\" touchscreen", "Apple CarPlay", "Android Auto", "Built-in GPS", "Bluetooth audio", "USB ports (2×)", "8-speaker premium system"] },
-  { icon: "eye",             label: "Visibility", count: 6,  iconColor: "#0EB5CA", iconBg: "#E0F8FB",
+  { icon: "eye",             label: "Visibility", count: 6,  iconColor: "#FF6B00", iconBg: "#FFF1E5",
     items: ["LED headlights", "LED daytime running", "LED rear lights", "Front fog lights", "Auto headlight", "High-beam assist"] },
   { icon: "layers",          label: "Exterior",   count: 3,  iconColor: "#2E7D32", iconBg: "#E8F5E9",
     items: ["18\" alloy wheels", "Rear roof spoiler", "Roof rails"] },
@@ -346,8 +346,8 @@ export default function CarDetailScreen() {
               { icon: "users",        label: "Owners",   value: `${s?.owners ?? 1}` },
             ].map((spec, i, arr) => (
               <View key={spec.label} style={[styles.keySpecChip, i < arr.length - 1 && { borderRightWidth: 1, borderRightColor: colors.border }]}>
-                <View style={[styles.keySpecIconBubble, { backgroundColor: isDark ? "rgba(14,181,202,0.12)" : "rgba(14,181,202,0.08)" }]}>
-                  <Feather name={spec.icon as any} size={13} color="#0EB5CA" />
+                <View style={[styles.keySpecIconBubble, { backgroundColor: isDark ? "rgba(255,107,0,0.12)" : "rgba(255,107,0,0.08)" }]}>
+                  <Feather name={spec.icon as any} size={13} color="#FF6B00" />
                 </View>
                 <View>
                   <Text style={[styles.keySpecValue, { color: colors.text }]}>{spec.value}</Text>
@@ -388,7 +388,7 @@ export default function CarDetailScreen() {
           </Text>
 
           {/* Car history banner */}
-          <View style={[styles.historyBanner, { backgroundColor: isDark ? "rgba(14,181,202,0.10)" : "rgba(14,181,202,0.08)", borderColor: isDark ? "rgba(14,181,202,0.25)" : "rgba(14,181,202,0.22)" }]}>
+          <View style={[styles.historyBanner, { backgroundColor: isDark ? "rgba(255,107,0,0.10)" : "rgba(255,107,0,0.08)", borderColor: isDark ? "rgba(255,107,0,0.25)" : "rgba(255,107,0,0.22)" }]}>
             <View style={styles.historyIcon}>
               <Feather name="check-square" size={18} color="#8B5CF6" />
             </View>
@@ -423,7 +423,7 @@ export default function CarDetailScreen() {
               onPress={() => router.push({ pathname: "/full-specs/[id]", params: { id: car.id } })}
             >
               <LinearGradient
-                colors={["#0EB5CA", "#0098AA"]}
+                colors={["#FF6B00", "#FF8C42"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.fullSpecsBtnGradient}
@@ -479,7 +479,7 @@ export default function CarDetailScreen() {
         <View style={[styles.card, { backgroundColor: colors.card, paddingHorizontal: 0, paddingVertical: 0, overflow: "hidden" }]}>
           {/* Section header */}
           <View style={[styles.specHeader, { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 }]}>
-            <View style={[styles.specHeaderAccent, { backgroundColor: "#0EB5CA" }]} />
+            <View style={[styles.specHeaderAccent, { backgroundColor: "#FF6B00" }]} />
             <Text style={[styles.cardTitle, { color: colors.text }]}>Equipment</Text>
           </View>
 
@@ -545,7 +545,7 @@ export default function CarDetailScreen() {
           {/* All Options gradient CTA */}
           <Pressable style={[styles.fullSpecsBtn, { marginHorizontal: 16, marginBottom: 16, marginTop: 12 }]} onPress={() => setShowEquipment(true)}>
             <LinearGradient
-              colors={["#0EB5CA", "#0098AA"]}
+              colors={["#FF6B00", "#FF8C42"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.fullSpecsBtnGradient}
@@ -817,7 +817,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   fairBadgeText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#2E7D32" },
-  creditLine: { fontSize: 13, color: "#0066CC", fontFamily: "Inter_500Medium" },
+  creditLine: { fontSize: 13, color: "#FF6B00", fontFamily: "Inter_500Medium" },
   historyBanner: {
     flexDirection: "row",
     alignItems: "center",
@@ -871,7 +871,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     gap: 6,
     elevation: 3,
-    shadowColor: "#0EB5CA",
+    shadowColor: "#FF6B00",
     shadowOpacity: 0.10,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 3 },
@@ -918,12 +918,12 @@ const styles = StyleSheet.create({
   detailLabel: { fontSize: 13, fontFamily: "Inter_400Regular" },
   detailValue: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   detailBadge: {
-    backgroundColor: "rgba(14,181,202,0.12)",
+    backgroundColor: "rgba(255,107,0,0.12)",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 20,
   },
-  detailBadgeText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#0098AA" },
+  detailBadgeText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#FF8C42" },
 
   // Full specs button
   fullSpecsBtn: { borderRadius: 14, overflow: "hidden" },
@@ -1068,7 +1068,7 @@ const styles = StyleSheet.create({
     width: 4,
     height: 22,
     borderRadius: 2,
-    backgroundColor: "#0EB5CA",
+    backgroundColor: "#FF6B00",
   },
   recsScroll: {
     flexDirection: "row",
@@ -1122,8 +1122,8 @@ const styles = StyleSheet.create({
     shadowColor: "#22C55E",
   },
   chatBtn: {
-    backgroundColor: "#0EB5CA",
-    shadowColor: "#0EB5CA",
+    backgroundColor: "#FF6B00",
+    shadowColor: "#FF6B00",
   },
   stickyBtnIcon: {
     width: 34,
