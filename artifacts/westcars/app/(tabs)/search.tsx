@@ -125,44 +125,39 @@ function FilterModal({
     setTransmission("Any"); setCondition("Any"); setPriceRange(PRICE_RANGES[0]);
   };
 
-  const handleBrandSelect = (b: string) => {
-    setBrand(b);
-    setModel("Any");
-  };
+  const handleBrandSelect = (b: string) => { setBrand(b); setModel("Any"); };
 
   const hasFilters =
     brand !== "Any" || model !== "Any" || location !== "Any" || fuelType !== "Any" ||
     transmission !== "Any" || condition !== "Any" || priceRange.label !== "Any Price";
 
-  // ── Section card ──
-  const SectionCard = ({
-    icon, label, children,
-  }: { icon: any; label: string; children: React.ReactNode }) => (
-    <View style={fStyles.card}>
-      <View style={fStyles.cardHeader}>
-        <View style={fStyles.cardIconBg}>
-          <Feather name={icon} size={14} color="#0EB5CA" />
+  const activeCount = [
+    brand !== "Any", model !== "Any", location !== "Any", fuelType !== "Any",
+    transmission !== "Any", condition !== "Any", priceRange.label !== "Any Price",
+  ].filter(Boolean).length;
+
+  // ── Section block ──
+  const Section = ({ icon, label, children }: { icon: any; label: string; children: React.ReactNode }) => (
+    <View style={fStyles.section}>
+      <View style={fStyles.sectionHeader}>
+        <View style={fStyles.sectionIconWrap}>
+          <Feather name={icon} size={13} color="#FF6B00" />
         </View>
-        <Text style={fStyles.cardLabel}>{label}</Text>
+        <Text style={fStyles.sectionLabel}>{label}</Text>
       </View>
       {children}
     </View>
   );
 
-  // ── Chip row ──
-  const ChipRow = ({
-    options, selected, onSelect,
-  }: { options: string[]; selected: string; onSelect: (v: string) => void }) => (
+  // ── Pill chip row ──
+  const ChipRow = ({ options, selected, onSelect }: { options: string[]; selected: string; onSelect: (v: string) => void }) => (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
-      <View style={{ flexDirection: "row", gap: 7, paddingRight: 4 }}>
+      <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
         {["Any", ...options].map((opt) => {
           const active = selected === opt;
           return (
-            <Pressable
-              key={opt}
-              onPress={() => onSelect(opt)}
-              style={[fStyles.chip, active && fStyles.chipActive]}
-            >
+            <Pressable key={opt} onPress={() => onSelect(opt)}
+              style={[fStyles.chip, active && fStyles.chipActive]}>
               <Text style={[fStyles.chipText, active && fStyles.chipTextActive]}>{opt}</Text>
             </Pressable>
           );
@@ -174,23 +169,19 @@ function FilterModal({
   // ── Brand row ──
   const BrandRow = () => (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
-      <View style={{ flexDirection: "row", gap: 8, paddingRight: 4 }}>
+      <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
         {[{ name: "Any", logo: null }, ...CAR_BRANDS.map(b => ({ name: b, logo: BRAND_LOGOS[b] ?? null }))].map(({ name: b, logo }) => {
           const active = brand === b;
           return (
-            <Pressable
-              key={b}
-              onPress={() => handleBrandSelect(b)}
-              style={[fStyles.brandChip, active && fStyles.chipActive]}
-            >
-              <View style={[fStyles.brandLogoWrap, active && { backgroundColor: "rgba(255,255,255,0.2)" }]}>
-                {b === "Any" ? (
-                  <Feather name="layers" size={15} color={active ? "#fff" : "#94A3B8"} />
-                ) : logo ? (
-                  <Image source={{ uri: logo }} style={{ width: 22, height: 22 }} resizeMode="contain" />
-                ) : (
-                  <Text style={{ fontSize: 11, fontFamily: "Manrope_800ExtraBold", color: active ? "#fff" : "#64748B" }}>{b.charAt(0)}</Text>
-                )}
+            <Pressable key={b} onPress={() => handleBrandSelect(b)}
+              style={[fStyles.brandChip, active && fStyles.chipActive]}>
+              <View style={[fStyles.brandLogoWrap, active && fStyles.brandLogoWrapActive]}>
+                {b === "Any"
+                  ? <Feather name="layers" size={14} color={active ? "#FF6B00" : "#64748B"} />
+                  : logo
+                    ? <Image source={{ uri: logo }} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                    : <Text style={{ fontSize: 10, fontFamily: "Manrope_800ExtraBold", color: active ? "#FF6B00" : "#64748B" }}>{b.charAt(0)}</Text>
+                }
               </View>
               <Text style={[fStyles.chipText, active && fStyles.chipTextActive]}>{b}</Text>
             </Pressable>
@@ -206,13 +197,10 @@ function FilterModal({
       {PRICE_RANGES.map((pr) => {
         const active = priceRange.label === pr.label;
         return (
-          <Pressable
-            key={pr.label}
-            onPress={() => setPriceRange(pr)}
-            style={[fStyles.priceCard, active && fStyles.priceCardActive]}
-          >
-            <Feather name={pr.icon} size={14} color={active ? "#fff" : "#0EB5CA"} />
-            <Text style={[fStyles.priceLabel, active && { color: "#fff" }]}>{pr.label}</Text>
+          <Pressable key={pr.label} onPress={() => setPriceRange(pr)}
+            style={[fStyles.priceCard, active && fStyles.priceCardActive]}>
+            <Feather name={pr.icon} size={13} color={active ? "#fff" : "#FF6B00"} />
+            <Text style={[fStyles.priceLabel, active && fStyles.priceLabelActive]}>{pr.label}</Text>
           </Pressable>
         );
       })}
@@ -222,60 +210,56 @@ function FilterModal({
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen">
       <SafeAreaView style={fStyles.safeArea} edges={["top", "bottom"]}>
-        {/* ── Header ── */}
-        <LinearGradient
-          colors={["#FF6B00", "#C85000"]}
-          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-          style={fStyles.header}
-        >
+
+        {/* ── Dark header ── */}
+        <View style={fStyles.header}>
           <Pressable style={fStyles.headerBack} onPress={onClose}>
             <Feather name="arrow-left" size={20} color="#fff" />
           </Pressable>
-          <Text style={fStyles.headerTitle}>Filters</Text>
-          <Pressable onPress={reset} style={fStyles.headerClear}>
-            <Text style={[fStyles.headerClearText, !hasFilters && { opacity: 0.45 }]}>Clear All</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={fStyles.headerTitle}>Filters</Text>
+            {activeCount > 0 && (
+              <Text style={fStyles.headerSub}>{activeCount} active</Text>
+            )}
+          </View>
+          <Pressable onPress={reset} style={[fStyles.clearBtn, !hasFilters && { opacity: 0.3 }]} disabled={!hasFilters}>
+            <Text style={fStyles.clearBtnText}>Reset</Text>
           </Pressable>
-        </LinearGradient>
+        </View>
 
         {/* ── Scrollable body ── */}
-        <ScrollView
-          style={fStyles.body}
-          contentContainerStyle={fStyles.bodyContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <SectionCard icon="layers" label="Brand">
+        <ScrollView style={fStyles.body} contentContainerStyle={fStyles.bodyContent} showsVerticalScrollIndicator={false}>
+
+          <Section icon="layers" label="Brand">
             <BrandRow />
-          </SectionCard>
+          </Section>
 
           {brand !== "Any" && BRAND_MODELS[brand] && (
-            <SectionCard icon="tag" label={`${brand} Models`}>
-              <ChipRow
-                options={BRAND_MODELS[brand]}
-                selected={model}
-                onSelect={setModel}
-              />
-            </SectionCard>
+            <Section icon="tag" label={`${brand} Model`}>
+              <ChipRow options={BRAND_MODELS[brand]} selected={model} onSelect={setModel} />
+            </Section>
           )}
 
-          <SectionCard icon="map-pin" label="Location">
+          <Section icon="map-pin" label="Location">
             <ChipRow options={GHANA_CITIES} selected={location} onSelect={setLocation} />
-          </SectionCard>
+          </Section>
 
-          <SectionCard icon="zap" label="Fuel Type">
+          <Section icon="zap" label="Fuel Type">
             <ChipRow options={FUEL_TYPES} selected={fuelType} onSelect={setFuelType} />
-          </SectionCard>
+          </Section>
 
-          <SectionCard icon="settings" label="Transmission">
+          <Section icon="settings" label="Transmission">
             <ChipRow options={TRANSMISSIONS} selected={transmission} onSelect={setTransmission} />
-          </SectionCard>
+          </Section>
 
-          <SectionCard icon="check-circle" label="Condition">
+          <Section icon="check-circle" label="Condition">
             <ChipRow options={CONDITIONS} selected={condition} onSelect={setCondition} />
-          </SectionCard>
+          </Section>
 
-          <SectionCard icon="dollar-sign" label="Price Range">
+          <Section icon="dollar-sign" label="Price Range">
             <PriceGrid />
-          </SectionCard>
+          </Section>
+
         </ScrollView>
 
         {/* ── Footer ── */}
@@ -289,11 +273,14 @@ function FilterModal({
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
               style={fStyles.applyGrad}
             >
-              <Feather name="check" size={18} color="#fff" />
-              <Text style={fStyles.applyText}>Apply Filters</Text>
+              <Feather name="check-circle" size={18} color="#fff" />
+              <Text style={fStyles.applyText}>
+                {hasFilters ? `Show Results (${activeCount} filter${activeCount > 1 ? "s" : ""})` : "Show All Results"}
+              </Text>
             </LinearGradient>
           </Pressable>
         </View>
+
       </SafeAreaView>
     </Modal>
   );
@@ -690,112 +677,107 @@ const styles = StyleSheet.create({
 });
 
 const fStyles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F0F5F9",
-  },
+  safeArea: { flex: 1, backgroundColor: "#0D0D1A" },
 
   // ── Header ──
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 0,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.06)",
+    gap: 12,
   },
   headerBack: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.18)",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.08)",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 10,
   },
   headerTitle: {
-    flex: 1,
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: "Manrope_800ExtraBold",
-    color: "#fff",
-    letterSpacing: -0.3,
+    color: "#FFFFFF",
+    letterSpacing: -0.5,
   },
-  headerClear: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.15)",
+  headerSub: {
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
+    color: "#FF6B00",
+    marginTop: 1,
   },
-  headerClearText: {
+  clearBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,107,0,0.40)",
+  },
+  clearBtnText: {
     fontSize: 13,
-    fontFamily: "Inter_700Bold",
-    color: "#fff",
+    fontFamily: "Inter_600SemiBold",
+    color: "#FF6B00",
   },
 
   // ── Body ──
-  body: {
-    flex: 1,
-  },
+  body: { flex: 1 },
   bodyContent: {
-    padding: 14,
-    gap: 12,
-    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 16,
   },
 
-  // ── Section cards ──
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingTop: 13,
-    paddingBottom: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+  // ── Section blocks ──
+  section: {
+    marginTop: 24,
   },
-  cardHeader: {
+  sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    marginBottom: 2,
   },
-  cardIconBg: {
-    width: 26,
-    height: 26,
-    borderRadius: 8,
-    backgroundColor: "#FFF0E6",
+  sectionIconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 7,
+    backgroundColor: "rgba(255,107,0,0.15)",
     alignItems: "center",
     justifyContent: "center",
   },
-  cardLabel: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-    color: "#0F172A",
-    letterSpacing: 0.1,
+  sectionLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_700Bold",
+    color: "rgba(255,255,255,0.45)",
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
   },
 
   // ── Chips ──
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
     borderRadius: 50,
-    backgroundColor: "#F1F5F9",
-    borderWidth: 1.5,
-    borderColor: "#E2E8F0",
+    backgroundColor: "#1A1A2E",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.10)",
   },
   chipActive: {
-    backgroundColor: "#0EB5CA",
-    borderColor: "#0EB5CA",
-    shadowColor: "#0EB5CA",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
-    elevation: 4,
+    backgroundColor: "#FF6B00",
+    borderColor: "#FF6B00",
+    shadowColor: "#FF6B00",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.50,
+    shadowRadius: 8,
+    elevation: 6,
   },
   chipText: {
     fontSize: 13,
     fontFamily: "Inter_600SemiBold",
-    color: "#334155",
+    color: "rgba(255,255,255,0.55)",
   },
   chipTextActive: {
     color: "#fff",
@@ -806,85 +788,86 @@ const fStyles = StyleSheet.create({
   brandChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 7,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: 50,
-    backgroundColor: "#F1F5F9",
-    borderWidth: 1.5,
-    borderColor: "#E2E8F0",
+    backgroundColor: "#1A1A2E",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.10)",
   },
   brandLogoWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#EEF3F8",
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "rgba(255,255,255,0.08)",
     alignItems: "center",
     justifyContent: "center",
+  },
+  brandLogoWrapActive: {
+    backgroundColor: "rgba(255,255,255,0.20)",
   },
 
   // ── Price grid ──
   priceCard: {
     width: "30%",
     flexGrow: 1,
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: 5,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    backgroundColor: "#F1F5F9",
-    borderWidth: 1.5,
-    borderColor: "#E2E8F0",
+    gap: 4,
+    paddingVertical: 14,
+    paddingHorizontal: 6,
+    borderRadius: 14,
+    backgroundColor: "#1A1A2E",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.10)",
   },
   priceCardActive: {
-    backgroundColor: "#0EB5CA",
-    borderColor: "#0EB5CA",
-    shadowColor: "#0EB5CA",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
-    elevation: 4,
+    backgroundColor: "#FF6B00",
+    borderColor: "#FF6B00",
+    shadowColor: "#FF6B00",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.50,
+    shadowRadius: 8,
+    elevation: 6,
   },
   priceLabel: {
     fontSize: 11,
     fontFamily: "Inter_700Bold",
-    color: "#1E293B",
+    color: "rgba(255,255,255,0.50)",
     textAlign: "center",
     flexShrink: 1,
+  },
+  priceLabelActive: {
+    color: "#fff",
   },
 
   // ── Footer ──
   footer: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 10,
-    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    paddingBottom: 12,
+    backgroundColor: "#0D0D1A",
     borderTopWidth: 1,
-    borderTopColor: "#E8EEF5",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 8,
+    borderTopColor: "rgba(255,255,255,0.07)",
   },
   applyBtn: {
-    borderRadius: 14,
+    borderRadius: 28,
     overflow: "hidden",
   },
   applyGrad: {
-    height: 52,
-    borderRadius: 14,
+    height: 56,
+    borderRadius: 28,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: 10,
   },
   applyText: {
-    fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontSize: 15,
+    fontFamily: "Inter_700Bold",
     color: "#fff",
-    letterSpacing: 0.2,
+    letterSpacing: 0.3,
   },
 });

@@ -43,10 +43,10 @@ export default function SplashScreen() {
 
     const navTimer = setTimeout(() => {
       try {
-        router.replace("/auth/login");
+        router.replace("/welcome");
       } catch {
         setTimeout(() => {
-          try { router.replace("/auth/login"); } catch {}
+          try { router.replace("/welcome"); } catch {}
         }, 400);
       }
     }, 2600);
