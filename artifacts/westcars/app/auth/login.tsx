@@ -214,9 +214,9 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0A1628' },
-  scroll: { flexGrow: 1 },
+  scroll: { flexGrow: 1, justifyContent: 'center' },
 
-  topSpacer: { flex: 1 },
+  topSpacer: { display: 'none' },
 
   heroWrap: {
     width: SCREEN_W,
