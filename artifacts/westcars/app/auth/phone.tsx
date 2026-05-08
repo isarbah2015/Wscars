@@ -40,9 +40,8 @@ export default function PhoneAuthScreen() {
       return;
     }
     setLoading(true);
-    // TODO: Replace with one of:
-    //   • signInWithPhoneNumber(auth, fullPhone(), recaptcha)  ← needs RN-compatible verifier
-    //   • Cloud-Function-backed Twilio Verify flow
+    // Scaffold: replace with signInWithPhoneNumber (needs RN-compatible verifier)
+    // or a Cloud-Function-backed Twilio Verify flow — see file header for details.
     await new Promise((r) => setTimeout(r, 800));
     setLoading(false);
     setStep("otp");
@@ -55,7 +54,7 @@ export default function PhoneAuthScreen() {
       return;
     }
     setLoading(true);
-    // TODO: confirmationResult.confirm(code) → Firebase user
+    // Scaffold: call confirmationResult.confirm(code) once verifier is integrated.
     await new Promise((r) => setTimeout(r, 800));
     setLoading(false);
     Alert.alert(

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase-persistence";
 
 export function GoogleAuthBridge({
   onIdToken,

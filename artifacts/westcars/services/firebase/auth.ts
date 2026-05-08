@@ -17,7 +17,8 @@ import {
   type Unsubscribe,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db, isFirebaseReady } from "@/lib/firebase";
+import { db, isFirebaseReady } from "@/lib/firebase";
+import { auth } from "@/lib/firebase-persistence";
 import { User } from "@/types";
 
 const ensureReady = () => {

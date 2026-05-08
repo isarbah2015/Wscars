@@ -40,6 +40,7 @@ function RootLayoutNav() {
       <Stack.Screen name="welcome" />
       <Stack.Screen name="auth/login" />
       <Stack.Screen name="auth/signup" />
+      <Stack.Screen name="auth/forgot-password" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="car/[id]"          options={{ presentation: "card" }} />
       <Stack.Screen name="conversation/[id]" options={{ presentation: "card" }} />
