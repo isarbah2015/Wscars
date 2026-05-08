@@ -142,10 +142,10 @@ const styles = StyleSheet.create({
 
   carFull: {
     position: "absolute",
-    top: SCREEN_H * 0.04,
-    left: -SCREEN_W * 0.52,
-    width: SCREEN_W * 1.65,
-    height: SCREEN_H * 0.60,
+    top: SCREEN_H * 0.05,
+    left: -SCREEN_W * 0.38,
+    width: SCREEN_W * 1.26,
+    height: SCREEN_H * 0.50,
   },
 
   topRow: {
