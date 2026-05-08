@@ -15,22 +15,15 @@ import {
   TextInput,
   View,
 } from "react-native";
-
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Car } from "@/types";
-import {
-  CAR_BRANDS,
-  CONDITIONS,
-  FUEL_TYPES,
-  GHANA_CITIES,
-  TRANSMISSIONS,
-} from "@/utils/ghanaData";
+import { CAR_BRANDS, CONDITIONS, FUEL_TYPES, GHANA_CITIES, TRANSMISSIONS } from "@/utils/ghanaData";
 import { BRAND_LOGOS } from "@/utils/brandLogos";
 
-const SHEET_H = Dimensions.get("window").height * 0.80;
+const { width: SCREEN_W } = Dimensions.get("window");
 
 const BRAND_MODELS: Record<string, string[]> = {
   Toyota:      ["Camry","Corolla","RAV4","Highlander","Land Cruiser","Prado","Fortuner","Venza","Yaris","Hiace","Avensis","Auris"],
@@ -75,18 +68,18 @@ const PRICE_RANGES = [
 type QuickFilterKey = "All"|"SUV"|"Sedan"|"Tokunbo"|"Budget"|"Luxury"|"Pickup"|"Truck"|"Bus"|"Heavy"|"Moto"|"New";
 
 const QUICK_FILTERS: { key: QuickFilterKey; label: string; icon: any; color: string }[] = [
-  { key: "All",     label: "All",     icon: "grid",        color: "#0EB5CA" },
-  { key: "SUV",     label: "SUV",     icon: "box",         color: "#6366F1" },
-  { key: "Sedan",   label: "Sedan",   icon: "minus-circle",color: "#EC4899" },
-  { key: "Tokunbo", label: "Tokunbo", icon: "package",     color: "#22C55E" },
-  { key: "Budget",  label: "Budget",  icon: "tag",         color: "#F59E0B" },
-  { key: "Luxury",  label: "Luxury",  icon: "award",       color: "#A855F7" },
-  { key: "Pickup",  label: "Pickup",  icon: "truck",       color: "#F97316" },
-  { key: "Truck",   label: "Truck",   icon: "truck",       color: "#DC2626" },
-  { key: "Bus",     label: "Bus",     icon: "users",       color: "#0284C7" },
-  { key: "Heavy",   label: "Heavy",   icon: "tool",        color: "#92400E" },
-  { key: "Moto",    label: "Moto",    icon: "navigation-2",color: "#0F766E" },
-  { key: "New",     label: "New",     icon: "star",        color: "#7C3AED" },
+  { key: "All",     label: "All",     icon: "grid",         color: "#0EB5CA" },
+  { key: "SUV",     label: "SUV",     icon: "box",          color: "#6366F1" },
+  { key: "Sedan",   label: "Sedan",   icon: "minus-circle", color: "#EC4899" },
+  { key: "Tokunbo", label: "Tokunbo", icon: "package",      color: "#22C55E" },
+  { key: "Budget",  label: "Budget",  icon: "tag",          color: "#F59E0B" },
+  { key: "Luxury",  label: "Luxury",  icon: "award",        color: "#A855F7" },
+  { key: "Pickup",  label: "Pickup",  icon: "truck",        color: "#F97316" },
+  { key: "Truck",   label: "Truck",   icon: "truck",        color: "#DC2626" },
+  { key: "Bus",     label: "Bus",     icon: "users",        color: "#0284C7" },
+  { key: "Heavy",   label: "Heavy",   icon: "tool",         color: "#92400E" },
+  { key: "Moto",    label: "Moto",    icon: "navigation-2", color: "#0F766E" },
+  { key: "New",     label: "New",     icon: "star",         color: "#7C3AED" },
 ];
 
 function mapCategoryToFilter(cat: string): { quickFilter: QuickFilterKey; query: string } {
@@ -108,10 +101,12 @@ function mapCategoryToFilter(cat: string): { quickFilter: QuickFilterKey; query:
   return { quickFilter: "All", query: cat };
 }
 
-// ── Full-screen Premium Filter Modal ─────────────────────────────────────────
-function FilterModal({
-  visible, onClose, onApply,
-}: { visible: boolean; onClose: () => void; onApply: (f: any) => void; colors?: any }) {
+// ─────────────────────────────────────────────────────────────────────────────
+// PREMIUM FILTER MODAL
+// ─────────────────────────────────────────────────────────────────────────────
+function FilterModal({ visible, onClose, onApply }: {
+  visible: boolean; onClose: () => void; onApply: (f: any) => void;
+}) {
   const [brand,        setBrand]        = useState("Any");
   const [model,        setModel]        = useState("Any");
   const [location,     setLocation]     = useState("Any");
@@ -124,41 +119,56 @@ function FilterModal({
     setBrand("Any"); setModel("Any"); setLocation("Any"); setFuelType("Any");
     setTransmission("Any"); setCondition("Any"); setPriceRange(PRICE_RANGES[0]);
   };
-
   const handleBrandSelect = (b: string) => { setBrand(b); setModel("Any"); };
-
-  const hasFilters =
-    brand !== "Any" || model !== "Any" || location !== "Any" || fuelType !== "Any" ||
-    transmission !== "Any" || condition !== "Any" || priceRange.label !== "Any Price";
 
   const activeCount = [
     brand !== "Any", model !== "Any", location !== "Any", fuelType !== "Any",
     transmission !== "Any", condition !== "Any", priceRange.label !== "Any Price",
   ].filter(Boolean).length;
+  const hasFilters = activeCount > 0;
 
-  // ── Section block ──
-  const Section = ({ icon, label, children }: { icon: any; label: string; children: React.ReactNode }) => (
-    <View style={fStyles.section}>
-      <View style={fStyles.sectionHeader}>
-        <View style={fStyles.sectionIconWrap}>
-          <Feather name={icon} size={13} color="#0EB5CA" />
+  // Reusable filter card section
+  const FilterCard = ({ icon, label, children }: { icon: any; label: string; children: React.ReactNode }) => (
+    <View style={fStyles.card}>
+      <View style={fStyles.cardHeader}>
+        <View style={fStyles.cardIconRing}>
+          <Feather name={icon} size={14} color="#0EB5CA" />
         </View>
-        <Text style={fStyles.sectionLabel}>{label}</Text>
+        <Text style={fStyles.cardLabel}>{label}</Text>
       </View>
       {children}
     </View>
   );
 
-  // ── Pill chip row ──
-  const ChipRow = ({ options, selected, onSelect }: { options: string[]; selected: string; onSelect: (v: string) => void }) => (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
+  // Pill chip grid (wraps)
+  const PillGrid = ({ options, selected, onSelect }: {
+    options: string[]; selected: string; onSelect: (v: string) => void;
+  }) => (
+    <View style={fStyles.pillGrid}>
+      {["Any", ...options].map((opt) => {
+        const active = selected === opt;
+        return (
+          <Pressable key={opt} onPress={() => onSelect(opt)}
+            style={[fStyles.pill, active && fStyles.pillActive]}>
+            <Text style={[fStyles.pillText, active && fStyles.pillTextActive]}>{opt}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+
+  // Horizontal scroll chips (for long lists like locations)
+  const ChipScroll = ({ options, selected, onSelect }: {
+    options: string[]; selected: string; onSelect: (v: string) => void;
+  }) => (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14 }}>
       <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
         {["Any", ...options].map((opt) => {
           const active = selected === opt;
           return (
             <Pressable key={opt} onPress={() => onSelect(opt)}
-              style={[fStyles.chip, active && fStyles.chipActive]}>
-              <Text style={[fStyles.chipText, active && fStyles.chipTextActive]}>{opt}</Text>
+              style={[fStyles.pill, active && fStyles.pillActive]}>
+              <Text style={[fStyles.pillText, active && fStyles.pillTextActive]}>{opt}</Text>
             </Pressable>
           );
         })}
@@ -166,24 +176,24 @@ function FilterModal({
     </ScrollView>
   );
 
-  // ── Brand row ──
+  // Brand row with logos
   const BrandRow = () => (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
-      <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14 }}>
+      <View style={{ flexDirection: "row", gap: 10, paddingRight: 8 }}>
         {[{ name: "Any", logo: null }, ...CAR_BRANDS.map(b => ({ name: b, logo: BRAND_LOGOS[b] ?? null }))].map(({ name: b, logo }) => {
           const active = brand === b;
           return (
             <Pressable key={b} onPress={() => handleBrandSelect(b)}
-              style={[fStyles.brandChip, active && fStyles.chipActive]}>
-              <View style={[fStyles.brandLogoWrap, active && fStyles.brandLogoWrapActive]}>
+              style={[fStyles.brandItem, active && fStyles.brandItemActive]}>
+              <View style={[fStyles.brandLogoCircle, active && fStyles.brandLogoCircleActive]}>
                 {b === "Any"
-                  ? <Feather name="layers" size={14} color={active ? "#0EB5CA" : "#64748B"} />
+                  ? <Feather name="layers" size={16} color={active ? "#fff" : "#64748B"} />
                   : logo
-                    ? <Image source={{ uri: logo }} style={{ width: 20, height: 20 }} resizeMode="contain" />
-                    : <Text style={{ fontSize: 10, fontFamily: "Manrope_800ExtraBold", color: active ? "#0EB5CA" : "#64748B" }}>{b.charAt(0)}</Text>
+                    ? <Image source={{ uri: logo }} style={{ width: 24, height: 24 }} resizeMode="contain" />
+                    : <Text style={{ fontSize: 13, fontFamily: "Manrope_800ExtraBold", color: active ? "#fff" : "#475569" }}>{b.charAt(0)}</Text>
                 }
               </View>
-              <Text style={[fStyles.chipText, active && fStyles.chipTextActive]}>{b}</Text>
+              <Text style={[fStyles.brandName, active && fStyles.brandNameActive]} numberOfLines={1}>{b}</Text>
             </Pressable>
           );
         })}
@@ -191,16 +201,20 @@ function FilterModal({
     </ScrollView>
   );
 
-  // ── Price grid ──
+  // 2-col price cards
   const PriceGrid = () => (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+    <View style={fStyles.priceGrid}>
       {PRICE_RANGES.map((pr) => {
         const active = priceRange.label === pr.label;
         return (
           <Pressable key={pr.label} onPress={() => setPriceRange(pr)}
             style={[fStyles.priceCard, active && fStyles.priceCardActive]}>
-            <Feather name={pr.icon} size={13} color={active ? "#fff" : "#0EB5CA"} />
-            <Text style={[fStyles.priceLabel, active && fStyles.priceLabelActive]}>{pr.label}</Text>
+            {active
+              ? <LinearGradient colors={["#0EB5CA", "#0098AA"]} style={StyleSheet.absoluteFill} start={{x:0,y:0}} end={{x:1,y:1}} />
+              : null
+            }
+            <Feather name={pr.icon} size={15} color={active ? "#fff" : "#0EB5CA"} />
+            <Text style={[fStyles.priceCardText, active && fStyles.priceCardTextActive]}>{pr.label}</Text>
           </Pressable>
         );
       })}
@@ -209,73 +223,72 @@ function FilterModal({
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen">
-      <SafeAreaView style={fStyles.safeArea} edges={["top", "bottom"]}>
+      <SafeAreaView style={fStyles.safeArea} edges={["top","bottom"]}>
 
-        {/* ── Dark header ── */}
+        {/* Header */}
         <View style={fStyles.header}>
-          <Pressable style={fStyles.headerBack} onPress={onClose}>
+          <Pressable style={fStyles.backBtn} onPress={onClose}>
             <Feather name="arrow-left" size={20} color="#0F172A" />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={fStyles.headerTitle}>Filters</Text>
+            <Text style={fStyles.headerTitle}>Refine Search</Text>
             {activeCount > 0 && (
-              <Text style={fStyles.headerSub}>{activeCount} active</Text>
+              <Text style={fStyles.headerSub}>{activeCount} filter{activeCount > 1 ? "s" : ""} active</Text>
             )}
           </View>
-          <Pressable onPress={reset} style={[fStyles.clearBtn, !hasFilters && { opacity: 0.3 }]} disabled={!hasFilters}>
-            <Text style={fStyles.clearBtnText}>Reset</Text>
+          <Pressable
+            style={[fStyles.resetBtn, !hasFilters && { opacity: 0.35 }]}
+            onPress={reset} disabled={!hasFilters}>
+            <Text style={fStyles.resetText}>Reset</Text>
           </Pressable>
         </View>
 
-        {/* ── Scrollable body ── */}
+        {/* Body */}
         <ScrollView style={fStyles.body} contentContainerStyle={fStyles.bodyContent} showsVerticalScrollIndicator={false}>
 
-          <Section icon="layers" label="Brand">
+          <FilterCard icon="layers" label="Brand">
             <BrandRow />
-          </Section>
+          </FilterCard>
 
           {brand !== "Any" && BRAND_MODELS[brand] && (
-            <Section icon="tag" label={`${brand} Model`}>
-              <ChipRow options={BRAND_MODELS[brand]} selected={model} onSelect={setModel} />
-            </Section>
+            <FilterCard icon="tag" label={`${brand} Model`}>
+              <ChipScroll options={BRAND_MODELS[brand]} selected={model} onSelect={setModel} />
+            </FilterCard>
           )}
 
-          <Section icon="map-pin" label="Location">
-            <ChipRow options={GHANA_CITIES} selected={location} onSelect={setLocation} />
-          </Section>
+          <FilterCard icon="map-pin" label="Location">
+            <ChipScroll options={GHANA_CITIES} selected={location} onSelect={setLocation} />
+          </FilterCard>
 
-          <Section icon="zap" label="Fuel Type">
-            <ChipRow options={FUEL_TYPES} selected={fuelType} onSelect={setFuelType} />
-          </Section>
+          <FilterCard icon="zap" label="Fuel Type">
+            <PillGrid options={FUEL_TYPES} selected={fuelType} onSelect={setFuelType} />
+          </FilterCard>
 
-          <Section icon="settings" label="Transmission">
-            <ChipRow options={TRANSMISSIONS} selected={transmission} onSelect={setTransmission} />
-          </Section>
+          <FilterCard icon="settings" label="Transmission">
+            <PillGrid options={TRANSMISSIONS} selected={transmission} onSelect={setTransmission} />
+          </FilterCard>
 
-          <Section icon="check-circle" label="Condition">
-            <ChipRow options={CONDITIONS} selected={condition} onSelect={setCondition} />
-          </Section>
+          <FilterCard icon="check-circle" label="Condition">
+            <PillGrid options={CONDITIONS} selected={condition} onSelect={setCondition} />
+          </FilterCard>
 
-          <Section icon="dollar-sign" label="Price Range">
+          <FilterCard icon="dollar-sign" label="Price Range">
             <PriceGrid />
-          </Section>
+          </FilterCard>
 
+          <View style={{ height: 16 }} />
         </ScrollView>
 
-        {/* ── Footer ── */}
+        {/* Footer */}
         <View style={fStyles.footer}>
           <Pressable
             style={fStyles.applyBtn}
             onPress={() => { onApply({ brand, model, location, fuelType, transmission, condition, priceRange }); onClose(); }}
           >
-            <LinearGradient
-              colors={["#0EB5CA", "#0098AA"]}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-              style={fStyles.applyGrad}
-            >
+            <LinearGradient colors={["#0EB5CA", "#0098AA"]} start={{x:0,y:0}} end={{x:1,y:0}} style={fStyles.applyGrad}>
               <Feather name="check-circle" size={18} color="#fff" />
               <Text style={fStyles.applyText}>
-                {hasFilters ? `Show Results (${activeCount} filter${activeCount > 1 ? "s" : ""})` : "Show All Results"}
+                {hasFilters ? `Show Results · ${activeCount} filter${activeCount > 1 ? "s" : ""}` : "Show All Results"}
               </Text>
             </LinearGradient>
           </Pressable>
@@ -286,7 +299,9 @@ function FilterModal({
   );
 }
 
-// ── Main Search Screen ────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN SEARCH SCREEN
+// ─────────────────────────────────────────────────────────────────────────────
 export default function SearchScreen() {
   const { cars } = useApp();
   const { colors, isDark } = useTheme();
@@ -303,30 +318,25 @@ export default function SearchScreen() {
   useEffect(() => {
     if (brandParam) {
       setActiveFilters((prev: any) => ({ ...(prev || {}), brand: brandParam }));
-      setQuickFilter("All");
-      setQuery("");
+      setQuickFilter("All"); setQuery("");
     }
   }, [brandParam]);
 
   useEffect(() => {
     if (category) {
       const { quickFilter: qf, query: q } = mapCategoryToFilter(category as string);
-      setQuickFilter(qf);
-      setQuery(q);
-      setActiveFilters(null);
+      setQuickFilter(qf); setQuery(q); setActiveFilters(null);
     }
   }, [category]);
 
   const filtered = cars.filter((car: Car) => {
     const q = query.toLowerCase();
-    const matchQuery =
-      !q ||
-      car.brand.toLowerCase().includes(q) ||
-      car.model.toLowerCase().includes(q) ||
-      car.location.toLowerCase().includes(q) ||
-      car.condition.toLowerCase().includes(q) ||
-      (car.category?.toLowerCase().includes(q) ?? false);
-
+    const matchQuery = !q
+      || car.brand.toLowerCase().includes(q)
+      || car.model.toLowerCase().includes(q)
+      || car.location.toLowerCase().includes(q)
+      || car.condition.toLowerCase().includes(q)
+      || (car.category?.toLowerCase().includes(q) ?? false);
     if (!matchQuery) return false;
 
     let matchQuick = true;
@@ -342,7 +352,6 @@ export default function SearchScreen() {
     else if (quickFilter === "Heavy")   matchQuick = cat.includes("excavator") || cat.includes("bulldozer") || cat.includes("crane") || cat.includes("forklift") || cat.includes("loader") || cat.includes("grader") || cat.includes("compactor") || cat.includes("mixer") || cat.includes("tractor") || cat.includes("harvester") || cat.includes("ambulance") || cat.includes("fire truck");
     else if (quickFilter === "Moto")    matchQuick = cat.includes("motorcycle") || cat.includes("scooter") || cat.includes("atv") || cat.includes("dirt bike") || cat.includes("quad");
     else if (quickFilter === "New")     matchQuick = car.condition === "New";
-
     if (!matchQuick) return false;
     if (!activeFilters) return true;
 
@@ -354,130 +363,112 @@ export default function SearchScreen() {
       (fuelType === "Any" || car.fuelType === fuelType) &&
       (transmission === "Any" || car.transmission === transmission) &&
       (condition === "Any" || car.condition === condition) &&
-      car.price >= priceRange.min &&
-      car.price <= priceRange.max
+      car.price >= priceRange.min && car.price <= priceRange.max
     );
   });
 
   const listData = React.useMemo(() => {
     const seeded = filtered.map((car) => ({
-      car,
-      k: [...car.id].reduce((s, ch) => (s * 33 + ch.charCodeAt(0)) >>> 0, 13),
+      car, k: [...car.id].reduce((s, ch) => (s * 33 + ch.charCodeAt(0)) >>> 0, 13),
     }));
     seeded.sort((a, b) => a.k - b.k);
     return seeded.map((x) => ({ type: "car" as const, item: x.car }));
   }, [filtered]);
 
-  const bgHeader = isDark ? "#111827" : "#FFFFFF";
-  const borderHeader = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)";
-  const TEAL = "#0EB5CA";
+  const headerBg  = isDark ? "#111827" : "#FFFFFF";
+  const bodyBg    = isDark ? colors.background : "#F0F4F8";
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
+    <View style={[S.root, { backgroundColor: bodyBg }]}>
+
       {/* ── Premium Header ── */}
-      <View style={[styles.header, { paddingTop: topPad + 14, backgroundColor: bgHeader, borderBottomColor: borderHeader }]}>
+      <View style={[S.header, { paddingTop: topPad + 12, backgroundColor: headerBg }]}>
+
         {/* Title row */}
-        <View style={styles.titleRow}>
+        <View style={S.titleRow}>
           <View>
-            <Text style={[styles.titleSub, { color: TEAL }]}>WESTCARS</Text>
-            <Text style={[styles.title, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Search</Text>
+            <Text style={[S.eyebrow, { color: "#0EB5CA" }]}>WESTCARS</Text>
+            <Text style={[S.title, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Search</Text>
           </View>
           {filtered.length > 0 && (
-            <View style={[styles.countBadge, { backgroundColor: TEAL }]}>
-              <Text style={styles.countText}>{filtered.length}</Text>
-              <Text style={styles.countLabel}>found</Text>
+            <View style={S.countBubble}>
+              <LinearGradient colors={["#0EB5CA","#0098AA"]} style={S.countBubbleGrad} start={{x:0,y:0}} end={{x:1,y:1}}>
+                <Text style={S.countNum}>{filtered.length}</Text>
+                <Text style={S.countLbl}>found</Text>
+              </LinearGradient>
             </View>
           )}
         </View>
 
         {/* Search bar */}
-        <View style={[styles.searchBar, {
-          backgroundColor: isDark ? "#1E293B" : "#F8FAFC",
-          borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+        <View style={[S.searchBar, {
+          backgroundColor: isDark ? "#1E293B" : "#F4F7FA",
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "#DDE3EC",
         }]}>
-          <Feather name="search" size={17} color={isDark ? "#64748B" : "#94A3B8"} />
+          <Feather name="search" size={18} color="#0EB5CA" />
           <TextInput
-            style={[styles.searchInput, { color: isDark ? "#F1F5F9" : "#0F172A" }]}
+            style={[S.searchInput, { color: isDark ? "#F1F5F9" : "#0F172A" }]}
             placeholder="Brand, model, location..."
             placeholderTextColor={isDark ? "#475569" : "#94A3B8"}
             value={query}
             onChangeText={setQuery}
           />
           {query.length > 0 && (
-            <Pressable onPress={() => setQuery("")} hitSlop={8}>
-              <Feather name="x-circle" size={16} color="#94A3B8" />
+            <Pressable onPress={() => setQuery("")} hitSlop={10}>
+              <Feather name="x-circle" size={17} color="#94A3B8" />
             </Pressable>
           )}
-          <Pressable
-            onPress={() => setFilterVisible(true)}
-            style={[styles.filterBtn, activeFilters && styles.filterBtnActive]}
-          >
-            <LinearGradient
-              colors={["#0EB5CA", "#0098AA"]}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-              style={styles.filterBtnGrad}
-            >
+          <Pressable onPress={() => setFilterVisible(true)} style={S.filterTrigger}>
+            <LinearGradient colors={["#0EB5CA","#0098AA"]} style={S.filterGrad} start={{x:0,y:0}} end={{x:1,y:1}}>
               <Feather name="sliders" size={16} color="#fff" />
-              {activeFilters && <View style={styles.filterDot} />}
+              {activeFilters && <View style={S.filterDot} />}
             </LinearGradient>
           </Pressable>
         </View>
 
-        {/* Premium quick-filter chips */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-          <View style={styles.chipRow}>
-            {QUICK_FILTERS.map(({ key, label, icon, color }) => {
-              const active = quickFilter === key;
-              return (
-                <Pressable
-                  key={key}
-                  style={[styles.chip, { borderColor: active ? "transparent" : (isDark ? "rgba(255,255,255,0.10)" : "#E2E8F0") }]}
-                  onPress={() => setQuickFilter(key)}
-                >
-                  {active ? (
-                    <LinearGradient
-                      colors={[color, color + "CC"]}
-                      start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                      style={styles.chipInner}
-                    >
-                      <View style={styles.chipIconCircle}>
-                        <Feather name={icon} size={12} color={color} />
-                      </View>
-                      <Text style={styles.chipLabelActive}>{label}</Text>
+        {/* Category chips */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={S.chipScroll} contentContainerStyle={S.chipRow}>
+          {QUICK_FILTERS.map(({ key, label, icon, color }) => {
+            const active = quickFilter === key;
+            return (
+              <Pressable key={key} onPress={() => setQuickFilter(key)} style={S.chipWrap}>
+                {active
+                  ? <LinearGradient colors={[color, color + "BB"]} style={S.chipInner} start={{x:0,y:0}} end={{x:1,y:1}}>
+                      <Feather name={icon} size={12} color="#fff" />
+                      <Text style={S.chipLabelActive}>{label}</Text>
                     </LinearGradient>
-                  ) : (
-                    <View style={[styles.chipInner, { backgroundColor: isDark ? "#1E293B" : "#F8FAFC" }]}>
-                      <View style={[styles.chipIconCircleInactive, { backgroundColor: color + "1A" }]}>
+                  : <View style={[S.chipInner, {
+                      backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+                      borderWidth: 1,
+                      borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                    }]}>
+                      <View style={[S.chipIconCircle, { backgroundColor: color + "18" }]}>
                         <Feather name={icon} size={12} color={color} />
                       </View>
-                      <Text style={[styles.chipLabel, { color: isDark ? "#94A3B8" : "#64748B" }]}>{label}</Text>
+                      <Text style={[S.chipLabel, { color: isDark ? "#94A3B8" : "#475569" }]}>{label}</Text>
                     </View>
-                  )}
-                </Pressable>
-              );
-            })}
-          </View>
+                }
+              </Pressable>
+            );
+          })}
         </ScrollView>
 
         {/* Active filter badge */}
         {activeFilters && (
-          <View style={styles.filterBadgeRow}>
-            <LinearGradient
-              colors={["rgba(14,181,202,0.10)", "rgba(0,152,170,0.10)"]}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-              style={styles.filterBadge}
-            >
+          <View style={S.filterBadgeRow}>
+            <View style={[S.filterBadge, { backgroundColor: "rgba(14,181,202,0.10)", borderColor: "rgba(14,181,202,0.22)" }]}>
               <Feather name="filter" size={11} color="#0EB5CA" />
-              <Text style={styles.filterBadgeText}>Filters active</Text>
+              <Text style={S.filterBadgeText}>Filters active</Text>
               <Pressable onPress={() => setActiveFilters(null)} hitSlop={10}>
                 <Feather name="x" size={12} color="#0EB5CA" />
               </Pressable>
-            </LinearGradient>
+            </View>
           </View>
         )}
+
       </View>
 
-      {/* ── Results ── */}
+      {/* ── Results grid ── */}
       <FlatList
         data={listData}
         keyExtractor={(item) => item.item.id}
@@ -485,24 +476,19 @@ export default function SearchScreen() {
           if (index % 2 === 1) return null;
           const next = listData[index + 1];
           return (
-            <View style={styles.row}>
-              <CarCard car={item.item} style={styles.half} />
-              {next ? <CarCard car={next.item} style={styles.half} /> : <View style={styles.half} />}
+            <View style={S.row}>
+              <CarCard car={item.item} style={S.half} />
+              {next ? <CarCard car={next.item} style={S.half} /> : <View style={S.half} />}
             </View>
           );
         }}
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <LinearGradient
-              colors={["rgba(14,181,202,0.12)", "rgba(0,152,170,0.08)"]}
-              style={styles.emptyIconBg}
-            >
-              <Feather name="search" size={34} color="#0EB5CA" />
+          <View style={S.empty}>
+            <LinearGradient colors={["rgba(14,181,202,0.12)","rgba(0,152,170,0.06)"]} style={S.emptyCircle}>
+              <Feather name="search" size={36} color="#0EB5CA" />
             </LinearGradient>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No vehicles found</Text>
-            <Text style={[styles.emptyText, { color: colors.textTertiary }]}>
-              Try adjusting your search or filters
-            </Text>
+            <Text style={[S.emptyTitle, { color: colors.text }]}>No vehicles found</Text>
+            <Text style={[S.emptyText, { color: colors.textTertiary }]}>Try adjusting your search or filters</Text>
           </View>
         }
         ListFooterComponent={<View style={{ height: 100 + insets.bottom }} />}
@@ -510,63 +496,45 @@ export default function SearchScreen() {
         contentContainerStyle={{ paddingTop: 10 }}
       />
 
-      <FilterModal
-        visible={filterVisible}
-        onClose={() => setFilterVisible(false)}
-        onApply={setActiveFilters}
-        colors={colors}
-      />
+      <FilterModal visible={filterVisible} onClose={() => setFilterVisible(false)} onApply={setActiveFilters} />
     </View>
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
+// ─────────────────────────────────────────────────────────────────────────────
+// SEARCH SCREEN STYLES
+// ─────────────────────────────────────────────────────────────────────────────
+const S = StyleSheet.create({
   root: { flex: 1 },
 
   header: {
-    paddingHorizontal: 18,
-    paddingBottom: 14,
-    gap: 12,
-    borderBottomWidth: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    gap: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 4,
+    zIndex: 10,
   },
 
   titleRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" },
-  titleSub: {
-    fontSize: 9,
-    fontFamily: "Inter_600SemiBold",
-    letterSpacing: 2,
-    marginBottom: 1,
-  },
-  title: {
-    fontSize: 17,
-    fontFamily: "Inter_600SemiBold",
-    letterSpacing: -0.2,
-    lineHeight: 22,
-  },
-  countBadge: {
-    alignItems: "center",
-    backgroundColor: "#0EB5CA",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginBottom: 2,
-  },
-  countText: { fontSize: 18, fontFamily: "Manrope_800ExtraBold", color: "#fff", lineHeight: 22 },
-  countLabel: { fontSize: 9, fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.85)", letterSpacing: 1 },
+  eyebrow: { fontSize: 9, fontFamily: "Inter_700Bold", letterSpacing: 2.5 },
+  title: { fontSize: 26, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.5, lineHeight: 30 },
+
+  countBubble: { borderRadius: 16, overflow: "hidden", marginBottom: 2 },
+  countBubbleGrad: { paddingHorizontal: 14, paddingVertical: 8, alignItems: "center" },
+  countNum: { fontSize: 20, fontFamily: "Manrope_800ExtraBold", color: "#fff", lineHeight: 22 },
+  countLbl: { fontSize: 9, fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.80)", letterSpacing: 1 },
 
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    borderRadius: 16,
+    borderRadius: 18,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 11,
     borderWidth: 1.5,
   },
   searchInput: {
@@ -575,300 +543,161 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_500Medium",
     padding: 0,
   },
-  filterBtn: {
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  filterBtnActive: {
-    shadowColor: "#0EB5CA",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  filterBtnGrad: {
-    width: 38,
-    height: 38,
-    alignItems: "center",
-    justifyContent: "center",
+  filterTrigger: { borderRadius: 12, overflow: "hidden" },
+  filterGrad: {
+    width: 38, height: 38,
+    alignItems: "center", justifyContent: "center",
   },
   filterDot: {
-    position: "absolute",
-    top: 4,
-    right: 4,
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: "#EF4444",
-    borderWidth: 1.5,
-    borderColor: "#fff",
+    position: "absolute", top: 4, right: 4,
+    width: 7, height: 7, borderRadius: 4,
+    backgroundColor: "#EF4444", borderWidth: 1.5, borderColor: "#fff",
   },
 
-  chipScroll: { flexGrow: 0, marginHorizontal: -2 },
-  chipRow: { flexDirection: "row", gap: 7, paddingHorizontal: 2 },
-  chip: {
-    borderRadius: 14,
-    borderWidth: 1.5,
-    overflow: "hidden",
-  },
+  chipScroll: { flexGrow: 0 },
+  chipRow: { flexDirection: "row", gap: 7, paddingHorizontal: 2, paddingBottom: 2 },
+  chipWrap: { borderRadius: 20, overflow: "hidden" },
   chipInner: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    flexDirection: "row", alignItems: "center", gap: 6,
+    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20,
   },
   chipIconCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "rgba(255,255,255,0.25)",
-    alignItems: "center",
-    justifyContent: "center",
+    width: 20, height: 20, borderRadius: 10,
+    alignItems: "center", justifyContent: "center",
   },
-  chipIconCircleInactive: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  chipLabel: {
-    fontSize: 12,
-    fontFamily: "Inter_700Bold",
-    color: "#334155",
-  },
-  chipLabelActive: {
-    fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
-    color: "#fff",
-  },
+  chipLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  chipLabelActive: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#fff" },
 
   filterBadgeRow: { flexDirection: "row" },
   filterBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(14,181,202,0.25)",
+    flexDirection: "row", alignItems: "center", gap: 6,
+    paddingHorizontal: 12, paddingVertical: 6,
+    borderRadius: 20, borderWidth: 1,
   },
-  filterBadgeText: {
-    fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
-    color: "#0EB5CA",
-  },
+  filterBadgeText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#0EB5CA" },
 
   row: { flexDirection: "row", paddingHorizontal: 8, gap: 8 },
   half: { flex: 1, marginBottom: 10 },
 
-  empty: { alignItems: "center", paddingVertical: 80, gap: 14 },
-  emptyIconBg: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    alignItems: "center",
-    justifyContent: "center",
+  empty: { alignItems: "center", paddingVertical: 80, gap: 16 },
+  emptyCircle: {
+    width: 96, height: 96, borderRadius: 48,
+    alignItems: "center", justifyContent: "center",
   },
   emptyTitle: { fontSize: 18, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.3 },
   emptyText: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// FILTER MODAL STYLES
+// ─────────────────────────────────────────────────────────────────────────────
 const fStyles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#FFFFFF" },
+  safeArea: { flex: 1, backgroundColor: "#F0F4F8" },
 
-  // ── Header ──
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
+    flexDirection: "row", alignItems: "center",
+    paddingHorizontal: 20, paddingVertical: 18,
     backgroundColor: "#FFFFFF",
-    gap: 12,
+    borderBottomWidth: 1, borderBottomColor: "#E8EEF4",
+    gap: 14,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05, shadowRadius: 8, elevation: 3,
   },
-  headerBack: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  backBtn: {
+    width: 40, height: 40, borderRadius: 12,
     backgroundColor: "#F1F5F9",
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "center", justifyContent: "center",
   },
-  headerTitle: {
-    fontSize: 22,
-    fontFamily: "Manrope_800ExtraBold",
-    color: "#0F172A",
-    letterSpacing: -0.5,
+  headerTitle: { fontSize: 20, fontFamily: "Manrope_800ExtraBold", color: "#0F172A", letterSpacing: -0.4 },
+  headerSub: { fontSize: 11, fontFamily: "Inter_500Medium", color: "#0EB5CA", marginTop: 1 },
+  resetBtn: {
+    paddingHorizontal: 16, paddingVertical: 8,
+    borderRadius: 20, borderWidth: 1.5, borderColor: "#0EB5CA",
   },
-  headerSub: {
-    fontSize: 11,
-    fontFamily: "Inter_500Medium",
-    color: "#0EB5CA",
-    marginTop: 1,
-  },
-  clearBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+  resetText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#0EB5CA" },
+
+  body: { flex: 1 },
+  bodyContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16, gap: 12 },
+
+  card: {
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(14,181,202,0.40)",
+    padding: 18,
+    shadowColor: "#0A1628",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  clearBtnText: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-    color: "#0EB5CA",
-  },
-
-  // ── Body ──
-  body: { flex: 1, backgroundColor: "#F8FAFC" },
-  bodyContent: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 16,
-  },
-
-  // ── Section blocks ──
-  section: {
-    marginTop: 24,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 2,
-  },
-  sectionIconWrap: {
-    width: 24,
-    height: 24,
-    borderRadius: 7,
+  cardHeader: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 4 },
+  cardIconRing: {
+    width: 30, height: 30, borderRadius: 9,
     backgroundColor: "rgba(14,181,202,0.12)",
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "center", justifyContent: "center",
   },
-  sectionLabel: {
-    fontSize: 11,
-    fontFamily: "Inter_700Bold",
-    color: "#64748B",
-    letterSpacing: 1.2,
-    textTransform: "uppercase",
-  },
+  cardLabel: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#64748B", letterSpacing: 1, textTransform: "uppercase" },
 
-  // ── Chips ──
-  chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 9,
+  pillGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },
+  pill: {
+    paddingHorizontal: 16, paddingVertical: 9,
     borderRadius: 50,
     backgroundColor: "#F1F5F9",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderWidth: 1.5, borderColor: "#E2E8F0",
   },
-  chipActive: {
-    backgroundColor: "#0EB5CA",
-    borderColor: "#0EB5CA",
-    shadowColor: "#0EB5CA",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 6,
+  pillActive: {
+    backgroundColor: "#0EB5CA", borderColor: "#0EB5CA",
+    shadowColor: "#0EB5CA", shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.30, shadowRadius: 8, elevation: 5,
   },
-  chipText: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-    color: "#475569",
-  },
-  chipTextActive: {
-    color: "#fff",
-    fontFamily: "Inter_700Bold",
-  },
+  pillText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#475569" },
+  pillTextActive: { color: "#fff", fontFamily: "Inter_700Bold" },
 
-  // ── Brand chips ──
-  brandChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 50,
-    backgroundColor: "#F1F5F9",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+  brandItem: {
+    alignItems: "center", gap: 6,
+    paddingHorizontal: 4, paddingBottom: 4,
   },
-  brandLogoWrap: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: "#E2E8F0",
-    alignItems: "center",
-    justifyContent: "center",
+  brandItemActive: {},
+  brandLogoCircle: {
+    width: 52, height: 52, borderRadius: 26,
+    backgroundColor: "#F1F5F9", borderWidth: 1.5, borderColor: "#E2E8F0",
+    alignItems: "center", justifyContent: "center",
   },
-  brandLogoWrapActive: {
-    backgroundColor: "rgba(255,255,255,0.30)",
+  brandLogoCircleActive: {
+    backgroundColor: "#0EB5CA", borderColor: "#0EB5CA",
+    shadowColor: "#0EB5CA", shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35, shadowRadius: 8, elevation: 5,
   },
+  brandName: { fontSize: 10, fontFamily: "Inter_600SemiBold", color: "#64748B", textAlign: "center", maxWidth: 56 },
+  brandNameActive: { color: "#0EB5CA", fontFamily: "Inter_700Bold" },
 
-  // ── Price grid ──
+  priceGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 14 },
   priceCard: {
-    width: "30%",
-    flexGrow: 1,
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-    paddingVertical: 14,
-    paddingHorizontal: 6,
-    borderRadius: 14,
+    width: (SCREEN_W - 32 - 36 - 20) / 2,
+    flexDirection: "column", alignItems: "center", justifyContent: "center",
+    gap: 6, paddingVertical: 18,
+    borderRadius: 16, overflow: "hidden",
     backgroundColor: "#F1F5F9",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderWidth: 1.5, borderColor: "#E2E8F0",
   },
   priceCardActive: {
-    backgroundColor: "#0EB5CA",
     borderColor: "#0EB5CA",
-    shadowColor: "#0EB5CA",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowColor: "#0EB5CA", shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.30, shadowRadius: 8, elevation: 5,
   },
-  priceLabel: {
-    fontSize: 11,
-    fontFamily: "Inter_700Bold",
-    color: "#64748B",
-    textAlign: "center",
-    flexShrink: 1,
-  },
-  priceLabelActive: {
-    color: "#fff",
-  },
+  priceCardText: { fontSize: 13, fontFamily: "Inter_700Bold", color: "#475569", textAlign: "center" },
+  priceCardTextActive: { color: "#fff" },
 
-  // ── Footer ──
   footer: {
-    paddingHorizontal: 20,
-    paddingTop: 14,
-    paddingBottom: 12,
+    paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12,
     backgroundColor: "#FFFFFF",
-    borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
+    borderTopWidth: 1, borderTopColor: "#E8EEF4",
+    shadowColor: "#000", shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.06, shadowRadius: 10, elevation: 6,
   },
-  applyBtn: {
-    borderRadius: 28,
-    overflow: "hidden",
-  },
+  applyBtn: { borderRadius: 18, overflow: "hidden" },
   applyGrad: {
-    height: 56,
-    borderRadius: 28,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
+    height: 58, borderRadius: 18,
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10,
   },
-  applyText: {
-    fontSize: 15,
-    fontFamily: "Inter_700Bold",
-    color: "#fff",
-    letterSpacing: 0.3,
-  },
+  applyText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: 0.2 },
 });

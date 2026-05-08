@@ -254,14 +254,14 @@ export default function HomeScreen() {
           }]}
           onPress={() => router.push("/(tabs)/search")}
         >
-          <Ionicons name="car-sport-outline" size={26} color={isDark ? "#FF6B00" : "#E05A00"} />
+          <Ionicons name="car-sport-outline" size={26} color={isDark ? "#0EB5CA" : "#0098AA"} />
           <View style={styles.searchBoxText}>
             <Text style={[styles.searchBoxLabel, { color: isDark ? "#CBD5E1" : "#334155" }]}>Brand, model, location…</Text>
             <Text style={[styles.searchBoxCount, { color: isDark ? "#64748B" : "#94A3B8" }]}>
               {totalCount.toLocaleString()} listings available
             </Text>
           </View>
-          <View style={[styles.filterBtn, { backgroundColor: "#FF6B00" }]}>
+          <View style={[styles.filterBtn, { backgroundColor: "#0EB5CA" }]}>
             <Feather name="sliders" size={17} color="#FFFFFF" />
           </View>
         </Pressable>
@@ -278,8 +278,8 @@ export default function HomeScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#FF6B00"
-            colors={["#FF6B00"]}
+            tintColor="#0EB5CA"
+            colors={["#0EB5CA"]}
           />
         }
       >
@@ -309,7 +309,7 @@ export default function HomeScreen() {
                   style={[
                     styles.mainTab,
                     active
-                      ? { backgroundColor: "#FF6B00", borderColor: "#FF8C42" }
+                      ? { backgroundColor: "#0EB5CA", borderColor: "#38D1E5" }
                       : {
                           backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9",
                           borderColor: isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0",
@@ -383,7 +383,7 @@ export default function HomeScreen() {
         {/* ── Browse by Brand ── */}
         <View style={[styles.brandSection, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
           <View style={styles.brandSectionHeader}>
-            <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" tintColor="#FF6B00" />
+            <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" />
             <Text style={[styles.brandSectionTitle, { color: isDark ? "#CBD5E1" : "#334155" }]}>Car Brands</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.brandRow}>
@@ -478,7 +478,7 @@ export default function HomeScreen() {
                         <Text style={styles.featSponsoredText}>SPONSORED</Text>
                       </LinearGradient>
                     ) : (car.condition === "New" || car.condition === "Foreign Used") && (
-                      <View style={[styles.featCondBadge, { backgroundColor: car.condition === "New" ? "#FF6B00" : "#1565C0" }]}>
+                      <View style={[styles.featCondBadge, { backgroundColor: car.condition === "New" ? "#0EB5CA" : "#1565C0" }]}>
                         <Text style={styles.featCondText}>{car.condition === "New" ? "New" : "Foreign"}</Text>
                       </View>
                     )}
@@ -960,7 +960,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 11,
     paddingVertical: 5,
-    shadowColor: "#FF6B00",
+    shadowColor: "#0EB5CA",
     shadowOpacity: 0.4,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
