@@ -10,6 +10,7 @@ import {
   Image,
   View,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -167,7 +168,7 @@ export default function LoginScreen() {
               disabled={busy}
               activeOpacity={0.8}
             >
-              <Text style={styles.phoneEmoji}>📱</Text>
+              <Feather name="phone" size={17} color="#fff" />
               <Text style={styles.socialTextLight}>Phone</Text>
             </TouchableOpacity>
           </View>
@@ -322,7 +323,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   googleG: { fontSize: 18, fontFamily: 'Manrope_800ExtraBold', color: '#4285F4', lineHeight: 22 },
-  phoneEmoji: { fontSize: 18, lineHeight: 22 },
+
   socialTextDark: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#0F172A' },
   socialTextLight: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#fff' },
 

@@ -18,14 +18,18 @@ const LOGO = require("@/assets/images/wc-logo.png");
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
+const TEAL      = "#0EB5CA";
+const TEAL_MID  = "#0098AA";
+const TEAL_DEEP = "#006F80";
+
 export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const BTN_H   = 64;
-  const THUMB   = BTN_H - 8;         // 56px
+  const BTN_H      = 64;
+  const THUMB      = BTN_H - 8;
   const trackWidth = Math.min(SCREEN_W - 48, 340);
-  const MAX_X   = trackWidth - THUMB - 8;
+  const MAX_X      = trackWidth - THUMB - 8;
   const translateX = useRef(new Animated.Value(0)).current;
   const [unlocked, setUnlocked] = useState(false);
 
@@ -71,7 +75,14 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.root}>
 
-      {/* ── Car image — half cut from left edge ── */}
+      {/* ── Background gradient: white → teal ── */}
+      <LinearGradient
+        colors={["#FFFFFF", "#E8F9FC", TEAL, TEAL_DEEP]}
+        locations={[0, 0.30, 0.70, 1]}
+        style={StyleSheet.absoluteFill}
+      />
+
+      {/* ── Car image ── */}
       <Image
         source={CAR}
         style={styles.carFull}
@@ -79,23 +90,23 @@ export default function WelcomeScreen() {
         fadeDuration={200}
       />
 
-      {/* ── Gradient scrim — transparent at top, solid dark at bottom ── */}
+      {/* ── Scrim: transparent at top (white bg shows) → teal-dark at bottom ── */}
       <LinearGradient
         colors={[
           "transparent",
-          "rgba(5,8,18,0.15)",
-          "rgba(5,8,18,0.70)",
-          "rgba(5,8,18,0.96)",
-          "#050812",
+          "transparent",
+          `rgba(0,111,128,0.30)`,
+          `rgba(0,111,128,0.82)`,
+          TEAL_DEEP,
         ]}
-        locations={[0, 0.38, 0.56, 0.72, 1]}
+        locations={[0, 0.38, 0.55, 0.72, 1]}
         style={StyleSheet.absoluteFill}
         pointerEvents="none"
       />
 
-      {/* ── Logo pinned top-left ── */}
+      {/* ── Logo pinned top-left (teal on white bg) ── */}
       <View style={[styles.topRow, { paddingTop: insets.top + 16 }]}>
-        <Image source={LOGO} style={styles.logo} resizeMode="contain" tintColor="#FFFFFF" />
+        <Image source={LOGO} style={styles.logo} resizeMode="contain" />
       </View>
 
       {/* ── Bottom content ── */}
@@ -108,25 +119,20 @@ export default function WelcomeScreen() {
           Experience the perfect blend of quality, trust, and{"\n"}affordability with thousands of verified car listings.
         </Text>
 
-        {/* ── "Get Started" slide button — exact reference layout ── */}
+        {/* ── Slide-to-start track ── */}
         <View style={[styles.slideTrack, { width: trackWidth }]}>
 
-          {/* Centred static label */}
           <Animated.Text style={[styles.slideLabel, { opacity: labelOpacity }]}>
             Get Started
           </Animated.Text>
 
-          {/* ">>" hint on right */}
           <Text style={styles.chevrons}>{">>"}</Text>
 
-          {/* Sliding thumb — orange circle with arrow */}
           <PanGestureHandler
             onGestureEvent={onGestureEvent}
             onHandlerStateChange={onHandlerStateChange}
           >
-            <Animated.View
-              style={[styles.slideThumb, { transform: [{ translateX }] }]}
-            >
+            <Animated.View style={[styles.slideThumb, { transform: [{ translateX }] }]}>
               <Feather name="arrow-right" size={24} color="#fff" />
             </Animated.View>
           </PanGestureHandler>
@@ -138,7 +144,7 @@ export default function WelcomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#050812" },
+  root: { flex: 1 },
 
   carFull: {
     position: "absolute",
@@ -177,18 +183,17 @@ const styles = StyleSheet.create({
   sub: {
     fontSize: 13,
     lineHeight: 20,
-    color: "rgba(255,255,255,0.60)",
+    color: "rgba(255,255,255,0.75)",
     fontFamily: "Inter_400Regular",
     marginBottom: 28,
   },
 
-  /* ── Slide track ── */
   slideTrack: {
     height: 64,
     borderRadius: 32,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(255,255,255,0.18)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.14)",
+    borderColor: "rgba(255,255,255,0.35)",
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 4,
@@ -210,7 +215,7 @@ const styles = StyleSheet.create({
   chevrons: {
     position: "absolute",
     right: 20,
-    color: "rgba(255,255,255,0.45)",
+    color: "rgba(255,255,255,0.50)",
     fontSize: 15,
     fontFamily: "Inter_600SemiBold",
     letterSpacing: 2,
@@ -220,12 +225,12 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#0EB5CA",
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#0EB5CA",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.65,
+    shadowOpacity: 0.20,
     shadowRadius: 12,
     elevation: 8,
   },
