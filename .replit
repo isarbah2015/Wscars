@@ -46,3 +46,4 @@ externalPort = 3000
 [userenv.shared]
 EXPO_PUBLIC_FIREBASE_DATABASE_ID = "westcar-5c1e6"
 VITE_FIREBASE_DATABASE_ID = "westcar-5c1e6"
+EXPO_TOKEN = "B-yrEsvnBw-tNvlhh-UTffAO_W85EjqRS42DlT2l"
