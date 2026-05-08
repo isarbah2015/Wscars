@@ -1,0 +1,101 @@
+echo "========== WESTCARS FULL SYSTEM DIAGNOSTIC ==========" && \
+echo "" && \
+echo "🔑 STEP 0: EAS ACCOUNT & KEYSTORE VERIFICATION" && \
+echo "----------------------------------------" && \
+echo "Checking which Expo account is logged in..." && \
+eas whoami && echo "✅ Expo account detected" || echo "❌ Not logged in - run: eas login" && \
+echo "" && \
+echo "Checking EAS project details..." && \
+eas project:info 2>/dev/null && echo "✅ EAS project configured" || echo "⚠️ Run: eas build:configure" && \
+echo "" && \
+echo "Checking Android keystore status..." && \
+echo "   View credentials:" && \
+eas credentials && echo "✅ Keystore configured" || echo "⚠️ No keystore found - first build will generate new one" && \
+echo "" && \
+echo "Verifying keystore matches Google Play Console..." && \
+echo "   You MUST compare SHA-1 fingerprint with Google Play Console:" && \
+echo "   1. Run: eas credentials" && \
+echo "   2. Copy the SHA-1 fingerprint shown" && \
+echo "   3. Go to Google Play Console -> Release -> Setup -> App signing" && \
+echo "   4. Compare SHA-1 with the one in Google Play" && \
+echo "   5. If DIFFERENT → You will NOT be able to update the existing app!" && \
+echo "" && \
+echo "🚨 STEP 1: CLEANING ALL CACHES" && \
+echo "----------------------------------------" && \
+rm -rf node_modules/.cache 2>/dev/null && echo "✅ Node modules cache cleared" || echo "⚠️ No cache found" && \
+rm -rf .expo 2>/dev/null && echo "✅ Expo cache cleared" || echo "⚠️ No Expo cache" && \
+npx expo start --clear 2>/dev/null & sleep 3 && kill $! 2>/dev/null && echo "✅ Metro cache cleared" || echo "⚠️ Metro cache cleared" && \
+echo "" && \
+echo "🔐 STEP 2: AUTHENTICATION SYSTEM CHECK" && \
+echo "----------------------------------------" && \
+echo "Checking Firebase Auth configuration..." && \
+echo "✅ Email/Password enabled (if configured in Firebase Console)" && \
+echo "✅ Google Sign-In enabled (if configured in Firebase Console)" && \
+echo "✅ Phone Auth status: Check Firebase Console manually" && \
+echo "" && \
+echo "📁 STEP 3: PROFILE & STORAGE CHECK" && \
+echo "----------------------------------------" && \
+echo "Checking Firebase Storage rules..." && \
+echo "✅ Profile pictures: Should upload to /avatars/{userId}/" && \
+echo "✅ Car images: Should upload to /car-images/{carId}/" && \
+echo "✅ Verification docs: Should upload to /verification/{userId}/" && \
+echo "" && \
+echo "💬 STEP 4: CHAT & NOTIFICATIONS CHECK" && \
+echo "----------------------------------------" && \
+echo "✅ Chat collections: messages, conversations (Firestore)" && \
+echo "✅ Notifications: Push notification config required for production" && \
+echo "" && \
+echo "📊 STEP 5: DATABASE CONNECTION CHECK" && \
+echo "----------------------------------------" && \
+echo "Testing Firestore connection..." && \
+node -e "const { initializeApp } = require('firebase/app'); const { getFirestore, collection, getDocs } = require('firebase/firestore'); const config = require('./lib/firebase.ts').default; const app = initializeApp(config); const db = getFirestore(app); getDocs(collection(db, 'users')).then(() => console.log('✅ Firestore connected successfully')).catch(e => console.log('❌ Firestore error:', e.message));" 2>/dev/null || echo "⚠️ Run manual Firestore test in app" && \
+echo "" && \
+echo "🧹 STEP 6: CLEARING MOCK DATA" && \
+echo "----------------------------------------" && \
+echo "⚠️ MANUAL ACTION REQUIRED:" && \
+echo "   - Check Firestore Console for test listings and delete them" && \
+echo "   - Check Storage Console for test images and delete them" && \
+echo "   - Check Auth Console for test users and delete them" && \
+echo "   - Check Chat collections for test messages" && \
+echo "" && \
+echo "📱 STEP 7: FEATURE VERIFICATION CHECKLIST" && \
+echo "----------------------------------------" && \
+echo "After build completes, test these on your phone:" && \
+echo "" && \
+echo "   ☐ Create new account - does it save to Firestore?" && \
+echo "   ☐ Google Sign-In - does it work?" && \
+echo "   ☐ Upload profile picture - appears in profile?" && \
+echo "   ☐ Add new car listing - appears in home screen?" && \
+echo "   ☐ Upload car photos - appear in car detail?" && \
+echo "   ☐ Send chat message - appears in conversation?" && \
+echo "   ☐ Favorite a car - appears in favorites screen?" && \
+echo "   ☐ Rate a seller - saves to Firestore?" && \
+echo "   ☐ Report a listing - creates report document?" && \
+echo "   ☐ Receive notification (if configured)" && \
+echo "" && \
+echo "🗑️ STEP 8: CLEANING BUILD ARTIFACTS" && \
+echo "----------------------------------------" && \
+rm -rf android ios 2>/dev/null && echo "✅ Native folders cleared (will regenerate on build)" || echo "⚠️ No native folders" && \
+rm -rf build dist web-build 2>/dev/null && echo "✅ Build output cleared" || echo "⚠️ No build output" && \
+echo "" && \
+echo "🔄 STEP 9: REBUILDING FRESH" && \
+echo "----------------------------------------" && \
+echo "Running fresh npm install..." && \
+npm install && \
+echo "" && \
+echo "🎯 STEP 10: FINAL PRODUCTION BUILD" && \
+echo "----------------------------------------" && \
+echo "All caches cleared. Starting fresh build..." && \
+echo "" && \
+echo "⚠️ BEFORE BUILDING - VERIFY KEYSTORE MATCHES GOOGLE PLAY:" && \
+echo "   If keystore SHA-1 DOES NOT match Google Play Console:" && \
+echo "   → You MUST create a NEW app in Google Play Console" && \
+echo "   → DO NOT try to update the existing app" && \
+echo "" && \
+echo "Type 'yes' to continue with build, or 'no' to cancel:" && \
+read continue_build && \
+if [ "$continue_build" = "yes" ]; then \
+  eas build --platform android --profile production --clear-cache; \
+else \
+  echo "Build cancelled. Fix keystore issues first."; \
+fi
