@@ -86,15 +86,12 @@
     },
     "extra": {
       "eas": {
-        "projectId": "e61e8d7b-541e-491c-afa1-219ca6f64d2d"
+        "projectId": "REPLACE_AFTER_EAS_INIT"
       }
     },
-    "owner": "lyon7sarbah",
+    "owner": "davidsarb",
     "runtimeVersion": {
       "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/e61e8d7b-541e-491c-afa1-219ca6f64d2d"
     }
   }
 }
