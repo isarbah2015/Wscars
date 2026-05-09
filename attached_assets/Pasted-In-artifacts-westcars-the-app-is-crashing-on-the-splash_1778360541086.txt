@@ -1,0 +1,293 @@
+In artifacts/westcars, the app is crashing on the splash screen after being installed from Play Store. This is a production native crash — not Expo Go. Fix everything in this exact order and do not mark anything done without proof.
+STEP 1 — Read the Crash Logs First
+bashcd artifacts/westcars
+eas build:list --platform android --limit 3
+Then get the crash logs from the last production build:
+basheas diagnostics
+Also check Metro logs for any errors:
+bashgrep -rn "Error\|crash\|undefined\|null" artifacts/westcars/app/_layout.tsx
+grep -rn "Error\|crash\|undefined\|null" artifacts/westcars/app/splash.tsx
+Paste all outputs
+STEP 2 — Fix Splash Screen Completely
+Completely rewrite app/splash.tsx from scratch:
+tsximport React, { useEffect } from 'react';
+import { View, Image, StyleSheet, Dimensions } from 'react-native';
+import { useRouter } from 'expo-router';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../lib/firebase-persistence';
+
+const { width, height } = Dimensions.get('window');
+
+export default function SplashScreen() {
+  const router = useRouter();
+
+  useEffect(() => {
+    let navigationDone = false;
+
+    const navigate = (destination: string) => {
+      if (navigationDone) return;
+      navigationDone = true;
+      try {
+        router.replace(destination as any);
+      } catch (e) {
+        setTimeout(() => {
+          try { router.replace(destination as any); } catch (e2) {}
+        }, 500);
+      }
+    };
+
+    // Check auth state first then navigate
+    const timeout = setTimeout(() => {
+      const unsub = onAuthStateChanged(
+        auth!,
+        (user) => {
+          unsub();
+          navigate(user ? '/(tabs)' : '/auth/login');
+        },
+        () => {
+          navigate('/auth/login');
+        }
+      );
+    }, 2000);
+
+    // Hard fallback — never stay on splash more than 6 seconds
+    const hardFallback = setTimeout(() => {
+      navigate('/auth/login');
+    }, 6000);
+
+    return () => {
+      clearTimeout(timeout);
+      clearTimeout(hardFallback);
+    };
+  }, [router]);
+
+  return (
+    <View style={styles.container}>
+      <Image
+        source={require('../assets/images/wc-logo.png')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0A1628',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logo: {
+    width: width * 0.6,
+    height: height * 0.2,
+  },
+});
+
+PROOF REQUIRED: Read file back and paste first 20 lines
+
+STEP 3 — Fix _layout.tsx Completely
+Completely rewrite app/_layout.tsx from scratch with this exact production-safe pattern:
+tsximport React, { useEffect, useRef, useState } from 'react';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
+
+// Prevent native splash from hiding until we are ready
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
+export default function RootLayout() {
+  const [appReady, setAppReady] = useState(false);
+  const safetyFired = useRef(false);
+
+  const [fontsLoaded, fontError] = useFonts({
+    ...Ionicons.font,
+    ...Feather.font,
+    ...MaterialIcons.font,
+    ...MaterialCommunityIcons.font,
+    ...FontAwesome.font,
+    ...FontAwesome5.font,
+    ...AntDesign.font,
+    ...Entypo.font,
+  });
+
+  // 5 second hard safety net — splash NEVER hangs forever
+  useEffect(() => {
+    const safety = setTimeout(() => {
+      if (!safetyFired.current) {
+        safetyFired.current = true;
+        SplashScreen.hideAsync().catch(() => {});
+        setAppReady(true);
+      }
+    }, 5000);
+    return () => clearTimeout(safety);
+  }, []);
+
+  // Hide splash as soon as fonts resolve
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      if (!safetyFired.current) {
+        safetyFired.current = true;
+        SplashScreen.hideAsync().catch(() => {});
+      }
+      setAppReady(true);
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!appReady) return null;
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="splash" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="auth/login" />
+        <Stack.Screen name="auth/signup" />
+        <Stack.Screen name="auth/forgot-password" />
+        <Stack.Screen name="auth/phone" />
+      </Stack>
+    </GestureHandlerRootView>
+  );
+}
+
+PROOF REQUIRED: Read file back and paste first 20 lines
+
+STEP 4 — Fix Firebase Initialization for Production
+Read lib/firebase.ts and paste contents. Then confirm:
+
+getApps().length === 0 guard is present
+All config values use process.env.EXPO_PUBLIC_FIREBASE_*
+initializeApp wrapped in try/catch
+No top level await
+
+Read lib/firebase-persistence.native.ts and paste contents. Confirm:
+
+initializeAuth with getReactNativePersistence(AsyncStorage)
+Wrapped in try/catch — never crashes on init failure
+
+If initializeAuth is NOT wrapped in try/catch fix it now:
+tsx// @ts-nocheck
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import app from './firebase';
+
+let auth: any = null;
+
+try {
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage),
+  });
+} catch (e: any) {
+  // Auth already initialized — get existing instance
+  if (e.code === 'auth/already-initialized') {
+    const { getAuth } = require('firebase/auth');
+    auth = getAuth(app);
+  }
+}
+
+export { auth };
+
+PROOF REQUIRED: Paste both file contents
+
+STEP 5 — Fix app.json for Production Crash
+Read and paste full app.json then confirm and fix if needed:
+
+"newArchEnabled": true — required for reanimated v4
+"jsEngine": "hermes" — must be present for production Android:
+
+json"android": {
+  "jsEngine": "hermes",
+  "package": "gh.westcars.app",
+  "softwareKeyboardLayoutMode": "pan"
+}
+
+Confirm splash image file actually exists:
+
+bashls -la artifacts/westcars/assets/images/wc-logo.png
+ls -la artifacts/westcars/assets/images/wc-new-logo.png
+
+Confirm icon file actually exists and is a real PNG not a renamed JPG:
+
+bashfile artifacts/westcars/assets/images/wc-new-logo.png
+file artifacts/westcars/assets/images/wc-logo.png
+
+PROOF REQUIRED: Paste ls and file outputs — must confirm real PNG files
+
+STEP 6 — Fix eas.json for Production
+Read and paste eas.json — confirm production profile has:
+json{
+  "build": {
+    "production": {
+      "android": {
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease"
+      },
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "...",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "...",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "...",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "...",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "...",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "...",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "...",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "...",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "..."
+      }
+    }
+  }
+}
+
+Confirm ALL 9 env vars are present with real values not empty strings
+PROOF REQUIRED: Paste eas.json env section with values masked as *** for security
+
+STEP 7 — Verify All Assets Exist
+bashls -la artifacts/westcars/assets/images/
+ls -la artifacts/westcars/assets/fonts/
+
+Paste output — confirm every file referenced in app.json and in code exists
+If any font file is missing that is referenced in useFonts — remove it from the useFonts call
+
+STEP 8 — Check for Hermes Compatibility Issues
+bashgrep -rn "eval\|Function(" artifacts/westcars/app --include="*.tsx" --include="*.ts"
+grep -rn "require\.context\|dynamic import" artifacts/westcars/app --include="*.tsx" --include="*.ts"
+
+eval and Function() are not supported in Hermes — fix any found
+Paste outputs
+
+STEP 9 — TypeScript Clean
+bashcd artifacts/westcars && pnpm exec tsc --noEmit 2>&1
+echo "EXIT CODE: $?"
+
+Must show exit code 0
+Fix every error before proceeding
+PROOF REQUIRED: Paste full tsc output
+
+STEP 10 — Full Clean and Production Build
+Only after ALL steps above pass:
+bashrm -rf artifacts/westcars/.expo
+rm -rf artifacts/westcars/node_modules/.cache
+rm -rf /tmp/metro-*
+rm -rf /tmp/haste-*
+cd artifacts/westcars && EAS_NO_VCS=1 eas build --platform android --profile production --non-interactive
+Paste full build output and URL
+FINAL REPORT — paste proof for every item:
+
+✅ Splash rewritten with auth check and hard fallback — paste first 20 lines
+✅ _layout.tsx rewritten with 5s safety net — paste first 20 lines
+✅ Firebase persistence wrapped in try/catch — paste file contents
+✅ jsEngine: hermes in app.json android section — paste line
+✅ All asset files confirmed real PNGs — paste file command output
+✅ All 9 env vars in eas.json — paste masked section
+✅ TypeScript exit code 0 — paste output
+✅ EAS build URL — paste link
+End with READY FOR PLAY STORE only if every item has proof
