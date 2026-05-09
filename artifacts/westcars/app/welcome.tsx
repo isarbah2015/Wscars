@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -6,7 +7,7 @@ import {
   Animated,
   Dimensions,
   Easing,
-  Image,
+  Image as RNImage,
   StyleSheet,
   Text,
   View,
@@ -131,8 +132,9 @@ export default function WelcomeScreen() {
       <Image
         source={CAR}
         style={styles.carFull}
-        resizeMode="contain"
-        fadeDuration={200}
+        contentFit="contain"
+        transition={0}
+        cachePolicy="memory-disk"
       />
 
       {/* ── Bottom scrim ── */}
@@ -151,7 +153,7 @@ export default function WelcomeScreen() {
 
       {/* ── Logo pinned top-left ── */}
       <View style={[styles.topRow, { paddingTop: insets.top + 16 }]}>
-        <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+        <RNImage source={LOGO} style={styles.logo} resizeMode="contain" />
       </View>
 
       {/* ── Bottom content ── */}
@@ -238,6 +240,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 24,
+    alignItems: "center",
   },
 
   headline: {
@@ -247,6 +250,7 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_800ExtraBold",
     letterSpacing: -0.8,
     marginBottom: 12,
+    textAlign: "center",
   },
   sub: {
     fontSize: 13,
@@ -254,6 +258,7 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.75)",
     fontFamily: "Inter_400Regular",
     marginBottom: 28,
+    textAlign: "center",
   },
 
   slideTrack: {
