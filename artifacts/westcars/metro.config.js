@@ -18,6 +18,8 @@ config.resolver.blockList = [
   /\/\.git\/.*/,
 ];
 
+config.resolver.unstable_enableSymlinks = true;
+
 config.resolver.platforms = ["android", "ios", "web", "native"];
 
 // ── Firebase singleton pinning ──────────────────────────────────────────────
