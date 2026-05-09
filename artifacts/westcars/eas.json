@@ -27,8 +27,10 @@
     },
     "production": {
       "autoIncrement": true,
+      "prebuildCommand": "node scripts/setup-credentials.js",
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "credentialsSource": "local"
       },
       "ios": {
         "buildConfiguration": "Release"

@@ -44,5 +44,9 @@ yarn-error.*
 play-store-service-account.json
 GoogleService-Info.plist
 
+# Generated credentials (DO NOT COMMIT)
+credentials.json
+upload-keystore.jks
+
 android/
 !google-services.json
