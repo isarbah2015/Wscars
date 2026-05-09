@@ -1,37 +1,20 @@
-import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import { Animated, Easing, Image, StyleSheet, View } from "react-native";
-
-import { auth } from "@/lib/firebase-persistence";
 
 const LOGO   = require("@/assets/images/wc-logo.png");
 const LOGO_W = 260;
 const LOGO_H = 170;
 
 export default function SplashScreen() {
-  const router           = useRouter();
-  const topY             = useRef(new Animated.Value(-(LOGO_H / 2 + 40))).current;
-  const botY             = useRef(new Animated.Value(LOGO_H / 2 + 40)).current;
-  const opacity          = useRef(new Animated.Value(0)).current;
-  const shimmerX         = useRef(new Animated.Value(-LOGO_W - 60)).current;
-  const shimmerOp        = useRef(new Animated.Value(0)).current;
-  const navigationDone   = useRef(false);
-
-  const navigate = (destination: string) => {
-    if (navigationDone.current) return;
-    navigationDone.current = true;
-    try {
-      router.replace(destination as any);
-    } catch {
-      setTimeout(() => {
-        try { router.replace(destination as any); } catch {}
-      }, 400);
-    }
-  };
+  const router    = useRouter();
+  const topY      = useRef(new Animated.Value(-(LOGO_H / 2 + 40))).current;
+  const botY      = useRef(new Animated.Value(LOGO_H / 2 + 40)).current;
+  const opacity   = useRef(new Animated.Value(0)).current;
+  const shimmerX  = useRef(new Animated.Value(-LOGO_W - 60)).current;
+  const shimmerOp = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // ── Animations ────────────────────────────────────────────────────────
     Animated.timing(opacity, {
       toValue: 1, duration: 200, useNativeDriver: false,
     }).start();
@@ -49,8 +32,8 @@ export default function SplashScreen() {
       }),
     ]).start(() => {
       Animated.sequence([
-        Animated.timing(shimmerOp, { toValue: 1, duration: 80,  useNativeDriver: false }),
-        Animated.timing(shimmerX,  {
+        Animated.timing(shimmerOp, { toValue: 1, duration: 80, useNativeDriver: false }),
+        Animated.timing(shimmerX, {
           toValue: LOGO_W + 60, duration: 650,
           easing: Easing.inOut(Easing.quad), useNativeDriver: false,
         }),
@@ -58,32 +41,18 @@ export default function SplashScreen() {
       ]).start();
     });
 
-    // ── Hard fallback — never hang on splash beyond 6 s ───────────────────
-    const hardFallback = setTimeout(() => navigate("/welcome"), 6000);
-
-    // ── Auth check after animation settles (2.6 s) ────────────────────────
-    const authTimer = setTimeout(() => {
-      if (!auth) {
-        navigate("/welcome");
-        return;
+    const navTimer = setTimeout(() => {
+      try {
+        router.replace("/welcome");
+      } catch {
+        setTimeout(() => {
+          try { router.replace("/welcome"); } catch {}
+        }, 400);
       }
-      const unsub = onAuthStateChanged(
-        auth,
-        (user) => {
-          unsub();
-          navigate(user ? "/(tabs)" : "/welcome");
-        },
-        () => {
-          navigate("/welcome");
-        },
-      );
     }, 2600);
 
-    return () => {
-      clearTimeout(authTimer);
-      clearTimeout(hardFallback);
-    };
-  }, []);
+    return () => clearTimeout(navTimer);
+  }, [router]);
 
   return (
     <View style={styles.root}>
