@@ -250,7 +250,8 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_800ExtraBold",
     letterSpacing: -0.8,
     marginBottom: 12,
-    textAlign: "center",
+    textAlign: "left",
+    alignSelf: "stretch",
   },
   sub: {
     fontSize: 13,
@@ -258,7 +259,8 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.75)",
     fontFamily: "Inter_400Regular",
     marginBottom: 28,
-    textAlign: "center",
+    textAlign: "left",
+    alignSelf: "stretch",
   },
 
   slideTrack: {
