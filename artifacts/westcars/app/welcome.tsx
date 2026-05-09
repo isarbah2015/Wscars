@@ -244,14 +244,14 @@ const styles = StyleSheet.create({
   },
 
   headline: {
-    fontSize: 38,
-    lineHeight: 46,
+    fontSize: 28,
+    lineHeight: 36,
     color: "#FFFFFF",
     fontFamily: "Manrope_800ExtraBold",
-    letterSpacing: -0.8,
+    letterSpacing: -0.5,
     marginBottom: 12,
     textAlign: "left",
-    alignSelf: "stretch",
+    width: "100%",
   },
   sub: {
     fontSize: 13,
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     marginBottom: 28,
     textAlign: "left",
-    alignSelf: "stretch",
+    width: "100%",
   },
 
   slideTrack: {
