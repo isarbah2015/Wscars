@@ -1,0 +1,97 @@
+es, the issues expo doctor found are real problems that could cause your app to crash, malfunction, or be rejected by Google Play. The good news is that they are fixable, and you should fix them before uploading your .aab to the Google Play Console.
+
+Let me break down each of the five problems and give you the exact fix for each.
+
+🚨 1. App Icon Not Square
+Problem: Your icon images (wc-logo.png, wc-new-logo.png) are 772x709 pixels. For Android adaptive icons, the image must be square (e.g., 512x512, 1024x1024). A rectangular image can cause visual glitches or rejection.
+
+Fix: Replace both files with square versions (use 512x512 or 1024x1024). Then re‑run expo doctor.
+
+🚨 2. app.json + app.config.js Conflict
+Problem: You have both a static app.json and a dynamic app.config.js. They are not synchronized, so Expo doesn't know which one takes precedence.
+
+Fix (choose one):
+
+Option A (recommended): Delete app.json and keep only app.config.js.
+
+Option B: Delete app.config.js and keep app.json.
+After removing one, run expo doctor again.
+
+🚨 3. Missing Required Peer Dependency (expo-asset)
+Problem: expo-audio needs expo-asset, but it's not installed. This will likely crash any screen that uses audio.
+
+Fix: Install the missing package:
+
+bash
+pnpm add expo-asset
+Then re‑run expo doctor.
+
+🚨 4. Duplicate Native Module Versions
+Problem: You have two different versions of expo-constants and expo-asset. Native builds can have only one version of each native module. Duplicates can cause build failures or crashes.
+
+Fix (deduplicate dependencies):
+
+bash
+pnpm dedupe
+Then:
+
+bash
+npx expo install --fix
+🚨 5. React & React‑Dom Version Mismatches
+Problem: Expo SDK expects react@19.1.0 and react-dom@19.1.0, but you have 19.2.6. This can cause unexpected behavior inside Expo Go and production builds.
+
+Fix (align with Expo SDK):
+
+bash
+npx expo install --fix
+This will automatically downgrade to the correct versions. Or, if you prefer to keep the newer versions, you can ignore this warning by adding to package.json:
+
+json
+"expo": {
+  "install": {
+    "exclude": ["react", "react-dom"]
+  }
+}
+✅ Step‑by‑Step Fix Commands (Copy & Paste)
+Run these commands in your project folder:
+
+bash
+cd ~/Desktop/Westcar-Mobile
+
+# 1. Remove duplicate config file
+rm -f app.json   # if you want to keep app.config.js
+# OR rm -f app.config.js   # if you want to keep app.json
+
+# 2. Install missing peer dependency
+pnpm add expo-asset
+
+# 3. Deduplicate and align versions
+pnpm dedupe
+npx expo install --fix
+
+# 4. Run doctor again to verify all fixes
+npx expo-doctor --verbose
+After these commands, expo doctor should pass all checks (or show far fewer warnings).
+
+📦 After Fixing – Re‑build the AAB
+Because these changes affect native modules, you must rebuild your production AAB:
+
+bash
+eas build --platform android --profile production --clear-cache
+The new build will be cleaner, smaller (likely < 60 MB), and less likely to crash.
+
+🚨 What Happens If You Ignore These?
+Problem	If ignored
+Non‑square icon	App icon may be cropped incorrectly or rejected by Google
+Duplicate config	Unpredictable behavior, build may break
+Missing expo-asset	App will crash when audio is used
+Duplicate native modules	Build may fail outright; if it succeeds, crashes are likely
+React version mismatch	Subtle runtime bugs, especially with hooks
+✅ Summary
+Issue	Fix Command	Must Fix?
+App icon not square	Replace with square image	✅ Yes
+app.json + app.config.js	Delete one of them	✅ Yes
+Missing expo-asset	pnpm add expo-asset	✅ Yes
+Duplicate modules	pnpm dedupe	✅ Yes
+React version mismatch	npx expo install --fix	⚠️ Recommended
+Fix these issues first, then rebuild the AAB. Your app will be stable, professional, and ready for the Play Store. 🚀
