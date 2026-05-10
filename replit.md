@@ -66,11 +66,32 @@ artifacts/westcars-admin/src/
 - Fonts: Inter (body), Manrope (display)
 - Target: Google Play Store
 
+## EAS Build (Android / iOS)
+
+**Canonical path: GitHub Actions** — EAS builds cannot run directly from Replit because the sandbox blocks git write operations (`.git/index.lock`) that EAS CLI requires to archive the project.
+
+| How | Where |
+|-----|-------|
+| **Auto** — push to `main` touching `artifacts/westcars/**` | `.github/workflows/eas-build.yml` triggers automatically |
+| **Manual** — go to GitHub → Actions → "EAS Build (Android Production)" → Run workflow | Choose platform (`android`/`ios`/`all`) and profile (`production`/`preview`) |
+
+**Required GitHub secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Description |
+|--------|-------------|
+| `EXPO_TOKEN` | Personal access token from expo.dev/accounts/davidsarb/settings/access-tokens |
+| `KEYSTORE_B64` | `base64 -i artifacts/westcars/upload-keystore.jks` |
+| `KEYSTORE_PASSWORD` | Keystore password |
+| `KEY_PASSWORD` | Key password for alias `2409d8e96f55c9e2557b4ebe6786a888` |
+
+Monitor builds at: https://expo.dev/accounts/davidsarb/projects/westcars/builds  
+Full runbook: `.local/notes/eas-build-workflow.md`
+
 ## Gotchas
 
 - `firebase-persistence.native.ts` and `firebase-persistence.ts` were deleted — auth init is now inlined in `lib/firebase.ts` using `require()`.
 - Admin has 2 pre-existing TypeScript warnings in `src/components/ui/calendar.tsx` and `src/components/ui/spinner.tsx` caused by a `@types/react` version conflict in the pnpm monorepo. These do not affect runtime.
-- `EAS_NO_VCS=1` must be set for EAS builds in this environment.
+- EAS builds must go through GitHub Actions — not from Replit directly. See the EAS Build section above.
 - `newArchEnabled: true` in `app.json` — new React Native architecture is on.
 - Firestore collections (`cars`, `users`, `messages`, `reports`, `reviews`) are created automatically on first write — no manual setup needed.
 
