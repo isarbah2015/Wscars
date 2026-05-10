@@ -38,10 +38,11 @@ export default function LoginScreen() {
       await signInWithEmailAndPassword(auth!, email.trim(), password);
       router.replace('/(tabs)');
     } catch (e: any) {
-      const msg = e.code === 'auth/invalid-credential'   ? 'Incorrect email or password'
-                : e.code === 'auth/too-many-requests'    ? 'Too many attempts. Try again later'
-                : e.code === 'auth/user-not-found'       ? 'No account found with this email'
-                : e.code === 'auth/wrong-password'       ? 'Incorrect password'
+      const msg = e.code === 'auth/invalid-credential'    ? 'Incorrect email or password'
+                : e.code === 'auth/too-many-requests'     ? 'Too many attempts. Try again later'
+                : e.code === 'auth/user-not-found'        ? 'No account found with this email'
+                : e.code === 'auth/wrong-password'        ? 'Incorrect password'
+                : e.code === 'auth/unauthorized-domain'   ? 'Sign-in is not enabled for this preview URL. Please open the app in Expo Go on your phone instead.'
                 : 'Login failed. Please try again';
       setError(msg);
     } finally { setLoading(false); }

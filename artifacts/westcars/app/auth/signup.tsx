@@ -42,9 +42,10 @@ export default function SignupScreen() {
       await updateProfile(cred.user, { displayName: name.trim() });
       router.replace('/(tabs)');
     } catch (e: any) {
-      const msg = e.code === 'auth/email-already-in-use' ? 'An account with this email already exists'
-                : e.code === 'auth/invalid-email'         ? 'Please enter a valid email address'
-                : e.code === 'auth/weak-password'         ? 'Password is too weak — use at least 6 characters'
+      const msg = e.code === 'auth/email-already-in-use'  ? 'An account with this email already exists'
+                : e.code === 'auth/invalid-email'          ? 'Please enter a valid email address'
+                : e.code === 'auth/weak-password'          ? 'Password is too weak — use at least 6 characters'
+                : e.code === 'auth/unauthorized-domain'    ? 'Sign-in is not enabled for this preview URL. Please open the app in Expo Go on your phone instead.'
                 : 'Sign up failed. Please try again';
       setError(msg);
     } finally { setLoading(false); }
