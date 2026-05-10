@@ -107,6 +107,7 @@ jobs:
         run: pnpm add -g eas-cli
 
       - name: Run EAS build
+        id: eas-build
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
@@ -116,8 +117,132 @@ jobs:
         run: |
           PLATFORM="${{ github.event.inputs.platform || 'android' }}"
           PROFILE="${{ github.event.inputs.profile || 'production' }}"
-          eas build \
+
+          # --json outputs build metadata to stdout; progress goes to stderr.
+          # Capture stdout only; let stderr stream to the log as normal.
+          RAW=$(eas build \
             --platform "$PLATFORM" \
             --profile "$PROFILE" \
             --non-interactive \
-            --no-wait
+            --no-wait \
+            --json 2>/dev/null) || true
+
+          echo "EAS JSON output: $RAW"
+
+          # Extract the build ID from the JSON array EAS returns.
+          BUILD_ID=$(echo "$RAW" | python3 -c "
+          import json, sys
+          try:
+              builds = json.loads(sys.stdin.read())
+              if isinstance(builds, list) and builds:
+                  print(builds[0]['id'])
+              elif isinstance(builds, dict):
+                  print(builds.get('id', ''))
+          except Exception:
+              pass
+          " 2>/dev/null || echo "")
+
+          if [ -n "$BUILD_ID" ]; then
+            BUILD_URL="https://expo.dev/accounts/davidsarb/projects/westcars/builds/${BUILD_ID}"
+            echo "Build submitted: $BUILD_URL"
+          else
+            BUILD_URL="https://expo.dev/accounts/davidsarb/projects/westcars/builds"
+            echo "Build submitted (ID not captured). Dashboard: $BUILD_URL"
+          fi
+
+          echo "build_id=$BUILD_ID"   >> $GITHUB_OUTPUT
+          echo "build_url=$BUILD_URL" >> $GITHUB_OUTPUT
+          echo "platform=$PLATFORM"   >> $GITHUB_OUTPUT
+          echo "profile=$PROFILE"     >> $GITHUB_OUTPUT
+
+      - name: Notify team via Slack
+        if: success()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          BUILD_URL: ${{ steps.eas-build.outputs.build_url }}
+          PLATFORM: ${{ steps.eas-build.outputs.platform }}
+          PROFILE: ${{ steps.eas-build.outputs.profile }}
+        run: |
+          # Skip gracefully if the webhook secret has not been configured yet.
+          # To enable notifications: add SLACK_WEBHOOK_URL to GitHub Secrets.
+          # Get your Incoming Webhook URL from: https://api.slack.com/messaging/webhooks
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL secret not configured — skipping Slack notification."
+            echo "Add SLACK_WEBHOOK_URL to GitHub Secrets to enable build alerts."
+            exit 0
+          fi
+
+          SHORT_SHA="${{ github.sha }}"
+          SHORT_SHA="${SHORT_SHA:0:7}"
+          COMMIT_MSG=$(echo "${{ github.event.head_commit.message }}" | head -1)
+          ACTOR="${{ github.actor }}"
+          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # Build a rich Slack Block Kit message.
+          PAYLOAD=$(cat <<JSON
+          {
+            "text": ":hammer_and_wrench: Westcars Android build queued on EAS",
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": ":hammer_and_wrench: Westcars Android build queued",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "A new *${PROFILE}* build for *${PLATFORM}* has been submitted to EAS and is now building. You will be able to download the AAB from the link below once it finishes."
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  { "type": "mrkdwn", "text": "*Branch:*\n\`${{ github.ref_name }}\`" },
+                  { "type": "mrkdwn", "text": "*Commit:*\n\`${SHORT_SHA}\` by ${ACTOR}" },
+                  { "type": "mrkdwn", "text": "*Profile:*\n${PROFILE}" },
+                  { "type": "mrkdwn", "text": "*Platform:*\n${PLATFORM}" }
+                ]
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Commit message:* ${COMMIT_MSG}"
+                }
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "style": "primary",
+                    "text": { "type": "plain_text", "text": "View build on Expo", "emoji": true },
+                    "url": "${BUILD_URL}"
+                  },
+                  {
+                    "type": "button",
+                    "text": { "type": "plain_text", "text": "View GitHub Actions run", "emoji": true },
+                    "url": "${RUN_URL}"
+                  }
+                ]
+              }
+            ]
+          }
+          JSON
+          )
+
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST \
+            -H 'Content-type: application/json' \
+            --data "$PAYLOAD" \
+            "$SLACK_WEBHOOK_URL")
+
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "Slack notification sent successfully."
+          else
+            echo "::warning::Slack notification failed (HTTP $HTTP_STATUS). Check your SLACK_WEBHOOK_URL secret."
+          fi
