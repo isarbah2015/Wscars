@@ -27,7 +27,6 @@
     },
     "production": {
       "autoIncrement": true,
-      "prebuildCommand": "sh scripts/run-setup-credentials.sh",
       "android": {
         "buildType": "app-bundle",
         "credentialsSource": "local"
@@ -35,7 +34,8 @@
       "ios": {
         "buildConfiguration": "Release"
       },
-      "channel": "production"
+      "channel": "production",
+      "prebuildCommand": "sh scripts/run-setup-credentials.sh"
     }
   },
   "submit": {
