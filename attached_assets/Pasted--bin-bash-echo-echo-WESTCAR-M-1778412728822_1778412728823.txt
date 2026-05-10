@@ -1,0 +1,110 @@
+#!/bin/bash
+
+echo "═══════════════════════════════════════════════════════════"
+echo "     WESTCAR‑MOBILE – FINAL PRE‑FLIGHT + CLOUD BUILD        "
+echo "═══════════════════════════════════════════════════════════"
+echo ""
+
+# ------------------------- 1. Firebase config -------------------------
+echo "🔍 1. Checking Firebase configuration..."
+if [ -f "lib/firebase.ts" ]; then
+    echo "   ✅ firebase.ts exists"
+    if grep -q "YOUR_API_KEY" lib/firebase.ts; then
+        echo "   ❌ ERROR: Placeholder API key found! Replace with real key."
+        exit 1
+    else
+        echo "   ✅ No placeholders – API keys appear real."
+    fi
+else
+    echo "   ❌ Missing lib/firebase.ts"
+    exit 1
+fi
+echo ""
+
+# ------------------------- 2. Auth screens -------------------------
+echo "🔐 2. Checking authentication screens..."
+for screen in welcome.tsx auth/login.tsx auth/signup.tsx; do
+    if [ -f "app/$screen" ]; then
+        echo "   ✅ app/$screen exists"
+    else
+        echo "   ❌ Missing app/$screen"
+        exit 1
+    fi
+done
+echo ""
+
+# ------------------------- 3. EAS secrets (Google Sign‑In) -------------------------
+echo "🔑 3. Checking Google Sign‑In secrets on EAS..."
+secrets=$(eas secret:list 2>/dev/null)
+if echo "$secrets" | grep -q "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID"; then
+    echo "   ✅ Android client ID present"
+else
+    echo "   ❌ Missing EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID – Google Sign‑In will fail"
+    exit 1
+fi
+if echo "$secrets" | grep -q "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID"; then
+    echo "   ✅ Web client ID present"
+else
+    echo "   ❌ Missing EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID"
+    exit 1
+fi
+echo ""
+
+# ------------------------- 4. Keystore (optional warning) -------------------------
+echo "📦 4. Checking keystore credentials..."
+if echo "$secrets" | grep -q "KEYSTORE_B64"; then
+    echo "   ✅ Keystore base64 present (you can update existing Play Store app)"
+else
+    echo "   ⚠️  Warning: No KEYSTORE_B64 – this build will generate a NEW keystore."
+    echo "      You will NOT be able to update an existing Play Store app with this build."
+fi
+echo ""
+
+# ------------------------- 5. Firebase rules files -------------------------
+echo "🗄️ 5. Checking Firebase rules files..."
+[ -f "firestore.rules" ] && echo "   ✅ firestore.rules exists" || echo "   ⚠️  Missing firestore.rules (security rules not deployed)"
+[ -f "storage.rules" ] && echo "   ✅ storage.rules exists" || echo "   ⚠️  Missing storage.rules"
+echo ""
+
+# ------------------------- 6. Package manager (avoid pnpm issues) -------------------------
+echo "📦 6. Checking package manager lock file..."
+if [ -f "pnpm-lock.yaml" ]; then
+    echo "   ⚠️  pnpm-lock.yaml found – may cause symlink issues"
+    echo "   → Re‑building with npm (recommended for Replit)"
+    rm -f pnpm-lock.yaml
+    npm install --legacy-peer-deps
+else
+    echo "   ✅ No pnpm-lock.yaml – using npm"
+fi
+echo ""
+
+# ------------------------- 7. Expo Doctor (non‑fatal) -------------------------
+echo "🩺 7. Running Expo Doctor (warnings allowed)..."
+npx expo-doctor --verbose || echo "   ⚠️  Doctor reported warnings (may be okay)"
+echo ""
+
+# ------------------------- 8. EAS login status -------------------------
+echo "🔐 8. Checking EAS login..."
+if eas whoami >/dev/null 2>&1; then
+    echo "   ✅ Logged into EAS"
+else
+    echo "   ❌ Not logged in – running eas login now"
+    eas login
+fi
+echo ""
+
+# ------------------------- 9. Suppress Expo Go warning -------------------------
+export EAS_BUILD_NO_EXPO_GO_WARNING=true
+
+# ------------------------- 10. Trigger cloud build -------------------------
+echo "═══════════════════════════════════════════════════════════"
+echo "🚀 All critical checks passed. Starting EAS production build..."
+echo "   Build will run on Expo's cloud (not inside Replit)."
+echo "   Monitor progress at: https://expo.dev/accounts/davidsarb/projects/westcars/builds"
+echo "═══════════════════════════════════════════════════════════"
+echo ""
+
+eas build --platform android --profile production --clear-cache --non-interactive
+
+echo ""
+echo "✅ Build submitted. Check the URL above for status."
