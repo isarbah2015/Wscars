@@ -1,0 +1,106 @@
+# OTA updates are cheap and near-instant, so this workflow runs on every push to
+# main that touches app code — even when the full EAS build also triggers.
+# The full build produces a new binary for native changes; the OTA update covers
+# JavaScript-only fixes so existing installs pick up the change immediately.
+# To suppress OTA updates for native-change commits, add a concurrency group or
+# path conditions here and in eas-build.yml to separate the two workflows.
+name: EAS OTA Update (Production)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'artifacts/westcars/**'
+      - '.github/workflows/eas-update.yml'
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Update message (shown in Expo dashboard)'
+        required: false
+        default: 'Manual OTA update'
+      branch:
+        description: 'EAS update branch'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - preview
+          - development
+
+jobs:
+  ota-update:
+    name: Publish OTA Update
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: artifacts/westcars
+
+    steps:
+      - name: Check required secrets
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "::error::Missing required GitHub secret: EXPO_TOKEN"
+            echo "Set it under: Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          echo "EXPO_TOKEN is present."
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        working-directory: .
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup EAS CLI
+        run: pnpm add -g eas-cli
+
+      - name: Build update message
+        id: update-msg
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "MESSAGE=${{ github.event.inputs.message }}" >> $GITHUB_OUTPUT
+          else
+            SHORT_SHA="${{ github.sha }}"
+            SHORT_SHA="${SHORT_SHA:0:7}"
+            COMMIT_MSG=$(echo "${{ github.event.head_commit.message }}" | head -1)
+            echo "MESSAGE=${COMMIT_MSG} (${SHORT_SHA})" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish OTA update
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_NO_VCS: '1'
+        run: |
+          BRANCH="${{ github.event.inputs.branch || 'production' }}"
+          MESSAGE="${{ steps.update-msg.outputs.MESSAGE }}"
+          echo "Publishing OTA update to branch: $BRANCH"
+          echo "Message: $MESSAGE"
+          eas update \
+            --branch "$BRANCH" \
+            --message "$MESSAGE" \
+            --non-interactive
