@@ -27,7 +27,7 @@
     },
     "production": {
       "autoIncrement": true,
-      "prebuildCommand": "node scripts/setup-credentials.js",
+      "prebuildCommand": "sh scripts/run-setup-credentials.sh",
       "android": {
         "buildType": "app-bundle",
         "credentialsSource": "local"
