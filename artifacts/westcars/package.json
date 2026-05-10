@@ -73,6 +73,6 @@
     "expo-crypto": "^15.0.9",
     "expo-document-picker": "^14.0.8",
     "expo-updates": "~29.0.17",
-    "firebase": "^11.10.0"
+    "firebase": "11.6.0"
   }
 }
