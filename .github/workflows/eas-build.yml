@@ -206,7 +206,8 @@ build_url    = os.environ["BUILD_URL"]
 download_url = os.environ.get("DOWNLOAD_URL", "")
 platform     = os.environ["PLATFORM"]
 profile      = os.environ["PROFILE"]
-commit_msg   = (os.environ.get("COMMIT_MSG") or "").splitlines()[0]
+_msg_lines   = (os.environ.get("COMMIT_MSG") or "").splitlines()
+commit_msg   = _msg_lines[0] if _msg_lines else "(no commit message)"
 short_sha    = os.environ["COMMIT_SHA"][:7]
 actor        = os.environ["ACTOR"]
 ref_name     = os.environ["REF_NAME"]
@@ -307,11 +308,12 @@ PYEOF
           PAYLOAD=$(python3 - <<'PYEOF'
 import json, os
 
-build_url  = os.environ.get("BUILD_URL", "https://expo.dev/accounts/davidsarb/projects/westcars/builds")
-platform   = os.environ.get("PLATFORM", "android")
-profile    = os.environ.get("PROFILE", "production")
-commit_msg = (os.environ.get("COMMIT_MSG") or "").splitlines()[0]
-short_sha  = os.environ["COMMIT_SHA"][:7]
+build_url  = os.environ.get("BUILD_URL") or "https://expo.dev/accounts/davidsarb/projects/westcars/builds"
+platform   = os.environ.get("PLATFORM") or "android"
+profile    = os.environ.get("PROFILE") or "production"
+_msg_lines = (os.environ.get("COMMIT_MSG") or "").splitlines()
+commit_msg = _msg_lines[0] if _msg_lines else "(no commit message)"
+short_sha  = (os.environ.get("COMMIT_SHA") or "unknown")[:7]
 actor      = os.environ["ACTOR"]
 ref_name   = os.environ["REF_NAME"]
 repository = os.environ["REPOSITORY"]
