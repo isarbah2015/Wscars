@@ -20,6 +20,7 @@ runButton = "Project"
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true
+integrations = ["github:1.0.0"]
 
 [postMerge]
 path = "scripts/post-merge.sh"
@@ -46,3 +47,6 @@ externalPort = 3000
 [userenv.shared]
 EXPO_PUBLIC_FIREBASE_DATABASE_ID = "westcar-5c1e6"
 VITE_FIREBASE_DATABASE_ID = "westcar-5c1e6"
+
+[nix]
+channel = "stable-25_05"
