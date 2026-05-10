@@ -5,7 +5,21 @@ on:
     branches:
       - main
     paths:
-      - 'artifacts/westcars/**'
+      # JS/TS source and asset files — changes here are OTA-safe.
+      # Native config changes (package.json, app.json, eas.json, etc.)
+      # are handled by eas-build.yml instead so both workflows don't fire
+      # for the same push.
+      - 'artifacts/westcars/app/**'
+      - 'artifacts/westcars/assets/**'
+      - 'artifacts/westcars/components/**'
+      - 'artifacts/westcars/constants/**'
+      - 'artifacts/westcars/context/**'
+      - 'artifacts/westcars/lib/**'
+      - 'artifacts/westcars/services/**'
+      - 'artifacts/westcars/types/**'
+      - 'artifacts/westcars/utils/**'
+      - 'artifacts/westcars/expo-env.d.ts'
+      - 'artifacts/westcars/tsconfig.json'
       - '.github/workflows/eas-update.yml'
   workflow_dispatch:
     inputs:
@@ -24,11 +38,14 @@ on:
           - development
 
 # Shared concurrency group with eas-build.yml.
-# If a full build is already running or queued in this group, this OTA update
-# will be cancelled rather than running redundantly alongside it.
+# cancel-in-progress: false means OTA update will NOT cancel a full build
+# that is already running in this group. The build always takes precedence.
+# (eas-build.yml uses cancel-in-progress: true, so a new build will cancel
+#  any in-progress OTA update — the direction of control is intentionally
+#  asymmetric: build > OTA.)
 concurrency:
   group: westcars-eas-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   check-changes:
@@ -52,9 +69,10 @@ jobs:
             exit 0
           fi
 
-          # Files that require a full EAS build when changed (not OTA-safe).
-          # These are native config, native dependencies, and build tooling.
-          NATIVE_PATTERNS="^artifacts/westcars/(package\.json|app\.json|eas\.json|babel\.config\.[jt]s|metro\.config\.[jt]s|android/|ios/|scripts/)"
+          # These are the same files that trigger eas-build.yml on push.
+          # If any are present in this commit, the full build handles it
+          # and OTA is redundant.
+          NATIVE_PATTERNS="^artifacts/westcars/(package\.json|package-lock\.json|app\.json|eas\.json|babel\.config\.[jt]s|metro\.config\.[jt]s|google-services\.json|firebase\.json|firestore\.(rules|indexes\.json)|storage\.rules|scripts/)"
 
           CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'artifacts/westcars/')
           echo "Changed files in artifacts/westcars/:"

@@ -5,7 +5,20 @@ on:
     branches:
       - main
     paths:
-      - 'artifacts/westcars/**'
+      # Native config and dependency files — changes here require a full rebuild.
+      # JS/TS-only changes are handled by eas-update.yml (OTA) instead.
+      - 'artifacts/westcars/package.json'
+      - 'artifacts/westcars/package-lock.json'
+      - 'artifacts/westcars/app.json'
+      - 'artifacts/westcars/eas.json'
+      - 'artifacts/westcars/babel.config.js'
+      - 'artifacts/westcars/metro.config.js'
+      - 'artifacts/westcars/google-services.json'
+      - 'artifacts/westcars/firebase.json'
+      - 'artifacts/westcars/firestore.rules'
+      - 'artifacts/westcars/storage.rules'
+      - 'artifacts/westcars/firestore.indexes.json'
+      - 'artifacts/westcars/scripts/**'
       - '.github/workflows/eas-build.yml'
   workflow_dispatch:
     inputs:
@@ -29,8 +42,8 @@ on:
           - development
 
 # Shared concurrency group with eas-update.yml.
-# cancel-in-progress: true means if a new full build is triggered, any
-# running or queued OTA update in the same group is cancelled immediately.
+# cancel-in-progress: true means a new full build cancels any OTA update
+# that is already running or queued in this group — builds take precedence.
 concurrency:
   group: westcars-eas-${{ github.ref }}
   cancel-in-progress: true
