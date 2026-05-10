@@ -57,7 +57,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          # fetch-depth: 0 fetches full history so git diff can span the
+          # entire push range (github.event.before..github.sha), even for
+          # multi-commit pushes where before may be many commits back.
+          fetch-depth: 0
 
       - name: Check if native files changed
         id: native-check
@@ -70,12 +73,24 @@ jobs:
           fi
 
           # These are the same files that trigger eas-build.yml on push.
-          # If any are present in this commit, the full build handles it
-          # and OTA is redundant.
+          # If any are present anywhere in the push range, the full build
+          # handles it and OTA is redundant.
           NATIVE_PATTERNS="^artifacts/westcars/(package\.json|package-lock\.json|app\.json|eas\.json|babel\.config\.[jt]s|metro\.config\.[jt]s|google-services\.json|firebase\.json|firestore\.(rules|indexes\.json)|storage\.rules|scripts/)"
 
-          CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'artifacts/westcars/')
-          echo "Changed files in artifacts/westcars/:"
+          BEFORE="${{ github.event.before }}"
+          SHA="${{ github.sha }}"
+
+          # github.event.before is all-zeros on the very first push to a branch.
+          # Fall back to HEAD~1 in that case so the diff still works.
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "First push to branch — diffing HEAD~1..HEAD"
+            CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'artifacts/westcars/')
+          else
+            echo "Diffing full push range: ${BEFORE}..${SHA}"
+            CHANGED=$(git diff --name-only "${BEFORE}" "${SHA}" -- 'artifacts/westcars/')
+          fi
+
+          echo "Changed files in artifacts/westcars/ across push range:"
           echo "$CHANGED"
 
           if echo "$CHANGED" | grep -qE "$NATIVE_PATTERNS"; then
