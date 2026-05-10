@@ -31,9 +31,7 @@
     "android": {
       "package": "gh.westcars.app",
       "versionCode": 37,
-      "jsEngine": "hermes",
       "softwareKeyboardLayoutMode": "pan",
-      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/wc-logo.png",
         "backgroundColor": "#0A1628"
