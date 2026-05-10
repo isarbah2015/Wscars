@@ -28,6 +28,13 @@ on:
           - preview
           - development
 
+# Shared concurrency group with eas-update.yml.
+# cancel-in-progress: true means if a new full build is triggered, any
+# running or queued OTA update in the same group is cancelled immediately.
+concurrency:
+  group: westcars-eas-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: EAS Build

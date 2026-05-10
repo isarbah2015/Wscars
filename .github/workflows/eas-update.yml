@@ -1,9 +1,3 @@
-# OTA updates are cheap and near-instant, so this workflow runs on every push to
-# main that touches app code — even when the full EAS build also triggers.
-# The full build produces a new binary for native changes; the OTA update covers
-# JavaScript-only fixes so existing installs pick up the change immediately.
-# To suppress OTA updates for native-change commits, add a concurrency group or
-# path conditions here and in eas-build.yml to separate the two workflows.
 name: EAS OTA Update (Production)
 
 on:
@@ -29,9 +23,55 @@ on:
           - preview
           - development
 
+# Shared concurrency group with eas-build.yml.
+# If a full build is already running or queued in this group, this OTA update
+# will be cancelled rather than running redundantly alongside it.
+concurrency:
+  group: westcars-eas-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  check-changes:
+    name: Detect native file changes
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.native-check.outputs.skip }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if native files changed
+        id: native-check
+        run: |
+          # On workflow_dispatch (manual run), never skip — always publish OTA.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual trigger — OTA update will proceed."
+            echo "skip=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Files that require a full EAS build when changed (not OTA-safe).
+          # These are native config, native dependencies, and build tooling.
+          NATIVE_PATTERNS="^artifacts/westcars/(package\.json|app\.json|eas\.json|babel\.config\.[jt]s|metro\.config\.[jt]s|android/|ios/|scripts/)"
+
+          CHANGED=$(git diff --name-only HEAD~1 HEAD -- 'artifacts/westcars/')
+          echo "Changed files in artifacts/westcars/:"
+          echo "$CHANGED"
+
+          if echo "$CHANGED" | grep -qE "$NATIVE_PATTERNS"; then
+            echo "Native files changed — skipping OTA update (full build will handle this push)."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "JS-only changes detected — OTA update will proceed."
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
   ota-update:
     name: Publish OTA Update
+    needs: check-changes
+    if: needs.check-changes.outputs.skip != 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
