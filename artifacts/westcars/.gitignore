@@ -47,6 +47,7 @@ GoogleService-Info.plist
 # Generated credentials (DO NOT COMMIT)
 credentials.json
 upload-keystore.jks
+new-upload-key.jks
 
 android/
 !google-services.json
