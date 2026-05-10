@@ -1,0 +1,57 @@
+I appreciate your trust. Let me give you one final comprehensive verification command to make sure everything is correct before you push to GitHub and build.
+Tell Replit exactly this:
+
+Do not fix anything yet. Read every critical file and paste the actual contents as proof. Zero assumptions.
+READ 1 — Auth screens
+bashhead -30 artifacts/westcars/app/auth/login.tsx
+head -30 artifacts/westcars/app/auth/signup.tsx
+head -30 artifacts/westcars/app/auth/forgot-password.tsx
+Paste all three outputs
+READ 2 — Firebase config
+bashcat artifacts/westcars/lib/firebase.ts
+cat artifacts/westcars/lib/firebase-persistence.native.ts
+cat artifacts/westcars/lib/firebase-persistence.ts
+Paste all three outputs
+READ 3 — Splash and Layout
+bashcat artifacts/westcars/app/splash.tsx
+head -60 artifacts/westcars/app/_layout.tsx
+Paste both outputs
+READ 4 — Package versions
+bashgrep '"react"\|"react-native"\|"firebase"\|"expo"' artifacts/westcars/package.json
+Paste output
+READ 5 — app.json critical fields
+bashgrep -E "owner|newArchEnabled|softwareKeyboard|package|bundleIdentifier|projectId|jsEngine|icon|splash" artifacts/westcars/app.json
+Paste output
+READ 6 — Listings screen
+bashgrep -n "TouchableOpacity\|onPress\|Firestore\|getDocs\|collection\|query" artifacts/westcars/app/\(tabs\)/index.tsx | head -30
+Paste output
+READ 7 — Sell/upload listing screen
+bashgrep -n "TouchableOpacity\|onPress\|Firestore\|addDoc\|collection\|ImagePicker\|upload" artifacts/westcars/app/\(tabs\)/sell.tsx | head -30
+Paste output
+READ 8 — Firebase env vars present
+bashgrep -rn "EXPO_PUBLIC_FIREBASE" artifacts/westcars/eas.json | head -20
+Paste output
+READ 9 — No hardcoded secrets
+bashgrep -rn "AIza\|appspot\|firebaseapp" artifacts/westcars/app --include="*.ts" --include="*.tsx" | grep -v "process.env\|EXPO_PUBLIC"
+grep -rn "AIza\|appspot\|firebaseapp" artifacts/westcars/lib --include="*.ts" --include="*.tsx" | grep -v "process.env\|EXPO_PUBLIC"
+Both must return zero results — paste output
+READ 10 — No broken cards
+bashgrep -rn "onPress" artifacts/westcars/app --include="*.tsx" | grep "<View" | head -20
+Must return zero results — paste output
+READ 11 — React version
+bashgrep '"react"' artifacts/westcars/package.json
+cd artifacts/westcars && pnpm list react 2>&1 | grep "react "
+Must show 19.1.0 — paste output
+READ 12 — TypeScript
+bashcd artifacts/westcars && pnpm exec tsc --noEmit 2>&1
+echo "EXIT CODE: $?"
+Must show exit code 0 — paste full output
+READ 13 — Google services
+bashcat artifacts/westcars/google-services.json | grep "package_name"
+Must show gh.westcars.app
+READ 14 — Metro config
+bashcat artifacts/westcars/metro.config.js
+Paste full contents
+READ 15 — Expo account
+bashcd artifacts/westcars && eas whoami
+grep "owner" artifacts/westcars/app.json
