@@ -173,10 +173,6 @@ PYEOF
           echo "platform=$PLATFORM" >> $GITHUB_OUTPUT
           echo "profile=$PROFILE"   >> $GITHUB_OUTPUT
 
-      # ── Shared helper script ─────────────────────────────────────────────
-      # Both notify steps use the same Python payload builder, invoked with
-      # different STATUS/EMOJI/COLOR env vars.
-
       - name: Notify team — build ready
         if: success()
         env:
@@ -191,7 +187,6 @@ PYEOF
           REF_NAME:      ${{ github.ref_name }}
           REPOSITORY:    ${{ github.repository }}
           RUN_ID:        ${{ github.run_id }}
-          STATUS:        success
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then
             echo "SLACK_WEBHOOK_URL not set — skipping success notification."
