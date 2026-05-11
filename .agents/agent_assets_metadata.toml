@@ -151,48 +151,6 @@ type = "image"
 title = "generated_image"
 
 [[outputs]]
-id = "lOh_1LBmwe16IZ0ZEawtv"
-uri = "file://screenshots/westcars_home_tab.jpg"
-type = "image"
-title = "Home Screen"
-
-[[outputs]]
-id = "ARXhVOb7jgYZGvWIdz3Wv"
-uri = "file://screenshots/westcars_search.jpg"
-type = "image"
-title = "Search Screen"
-
-[[outputs]]
-id = "6oGDQ3QAjtld3Ftphda9z"
-uri = "file://screenshots/westcars_favourites.jpg"
-type = "image"
-title = "Saved Cars Screen"
-
-[[outputs]]
-id = "n1S89M0SXpJw_I1FegJYZ"
-uri = "file://screenshots/westcars_messages.jpg"
-type = "image"
-title = "Messages Screen"
-
-[[outputs]]
-id = "sle5WrJCuSkB6GCON7GNj"
-uri = "file://screenshots/westcars_profile.jpg"
-type = "image"
-title = "Profile / Join Screen"
-
-[[outputs]]
-id = "0m5_DBa-Kp5YqmBmBsNsG"
-uri = "file://screenshots/westcars_home.jpg"
-type = "image"
-title = "Splash Screen"
-
-[[outputs]]
-id = "tdjHkDlJNgkBkHp7-dvWC"
-uri = "file://screenshots/phone_home.jpg"
-type = "image"
-title = "Phone — Home"
-
-[[outputs]]
 id = "h9zPUPB8xjijb13a6qmQ1"
 uri = "file://screenshots/phone_search.jpg"
 type = "image"
@@ -205,24 +163,6 @@ type = "image"
 title = "Phone — Saved Cars"
 
 [[outputs]]
-id = "7g4rh25wJu_OuTz_WuksA"
-uri = "file://screenshots/phone_messages.jpg"
-type = "image"
-title = "Phone — Messages"
-
-[[outputs]]
-id = "azeWFKlqbiRc88RpLoZZK"
-uri = "file://screenshots/phone_profile.jpg"
-type = "image"
-title = "Phone — Profile"
-
-[[outputs]]
-id = "wG1zqu8TXor_eecakpXS2"
-uri = "file://screenshots/tablet7_home.jpg"
-type = "image"
-title = "7\" Tablet — Home"
-
-[[outputs]]
 id = "XKzGMPqbAGaEAItlmCReN"
 uri = "file://screenshots/tablet7_search.jpg"
 type = "image"
@@ -233,24 +173,6 @@ id = "acSMvJf82AiPHMtO98WFu"
 uri = "file://screenshots/tablet7_favourites.jpg"
 type = "image"
 title = "7\" Tablet — Saved Cars"
-
-[[outputs]]
-id = "wfi17-YNgDiCaz6G17RCP"
-uri = "file://screenshots/tablet7_messages.jpg"
-type = "image"
-title = "7\" Tablet — Messages"
-
-[[outputs]]
-id = "Kqo1G2hDsvclSmZfa_HLm"
-uri = "file://screenshots/tablet7_profile.jpg"
-type = "image"
-title = "7\" Tablet — Profile"
-
-[[outputs]]
-id = "ibEoRXbO1bshr_1cIiUhb"
-uri = "file://screenshots/tablet10_home.jpg"
-type = "image"
-title = "10\" Tablet — Home"
 
 [[outputs]]
 id = "00Bx2HNZJuS-YaV3VTwK2"
@@ -269,9 +191,3 @@ id = "92PCfaRkx8zx7ojQTjSOH"
 uri = "file://screenshots/tablet10_messages.jpg"
 type = "image"
 title = "10\" Tablet — Messages"
-
-[[outputs]]
-id = "M7woVXUkXvd4MiPgPAiqW"
-uri = "file://screenshots/tablet10_profile.jpg"
-type = "image"
-title = "10\" Tablet — Profile"
