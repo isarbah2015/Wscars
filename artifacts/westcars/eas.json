@@ -34,8 +34,7 @@
       "ios": {
         "buildConfiguration": "Release"
       },
-      "channel": "production",
-      "prebuildCommand": "node scripts/setup-credentials.js && npx expo prebuild --clean"
+      "channel": "production"
     }
   },
   "submit": {

@@ -82,6 +82,13 @@ jobs:
       - name: Install dependencies (npm — flat node_modules for EAS CLI)
         run: npm install --legacy-peer-deps
 
+      - name: Generate credentials.json and keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: node scripts/setup-credentials.js
+
       - name: Run EAS build
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
