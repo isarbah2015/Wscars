@@ -461,7 +461,13 @@ export default function HomeScreen() {
                 >
                   {/* Image with price overlay */}
                   <View style={styles.featImgWrap}>
-                    <Image source={{ uri: car.images[0] }} style={styles.featImg} resizeMode="cover" />
+                    {car.images?.[0] ? (
+                      <Image source={{ uri: car.images[0] }} style={styles.featImg} resizeMode="cover" />
+                    ) : (
+                      <View style={[styles.featImg, styles.imgFallback, { backgroundColor: isDark ? "#111827" : "#F8FAFC" }]}>
+                        <Feather name="camera" size={28} color={isDark ? "#94A3B8" : "#64748B"} />
+                      </View>
+                    )}
                     <LinearGradient
                       colors={["transparent", "rgba(0,0,0,0.70)"]}
                       style={styles.featScrim}
@@ -983,6 +989,7 @@ const styles = StyleSheet.create({
   },
   featImgWrap: { height: 230, position: "relative" },
   featImg: { width: "100%", height: "100%" },
+  imgFallback: { alignItems: "center", justifyContent: "center" },
   featScrim: { position: "absolute", bottom: 0, left: 0, right: 0, height: 100 },
   featCondBadge: {
     position: "absolute", top: 12, left: 12,

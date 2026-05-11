@@ -93,7 +93,13 @@ export default function FullSpecsScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Car image with gradient overlay */}
         <View style={styles.heroCard}>
-          <Image source={{ uri: car.images[0] }} style={styles.heroImg} resizeMode="cover" />
+          {car.images?.[0] ? (
+            <Image source={{ uri: car.images[0] }} style={styles.heroImg} resizeMode="cover" />
+          ) : (
+            <View style={[styles.heroImg, styles.imgFallback, { backgroundColor: isDark ? "#111827" : "#F8FAFC" }]}>
+              <Feather name="camera" size={32} color={isDark ? "#94A3B8" : "#64748B"} />
+            </View>
+          )}
           <LinearGradient
             colors={["transparent", "rgba(14,181,202,0.35)", "rgba(10,30,50,0.55)"]}
             start={{ x: 0.5, y: 0.3 }}
@@ -227,6 +233,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#0F172A",
   },
   heroImg: { width: "100%", height: "100%", opacity: 0.85 },
+  imgFallback: { alignItems: "center", justifyContent: "center" },
   dimBadge: {
     position: "absolute",
     backgroundColor: "rgba(14,181,202,0.25)",

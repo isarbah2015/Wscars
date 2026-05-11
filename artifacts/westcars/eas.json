@@ -28,8 +28,7 @@
     "production": {
       "autoIncrement": true,
       "android": {
-        "buildType": "app-bundle",
-        "credentialsSource": "local"
+        "buildType": "app-bundle"
       },
       "ios": {
         "buildConfiguration": "Release"

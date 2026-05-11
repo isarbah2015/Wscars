@@ -596,7 +596,13 @@ export default function ConversationScreen() {
           style={[styles.carBanner, { backgroundColor: isDark ? "#111827" : "#FFFFFF", borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "#E2E8F0" }]}
           onPress={() => router.push({ pathname: "/car/[id]", params: { id: conv.carId } })}
         >
-          <Image source={{ uri: conv.car.images[0] }} style={styles.carBannerImage} />
+          {conv.car.images?.[0] ? (
+            <Image source={{ uri: conv.car.images[0] }} style={styles.carBannerImage} />
+          ) : (
+            <View style={[styles.carBannerImage, styles.imgFallback, { backgroundColor: isDark ? "#111827" : "#F8FAFC" }]}>
+              <Feather name="camera" size={24} color={isDark ? "#94A3B8" : "#64748B"} />
+            </View>
+          )}
           <View style={styles.carBannerInfo}>
             <Text style={[styles.carBannerTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]} numberOfLines={1}>
               {conv.car.brand} {conv.car.model}
@@ -909,6 +915,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   carBannerImage: { width: 52, height: 40, borderRadius: 8 },
+  imgFallback: { alignItems: "center", justifyContent: "center" },
   carBannerInfo: { flex: 1 },
   carBannerTitle: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   carBannerPrice: { fontSize: 12, fontFamily: "Inter_500Medium" },

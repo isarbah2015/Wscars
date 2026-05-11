@@ -26,6 +26,7 @@ export function CarCard({ car, style }: CarCardProps) {
   const { colors, isDark } = useTheme();
   const fav = isFavorite(car.id);
   const [imgError, setImgError] = useState(false);
+  const coverImage = car.images?.[0];
 
   const scale = useRef(new Animated.Value(1)).current;
 
@@ -67,9 +68,9 @@ export function CarCard({ car, style }: CarCardProps) {
           >
             {/* ── Image block (taller for sponsored) ── */}
             <View style={sponsoredStyles.imageWrap}>
-              {!imgError ? (
+              {!imgError && coverImage ? (
                 <Image
-                  source={{ uri: car.images[0] }}
+                  source={{ uri: coverImage }}
                   style={sponsoredStyles.image}
                   resizeMode="cover"
                   onError={() => setImgError(true)}
@@ -207,9 +208,9 @@ export function CarCard({ car, style }: CarCardProps) {
       >
         {/* ── Image block ── */}
         <View style={styles.imageWrap}>
-          {!imgError ? (
+          {!imgError && coverImage ? (
             <Image
-              source={{ uri: car.images[0] }}
+              source={{ uri: coverImage }}
               style={styles.image}
               resizeMode="cover"
               onError={() => setImgError(true)}
