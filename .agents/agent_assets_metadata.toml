@@ -1,4 +1,5 @@
 uploads = []
+outputs = []
 
 [[generated]]
 id = "jUylkv4nkbZ7T2TB7LWMy"
@@ -149,45 +150,3 @@ id = "Nzpflr-yqkLT8-XdLGR7i"
 uri = "file://artifacts/westcars/assets/images/welcome-car.png"
 type = "image"
 title = "generated_image"
-
-[[outputs]]
-id = "h9zPUPB8xjijb13a6qmQ1"
-uri = "file://screenshots/phone_search.jpg"
-type = "image"
-title = "Phone — Search"
-
-[[outputs]]
-id = "ONMhEr_bUV7N7rof0LMkr"
-uri = "file://screenshots/phone_favourites.jpg"
-type = "image"
-title = "Phone — Saved Cars"
-
-[[outputs]]
-id = "XKzGMPqbAGaEAItlmCReN"
-uri = "file://screenshots/tablet7_search.jpg"
-type = "image"
-title = "7\" Tablet — Search"
-
-[[outputs]]
-id = "acSMvJf82AiPHMtO98WFu"
-uri = "file://screenshots/tablet7_favourites.jpg"
-type = "image"
-title = "7\" Tablet — Saved Cars"
-
-[[outputs]]
-id = "00Bx2HNZJuS-YaV3VTwK2"
-uri = "file://screenshots/tablet10_search.jpg"
-type = "image"
-title = "10\" Tablet — Search"
-
-[[outputs]]
-id = "jhlvKUSLM8fBfh1Qy_jcw"
-uri = "file://screenshots/tablet10_favourites.jpg"
-type = "image"
-title = "10\" Tablet — Saved Cars"
-
-[[outputs]]
-id = "92PCfaRkx8zx7ojQTjSOH"
-uri = "file://screenshots/tablet10_messages.jpg"
-type = "image"
-title = "10\" Tablet — Messages"
