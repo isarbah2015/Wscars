@@ -21,7 +21,7 @@ const path = require('path');
 const keystoreB64     = process.env.KEYSTORE_B64;
 const keystorePassword = process.env.KEYSTORE_PASSWORD;
 const keyPassword      = process.env.KEY_PASSWORD;
-const keyAlias         = '2409d8e96f55c9e2557b4ebe6786a888';
+const keyAlias         = 'upload';
 
 if (!keystoreB64 || !keystorePassword || !keyPassword) {
   console.error(
