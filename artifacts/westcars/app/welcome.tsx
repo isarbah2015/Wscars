@@ -12,7 +12,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { PanGestureHandler, State } from "react-native-gesture-handler";
+import { PanGestureHandler, GestureHandlerStateChangeEvent } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CAR  = require("@/assets/images/welcome-car-porsche.png");
@@ -98,7 +98,7 @@ export default function WelcomeScreen() {
   );
 
   const onHandlerStateChange = (e: any) => {
-    if (e.nativeEvent.state === State.END) {
+    if (e.nativeEvent.state === 5) {
       const x = e.nativeEvent.translationX;
       if (x >= MAX_X * 0.85) {
         Animated.timing(translateX, {
