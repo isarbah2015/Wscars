@@ -1,18 +1,6 @@
 name: EAS Build (Android Production)
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'artifacts/westcars/package.json'
-      - 'artifacts/westcars/app.json'
-      - 'artifacts/westcars/eas.json'
-      - 'artifacts/westcars/babel.config.js'
-      - 'artifacts/westcars/metro.config.js'
-      - 'artifacts/westcars/google-services.json'
-      - 'artifacts/westcars/scripts/**'
-      - '.github/workflows/eas-build.yml'
   workflow_dispatch:
     inputs:
       platform:
