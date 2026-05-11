@@ -3,7 +3,7 @@ name: EAS OTA Update (Production)
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       # JS/TS source and asset files — changes here are OTA-safe.
       # Native config changes (package.json, app.json, eas.json, etc.)

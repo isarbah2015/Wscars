@@ -3,23 +3,14 @@ name: EAS Build (Android Production)
 on:
   push:
     branches:
-      - main
+      - master
     paths:
-      # Native config and dependency files — changes here require a full rebuild.
-      # JS/TS-only changes are handled by eas-update.yml (OTA) instead.
       - 'artifacts/westcars/package.json'
-      - 'artifacts/westcars/package-lock.json'
       - 'artifacts/westcars/app.json'
       - 'artifacts/westcars/eas.json'
       - 'artifacts/westcars/babel.config.js'
-      - 'artifacts/westcars/babel.config.ts'
       - 'artifacts/westcars/metro.config.js'
-      - 'artifacts/westcars/metro.config.ts'
       - 'artifacts/westcars/google-services.json'
-      - 'artifacts/westcars/firebase.json'
-      - 'artifacts/westcars/firestore.rules'
-      - 'artifacts/westcars/storage.rules'
-      - 'artifacts/westcars/firestore.indexes.json'
       - 'artifacts/westcars/scripts/**'
       - '.github/workflows/eas-build.yml'
   workflow_dispatch:
@@ -43,9 +34,6 @@ on:
           - preview
           - development
 
-# Shared concurrency group with eas-update.yml.
-# cancel-in-progress: true means a new full build cancels any OTA update
-# that is already running or queued in this group — builds take precedence.
 concurrency:
   group: westcars-eas-${{ github.ref }}
   cancel-in-progress: true
@@ -53,8 +41,6 @@ concurrency:
 jobs:
   build:
     name: EAS Build
-    # Free EAS builds can queue for 30-60 min; set a generous timeout so the
-    # runner does not time out before the binary finishes.
     timeout-minutes: 120
     runs-on: ubuntu-latest
     defaults:
@@ -62,317 +48,51 @@ jobs:
         working-directory: artifacts/westcars
 
     steps:
-      - name: Check required secrets
-        run: |
-          missing=""
-          [ -z "${{ secrets.EXPO_TOKEN }}" ]       && missing="$missing EXPO_TOKEN"
-          [ -z "${{ secrets.KEYSTORE_B64 }}" ]     && missing="$missing KEYSTORE_B64"
-          [ -z "${{ secrets.KEYSTORE_PASSWORD }}" ] && missing="$missing KEYSTORE_PASSWORD"
-          [ -z "${{ secrets.KEY_PASSWORD }}" ]      && missing="$missing KEY_PASSWORD"
-          if [ -n "$missing" ]; then
-            echo "::error::Missing required GitHub secrets:$missing"
-            echo "Set these under: Settings → Secrets and variables → Actions"
-            echo "See .local/notes/eas-build-workflow.md for instructions."
-            exit 1
-          fi
-          echo "All required secrets are present."
-
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Check required secrets
+        working-directory: ${{ github.workspace }}
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          MISSING=""
+          [ -z "$EXPO_TOKEN" ]        && MISSING="$MISSING EXPO_TOKEN"
+          [ -z "$KEYSTORE_B64" ]      && MISSING="$MISSING KEYSTORE_B64"
+          [ -z "$KEYSTORE_PASSWORD" ] && MISSING="$MISSING KEYSTORE_PASSWORD"
+          [ -z "$KEY_PASSWORD" ]      && MISSING="$MISSING KEY_PASSWORD"
+          if [ -n "$MISSING" ]; then
+            echo "::error::Missing required GitHub secrets:$MISSING"
+            exit 1
+          fi
+          echo "All required secrets present."
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      - name: Install EAS CLI
+        working-directory: ${{ github.workspace }}
+        run: npm install -g eas-cli
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Cache pnpm dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
-      - name: Install dependencies
-        working-directory: .
-        run: pnpm install --frozen-lockfile
-
-      - name: Setup EAS CLI
-        run: pnpm add -g eas-cli
+      - name: Install dependencies (npm — flat node_modules for EAS CLI)
+        run: npm install --legacy-peer-deps
 
       - name: Run EAS build
-        id: eas-build
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          EAS_NO_VCS: '1'
         run: |
           PLATFORM="${{ github.event.inputs.platform || 'android' }}"
           PROFILE="${{ github.event.inputs.profile || 'production' }}"
-
-          # Block until EAS build reaches a terminal state (FINISHED or ERRORED).
-          # --no-wait is intentionally absent — we wait for completion so that
-          # the Slack notification fires only when the AAB is actually ready.
-          # Free plan builds can queue for 30-60 min; timeout-minutes: 120 above
-          # gives plenty of headroom without tying up a runner indefinitely.
-          #
-          # --json outputs the completed build object to stdout; progress logs
-          # go to stderr and stream to the Actions log automatically.
-          # Failures (ERRORED, CANCELED) cause eas-cli to exit non-zero,
-          # which fails this step immediately — no || true needed or used.
-          RAW=$(eas build \
+          echo "Building platform=$PLATFORM profile=$PROFILE"
+          eas build \
             --platform "$PLATFORM" \
             --profile "$PROFILE" \
-            --non-interactive \
-            --json)
-
-          # Parse the completed build JSON for ID and direct download URL.
-          # All values are written to GITHUB_OUTPUT for use in notify steps.
-          python3 - <<PYEOF
-import json, os, sys
-
-raw = """$RAW"""
-try:
-    builds = json.loads(raw)
-    b = builds[0] if isinstance(builds, list) else builds
-    build_id    = b.get("id", "")
-    artifacts   = b.get("artifacts") or {}
-    download_url = artifacts.get("buildUrl", "")
-except Exception as e:
-    print(f"Warning: could not parse EAS JSON — {e}", file=sys.stderr)
-    build_id = ""
-    download_url = ""
-
-if build_id:
-    build_url = f"https://expo.dev/accounts/davidsarb/projects/westcars/builds/{build_id}"
-else:
-    build_url = "https://expo.dev/accounts/davidsarb/projects/westcars/builds"
-
-with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-    f.write(f"build_id={build_id}\n")
-    f.write(f"build_url={build_url}\n")
-    f.write(f"download_url={download_url}\n")
-
-print(f"Build ID:      {build_id}")
-print(f"Build URL:     {build_url}")
-print(f"Download URL:  {download_url}")
-PYEOF
-
-          # Also export platform/profile for the notify steps.
-          echo "platform=$PLATFORM" >> $GITHUB_OUTPUT
-          echo "profile=$PROFILE"   >> $GITHUB_OUTPUT
-
-      - name: Notify team — build ready
-        if: success()
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          BUILD_URL:     ${{ steps.eas-build.outputs.build_url }}
-          DOWNLOAD_URL:  ${{ steps.eas-build.outputs.download_url }}
-          PLATFORM:      ${{ steps.eas-build.outputs.platform }}
-          PROFILE:       ${{ steps.eas-build.outputs.profile }}
-          COMMIT_MSG:    ${{ github.event.head_commit.message }}
-          COMMIT_SHA:    ${{ github.sha }}
-          ACTOR:         ${{ github.actor }}
-          REF_NAME:      ${{ github.ref_name }}
-          REPOSITORY:    ${{ github.repository }}
-          RUN_ID:        ${{ github.run_id }}
-        run: |
-          if [ -z "$SLACK_WEBHOOK_URL" ]; then
-            echo "SLACK_WEBHOOK_URL not set — skipping success notification."
-            echo "Add SLACK_WEBHOOK_URL to GitHub Secrets to enable Slack alerts."
-            exit 0
-          fi
-          # Payload built entirely in Python — safe escaping for any commit msg.
-          PAYLOAD=$(python3 - <<'PYEOF'
-import json, os
-
-build_url    = os.environ["BUILD_URL"]
-download_url = os.environ.get("DOWNLOAD_URL", "")
-platform     = os.environ["PLATFORM"]
-profile      = os.environ["PROFILE"]
-_msg_lines   = (os.environ.get("COMMIT_MSG") or "").splitlines()
-commit_msg   = _msg_lines[0] if _msg_lines else "(no commit message)"
-short_sha    = os.environ["COMMIT_SHA"][:7]
-actor        = os.environ["ACTOR"]
-ref_name     = os.environ["REF_NAME"]
-repository   = os.environ["REPOSITORY"]
-run_id       = os.environ["RUN_ID"]
-run_url      = f"https://github.com/{repository}/actions/runs/{run_id}"
-
-# If EAS provided a direct download link, prefer it; otherwise fall back
-# to the build detail page.
-primary_url   = download_url if download_url else build_url
-primary_label = "Download AAB" if download_url else "View build on Expo"
-
-payload = {
-    "text": f":white_check_mark: Westcars {platform} ({profile}) build is ready",
-    "blocks": [
-        {
-            "type": "header",
-            "text": {
-                "type": "plain_text",
-                "text": f":white_check_mark: Westcars {platform} build ready",
-                "emoji": True,
-            },
-        },
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": (
-                    f"A new *{profile}* build for *{platform}* has finished on EAS "
-                    "and the AAB is ready to download or install."
-                ),
-            },
-        },
-        {
-            "type": "section",
-            "fields": [
-                {"type": "mrkdwn", "text": f"*Branch:*\n`{ref_name}`"},
-                {"type": "mrkdwn", "text": f"*Commit:*\n`{short_sha}` by {actor}"},
-                {"type": "mrkdwn", "text": f"*Profile:*\n{profile}"},
-                {"type": "mrkdwn", "text": f"*Platform:*\n{platform}"},
-            ],
-        },
-        {
-            "type": "section",
-            "text": {"type": "mrkdwn", "text": f"*Commit message:* {commit_msg}"},
-        },
-        {
-            "type": "actions",
-            "elements": [
-                {
-                    "type": "button",
-                    "style": "primary",
-                    "text": {"type": "plain_text", "text": primary_label, "emoji": True},
-                    "url": primary_url,
-                },
-                {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "View build on Expo", "emoji": True},
-                    "url": build_url,
-                },
-                {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "View Actions run", "emoji": True},
-                    "url": run_url,
-                },
-            ],
-        },
-    ],
-}
-print(json.dumps(payload))
-PYEOF
-          )
-          HTTP=$(curl -s -o /dev/null -w "%{http_code}" \
-            -X POST -H 'Content-type: application/json' \
-            --data "$PAYLOAD" "$SLACK_WEBHOOK_URL")
-          [ "$HTTP" = "200" ] \
-            && echo "Slack success notification sent." \
-            || echo "::warning::Slack notification failed (HTTP $HTTP). Check SLACK_WEBHOOK_URL."
-
-      - name: Notify team — build failed
-        if: failure()
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          BUILD_URL:    ${{ steps.eas-build.outputs.build_url }}
-          PLATFORM:     ${{ steps.eas-build.outputs.platform }}
-          PROFILE:      ${{ steps.eas-build.outputs.profile }}
-          COMMIT_MSG:   ${{ github.event.head_commit.message }}
-          COMMIT_SHA:   ${{ github.sha }}
-          ACTOR:        ${{ github.actor }}
-          REF_NAME:     ${{ github.ref_name }}
-          REPOSITORY:   ${{ github.repository }}
-          RUN_ID:       ${{ github.run_id }}
-        run: |
-          if [ -z "$SLACK_WEBHOOK_URL" ]; then
-            echo "SLACK_WEBHOOK_URL not set — skipping failure notification."
-            exit 0
-          fi
-          PAYLOAD=$(python3 - <<'PYEOF'
-import json, os
-
-build_url  = os.environ.get("BUILD_URL") or "https://expo.dev/accounts/davidsarb/projects/westcars/builds"
-platform   = os.environ.get("PLATFORM") or "android"
-profile    = os.environ.get("PROFILE") or "production"
-_msg_lines = (os.environ.get("COMMIT_MSG") or "").splitlines()
-commit_msg = _msg_lines[0] if _msg_lines else "(no commit message)"
-short_sha  = (os.environ.get("COMMIT_SHA") or "unknown")[:7]
-actor      = os.environ["ACTOR"]
-ref_name   = os.environ["REF_NAME"]
-repository = os.environ["REPOSITORY"]
-run_id     = os.environ["RUN_ID"]
-run_url    = f"https://github.com/{repository}/actions/runs/{run_id}"
-
-payload = {
-    "text": f":x: Westcars {platform} ({profile}) build FAILED",
-    "blocks": [
-        {
-            "type": "header",
-            "text": {
-                "type": "plain_text",
-                "text": f":x: Westcars {platform} build failed",
-                "emoji": True,
-            },
-        },
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": (
-                    f"The *{profile}* build for *{platform}* failed on EAS. "
-                    "Check the Actions log and EAS build page for details."
-                ),
-            },
-        },
-        {
-            "type": "section",
-            "fields": [
-                {"type": "mrkdwn", "text": f"*Branch:*\n`{ref_name}`"},
-                {"type": "mrkdwn", "text": f"*Commit:*\n`{short_sha}` by {actor}"},
-                {"type": "mrkdwn", "text": f"*Profile:*\n{profile}"},
-                {"type": "mrkdwn", "text": f"*Platform:*\n{platform}"},
-            ],
-        },
-        {
-            "type": "section",
-            "text": {"type": "mrkdwn", "text": f"*Commit message:* {commit_msg}"},
-        },
-        {
-            "type": "actions",
-            "elements": [
-                {
-                    "type": "button",
-                    "style": "danger",
-                    "text": {"type": "plain_text", "text": "View build logs", "emoji": True},
-                    "url": run_url,
-                },
-                {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "View build on Expo", "emoji": True},
-                    "url": build_url,
-                },
-            ],
-        },
-    ],
-}
-print(json.dumps(payload))
-PYEOF
-          )
-          HTTP=$(curl -s -o /dev/null -w "%{http_code}" \
-            -X POST -H 'Content-type: application/json' \
-            --data "$PAYLOAD" "$SLACK_WEBHOOK_URL")
-          [ "$HTTP" = "200" ] \
-            && echo "Slack failure notification sent." \
-            || echo "::warning::Slack failure notification failed (HTTP $HTTP)."
+            --non-interactive

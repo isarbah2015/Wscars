@@ -35,7 +35,7 @@
         "buildConfiguration": "Release"
       },
       "channel": "production",
-      "prebuildCommand": "sh scripts/run-setup-credentials.sh"
+      "prebuildCommand": "node scripts/setup-credentials.js && npx expo prebuild --clean"
     }
   },
   "submit": {
