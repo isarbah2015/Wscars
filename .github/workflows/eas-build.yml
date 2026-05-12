@@ -21,14 +21,6 @@ on:
           - production
           - preview
           - development
-      clear_cache:
-        description: 'Pass --clear-cache to EAS build'
-        required: false
-        default: 'false'
-        type: choice
-        options:
-          - 'false'
-          - 'true'
 
 concurrency:
   group: westcars-eas-${{ github.ref }}
@@ -94,12 +86,8 @@ jobs:
         run: |
           PLATFORM="${{ github.event.inputs.platform || 'android' }}"
           PROFILE="${{ github.event.inputs.profile || 'production' }}"
-          CLEAR_CACHE="${{ github.event.inputs.clear_cache || 'false' }}"
-          echo "Building platform=$PLATFORM profile=$PROFILE clear_cache=$CLEAR_CACHE"
-          CACHE_FLAG=""
-          [ "$CLEAR_CACHE" = "true" ] && CACHE_FLAG="--clear-cache"
+          echo "Building platform=$PLATFORM profile=$PROFILE"
           eas build \
             --platform "$PLATFORM" \
             --profile "$PROFILE" \
-            --non-interactive \
-            $CACHE_FLAG
+            --non-interactive
