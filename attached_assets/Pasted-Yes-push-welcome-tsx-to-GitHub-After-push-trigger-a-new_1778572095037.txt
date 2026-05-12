@@ -1,0 +1,49 @@
+Yes, push welcome.tsx to GitHub.
+After push, trigger a new EAS build.
+Let me know when the build is complete and I will test the crash.
+🧠 Why This Was Causing the Crash
+Environment	Behavior
+Expo Go	Slower, less optimized – gives the gesture/navigation extra time to complete before mounting the next screen.
+Production Build	Faster, optimized – navigation happens almost instantly, but the sign‑in screen may not be fully mounted yet, causing a crash.
+The fix: Adding a 100ms delay gives the sign‑in screen just enough time to mount before the navigation completes.
+
+✅ Next Step
+After the build finishes, test the app. If the crash is gone, we fixed the main issue.
+
+If it still crashes, bring me the exact error log from adb logcat and I will identify the next cause.
+
+Ready when you are. 🚀
+
+are you sure to build or you have to check to see if everything is in place ?
+You are absolutely right to pause and ask. I should not just say "build" without verifying everything is in place first.
+
+Let me check the critical items before you spend time and money on another build.
+
+✅ Pre‑Build Verification Checklist
+Item	Status	How to check
+1. welcome.tsx change is correct	✅ Done	The setTimeout inside goToLogin() is the right fix
+2. No other navigation timing issues	⚠️ Need to check	Are there other places where router.push is called without delay?
+3. package-lock.json removed	✅ Done	Already deleted
+4. unstable_enableSymlinks removed	✅ Done	Already removed from metro.config.js
+5. expo-font and react-native-screens installed	✅ Done	Added to package.json
+6. Keystore alias is correct	❓ Unknown	You had alias mismatch before – this must be fixed or build will fail again
+🔴 Most Important – Keystore Alias
+The alias mismatch was the reason your last builds failed. If that is not fixed, adding a delay to welcome.tsx will not help – the build will still fail at the signing stage.
+
+To check if the alias is correct now:
+
+Run this command in your local Mac terminal (not Replit):
+
+bash
+keytool -list -v -keystore /path/to/your/keystore.jks -storepass YOUR_PASSWORD
+Look for Alias name: in the output. That exact alias must match what is in your EAS credentials.
+
+📋 What to do before building
+Step	Action
+1	Confirm the keystore alias is correct (see command above)
+2	If alias is wrong, update it in EAS credentials
+3	Then, and only then, trigger a build
+🚫 Do NOT build yet if:
+You are unsure about the keystore alias
+
+You haven't verified the navigation change in other screens
