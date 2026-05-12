@@ -137,49 +137,105 @@ export default function SellScreen() {
   const [negotiable,   setNegotiable]   = useState(false);
   const [submitting,   setSubmitting]   = useState(false);
 
-  const [vin,        setVin]        = useState("");
-  const [vinLoading, setVinLoading] = useState(false);
-  const [vinDecoded, setVinDecoded] = useState(false);
-  const [vinError,   setVinError]   = useState("");
+  type IdType = "VIN" | "IMEI" | "Serial";
+  const ID_TYPES: { key: IdType; label: string; hint: string; maxLen: number; format: string }[] = [
+    { key: "VIN",    label: "VIN",           hint: "17-char vehicle ID — auto-fills details",  maxLen: 17, format: "e.g. 1HGCM82633A123456" },
+    { key: "IMEI",   label: "IMEI",          hint: "15-digit phone / device identifier",        maxLen: 15, format: "e.g. 354081087654321" },
+    { key: "Serial", label: "Serial / Chassis", hint: "Manufacturer serial or chassis number", maxLen: 40, format: "e.g. CHS-GH-2024-00123" },
+  ];
 
-  const decodeVIN = async () => {
-    if (vin.length !== 17) return;
-    setVinLoading(true);
-    setVinDecoded(false);
-    setVinError("");
+  const [idType,     setIdType]     = useState<IdType>("VIN");
+  const [identifier, setIdentifier] = useState("");
+  const [idLoading,  setIdLoading]  = useState(false);
+  const [idDecoded,  setIdDecoded]  = useState(false);
+  const [idError,    setIdError]    = useState("");
+  const [idInfo,     setIdInfo]     = useState("");
+
+  const currentIdConfig = ID_TYPES.find(t => t.key === idType)!;
+
+  const handleIdTypeChange = (t: IdType) => {
+    setIdType(t);
+    setIdentifier("");
+    setIdDecoded(false);
+    setIdError("");
+    setIdInfo("");
+  };
+
+  const lookupIdentifier = async () => {
+    setIdLoading(true);
+    setIdDecoded(false);
+    setIdError("");
+    setIdInfo("");
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     try {
-      const res  = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
-      const data = await res.json();
-      const results: any[] = data.Results || [];
-      const get = (v: string) => results.find((r: any) => r.Variable === v)?.Value || "";
+      if (idType === "VIN") {
+        if (identifier.length !== 17) { setIdError("VIN must be exactly 17 characters."); return; }
+        const res  = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${identifier}?format=json`);
+        const data = await res.json();
+        const results: any[] = data.Results || [];
+        const get = (v: string) => results.find((r: any) => r.Variable === v)?.Value || "";
+        const make  = get("Make");
+        const mdl   = get("Model");
+        const yr    = get("Model Year");
+        const fuel  = get("Fuel Type - Primary");
+        const trans = get("Transmission Style");
+        if (!make || make === "0") {
+          setIdError("VIN not recognised. Enter details manually.");
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          return;
+        }
+        const fuelMap:  Record<string,string> = { Gasoline:"Petrol", Petrol:"Petrol", Diesel:"Diesel", Electric:"Electric", "Natural Gas":"Hybrid", Hybrid:"Hybrid" };
+        const transMap: Record<string,string> = { Automatic:"Automatic", Manual:"Manual", "Continuously Variable Transmission":"Automatic", CVT:"Automatic" };
+        const matched = CAR_BRANDS.find(b => b.toUpperCase() === make.toUpperCase()) || (make.charAt(0) + make.slice(1).toLowerCase());
+        if (matched) setBrand(matched);
+        if (mdl)     setModel(mdl);
+        if (yr)      setYear(yr);
+        if (fuel)    setFuelType(fuelMap[fuel]  || fuel);
+        if (trans)   setTransmission(transMap[trans] || trans);
+        setIdInfo(`${matched || make} ${mdl} ${yr}`.trim());
+        setIdDecoded(true);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-      const make  = get("Make");
-      const mdl   = get("Model");
-      const yr    = get("Model Year");
-      const fuel  = get("Fuel Type - Primary");
-      const trans = get("Transmission Style");
+      } else if (idType === "IMEI") {
+        if (identifier.length !== 15 || !/^\d{15}$/.test(identifier)) {
+          setIdError("IMEI must be exactly 15 digits.");
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          return;
+        }
+        const luhn = (n: string) => {
+          let sum = 0;
+          for (let i = 0; i < n.length; i++) {
+            let d = parseInt(n[i]);
+            if (i % 2 === 1) { d *= 2; if (d > 9) d -= 9; }
+            sum += d;
+          }
+          return sum % 10 === 0;
+        };
+        if (!luhn(identifier)) {
+          setIdError("IMEI checksum invalid. Please double-check the number.");
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          return;
+        }
+        setIdInfo(`IMEI ${identifier} — checksum valid`);
+        setIdDecoded(true);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-      if (!make || make === "0") {
-        setVinError("VIN not recognised. Enter details manually.");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        return;
+      } else {
+        if (identifier.trim().length < 4) {
+          setIdError("Please enter a valid serial or chassis number.");
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          return;
+        }
+        setIdInfo(`Serial / Chassis: ${identifier.trim()}`);
+        setIdDecoded(true);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
-      const fuelMap:  Record<string,string> = { Gasoline:"Petrol", Petrol:"Petrol", Diesel:"Diesel", Electric:"Electric", "Natural Gas":"Hybrid", Hybrid:"Hybrid" };
-      const transMap: Record<string,string> = { Automatic:"Automatic", Manual:"Manual", "Continuously Variable Transmission":"Automatic", CVT:"Automatic" };
-      const matched = CAR_BRANDS.find(b => b.toUpperCase() === make.toUpperCase()) || (make.charAt(0) + make.slice(1).toLowerCase());
-      if (matched)  setBrand(matched);
-      if (mdl)      setModel(mdl);
-      if (yr)       setYear(yr);
-      if (fuel)     setFuelType(fuelMap[fuel]  || fuel);
-      if (trans)    setTransmission(transMap[trans] || trans);
-      setVinDecoded(true);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
-      setVinError("Could not reach VIN service. Check your connection.");
+      setIdError("Lookup failed. Check your connection and try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
-      setVinLoading(false);
+      setIdLoading(false);
     }
   };
 
@@ -204,7 +260,12 @@ export default function SellScreen() {
     try {
       const PLACEHOLDER_IMG = "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800";
       const initialImages   = images.length > 0 ? images : [PLACEHOLDER_IMG];
-      const finalDesc       = description.trim() + (negotiable ? (description.trim() ? "\n\nPrice negotiable." : "Price negotiable.") : "");
+      const idLine = idDecoded && identifier.trim()
+        ? `\n\n${currentIdConfig.label}: ${identifier.trim()}`
+        : "";
+      const finalDesc = description.trim()
+        + idLine
+        + (negotiable ? (description.trim() || idLine ? "\nPrice negotiable." : "Price negotiable.") : "");
 
       const carId = await addCar({
         brand,
@@ -334,49 +395,86 @@ export default function SellScreen() {
           </Text>
         </View>
 
-        {/* ── VIN Lookup ── */}
+        {/* ── ID Lookup ── */}
         <View style={styles.card}>
-          <SectionHeader title="VIN lookup" right={<Text style={styles.optionalTag}>optional</Text>} />
+          <SectionHeader
+            title="Product identifier"
+            right={<Text style={styles.optionalTag}>optional</Text>}
+          />
+
+          {/* Type selector pills */}
+          <View style={styles.idTypePills}>
+            {ID_TYPES.map(t => (
+              <Pressable
+                key={t.key}
+                style={[styles.idTypePill, idType === t.key && styles.idTypePillActive]}
+                onPress={() => handleIdTypeChange(t.key)}
+              >
+                <Text style={[styles.idTypePillText, idType === t.key && styles.idTypePillTextActive]}>
+                  {t.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text style={styles.idHint}>{currentIdConfig.hint}</Text>
+
           <View style={styles.vinRow}>
             <TextInput
               style={[
                 styles.vinInput,
-                vinDecoded && { borderColor: "#22C55E" },
-                !!vinError  && { borderColor: "#EF4444" },
+                idDecoded && { borderColor: "#22C55E" },
+                !!idError  && { borderColor: "#EF4444" },
               ]}
-              value={vin}
+              value={identifier}
               onChangeText={t => {
-                setVin(t.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, ""));
-                setVinDecoded(false);
-                setVinError("");
+                const clean = idType === "VIN"
+                  ? t.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, "")
+                  : idType === "IMEI"
+                  ? t.replace(/\D/g, "")
+                  : t;
+                setIdentifier(clean);
+                setIdDecoded(false);
+                setIdError("");
               }}
-              placeholder="Enter 17-character VIN…"
+              placeholder={currentIdConfig.format}
               placeholderTextColor={PLACEHOLDER}
-              maxLength={17}
-              autoCapitalize="characters"
+              maxLength={currentIdConfig.maxLen}
+              autoCapitalize={idType === "VIN" ? "characters" : "none"}
               autoCorrect={false}
+              keyboardType={idType === "IMEI" ? "numeric" : "default"}
             />
             <Pressable
-              style={[styles.vinBtn, (vin.length !== 17 || vinLoading) && { opacity: 0.45 }]}
-              onPress={decodeVIN}
-              disabled={vin.length !== 17 || vinLoading}
+              style={[styles.vinBtn, (identifier.length < 4 || idLoading) && { opacity: 0.45 }]}
+              onPress={lookupIdentifier}
+              disabled={identifier.length < 4 || idLoading}
             >
-              {vinLoading
+              {idLoading
                 ? <ActivityIndicator size="small" color="#fff" />
                 : <Text style={styles.vinBtnText}>Look up</Text>
               }
             </Pressable>
           </View>
-          {vinDecoded && (
+
+          {idType === "VIN" && (
+            <Text style={styles.idCounter}>{identifier.length} / 17</Text>
+          )}
+          {idType === "IMEI" && (
+            <Text style={styles.idCounter}>{identifier.length} / 15</Text>
+          )}
+
+          {idDecoded && (
             <View style={styles.vinSuccess}>
               <Feather name="check-circle" size={14} color="#22C55E" />
-              <Text style={styles.vinSuccessText}>Fields auto-filled from VIN</Text>
+              <Text style={styles.vinSuccessText}>
+                {idType === "VIN" ? `Auto-filled: ${idInfo}` : idInfo}
+              </Text>
             </View>
           )}
-          {!!vinError && (
+          {!!idError && (
             <View style={styles.vinError}>
               <Feather name="alert-circle" size={14} color="#EF4444" />
-              <Text style={styles.vinErrorText}>{vinError}</Text>
+              <Text style={styles.vinErrorText}>{idError}</Text>
             </View>
           )}
         </View>
@@ -608,8 +706,19 @@ const styles = StyleSheet.create({
   photoEmpty: { width: 76, height: 76, borderRadius: 10, backgroundColor: INPUT_BG, borderWidth: 1.5, borderColor: BORDER },
   photoHint:  { fontSize: 11, fontFamily: "Inter_400Regular", color: MUTED, lineHeight: 16, marginTop: 4 },
 
-  // VIN
+  // Identifier
   optionalTag: { fontSize: 11, fontFamily: "Inter_400Regular", color: MUTED, fontStyle: "italic" },
+  idTypePills: { flexDirection: "row", gap: 8, marginBottom: 10 },
+  idTypePill: {
+    paddingHorizontal: 14, paddingVertical: 7,
+    borderRadius: 20, borderWidth: 1.5, borderColor: BORDER,
+    backgroundColor: INPUT_BG,
+  },
+  idTypePillActive:     { backgroundColor: TEAL, borderColor: TEAL },
+  idTypePillText:       { fontSize: 12, fontFamily: "Inter_600SemiBold", color: MUTED },
+  idTypePillTextActive: { color: "#fff" },
+  idHint:    { fontSize: 11, fontFamily: "Inter_400Regular", color: MUTED, marginBottom: 10, lineHeight: 16 },
+  idCounter: { fontSize: 11, fontFamily: "Inter_400Regular", color: PLACEHOLDER, textAlign: "right", marginTop: 4 },
   vinRow:    { flexDirection: "row", gap: 10 },
   vinInput: {
     flex: 1, height: 46, backgroundColor: INPUT_BG,
