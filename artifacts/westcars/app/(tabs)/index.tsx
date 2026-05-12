@@ -111,6 +111,7 @@ export default function HomeScreen() {
   const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
   const [condition, setCondition] = useState<Condition>("used");
   const [refreshing, setRefreshing] = useState(false);
+  const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
 
   const totalUnread = conversations?.reduce((s: number, c: any) => s + (c.unreadCount || 0), 0) ?? 0;
 
@@ -395,9 +396,14 @@ export default function HomeScreen() {
                   style={[styles.brandPill, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA", borderColor: isDark ? "#2D3A4F" : "#E4E8EF" }]}
                   onPress={() => router.push({ pathname: "/(tabs)/search", params: { brand } })}
                 >
-                  {logoUrl ? (
+                  {(logoUrl && !logoErrors[brand]) ? (
                     <View style={styles.brandPillLogoWrap}>
-                      <Image source={{ uri: logoUrl }} style={styles.brandPillLogo} resizeMode="contain" />
+                      <Image
+                        source={{ uri: logoUrl }}
+                        style={styles.brandPillLogo}
+                        resizeMode="contain"
+                        onError={() => setLogoErrors(prev => ({ ...prev, [brand]: true }))}
+                      />
                     </View>
                   ) : (
                     <View style={[styles.brandPillLogoPlaceholder, { backgroundColor: isDark ? "#2D3A4F" : "#E2E8F0" }]}>

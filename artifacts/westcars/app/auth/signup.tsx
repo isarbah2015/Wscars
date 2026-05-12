@@ -164,12 +164,7 @@ export default function SignupScreen() {
             activeOpacity={0.85}
           >
             {loading ? <ActivityIndicator color="#fff" /> : (
-              <>
-                <View style={styles.btnArrow}>
-                  <Text style={styles.btnArrowIcon}>→</Text>
-                </View>
-                <Text style={styles.primaryBtnText}>Create Account</Text>
-              </>
+              <Text style={styles.primaryBtnText}>Create Account</Text>
             )}
           </TouchableOpacity>
 
