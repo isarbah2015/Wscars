@@ -1,6 +1,5 @@
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -18,9 +17,9 @@ import {
   View,
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAvatarUpload } from "@/hooks/useAvatarUpload";
+import AvatarUploadSheet from "@/components/AvatarUploadSheet";
 import { CarCard } from "@/components/CarCard";
 import { ReviewCard, StarRating } from "@/components/ReviewCard";
 import { TrustScore } from "@/components/TrustScore";
@@ -66,7 +65,10 @@ export default function ProfileScreen() {
   const [verifyingId, setVerifyingId] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [locLoading, setLocLoading] = useState(false);
-  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarSheetOpen, setAvatarSheetOpen] = useState(false);
+  const { photoURL: uploadedAvatar, progress: uploadProgress, isUploading: avatarUploading,
+          pickAndUpload, removePhoto } =
+    useAvatarUpload({ userId: currentUser?.id ?? "", initialPhotoURL: currentUser?.avatar });
 
   if (!isAuthenticated || !currentUser) {
     return (
@@ -199,40 +201,6 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const handlePickAvatar = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission Required", "Please allow photo access in settings to change your profile picture.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.75,
-    });
-    if (result.canceled || !result.assets?.[0]) return;
-    const uri = result.assets[0].uri;
-    setAvatarUploading(true);
-    try {
-      if (storage && currentUser) {
-        const ext = uri.split(".").pop()?.split("?")[0] ?? "jpg";
-        const storageRef = ref(storage, `avatars/${currentUser.id}.${ext}`);
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        await uploadBytes(storageRef, blob, { contentType: `image/${ext}` });
-        const downloadURL = await getDownloadURL(storageRef);
-        await updateUserProfile({ avatar: downloadURL });
-      } else {
-        await updateUserProfile({ avatar: uri });
-      }
-    } catch (err) {
-      Alert.alert("Upload Failed", "Could not update your profile picture. Please try again.");
-      console.warn("[avatar upload]", err);
-    } finally {
-      setAvatarUploading(false);
-    }
-  };
 
   const v = currentUser.verification;
 
@@ -252,8 +220,8 @@ export default function ProfileScreen() {
         borderBottomColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
       }]}>
         <View style={styles.avatarArea}>
-          {currentUser.avatar ? (
-            <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
+          {(uploadedAvatar ?? currentUser.avatar) ? (
+            <Image source={{ uri: uploadedAvatar ?? currentUser.avatar! }} style={styles.avatar} />
           ) : (
             <View style={[styles.avatarPlaceholder, {
               backgroundColor: isDark ? "rgba(14,181,202,0.15)" : "rgba(14,181,202,0.10)",
@@ -262,12 +230,17 @@ export default function ProfileScreen() {
               <Feather name="user" size={36} color="#0098AA" />
             </View>
           )}
-          <Pressable style={styles.editAvatarBtn} onPress={handlePickAvatar} disabled={avatarUploading}>
+          <Pressable style={styles.editAvatarBtn} onPress={() => setAvatarSheetOpen(true)} disabled={avatarUploading}>
             {avatarUploading
               ? <ActivityIndicator size={12} color="#FFFFFF" />
               : <Feather name="camera" size={14} color="#FFFFFF" />}
           </Pressable>
         </View>
+        {uploadProgress !== null && (
+          <View style={styles.uploadProgressTrack}>
+            <View style={[styles.uploadProgressFill, { width: `${Math.round(uploadProgress * 100)}%` as any }]} />
+          </View>
+        )}
 
         <Text style={[styles.userName, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>
           {currentUser.name}
@@ -653,6 +626,15 @@ export default function ProfileScreen() {
         </View>
       )}
     </ScrollView>
+
+    <AvatarUploadSheet
+      visible={avatarSheetOpen}
+      hasPhoto={!!(uploadedAvatar ?? currentUser.avatar)}
+      onCamera={() => { setAvatarSheetOpen(false); pickAndUpload("camera"); }}
+      onLibrary={() => { setAvatarSheetOpen(false); pickAndUpload("library"); }}
+      onRemove={() => { setAvatarSheetOpen(false); removePhoto(); }}
+      onClose={() => setAvatarSheetOpen(false)}
+    />
     </View>
   );
 }
@@ -716,6 +698,15 @@ const styles = StyleSheet.create({
     width: 28, height: 28, borderRadius: 14,
     backgroundColor: "#0EB5CA", borderWidth: 2, borderColor: "#fff",
     alignItems: "center", justifyContent: "center",
+  },
+  uploadProgressTrack: {
+    height: 3, borderRadius: 2,
+    backgroundColor: "rgba(14,181,202,0.2)",
+    width: 88, marginTop: 6, overflow: "hidden",
+  },
+  uploadProgressFill: {
+    height: "100%", borderRadius: 2,
+    backgroundColor: "#0EB5CA",
   },
   userName: { fontSize: 22, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.3 },
   locationRow: { flexDirection: "row", alignItems: "center", gap: 4 },

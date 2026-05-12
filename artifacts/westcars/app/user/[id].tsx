@@ -20,7 +20,10 @@ import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { isFirebaseReady } from "@/lib/firebase";
+import { auth } from "@/lib/firebase-persistence";
 import { getUser } from "@/services/firebase";
+import { useAvatarUpload } from "@/hooks/useAvatarUpload";
+import AvatarUploadSheet from "@/components/AvatarUploadSheet";
 import { User } from "@/types";
 
 export default function UserProfileScreen() {
@@ -29,8 +32,15 @@ export default function UserProfileScreen() {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const [user, setUser] = useState<User | null>(null);
+  const currentUid = auth?.currentUser?.uid;
+  const isOwner    = !!currentUid && currentUid === id;
+
+  const [user, setUser]       = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const { photoURL: uploadedAvatar, progress: uploadProgress, isUploading, pickAndUpload, removePhoto } =
+    useAvatarUpload({ userId: id, initialPhotoURL: user?.avatar });
 
   useEffect(() => {
     if (!id) { setLoading(false); return; }
@@ -92,6 +102,7 @@ export default function UserProfileScreen() {
   };
 
   return (
+    <>
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       showsVerticalScrollIndicator={false}
@@ -112,11 +123,29 @@ export default function UserProfileScreen() {
           <Feather name="arrow-left" size={22} color={colors.text} />
         </Pressable>
 
-        {user.avatar ? (
-          <Image source={{ uri: user.avatar }} style={styles.avatar} />
-        ) : (
-          <View style={[styles.avatarPlaceholder, { backgroundColor: colors.accentLight }]}>
-            <Feather name="user" size={36} color={colors.accent} />
+        <Pressable
+          onPress={isOwner ? () => setSheetOpen(true) : undefined}
+          disabled={!isOwner || isUploading}
+          style={{ position: "relative" }}
+        >
+          {(uploadedAvatar ?? user.avatar) ? (
+            <Image source={{ uri: uploadedAvatar ?? user.avatar! }} style={styles.avatar} />
+          ) : (
+            <View style={[styles.avatarPlaceholder, { backgroundColor: colors.accentLight }]}>
+              <Feather name="user" size={36} color={colors.accent} />
+            </View>
+          )}
+          {isOwner && (
+            <View style={styles.cameraBadge}>
+              {isUploading
+                ? <ActivityIndicator size={12} color="#fff" />
+                : <Feather name="camera" size={13} color="#fff" />}
+            </View>
+          )}
+        </Pressable>
+        {isOwner && uploadProgress !== null && (
+          <View style={styles.uploadProgressTrack}>
+            <View style={[styles.uploadProgressFill, { width: `${Math.round(uploadProgress * 100)}%` as any }]} />
           </View>
         )}
 
@@ -244,6 +273,18 @@ export default function UserProfileScreen() {
 
       <View style={{ height: 24 + insets.bottom }} />
     </ScrollView>
+
+    {isOwner && (
+      <AvatarUploadSheet
+        visible={sheetOpen}
+        hasPhoto={!!(uploadedAvatar ?? user?.avatar)}
+        onCamera={() => { setSheetOpen(false); pickAndUpload("camera"); }}
+        onLibrary={() => { setSheetOpen(false); pickAndUpload("library"); }}
+        onRemove={() => { setSheetOpen(false); removePhoto(); }}
+        onClose={() => setSheetOpen(false)}
+      />
+    )}
+    </>
   );
 }
 
@@ -279,6 +320,21 @@ const styles = StyleSheet.create({
     borderColor: "#0EB5CA",
     alignItems: "center",
     justifyContent: "center",
+  },
+  cameraBadge: {
+    position: "absolute", bottom: 2, right: 2,
+    width: 26, height: 26, borderRadius: 13,
+    backgroundColor: "#0EB5CA", borderWidth: 2, borderColor: "#fff",
+    alignItems: "center", justifyContent: "center",
+  },
+  uploadProgressTrack: {
+    height: 3, borderRadius: 2,
+    backgroundColor: "rgba(14,181,202,0.2)",
+    width: 88, marginTop: 6, overflow: "hidden",
+  },
+  uploadProgressFill: {
+    height: "100%", borderRadius: 2,
+    backgroundColor: "#0EB5CA",
   },
   userName: { fontSize: 22, fontFamily: "Inter_700Bold" },
   metaRow: { flexDirection: "row", alignItems: "center", gap: 5 },

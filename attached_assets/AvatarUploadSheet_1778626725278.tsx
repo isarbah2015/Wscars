@@ -1,13 +1,13 @@
 // components/AvatarUploadSheet.tsx
 // WestCars — reusable bottom sheet for avatar upload
-// Uses react-native-svg inline icons (no external icon lib required)
+// Uses React Native SVG inline icons (no external icon lib required)
 
 import { Modal, Pressable, View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import Svg, { Path, Circle, Rect, Polyline } from 'react-native-svg'
 
-// ─── Inline Feather-style icons ───────────────────────────────────────────────
+// ─── Feather-style inline icons ───────────────────────────────────────────────
 
 function CameraIcon({ color = '#fff', size = 22 }: { color?: string; size?: number }) {
+  const { Svg, Rect, Circle, Line, Path } = require('react-native-svg')
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -18,6 +18,7 @@ function CameraIcon({ color = '#fff', size = 22 }: { color?: string; size?: numb
 }
 
 function GalleryIcon({ color = '#fff', size = 22 }: { color?: string; size?: number }) {
+  const { Svg, Rect, Polyline, Line } = require('react-native-svg')
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -29,6 +30,7 @@ function GalleryIcon({ color = '#fff', size = 22 }: { color?: string; size?: num
 }
 
 function TrashIcon({ color = '#e24b4a', size = 18 }: { color?: string; size?: number }) {
+  const { Svg, Polyline, Path, Line } = require('react-native-svg')
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"
       stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#0EB5CA',
+    backgroundColor: '#008080',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,

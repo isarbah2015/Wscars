@@ -129,7 +129,7 @@ export function useAvatarUpload({
         if (!db) throw new Error("Firestore not initialised");
 
         await updateDoc(doc(db, "users", userId), {
-          photoURL: downloadURL,
+          avatar: downloadURL,
           photoUpdatedAt: new Date().toISOString(),
         });
 
@@ -163,7 +163,7 @@ export function useAvatarUpload({
       if (!db) throw new Error("Firestore not initialised");
 
       await updateDoc(doc(db, "users", userId), {
-        photoURL: null,
+        avatar: null,
         photoUpdatedAt: new Date().toISOString(),
       });
 
