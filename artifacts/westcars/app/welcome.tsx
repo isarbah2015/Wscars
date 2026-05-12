@@ -154,7 +154,7 @@ export default function WelcomeScreen() {
       />
 
       {/* ── Logo pinned top-left ── */}
-      <View style={[styles.topRow, { paddingTop: insets.top + 16 }]}>
+      <View style={[styles.topRow, { paddingTop: insets.top + 28 }]}>
         <RNImage source={LOGO} style={styles.logo} resizeMode="contain" />
       </View>
 
