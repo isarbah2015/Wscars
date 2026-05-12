@@ -424,6 +424,7 @@ export default function SearchScreen() {
       <FlatList
         data={listData}
         keyExtractor={(item) => item.item.id}
+        style={S.list}
         contentContainerStyle={S.listContent}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
@@ -534,6 +535,7 @@ const S = StyleSheet.create({
   chipTextInactive: { color: MUTED },
 
   // List
+  list:        { flex: 1 },
   listContent: { padding: 12, paddingBottom: 100 },
   row:         { flexDirection: "row", paddingHorizontal: 8, gap: 8, marginBottom: 8 },
   cardStyle:   { flex: 1 },
