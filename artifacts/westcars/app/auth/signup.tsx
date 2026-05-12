@@ -28,6 +28,8 @@ export default function SignupScreen() {
   const [confirm,  setConfirm]  = useState('');
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm,  setShowConfirm]  = useState(false);
 
   const handleSignup = async () => {
     setError('');
@@ -111,39 +113,49 @@ export default function SignupScreen() {
           />
 
           <Text style={styles.label}>Password</Text>
-          <TextInput
-            ref={passwordRef}
-            style={styles.input}
-            placeholder="••••••••••"
-            placeholderTextColor="#94A3B8"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="new-password"
-            returnKeyType="next"
-            blurOnSubmit={false}
-            editable={!loading}
-            onSubmitEditing={() => confirmRef.current?.focus()}
-          />
+          <View style={styles.passwordRow}>
+            <TextInput
+              ref={passwordRef}
+              style={[styles.input, { marginBottom: 0, flex: 1, borderWidth: 0 }]}
+              placeholder="••••••••••"
+              placeholderTextColor="#94A3B8"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="new-password"
+              returnKeyType="next"
+              blurOnSubmit={false}
+              editable={!loading}
+              onSubmitEditing={() => confirmRef.current?.focus()}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(v => !v)} hitSlop={8} style={styles.eyeBtn}>
+              <Text style={styles.eyeText}>{showPassword ? 'Hide' : 'Show'}</Text>
+            </TouchableOpacity>
+          </View>
 
           <Text style={styles.label}>Confirm Password</Text>
-          <TextInput
-            ref={confirmRef}
-            style={styles.input}
-            placeholder="••••••••••"
-            placeholderTextColor="#94A3B8"
-            value={confirm}
-            onChangeText={setConfirm}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="new-password"
-            returnKeyType="done"
-            editable={!loading}
-            onSubmitEditing={handleSignup}
-          />
+          <View style={styles.passwordRow}>
+            <TextInput
+              ref={confirmRef}
+              style={[styles.input, { marginBottom: 0, flex: 1, borderWidth: 0 }]}
+              placeholder="••••••••••"
+              placeholderTextColor="#94A3B8"
+              value={confirm}
+              onChangeText={setConfirm}
+              secureTextEntry={!showConfirm}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="new-password"
+              returnKeyType="done"
+              editable={!loading}
+              onSubmitEditing={handleSignup}
+            />
+            <TouchableOpacity onPress={() => setShowConfirm(v => !v)} hitSlop={8} style={styles.eyeBtn}>
+              <Text style={styles.eyeText}>{showConfirm ? 'Hide' : 'Show'}</Text>
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={[styles.primaryBtn, loading && styles.btnDisabled]}
@@ -286,4 +298,17 @@ const styles = StyleSheet.create({
 
   guestBtn: { alignItems: 'center', marginTop: 22, paddingVertical: 6 },
   guestText: { color: '#94A3B8', fontSize: 13, fontFamily: 'Inter_500Medium' },
+  passwordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5FBFC',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
+    paddingRight: 12,
+    overflow: 'hidden',
+  },
+  eyeBtn: { paddingHorizontal: 8 },
+  eyeText: { color: '#0EB5CA', fontSize: 13, fontFamily: 'Inter_600SemiBold' },
 });

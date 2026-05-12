@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
   Animated,
+  Dimensions,
   Image,
   Platform,
   Pressable,
@@ -304,7 +305,9 @@ export function CarCard({ car, style }: CarCardProps) {
 }
 
 const styles = StyleSheet.create({
-  wrapper: {},
+  wrapper: {
+    width: (Dimensions.get('window').width - 48) / 2,
+  },
   card: {
     borderRadius: 16,
     overflow: "hidden",

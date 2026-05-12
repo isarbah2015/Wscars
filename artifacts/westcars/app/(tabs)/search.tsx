@@ -161,8 +161,8 @@ function FilterModal({ visible, onClose, onApply }: {
   const ChipScroll = ({ options, selected, onSelect }: {
     options: string[]; selected: string; onSelect: (v: string) => void;
   }) => (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14 }}>
-      <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14 }} contentContainerStyle={{ paddingHorizontal: 4, paddingRight: 12 }}>
+      <View style={{ flexDirection: "row", gap: 8 }}>
         {["Any", ...options].map((opt) => {
           const active = selected === opt;
           return (
@@ -178,8 +178,8 @@ function FilterModal({ visible, onClose, onApply }: {
 
   // Brand row with logos
   const BrandRow = () => (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14 }}>
-      <View style={{ flexDirection: "row", gap: 10, paddingRight: 8 }}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14 }} contentContainerStyle={{ paddingHorizontal: 4, paddingRight: 12 }}>
+      <View style={{ flexDirection: "row", gap: 10 }}>
         {[{ name: "Any", logo: null }, ...CAR_BRANDS.map(b => ({ name: b, logo: BRAND_LOGOS[b] ?? null }))].map(({ name: b, logo }) => {
           const active = brand === b;
           return (

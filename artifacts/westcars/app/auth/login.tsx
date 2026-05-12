@@ -7,6 +7,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   StyleSheet,
+  View,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
@@ -20,6 +21,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     setError('');
@@ -77,20 +79,29 @@ export default function LoginScreen() {
           onSubmitEditing={() => passwordRef.current?.focus()}
         />
 
-        <TextInput
-          ref={passwordRef}
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#999"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoCapitalize="none"
-          autoCorrect={false}
-          returnKeyType="done"
-          editable={!loading}
-          onSubmitEditing={handleLogin}
-        />
+        <View style={styles.passwordRow}>
+          <TextInput
+            ref={passwordRef}
+            style={[styles.input, { marginBottom: 0, flex: 1 }]}
+            placeholder="Password"
+            placeholderTextColor="#999"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="done"
+            editable={!loading}
+            onSubmitEditing={handleLogin}
+          />
+          <TouchableOpacity
+            style={styles.eyeBtn}
+            onPress={() => setShowPassword(v => !v)}
+            hitSlop={8}
+          >
+            <Text style={styles.eyeText}>{showPassword ? 'Hide' : 'Show'}</Text>
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
@@ -156,4 +167,15 @@ const styles = StyleSheet.create({
   link: { marginTop: 16, alignItems: 'center' },
   linkText: { color: '#aaa', fontSize: 14 },
   linkBold: { color: '#00C897', fontWeight: '700' },
+  passwordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginBottom: 16,
+    paddingRight: 12,
+    overflow: 'hidden',
+  },
+  eyeBtn: { paddingHorizontal: 8, paddingVertical: 4 },
+  eyeText: { color: '#0EB5CA', fontSize: 13, fontWeight: '600' },
 });
