@@ -3,15 +3,18 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Dimensions,
   FlatList,
   Modal,
   Platform,
   Pressable,
   ScrollView,
+  StyleProp,
   StyleSheet,
   Text,
   TextInput,
+  TextStyle,
   View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -84,6 +87,50 @@ const QUICK_FILTERS: { key: QuickFilterKey; label: string; color: string }[] = [
 // ─── Brand colours (static) ───────────────────────────────
 const TEAL   = "#0EB5CA";
 const ORANGE = "#F97316";
+
+// ─── Animated count badge ─────────────────────────────────
+function AnimatedCount({
+  value,
+  style,
+}: {
+  value: number | string;
+  style?: StyleProp<TextStyle>;
+}) {
+  const opacity   = useRef(new Animated.Value(1)).current;
+  const displayed = useRef(value);
+  const [shown, setShown] = useState(value);
+
+  useEffect(() => {
+    if (value === displayed.current) return;
+    const fadeOut = Animated.timing(opacity, {
+      toValue: 0,
+      duration: 90,
+      useNativeDriver: true,
+    });
+    let fadeIn: Animated.CompositeAnimation | null = null;
+    fadeOut.start(({ finished }) => {
+      if (!finished) return;
+      displayed.current = value;
+      setShown(value);
+      fadeIn = Animated.timing(opacity, {
+        toValue: 1,
+        duration: 110,
+        useNativeDriver: true,
+      });
+      fadeIn.start();
+    });
+    return () => {
+      fadeOut.stop();
+      fadeIn?.stop();
+    };
+  }, [value]);
+
+  return (
+    <Animated.Text style={[style, { opacity }]}>
+      {shown}
+    </Animated.Text>
+  );
+}
 
 function mapCategoryToFilter(cat: string): { quickFilter: QuickFilterKey; query: string } {
   const l = cat.toLowerCase();
@@ -457,7 +504,10 @@ export default function SearchScreen() {
             <Text style={[S.title, { color: colors.text }]}>Search</Text>
           </View>
           <View style={S.countPill}>
-            <Text style={S.countNum}>{filtered.length.toLocaleString()}</Text>
+            <AnimatedCount
+              value={filtered.length.toLocaleString()}
+              style={S.countNum}
+            />
             <Text style={S.countLbl}>cars</Text>
           </View>
         </View>
@@ -536,9 +586,10 @@ export default function SearchScreen() {
                   {label}
                 </Text>
                 <View style={[S.chipBadge, active ? S.chipBadgeActive : S.chipBadgeInactive]}>
-                  <Text style={[S.chipBadgeText, { color: active ? "#fff" : colors.textSecondary }]}>
-                    {count >= 1000 ? `${Math.floor(count / 1000)}k` : count}
-                  </Text>
+                  <AnimatedCount
+                    value={count >= 1000 ? `${Math.floor(count / 1000)}k` : count}
+                    style={[S.chipBadgeText, { color: active ? "#fff" : colors.textSecondary }]}
+                  />
                 </View>
               </Pressable>
             );
