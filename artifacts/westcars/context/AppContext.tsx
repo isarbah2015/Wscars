@@ -262,25 +262,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return true;
   }, [useFirebase]);
 
-  const loginWithGoogle = useCallback(async (idToken: string, accessToken?: string): Promise<boolean> => {
-    if (!useFirebase) {
-      throw new Error("Firebase is not configured. Add EXPO_PUBLIC_FIREBASE_* secrets to enable sign-in.");
-    }
-    // Let Firebase errors propagate — callers handle them with authErrorMessage().
-    const user = await fb.signInWithGoogleIdToken(idToken, accessToken);
-    setCurrentUser(user); setIsAuthenticated(true);
-    return true;
-  }, [useFirebase]);
+  const loginWithGoogle = useCallback(async (_idToken: string, _accessToken?: string): Promise<boolean> => {
+    setError('Google sign-in is not available in this version');
+    return false;
+  }, []);
 
   const loginWithGooglePopup = useCallback(async (): Promise<boolean> => {
-    if (!useFirebase) {
-      throw new Error("Firebase is not configured. Add EXPO_PUBLIC_FIREBASE_* secrets to enable sign-in.");
-    }
-    // Let Firebase errors propagate — callers handle them with authErrorMessage().
-    const user = await fb.signInWithGooglePopup();
-    setCurrentUser(user); setIsAuthenticated(true);
-    return true;
-  }, [useFirebase]);
+    setError('Google sign-in is not available in this version');
+    return false;
+  }, []);
 
   const logout = useCallback(async () => {
     if (useFirebase) {
