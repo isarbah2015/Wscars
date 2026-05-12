@@ -104,6 +104,24 @@ function mapCategoryToFilter(cat: string): { quickFilter: QuickFilterKey; query:
   return { quickFilter: "All", query: cat };
 }
 
+// ─── Quick-filter predicate (extracted for reuse) ────────
+function matchesQuickFilter(car: Car, key: QuickFilterKey): boolean {
+  const cat = car.category?.toLowerCase() ?? "";
+  if (key === "SUV")     return cat.includes("suv") || cat.includes("4x4") || cat.includes("4×4");
+  if (key === "Sedan")   return cat.includes("sedan");
+  if (key === "Tokunbo") return car.condition === "Foreign Used";
+  if (key === "Budget")  return car.price < 100000;
+  if (key === "Luxury")  return car.price > 300000;
+  if (key === "Pickup")  return cat.includes("pickup");
+  if (key === "Truck")   return cat.includes("cargo") || cat.includes("tipper") || cat.includes("tanker") || cat.includes("flatbed") || cat.includes("box truck");
+  if (key === "Bus")     return cat.includes("bus") || cat.includes("minibus") || cat.includes("coach");
+  if (key === "Heavy")   return cat.includes("excavator") || cat.includes("bulldozer") || cat.includes("crane") || cat.includes("forklift") || cat.includes("loader") || cat.includes("grader") || cat.includes("compactor") || cat.includes("mixer") || cat.includes("tractor") || cat.includes("harvester") || cat.includes("ambulance") || cat.includes("fire truck");
+  if (key === "Moto")    return cat.includes("motorcycle") || cat.includes("scooter") || cat.includes("atv") || cat.includes("dirt bike") || cat.includes("quad");
+  if (key === "New")     return car.condition === "New";
+  return true; // "All"
+}
+
+
 // ─────────────────────────────────────────────────────────────────────────────
 // FILTER MODAL — theme-aware
 // ─────────────────────────────────────────────────────────────────────────────
@@ -295,32 +313,19 @@ export default function SearchScreen() {
     }
   }, [category]);
 
-  const filtered = cars.filter((car: Car) => {
+  // ── Shared helpers ─────────────────────────────────────────────────────────
+  const matchesQuery = React.useCallback((car: Car) => {
     const q = query.toLowerCase();
-    const matchQuery = !q
+    return !q
       || car.brand.toLowerCase().includes(q)
       || car.model.toLowerCase().includes(q)
       || car.location.toLowerCase().includes(q)
       || car.condition.toLowerCase().includes(q)
       || (car.category?.toLowerCase().includes(q) ?? false);
-    if (!matchQuery) return false;
+  }, [query]);
 
-    let matchQuick = true;
-    const cat = car.category?.toLowerCase() ?? "";
-    if      (quickFilter === "SUV")     matchQuick = cat.includes("suv") || cat.includes("4x4") || cat.includes("4×4");
-    else if (quickFilter === "Sedan")   matchQuick = cat.includes("sedan");
-    else if (quickFilter === "Tokunbo") matchQuick = car.condition === "Foreign Used";
-    else if (quickFilter === "Budget")  matchQuick = car.price < 100000;
-    else if (quickFilter === "Luxury")  matchQuick = car.price > 300000;
-    else if (quickFilter === "Pickup")  matchQuick = cat.includes("pickup");
-    else if (quickFilter === "Truck")   matchQuick = cat.includes("cargo") || cat.includes("tipper") || cat.includes("tanker") || cat.includes("flatbed") || cat.includes("box truck");
-    else if (quickFilter === "Bus")     matchQuick = cat.includes("bus") || cat.includes("minibus") || cat.includes("coach");
-    else if (quickFilter === "Heavy")   matchQuick = cat.includes("excavator") || cat.includes("bulldozer") || cat.includes("crane") || cat.includes("forklift") || cat.includes("loader") || cat.includes("grader") || cat.includes("compactor") || cat.includes("mixer") || cat.includes("tractor") || cat.includes("harvester") || cat.includes("ambulance") || cat.includes("fire truck");
-    else if (quickFilter === "Moto")    matchQuick = cat.includes("motorcycle") || cat.includes("scooter") || cat.includes("atv") || cat.includes("dirt bike") || cat.includes("quad");
-    else if (quickFilter === "New")     matchQuick = car.condition === "New";
-    if (!matchQuick) return false;
+  const matchesModalFilters = React.useCallback((car: Car) => {
     if (!activeFilters) return true;
-
     const { brand, model, location, fuelType, transmission, condition, priceRange } = activeFilters;
     const minP = priceRange?.min ?? 0;
     const maxP = priceRange?.max ?? 9999999;
@@ -333,7 +338,25 @@ export default function SearchScreen() {
       (!condition || condition === "Any" || car.condition === condition) &&
       car.price >= minP && car.price <= maxP
     );
+  }, [activeFilters]);
+
+  // ── Filtering logic ────────────────────────────────────────────────────────
+  const filtered = cars.filter((car: Car) => {
+    if (!matchesQuery(car)) return false;
+    if (!matchesQuickFilter(car, quickFilter)) return false;
+    return matchesModalFilters(car);
   });
+
+  // ── Per-chip counts (query + modal filters applied, quick-filter per chip) ─
+  const chipCounts = React.useMemo(() => {
+    const result: Record<QuickFilterKey, number> = {} as Record<QuickFilterKey, number>;
+    for (const { key } of QUICK_FILTERS) {
+      result[key] = cars.filter((car: Car) =>
+        matchesQuery(car) && matchesQuickFilter(car, key) && matchesModalFilters(car)
+      ).length;
+    }
+    return result;
+  }, [cars, matchesQuery, matchesModalFilters]);
 
   const listData = React.useMemo(() => {
     const seeded = filtered.map((car) => ({
@@ -400,6 +423,8 @@ export default function SearchScreen() {
         >
           {QUICK_FILTERS.map(({ key, label, color }) => {
             const active = quickFilter === key;
+            const count = chipCounts[key] ?? 0;
+            const isEmpty = count === 0 && key !== "All";
             return (
               <Pressable
                 key={key}
@@ -407,13 +432,19 @@ export default function SearchScreen() {
                   S.chip,
                   active
                     ? { backgroundColor: color }
-                    : { backgroundColor: colors.inputBg, borderColor: colors.border },
+                    : { backgroundColor: colors.inputBg, borderColor: colors.border, borderWidth: 1 },
+                  isEmpty && !active && S.chipDimmed,
                 ]}
                 onPress={() => setQuickFilter(key)}
               >
                 <Text style={[S.chipText, { color: active ? "#fff" : colors.textSecondary }]}>
                   {label}
                 </Text>
+                <View style={[S.chipBadge, active ? S.chipBadgeActive : S.chipBadgeInactive]}>
+                  <Text style={[S.chipBadgeText, { color: active ? "#fff" : colors.textSecondary }]}>
+                    {count >= 1000 ? `${Math.floor(count / 1000)}k` : count}
+                  </Text>
+                </View>
               </Pressable>
             );
           })}
@@ -518,10 +549,21 @@ const S = StyleSheet.create({
     paddingLeft: 14, paddingRight: 60, paddingBottom: 2,
   },
   chip: {
-    paddingHorizontal: 16, paddingVertical: 8,
-    borderRadius: 20, borderWidth: 1,
+    paddingHorizontal: 12, paddingVertical: 7,
+    borderRadius: 20,
+    flexDirection: "row", alignItems: "center", gap: 6,
+  },
+  chipDimmed: {
+    opacity: 0.38,
   },
   chipText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+
+  chipBadge: {
+    borderRadius: 10, paddingHorizontal: 5, paddingVertical: 1, minWidth: 20, alignItems: "center",
+  },
+  chipBadgeActive:   { backgroundColor: "rgba(255,255,255,0.25)" },
+  chipBadgeInactive: { backgroundColor: "rgba(255,255,255,0.08)" },
+  chipBadgeText:     { fontSize: 10, fontFamily: "Inter_700Bold" },
 
   list:        { flex: 1 },
   listContent: { padding: 12, paddingBottom: 100 },
