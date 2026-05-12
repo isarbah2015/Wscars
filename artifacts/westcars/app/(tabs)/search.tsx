@@ -89,6 +89,10 @@ const QUICK_FILTERS: { key: QuickFilterKey; label: string; color: string }[] = [
 const TEAL   = "#0EB5CA";
 const ORANGE = "#F97316";
 
+// ─── Chip row layout constants (shared by stylesheet + scroll calculation) ──
+const CHIP_ROW_PADDING_LEFT = 14;
+const CHIP_ROW_GAP          = 8;
+
 // ─── Animated count badge ─────────────────────────────────
 function AnimatedCount({
   value,
@@ -461,10 +465,16 @@ export default function SearchScreen() {
 
   useEffect(() => {
     const id = setTimeout(() => {
-      const layout = chipLayouts.current[quickFilter];
-      if (!layout || !chipScrollRef.current) return;
-      const scrollX = Math.max(0, layout.x - 12);
-      chipScrollRef.current.scrollTo({ x: scrollX, animated: true });
+      if (!chipScrollRef.current) return;
+      // Compute x from the current sorted order + stored chip widths.
+      // This avoids reading stale onLayout x-values that haven't refreshed
+      // yet after a reorder.
+      let x = CHIP_ROW_PADDING_LEFT;
+      for (const { key } of sortedFilters) {
+        if (key === quickFilter) break;
+        x += (chipLayouts.current[key]?.width ?? 0) + CHIP_ROW_GAP;
+      }
+      chipScrollRef.current.scrollTo({ x: Math.max(0, x - 12), animated: true });
     }, 0);
     return () => clearTimeout(id);
   }, [quickFilter, sortedFilters]);
@@ -727,8 +737,8 @@ const S = StyleSheet.create({
   },
 
   chipRow: {
-    flexDirection: "row", gap: 8,
-    paddingLeft: 14, paddingRight: 60, paddingBottom: 2,
+    flexDirection: "row", gap: CHIP_ROW_GAP,
+    paddingLeft: CHIP_ROW_PADDING_LEFT, paddingRight: 60, paddingBottom: 2,
   },
   chip: {
     paddingHorizontal: 12, paddingVertical: 7,
