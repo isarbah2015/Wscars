@@ -1,0 +1,40 @@
+Apply the following 7 fixes to the Westcars app. Do not change anything else.
+
+## Fix 1 – Google Login (expo-auth-session)
+- Add to package.json dependencies: "expo-auth-session": "^7.0.11", "expo-web-browser": "~15.0.11"
+- In context/AppContext.tsx:
+  - Add imports: import * as Google from 'expo-auth-session/providers/google'; import * as WebBrowser from 'expo-web-browser';
+  - Add WebBrowser.maybeCompleteAuthSession(); after imports
+  - Inside AppProvider, before return, add the useAuthRequest hook and useEffect as provided (stub implementation – keep stubs active until user adds credentials)
+- In app.json, under "android" and "ios", add "googleServicesFile": "./google-services.json" and "./GoogleService-Info.plist"
+
+## Fix 2 – Sign-in / Create Account – No changes needed (already correct)
+
+## Fix 3 – Show/Hide Password Toggle
+- In app/auth/login.tsx:
+  - Add const [showPassword, setShowPassword] = useState(false);
+  - Replace password TextInput with the View/TextInput/TouchableOpacity structure and styles.passwordRow, .eyeBtn, .eyeText
+- In app/auth/signup.tsx:
+  - Add const [showPassword, setShowPassword] = useState(false); const [showConfirm, setShowConfirm] = useState(false);
+  - Replace password and confirm password TextInputs with similar View+button structures and styles
+
+## Fix 4 – Remove Mock Data from Production
+- In context/AppContext.tsx, change const useFirebase = isFirebaseReady(); to const useFirebase = isFirebaseReady() && !__DEV__;
+- Do NOT delete utils/mockData.ts – it stays as development fallback.
+
+## Fix 5 – Premium Filter UI (Price Presets)
+- In app/(tabs)/search.tsx:
+  - Add state: const [priceMin, setPriceMin] = useState(0); const [priceMax, setPriceMax] = useState(9999999);
+  - Add PRICE_PRESETS array as provided
+  - Replace the price range section with ScrollView of preset chips, using filterStyles as provided
+
+## Fix 6 – Horizontal Scroll Clipping
+- In all horizontal ScrollView and FlatList (app/(tabs)/index.tsx, app/(tabs)/search.tsx, etc.), add contentContainerStyle={{ paddingHorizontal: 16 }} and appropriate gap.
+
+## Fix 7 – Standardised Card Dimensions
+- In components/CarCard.tsx:
+  - Add Dimensions import
+  - Change wrapper style to: width: (Dimensions.get('window').width - 48) / 2
+- In screens using CarCard in 2‑column grid, add columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 16 }}
+
+Apply all changes. Do not modify any other files.
