@@ -1,0 +1,340 @@
+Good research. Here's what I'd recommend adding — keeping it practical for Ghana:
+
+Add all of these:
+
+Chinese: "Sinotruk", "Yutong", "King Long", "Higer", "Jetour", "Maxus", "Zotye"
+
+Non-Chinese gaps: "Hino", "Infiniti", "Acura", "Mitsubishi Fuso"
+
+Skip "CFAO" (it's a dealership not a brand), "Innoson" (Nigerian, rare in Ghana), "SAIC" (parent company, not sold under that name).
+
+Exact Replit instructions for all three fixes:
+
+Fix A — Add missing brands to utils/ghanaData.ts
+Find:
+
+js
+"Omoda",
+Replace with:
+
+js
+"Omoda",
+"Jetour",
+"Sinotruk",
+"Yutong",
+"King Long",
+"Higer",
+"Maxus",
+"Zotye",
+Find:
+
+js
+// Other
+"Tata",
+Replace with:
+
+js
+// Other
+"Hino",
+"Mitsubishi Fuso",
+"Infiniti",
+"Acura",
+"Tata",
+Fix B — Filter theme follows system (light/dark) in app/(tabs)/search.tsx
+At the top of the file, find the hardcoded dark constants block:
+
+js
+const BG      = "#0D1117";
+const CARD_BG = "#161B22";
+const INPUT_BG = "#1C2333";
+const PILL_BG  = "#1C2333";
+const PILL_BORDER = "#2D3748";
+const LABEL_CLR   = "#0EB5CA";
+const TEXT        = "#F0F6FF";
+const MUTED       = "rgba(240,246,255,0.45)";
+const TEAL        = "#0EB5CA";
+const ORANGE      = "#F97316";
+Replace with:
+
+js
+const TEAL   = "#0EB5CA";
+const ORANGE = "#F97316";
+Then find the line inside SearchScreen where useTheme is called (currently unused destructure):
+
+js
+useTheme()
+Replace with:
+
+js
+const { colors, isDark } = useTheme();
+Now replace every hardcoded color reference in SearchScreen and FilterModal using this map:
+
+In styles S and inline styles, find and replace:
+
+Find	Replace with
+backgroundColor: BG	backgroundColor: colors.background
+backgroundColor: CARD_BG	backgroundColor: colors.card
+backgroundColor: INPUT_BG	backgroundColor: isDark ? "#1C2333" : "#F1F5F9"
+backgroundColor: PILL_BG	backgroundColor: isDark ? "#1C2333" : "#F1F5F9"
+borderColor: PILL_BORDER	borderColor: isDark ? "#2D3748" : "#E2E8F0"
+color: LABEL_CLR	color: TEAL
+color: TEXT	color: colors.text
+color: MUTED	color: colors.textSecondary
+For the FilterModal root background (the slide-up sheet), find:
+
+js
+root: { backgroundColor: BG, paddingTop: 12 }
+Replace with:
+
+js
+root: { paddingTop: 12 }
+And on the <BottomSheetView> or modal root <View>, add inline:
+
+js
+style={[fS.root, { backgroundColor: colors.background }]}
+For the pill active state in FilterModal, the teal border and background stay as-is — those are brand colors not theme colors.
+
+For the handle bar at top of modal, find:
+
+js
+handle: { backgroundColor: "rgba(255,255,255,0.18)" }
+Replace with:
+
+js
+handle: { backgroundColor: isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.15)" }
+For the section labels in FilterModal (sectionLabel), find:
+
+js
+color: LABEL_CLR
+These stay teal — that's correct brand color, not a theme issue.
+
+For the price cards in FilterModal, find:
+
+js
+priceCard: { ... borderColor: PILL_BORDER ... }
+Replace PILL_BORDER with isDark ? "#2D3748" : "#E2E8F0" inline.
+
+For the footer border in FilterModal:
+
+js
+borderColor: PILL_BORDER
+Same replacement.
+
+Fix C — Video ad card in components/CarCard.tsx + app/(tabs)/index.tsx
+File 1: components/CarCard.tsx
+
+Add this import at the top:
+
+js
+import { Video, ResizeMode } from "expo-av";
+Add a new VideoAdCard export at the bottom of the file (after all existing code):
+
+tsx
+interface VideoAdCardProps {
+  videoUri?: string;
+  title?: string;
+  packageName?: string;
+  style?: object;
+}
+
+export function VideoAdCard({ videoUri, title, packageName, style }: VideoAdCardProps) {
+  const { isDark } = useTheme();
+  const scale = useRef(new Animated.Value(1)).current;
+  const nativeDriver = Platform.OS !== "web";
+
+  const pressIn = () =>
+    Animated.spring(scale, { toValue: 0.97, useNativeDriver: nativeDriver, speed: 80, bounciness: 0 }).start();
+  const pressOut = () =>
+    Animated.spring(scale, { toValue: 1, useNativeDriver: nativeDriver, speed: 28, bounciness: 5 }).start();
+
+  return (
+    <Animated.View style={[videoAdStyles.wrap, { transform: [{ scale }] }, style]}>
+      <Pressable
+        onPress={() => router.push("/advertise")}
+        onPressIn={pressIn}
+        onPressOut={pressOut}
+        style={[videoAdStyles.card, { backgroundColor: isDark ? "#0D1117" : "#0D1117" }]}
+      >
+        {/* Video or placeholder */}
+        <View style={videoAdStyles.mediaWrap}>
+          {videoUri ? (
+            <Video
+              source={{ uri: videoUri }}
+              style={videoAdStyles.video}
+              resizeMode={ResizeMode.COVER}
+              shouldPlay
+              isLooping
+              isMuted
+              useNativeControls={false}
+            />
+          ) : (
+            <LinearGradient
+              colors={["#006F80", "#0EB5CA", "#38D1E5"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={videoAdStyles.placeholder}
+            >
+              <View style={videoAdStyles.playBtn}>
+                <Feather name="play" size={28} color="#fff" />
+              </View>
+              <Text style={videoAdStyles.placeholderTitle}>
+                {title ?? "Advertise Here"}
+              </Text>
+              <Text style={videoAdStyles.placeholderSub}>
+                Book a Video Ad slot
+              </Text>
+            </LinearGradient>
+          )}
+
+          {/* Scrim over video */}
+          {videoUri && (
+            <LinearGradient
+              colors={["transparent", "rgba(0,0,0,0.65)"]}
+              style={videoAdStyles.scrim}
+              pointerEvents="none"
+            />
+          )}
+
+          {/* VIDEO AD badge */}
+          <View style={videoAdStyles.badge}>
+            <Feather name="video" size={9} color="#fff" />
+            <Text style={videoAdStyles.badgeText}>VIDEO AD</Text>
+          </View>
+
+          {/* Bottom label (only when video plays) */}
+          {videoUri && (
+            <View style={videoAdStyles.bottomRow}>
+              <Text style={videoAdStyles.bottomTitle} numberOfLines={1}>
+                {title ?? packageName ?? "Sponsored"}
+              </Text>
+              <View style={videoAdStyles.bookBtn}>
+                <Text style={videoAdStyles.bookBtnText}>Book →</Text>
+              </View>
+            </View>
+          )}
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+const videoAdStyles = StyleSheet.create({
+  wrap: { marginBottom: 2 },
+  card: {
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#0EB5CA",
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 5,
+  },
+  mediaWrap: {
+    height: 200,
+    position: "relative",
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+  },
+  placeholder: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  playBtn: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  placeholderTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: -0.3,
+  },
+  placeholderSub: {
+    color: "rgba(255,255,255,0.75)",
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+  },
+  scrim: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+  },
+  badge: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#0EB5CA",
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: 9,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 1.0,
+  },
+  bottomRow: {
+    position: "absolute",
+    bottom: 10,
+    left: 10,
+    right: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  bottomTitle: {
+    color: "#fff",
+    fontSize: 13,
+    fontFamily: "Inter_600SemiBold",
+    flex: 1,
+    marginRight: 8,
+  },
+  bookBtn: {
+    backgroundColor: "#0EB5CA",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  bookBtnText: {
+    color: "#fff",
+    fontSize: 12,
+    fontFamily: "Inter_700Bold",
+  },
+});
+File 2: app/(tabs)/index.tsx
+
+Add the import at the top alongside the CarCard import:
+
+js
+import { CarCard, VideoAdCard } from "@/components/CarCard";
+Find the advertise banner (the teal adBannerWrap Pressable) and insert the video ad card just above it:
+
+tsx
+{/* ── Video Ad slot ── */}
+<VideoAdCard
+  style={{ marginHorizontal: 10, marginTop: 6 }}
+/>
+
+<View style={[styles.sep, { backgroundColor: colors.background }]} />
+That's all three fixes. Once Replit applies them, the filter will respect light/dark system theme, all Chinese and missing brands will appear in both the home brand strip and the filter modal, and the video ad card will appear on the home screen — static placeholder for now, real video when a videoUri is passed.
+
+
+
