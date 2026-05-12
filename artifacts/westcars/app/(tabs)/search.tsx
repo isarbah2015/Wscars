@@ -23,7 +23,7 @@ import { CONDITIONS, FUEL_TYPES, GHANA_CITIES, TRANSMISSIONS } from "@/utils/gha
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
-// ─── Brand model map ─────────────────────────────────────
+// ─── Brand model map ──────────────────────────────────────
 const BRAND_MODELS: Record<string, string[]> = {
   Toyota:      ["Camry","Corolla","RAV4","Highlander","Land Cruiser","Prado","Fortuner","Venza","Yaris","Hiace","Avensis","Auris"],
   Honda:       ["Accord","Civic","CR-V","HR-V","Pilot","Odyssey","Fit","Jazz","Vezel"],
@@ -55,7 +55,7 @@ const BRAND_MODELS: Record<string, string[]> = {
   Acura:       ["TLX","RDX","MDX","ILX","NSX"],
 };
 
-// ─── Price ranges ─────────────────────────────────────────
+// ─── Price ranges ──────────────────────────────────────────
 const PRICE_RANGES = [
   { label: "Under GHS 30k",  sub: "Under",  main: "GHS 30k",  min: 0,      max: 30000   },
   { label: "Under GHS 60k",  sub: "Under",  main: "GHS 60k",  min: 0,      max: 60000   },
@@ -63,7 +63,7 @@ const PRICE_RANGES = [
   { label: "Above GHS 100k", sub: "Above",  main: "GHS 100k", min: 100000, max: 9999999 },
 ];
 
-// ─── Quick filters ────────────────────────────────────────
+// ─── Quick filters ─────────────────────────────────────────
 type QuickFilterKey = "All"|"SUV"|"Sedan"|"Tokunbo"|"Budget"|"Luxury"|"Pickup"|"Truck"|"Bus"|"Heavy"|"Moto"|"New";
 
 const QUICK_FILTERS: { key: QuickFilterKey; label: string; color: string }[] = [
@@ -80,6 +80,10 @@ const QUICK_FILTERS: { key: QuickFilterKey; label: string; color: string }[] = [
   { key: "Heavy",   label: "Heavy",   color: "#92400E" },
   { key: "Moto",    label: "Moto",    color: "#0F766E" },
 ];
+
+// ─── Brand colours (static) ───────────────────────────────
+const TEAL   = "#0EB5CA";
+const ORANGE = "#F97316";
 
 function mapCategoryToFilter(cat: string): { quickFilter: QuickFilterKey; query: string } {
   const l = cat.toLowerCase();
@@ -100,25 +104,14 @@ function mapCategoryToFilter(cat: string): { quickFilter: QuickFilterKey; query:
   return { quickFilter: "All", query: cat };
 }
 
-// ─── Dark theme constants ─────────────────────────────────
-const BG        = "#0D1117";
-const CARD_BG   = "#161B22";
-const INPUT_BG  = "#1C2333";
-const PILL_BG   = "#1C2333";
-const PILL_BORDER = "#2D3748";
-const LABEL_CLR = "#0EB5CA";
-const TEXT      = "#F0F6FF";
-const MUTED     = "rgba(240,246,255,0.45)";
-const TEAL      = "#0EB5CA";
-const ORANGE    = "#F97316";
-
 // ─────────────────────────────────────────────────────────────────────────────
-// FILTER MODAL (dark bottom-sheet style)
+// FILTER MODAL — theme-aware
 // ─────────────────────────────────────────────────────────────────────────────
 function FilterModal({ visible, onClose, onApply }: {
   visible: boolean; onClose: () => void; onApply: (f: any) => void;
 }) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   const [brand,        setBrand]        = useState("Any");
   const [model,        setModel]        = useState("Any");
@@ -138,12 +131,12 @@ function FilterModal({ visible, onClose, onApply }: {
     transmission !== "Any", condition !== "Any", priceRange !== null,
   ].filter(Boolean).length;
 
-  // ── Section label ──
+  const TOP_BRANDS = ["Toyota","Honda","Hyundai","Mercedes","Kia","Ford","BMW","Nissan","Volkswagen","Mitsubishi","Lexus","Isuzu","Suzuki","Mazda","Subaru"];
+
   const SectionLabel = ({ label }: { label: string }) => (
-    <Text style={fS.sectionLabel}>{label}</Text>
+    <Text style={[fS.sectionLabel, { color: colors.accent }]}>{label}</Text>
   );
 
-  // ── Wrap pill grid ──
   const PillWrap = ({ options, selected, onSelect }: {
     options: string[]; selected: string; onSelect: (v: string) => void;
   }) => (
@@ -153,29 +146,34 @@ function FilterModal({ visible, onClose, onApply }: {
         return (
           <Pressable
             key={opt}
-            style={[fS.pill, active && fS.pillActive]}
+            style={[
+              fS.pill,
+              { backgroundColor: colors.inputBg, borderColor: colors.border },
+              active && { borderColor: TEAL, backgroundColor: colors.accentLight },
+            ]}
             onPress={() => onSelect(active ? "Any" : opt)}
           >
-            <Text style={[fS.pillText, active && fS.pillTextActive]}>{opt}</Text>
+            <Text style={[
+              fS.pillText,
+              { color: colors.textSecondary },
+              active && { color: TEAL, fontFamily: "Inter_600SemiBold" },
+            ]}>
+              {opt}
+            </Text>
           </Pressable>
         );
       })}
     </View>
   );
 
-  // ── Brand pill wrap (subset of top brands for quick pick) ──
-  const TOP_BRANDS = ["Toyota","Honda","Hyundai","Mercedes","Kia","Ford","BMW","Nissan","Volkswagen","Mitsubishi","Lexus","Isuzu","Suzuki","Mazda","Subaru"];
-
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen">
-      <View style={[fS.root, { paddingBottom: insets.bottom + 16 }]}>
+      <View style={[fS.root, { backgroundColor: colors.background, paddingBottom: insets.bottom + 16 }]}>
 
-        {/* Handle */}
-        <View style={fS.handle} />
+        <View style={[fS.handle, { backgroundColor: colors.border }]} />
 
-        {/* Title row */}
         <View style={fS.titleRow}>
-          <Text style={fS.title}>Filters</Text>
+          <Text style={[fS.title, { color: colors.text }]}>Filters</Text>
           {activeCount > 0 && (
             <View style={fS.countPill}>
               <Text style={fS.countPillText}>{activeCount}</Text>
@@ -185,11 +183,9 @@ function FilterModal({ visible, onClose, onApply }: {
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={fS.body}>
 
-          {/* Brand */}
           <SectionLabel label="BRAND" />
           <PillWrap options={TOP_BRANDS} selected={brand} onSelect={(b) => { setBrand(b); setModel("Any"); }} />
 
-          {/* Model (shown only when a brand with known models is selected) */}
           {brand !== "Any" && BRAND_MODELS[brand] && (
             <>
               <SectionLabel label={`${brand.toUpperCase()} MODEL`} />
@@ -197,7 +193,6 @@ function FilterModal({ visible, onClose, onApply }: {
             </>
           )}
 
-          {/* Price range — 2-col card grid */}
           <SectionLabel label="PRICE RANGE" />
           <View style={fS.priceGrid}>
             {PRICE_RANGES.map((pr) => {
@@ -205,43 +200,46 @@ function FilterModal({ visible, onClose, onApply }: {
               return (
                 <Pressable
                   key={pr.label}
-                  style={[fS.priceCard, active && fS.priceCardActive]}
+                  style={[
+                    fS.priceCard,
+                    { backgroundColor: colors.inputBg, borderColor: colors.border },
+                    active && { borderColor: TEAL, backgroundColor: colors.accentLight },
+                  ]}
                   onPress={() => setPriceRange(active ? null : pr)}
                 >
-                  <Text style={[fS.priceSub, active && fS.priceSubActive]}>{pr.sub}</Text>
-                  <Text style={[fS.priceMain, active && fS.priceMainActive]}>{pr.main}</Text>
+                  <Text style={[fS.priceSub, { color: colors.textTertiary }, active && { color: TEAL }]}>
+                    {pr.sub}
+                  </Text>
+                  <Text style={[fS.priceMain, { color: colors.text }, active && { color: TEAL }]}>
+                    {pr.main}
+                  </Text>
                 </Pressable>
               );
             })}
           </View>
 
-          {/* Condition */}
           <SectionLabel label="CONDITION" />
           <PillWrap options={CONDITIONS} selected={condition} onSelect={setCondition} />
 
-          {/* Fuel */}
           <SectionLabel label="FUEL" />
           <PillWrap options={FUEL_TYPES} selected={fuelType} onSelect={setFuelType} />
 
-          {/* Transmission */}
           <SectionLabel label="TRANSMISSION" />
           <PillWrap options={TRANSMISSIONS} selected={transmission} onSelect={setTransmission} />
 
-          {/* Location */}
           <SectionLabel label="LOCATION" />
           <PillWrap options={GHANA_CITIES} selected={location} onSelect={setLocation} />
 
           <View style={{ height: 16 }} />
         </ScrollView>
 
-        {/* Footer */}
-        <View style={fS.footer}>
+        <View style={[fS.footer, { borderTopColor: colors.border }]}>
           <Pressable
-            style={[fS.resetBtn, activeCount === 0 && { opacity: 0.38 }]}
+            style={[fS.resetBtn, { borderColor: colors.border }, activeCount === 0 && { opacity: 0.38 }]}
             onPress={reset}
             disabled={activeCount === 0}
           >
-            <Text style={fS.resetText}>Reset</Text>
+            <Text style={[fS.resetText, { color: colors.textSecondary }]}>Reset</Text>
           </Pressable>
           <Pressable
             style={fS.applyBtnWrap}
@@ -272,7 +270,7 @@ function FilterModal({ visible, onClose, onApply }: {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function SearchScreen() {
   const { cars } = useApp();
-  useTheme(); // theme context subscription kept for future light-mode support
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 10 : insets.top;
 
@@ -297,7 +295,6 @@ export default function SearchScreen() {
     }
   }, [category]);
 
-  // ── Filtering logic (unchanged) ───────────────────────────────────────────
   const filtered = cars.filter((car: Car) => {
     const q = query.toLowerCase();
     const matchQuery = !q
@@ -352,16 +349,19 @@ export default function SearchScreen() {
   });
 
   return (
-    <View style={S.root}>
+    <View style={[S.root, { backgroundColor: colors.background }]}>
 
       {/* ── Header ── */}
-      <View style={[S.header, { paddingTop: topPad + 10 }]}>
+      <View style={[S.header, {
+        paddingTop: topPad + 10,
+        backgroundColor: colors.card,
+        borderBottomColor: colors.border,
+      }]}>
 
-        {/* Title row */}
         <View style={S.titleRow}>
           <View>
             <Text style={S.eyebrow}>WESTCARS</Text>
-            <Text style={S.title}>Search</Text>
+            <Text style={[S.title, { color: colors.text }]}>Search</Text>
           </View>
           <View style={S.countPill}>
             <Text style={S.countNum}>{filtered.length.toLocaleString()}</Text>
@@ -369,34 +369,30 @@ export default function SearchScreen() {
           </View>
         </View>
 
-        {/* Search bar */}
         <View style={S.searchRow}>
-          <View style={S.searchInput}>
-            <Feather name="search" size={17} color={MUTED} />
+          <View style={[S.searchInput, { backgroundColor: colors.inputBg, borderColor: colors.border }]}>
+            <Feather name="search" size={17} color={colors.textTertiary} />
             <TextInput
-              style={S.input}
+              style={[S.input, { color: colors.text }]}
               placeholder="Make, model, keyword…"
-              placeholderTextColor={MUTED}
+              placeholderTextColor={colors.textTertiary}
               value={query}
               onChangeText={setQuery}
               selectionColor={TEAL}
             />
             {query.length > 0 && (
               <Pressable onPress={() => setQuery("")} hitSlop={10}>
-                <Feather name="x-circle" size={16} color={MUTED} />
+                <Feather name="x-circle" size={16} color={colors.textTertiary} />
               </Pressable>
             )}
           </View>
-          <Pressable
-            style={S.filterBtn}
-            onPress={() => setFilterVisible(true)}
-          >
+          <Pressable style={S.filterBtn} onPress={() => setFilterVisible(true)}>
             <Feather name="sliders" size={18} color="#fff" />
             {hasFilters && <View style={S.filterDot} />}
           </Pressable>
         </View>
 
-        {/* Quick-filter chip row — paddingHorizontal on contentContainerStyle, not the wrapper */}
+        {/* Chip row — paddingHorizontal on contentContainerStyle stops edge clipping */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -407,10 +403,15 @@ export default function SearchScreen() {
             return (
               <Pressable
                 key={key}
-                style={[S.chip, active ? { backgroundColor: color } : S.chipInactive]}
+                style={[
+                  S.chip,
+                  active
+                    ? { backgroundColor: color }
+                    : { backgroundColor: colors.inputBg, borderColor: colors.border },
+                ]}
                 onPress={() => setQuickFilter(key)}
               >
-                <Text style={[S.chipText, active ? S.chipTextActive : S.chipTextInactive]}>
+                <Text style={[S.chipText, { color: active ? "#fff" : colors.textSecondary }]}>
                   {label}
                 </Text>
               </Pressable>
@@ -429,9 +430,9 @@ export default function SearchScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={S.empty}>
-            <Feather name="search" size={40} color={MUTED} />
-            <Text style={S.emptyTitle}>No listings found</Text>
-            <Text style={S.emptySub}>Try adjusting your filters or search term</Text>
+            <Feather name="search" size={40} color={colors.textTertiary} />
+            <Text style={[S.emptyTitle, { color: colors.text }]}>No listings found</Text>
+            <Text style={[S.emptySub, { color: colors.textSecondary }]}>Try adjusting your filters or search term</Text>
             {hasFilters && (
               <Pressable style={S.clearBtn} onPress={() => { setActiveFilters(null); setQuery(""); setQuickFilter("All"); }}>
                 <Text style={S.clearBtnText}>Clear all filters</Text>
@@ -451,7 +452,6 @@ export default function SearchScreen() {
         }}
       />
 
-      {/* ── Filter modal ── */}
       <FilterModal
         visible={filterVisible}
         onClose={() => setFilterVisible(false)}
@@ -461,15 +461,13 @@ export default function SearchScreen() {
   );
 }
 
-// ─── Search screen styles ─────────────────────────────────
+// ─── Styles (brand/layout only — theme colours applied inline) ────────────────
 const S = StyleSheet.create({
-  root:   { flex: 1, backgroundColor: BG },
+  root: { flex: 1 },
 
   header: {
-    backgroundColor: CARD_BG,
     paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.06)",
   },
 
   titleRow: {
@@ -481,7 +479,7 @@ const S = StyleSheet.create({
     fontSize: 11, fontFamily: "Inter_600SemiBold",
     color: TEAL, letterSpacing: 1.5, marginBottom: 2,
   },
-  title:   { fontSize: 28, fontFamily: "Manrope_800ExtraBold", color: TEXT, letterSpacing: -0.5 },
+  title: { fontSize: 28, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.5 },
 
   countPill: {
     backgroundColor: TEAL, borderRadius: 12,
@@ -489,7 +487,7 @@ const S = StyleSheet.create({
     alignItems: "center", marginTop: 4,
   },
   countNum: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#fff" },
-  countLbl: { fontSize: 10, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.8)" },
+  countLbl: { fontSize: 10, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.85)" },
 
   searchRow: {
     flexDirection: "row", alignItems: "center",
@@ -497,13 +495,11 @@ const S = StyleSheet.create({
   },
   searchInput: {
     flex: 1, flexDirection: "row", alignItems: "center",
-    backgroundColor: INPUT_BG, borderRadius: 12,
+    borderRadius: 12, borderWidth: 1,
     paddingHorizontal: 14, height: 46, minHeight: 46, gap: 10,
   },
-  input: {
-    flex: 1, fontSize: 14, fontFamily: "Inter_400Regular",
-    color: TEXT,
-  },
+  input: { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular" },
+
   filterBtn: {
     width: 46, height: 46, borderRadius: 12,
     backgroundColor: ORANGE,
@@ -517,36 +513,27 @@ const S = StyleSheet.create({
     borderWidth: 1.5, borderColor: ORANGE,
   },
 
-  // Chip row — paddingHorizontal: 14 on contentContainerStyle stops edge clipping
   chipRow: {
     flexDirection: "row", gap: 8,
     paddingLeft: 14, paddingRight: 60, paddingBottom: 2,
   },
   chip: {
     paddingHorizontal: 16, paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 20, borderWidth: 1,
   },
-  chipInactive: {
-    backgroundColor: INPUT_BG,
-    borderWidth: 1, borderColor: PILL_BORDER,
-  },
-  chipText:         { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  chipTextActive:   { color: "#fff" },
-  chipTextInactive: { color: MUTED },
+  chipText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 
-  // List
   list:        { flex: 1 },
   listContent: { padding: 12, paddingBottom: 100 },
   row:         { flexDirection: "row", paddingHorizontal: 8, gap: 8, marginBottom: 8 },
   cardStyle:   { flex: 1 },
 
-  // Empty state
   empty: {
     flex: 1, alignItems: "center", justifyContent: "center",
     paddingTop: 80, gap: 10,
   },
-  emptyTitle: { fontSize: 18, fontFamily: "Inter_700Bold", color: TEXT },
-  emptySub:   { fontSize: 13, fontFamily: "Inter_400Regular", color: MUTED, textAlign: "center", paddingHorizontal: 40 },
+  emptyTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
+  emptySub:   { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", paddingHorizontal: 40 },
   clearBtn: {
     marginTop: 8, paddingHorizontal: 20, paddingVertical: 10,
     borderRadius: 20, borderWidth: 1.5, borderColor: TEAL,
@@ -554,22 +541,19 @@ const S = StyleSheet.create({
   clearBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: TEAL },
 });
 
-// ─── Filter modal styles ──────────────────────────────────
+// ─── Filter modal styles (layout only) ───────────────────────────────────────
 const fS = StyleSheet.create({
-  root: {
-    flex: 1, backgroundColor: BG,
-    paddingTop: 12,
-  },
+  root: { flex: 1, paddingTop: 12 },
+
   handle: {
     width: 40, height: 4, borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.18)",
     alignSelf: "center", marginBottom: 16,
   },
   titleRow: {
     flexDirection: "row", alignItems: "center", gap: 10,
     paddingHorizontal: 20, marginBottom: 4,
   },
-  title: { fontSize: 22, fontFamily: "Manrope_800ExtraBold", color: TEXT },
+  title: { fontSize: 22, fontFamily: "Manrope_800ExtraBold" },
   countPill: {
     backgroundColor: TEAL, borderRadius: 12,
     paddingHorizontal: 10, paddingVertical: 3,
@@ -580,49 +564,36 @@ const fS = StyleSheet.create({
 
   sectionLabel: {
     fontSize: 11, fontFamily: "Inter_700Bold",
-    color: LABEL_CLR, letterSpacing: 1.2,
-    marginTop: 20, marginBottom: 10,
+    letterSpacing: 1.2, marginTop: 20, marginBottom: 10,
   },
 
-  // Wrap pill grid
   pillWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   pill: {
     paddingHorizontal: 14, paddingVertical: 9,
     borderRadius: 20, borderWidth: 1.5,
-    borderColor: PILL_BORDER, backgroundColor: PILL_BG,
   },
-  pillActive: { borderColor: TEAL, backgroundColor: "rgba(14,181,202,0.12)" },
-  pillText:       { fontSize: 13, fontFamily: "Inter_500Medium", color: MUTED },
-  pillTextActive: { color: TEAL, fontFamily: "Inter_600SemiBold" },
+  pillText: { fontSize: 13, fontFamily: "Inter_500Medium" },
 
-  // Price range 2-col cards
   priceGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   priceCard: {
     width: (SCREEN_W - 60) / 2,
     paddingVertical: 14, paddingHorizontal: 16,
-    borderRadius: 12, borderWidth: 1.5,
-    borderColor: PILL_BORDER, backgroundColor: PILL_BG,
-    gap: 2,
+    borderRadius: 12, borderWidth: 1.5, gap: 2,
   },
-  priceCardActive: { borderColor: TEAL, backgroundColor: "rgba(14,181,202,0.10)" },
-  priceSub:        { fontSize: 10, fontFamily: "Inter_400Regular", color: MUTED },
-  priceSubActive:  { color: TEAL },
-  priceMain:       { fontSize: 15, fontFamily: "Inter_700Bold", color: TEXT },
-  priceMainActive: { color: TEAL },
+  priceSub:  { fontSize: 10, fontFamily: "Inter_400Regular" },
+  priceMain: { fontSize: 15, fontFamily: "Inter_700Bold" },
 
-  // Footer
   footer: {
     flexDirection: "row", alignItems: "center",
-    paddingHorizontal: 20, paddingTop: 14,
-    gap: 12,
-    borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.07)",
+    paddingHorizontal: 20, paddingTop: 14, gap: 12,
+    borderTopWidth: 1,
   },
   resetBtn: {
     flex: 1, height: 50, borderRadius: 12,
-    borderWidth: 1.5, borderColor: PILL_BORDER,
+    borderWidth: 1.5,
     alignItems: "center", justifyContent: "center",
   },
-  resetText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: MUTED },
+  resetText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
   applyBtnWrap: { flex: 2 },
   applyBtn: {
     height: 50, borderRadius: 12,
