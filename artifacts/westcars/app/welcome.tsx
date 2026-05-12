@@ -82,7 +82,9 @@ export default function WelcomeScreen() {
   const goToLogin = () => {
     if (unlocked) return;
     setUnlocked(true);
-    router.replace("/auth/login");
+    setTimeout(() => {
+      router.replace("/auth/login");
+    }, 100);
   };
 
   const onGestureEvent = Animated.event(
