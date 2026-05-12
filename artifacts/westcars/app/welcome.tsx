@@ -233,6 +233,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 24,
+    alignItems: "flex-end",
   },
   logo: { width: 110, height: 40 },
 
