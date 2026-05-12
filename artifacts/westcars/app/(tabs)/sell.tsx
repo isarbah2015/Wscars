@@ -1,7 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -13,12 +12,12 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
 import { isFirebaseReady } from "@/lib/firebase";
 import { updateCar, uploadCarImage } from "@/services/firebase";
@@ -31,83 +30,117 @@ import {
   VEHICLE_TYPES,
 } from "@/utils/ghanaData";
 
-function PickerRow({
-  label,
-  value,
-  options,
-  onSelect,
+const TEAL       = "#0EB5CA";
+const TEAL_DARK  = "#0098AA";
+const TEAL_LIGHT = "rgba(14,181,202,0.10)";
+const BG         = "#F4F7F9";
+const CARD       = "#FFFFFF";
+const INPUT_BG   = "#F1F5F9";
+const BORDER     = "#E2E8F0";
+const TEXT       = "#0F172A";
+const MUTED      = "#64748B";
+const PLACEHOLDER = "#94A3B8";
+
+const STEPS = ["Photos", "Details", "Specs", "Price"];
+
+// ── Section header ────────────────────────────────────────────────────────
+function SectionHeader({ title, right }: { title: string; right?: React.ReactNode }) {
+  return (
+    <View style={sh.row}>
+      <View style={sh.icon}>
+        <Feather name="square" size={10} color={TEAL} />
+      </View>
+      <Text style={sh.title}>{title}</Text>
+      {right && <View style={{ marginLeft: "auto" }}>{right}</View>}
+    </View>
+  );
+}
+const sh = StyleSheet.create({
+  row:   { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 },
+  icon:  { width: 22, height: 22, borderRadius: 5, backgroundColor: TEAL_LIGHT, alignItems: "center", justifyContent: "center" },
+  title: { fontSize: 14, fontFamily: "Inter_700Bold", color: TEXT },
+});
+
+// ── Inline picker (expands in place — no absolute dropdown) ───────────────
+function InlinePicker({
+  label, value, options, onSelect, required, flex,
 }: {
-  label: string;
-  value: string;
-  options: string[];
-  onSelect: (v: string) => void;
+  label: string; value: string; options: string[];
+  onSelect: (v: string) => void; required?: boolean; flex?: number;
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <View style={pStyles.container}>
-      <Pressable style={pStyles.trigger} onPress={() => setOpen(!open)}>
-        <Text style={pStyles.label}>{label}</Text>
-        <View style={pStyles.valueRow}>
-          <Text style={[pStyles.value, !value && pStyles.placeholder]}>
-            {value || `Select ${label}`}
-          </Text>
-          <Feather
-            name={open ? "chevron-up" : "chevron-down"}
-            size={16}
-            color={Colors.light.textTertiary}
-          />
-        </View>
+    <View style={{ flex: flex ?? 1 }}>
+      <Text style={ip.label}>
+        {label}
+        {required ? <Text style={{ color: TEAL }}> •</Text> : null}
+      </Text>
+      <Pressable
+        style={[ip.trigger, open && ip.triggerOpen]}
+        onPress={() => setOpen(v => !v)}
+      >
+        <Text style={[ip.val, !value && ip.ph]} numberOfLines={1}>
+          {value || "Select"}
+        </Text>
+        <Feather name={open ? "chevron-up" : "chevron-down"} size={13} color={MUTED} />
       </Pressable>
       {open && (
-        <ScrollView style={pStyles.dropdown} nestedScrollEnabled>
-          {options.map((opt) => (
-            <Pressable
-              key={opt}
-              style={[pStyles.option, value === opt && pStyles.optionActive]}
-              onPress={() => {
-                onSelect(opt);
-                setOpen(false);
-              }}
-            >
-              <Text
-                style={[pStyles.optionText, value === opt && pStyles.optionTextActive]}
+        <View style={ip.list}>
+          <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="always" style={{ maxHeight: 160 }}>
+            {options.map(opt => (
+              <Pressable
+                key={opt}
+                style={[ip.opt, value === opt && ip.optActive]}
+                onPress={() => { onSelect(opt); setOpen(false); }}
               >
-                {opt}
-              </Text>
-              {value === opt && (
-                <Feather name="check" size={16} color={Colors.primary} />
-              )}
-            </Pressable>
-          ))}
-        </ScrollView>
+                <Text style={[ip.optText, value === opt && ip.optTextActive]}>{opt}</Text>
+                {value === opt && <Feather name="check" size={12} color={TEAL} />}
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
       )}
     </View>
   );
 }
+const ip = StyleSheet.create({
+  label:        { fontSize: 10, fontFamily: "Inter_600SemiBold", color: MUTED, textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 6 },
+  trigger:      { height: 44, backgroundColor: INPUT_BG, borderRadius: 10, borderWidth: 1.5, borderColor: BORDER, flexDirection: "row", alignItems: "center", paddingHorizontal: 12, justifyContent: "space-between" },
+  triggerOpen:  { borderColor: TEAL, backgroundColor: "rgba(14,181,202,0.04)" },
+  val:          { fontSize: 14, fontFamily: "Inter_400Regular", color: TEXT, flex: 1 },
+  ph:           { color: PLACEHOLDER },
+  list:         { borderWidth: 1.5, borderColor: BORDER, borderRadius: 10, backgroundColor: CARD, marginTop: 4, overflow: "hidden" },
+  opt:          { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: "#F1F5F9" },
+  optActive:    { backgroundColor: TEAL_LIGHT },
+  optText:      { fontSize: 14, fontFamily: "Inter_400Regular", color: TEXT },
+  optTextActive:{ color: TEAL, fontFamily: "Inter_600SemiBold" },
+});
 
+// ── Main screen ───────────────────────────────────────────────────────────
 export default function SellScreen() {
   const { addCar, currentUser, isAuthenticated } = useApp();
-  const insets = useSafeAreaInsets();
-  const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);
+  const insets  = useSafeAreaInsets();
+  const topPad  = insets.top + (Platform.OS === "web" ? 67 : 0);
 
-  const [images, setImages] = useState<string[]>([]);
-  const [brand, setBrand] = useState("");
-  const [model, setModel] = useState("");
-  const [year, setYear] = useState("");
-  const [price, setPrice] = useState("");
-  const [mileage, setMileage] = useState("");
-  const [fuelType, setFuelType] = useState("");
+  const [images,       setImages]       = useState<string[]>([]);
+  const [brand,        setBrand]        = useState("");
+  const [model,        setModel]        = useState("");
+  const [year,         setYear]         = useState("");
+  const [price,        setPrice]        = useState("");
+  const [mileage,      setMileage]      = useState("");
+  const [fuelType,     setFuelType]     = useState("");
   const [transmission, setTransmission] = useState("");
-  const [condition, setCondition] = useState("");
-  const [location, setLocation] = useState("");
-  const [description, setDescription] = useState("");
-  const [vehicleType, setVehicleType] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [condition,    setCondition]    = useState("");
+  const [location,     setLocation]     = useState("");
+  const [description,  setDescription]  = useState("");
+  const [vehicleType,  setVehicleType]  = useState("");
+  const [negotiable,   setNegotiable]   = useState(false);
+  const [submitting,   setSubmitting]   = useState(false);
 
-  const [vin, setVin] = useState("");
+  const [vin,        setVin]        = useState("");
   const [vinLoading, setVinLoading] = useState(false);
   const [vinDecoded, setVinDecoded] = useState(false);
-  const [vinError, setVinError] = useState("");
+  const [vinError,   setVinError]   = useState("");
 
   const decodeVIN = async () => {
     if (vin.length !== 17) return;
@@ -116,135 +149,88 @@ export default function SellScreen() {
     setVinError("");
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
-      const res = await fetch(
-        `https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`
-      );
+      const res  = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
       const data = await res.json();
       const results: any[] = data.Results || [];
-      const get = (varName: string) =>
-        results.find((r: any) => r.Variable === varName)?.Value || "";
+      const get = (v: string) => results.find((r: any) => r.Variable === v)?.Value || "";
 
-      const make     = get("Make");
-      const mdl      = get("Model");
-      const yr       = get("Model Year");
-      const fuel     = get("Fuel Type - Primary");
-      const trans    = get("Transmission Style");
+      const make  = get("Make");
+      const mdl   = get("Model");
+      const yr    = get("Model Year");
+      const fuel  = get("Fuel Type - Primary");
+      const trans = get("Transmission Style");
 
       if (!make || make === "0") {
-        setVinError("VIN not recognised. Please enter details manually.");
-        setVinLoading(false);
+        setVinError("VIN not recognised. Enter details manually.");
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         return;
       }
-
-      const fuelMap: Record<string, string> = {
-        Gasoline: "Petrol", Petrol: "Petrol", Diesel: "Diesel",
-        Electric: "Electric", "Natural Gas": "Hybrid", Hybrid: "Hybrid",
-      };
-      const transMap: Record<string, string> = {
-        Automatic: "Automatic", Manual: "Manual",
-        "Continuously Variable Transmission": "Automatic",
-        CVT: "Automatic",
-      };
-
-      const normalMake = make.charAt(0) + make.slice(1).toLowerCase();
-      const matchedBrand = CAR_BRANDS.find(
-        (b) => b.toUpperCase() === make.toUpperCase()
-      ) || normalMake;
-
-      if (matchedBrand) setBrand(matchedBrand);
-      if (mdl)  setModel(mdl);
-      if (yr)   setYear(yr);
-      if (fuel) setFuelType(fuelMap[fuel] || fuel);
-      if (trans) setTransmission(transMap[trans] || trans);
-
+      const fuelMap:  Record<string,string> = { Gasoline:"Petrol", Petrol:"Petrol", Diesel:"Diesel", Electric:"Electric", "Natural Gas":"Hybrid", Hybrid:"Hybrid" };
+      const transMap: Record<string,string> = { Automatic:"Automatic", Manual:"Manual", "Continuously Variable Transmission":"Automatic", CVT:"Automatic" };
+      const matched = CAR_BRANDS.find(b => b.toUpperCase() === make.toUpperCase()) || (make.charAt(0) + make.slice(1).toLowerCase());
+      if (matched)  setBrand(matched);
+      if (mdl)      setModel(mdl);
+      if (yr)       setYear(yr);
+      if (fuel)     setFuelType(fuelMap[fuel]  || fuel);
+      if (trans)    setTransmission(transMap[trans] || trans);
       setVinDecoded(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
-      setVinError("Could not reach the VIN lookup service. Check your connection.");
+      setVinError("Could not reach VIN service. Check your connection.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setVinLoading(false);
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <View style={[styles.authWall, { paddingTop: topPad }]}>
-        <Feather name="lock" size={52} color={Colors.light.textTertiary} />
-        <Text style={styles.authTitle}>Sign In Required</Text>
-        <Text style={styles.authText}>
-          You need to be logged in to list your car for sale.
-        </Text>
-        <Pressable
-          style={[styles.authBtn, { backgroundColor: "#0EB5CA", borderRadius: 14, paddingVertical: 14, alignItems: "center" }]}
-          onPress={() => router.push("/auth/login")}
-        >
-          <Text style={[styles.authBtnText, { color: "#FFFFFF" }]}>Sign In</Text>
-        </Pressable>
-      </View>
-    );
-  }
-
   const pickImages = async () => {
-    if (images.length >= 10) {
-      Alert.alert("Limit reached", "You can add up to 10 photos.");
-      return;
-    }
+    if (images.length >= 10) { Alert.alert("Limit reached", "You can add up to 10 photos."); return; }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
       quality: 0.8,
     });
-
     if (!result.canceled) {
-      const newImgs = result.assets.map((a) => a.uri);
-      setImages((prev) => [...prev, ...newImgs].slice(0, 10));
+      setImages(prev => [...prev, ...result.assets.map(a => a.uri)].slice(0, 10));
     }
   };
 
   const handleSubmit = async () => {
     if (!brand || !model || !year || !price || !condition || !location) {
-      Alert.alert("Missing Info", "Please fill in all required fields.");
+      Alert.alert("Missing info", "Please fill in all required fields (marked •).");
       return;
     }
     setSubmitting(true);
-
     try {
-      const PLACEHOLDER = "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800";
-      const initialImages = images.length > 0 ? images : [PLACEHOLDER];
+      const PLACEHOLDER_IMG = "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800";
+      const initialImages   = images.length > 0 ? images : [PLACEHOLDER_IMG];
+      const finalDesc       = description.trim() + (negotiable ? (description.trim() ? "\n\nPrice negotiable." : "Price negotiable.") : "");
 
-      // Step 1 — create the Firestore doc (gets us a carId)
       const carId = await addCar({
         brand,
         model,
-        year: parseInt(year),
-        price: parseFloat(price),
-        mileage: parseInt(mileage || "0"),
-        fuelType: fuelType || "Petrol",
+        year:         parseInt(year),
+        price:        parseFloat(price),
+        mileage:      parseInt(mileage || "0"),
+        fuelType:     fuelType     || "Petrol",
         transmission: transmission || "Automatic",
         condition,
         location,
-        description,
-        images: initialImages,
-        sellerId: currentUser?.id || "currentUser",
-        isFeatured: false,
-        category: vehicleType || "sedan",
+        description:  finalDesc,
+        images:       initialImages,
+        sellerId:     currentUser?.id || "currentUser",
+        isFeatured:   false,
+        category:     vehicleType || "sedan",
       });
 
-      // Step 2 — upload real images to Firebase Storage (only when Firebase is live
-      //           and the user actually picked local files)
       if (carId && isFirebaseReady() && currentUser?.id && images.length > 0) {
         try {
           const uploadedUrls = await Promise.all(
-            images.map((uri, idx) =>
-              uploadCarImage(currentUser.id, carId, uri, idx)
-            )
+            images.map((uri, idx) => uploadCarImage(currentUser.id, carId, uri, idx))
           );
-          // Step 3 — patch the Firestore doc with the real Storage download URLs
           await updateCar(carId, { images: uploadedUrls });
         } catch (uploadErr) {
-          console.warn("[sell] image upload failed, listing saved with placeholder:", uploadErr);
+          console.warn("[sell] image upload failed:", uploadErr);
         }
       }
 
@@ -261,719 +247,440 @@ export default function SellScreen() {
     }
   };
 
-  const InputField = ({
-    label,
-    value,
-    onChangeText,
-    placeholder,
-    keyboardType = "default",
-    multiline = false,
-  }: any) => (
-    <View style={styles.fieldContainer}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <TextInput
-        style={[styles.input, multiline && styles.inputMulti]}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={Colors.light.textTertiary}
-        keyboardType={keyboardType}
-        multiline={multiline}
-        numberOfLines={multiline ? 4 : 1}
-        textAlignVertical={multiline ? "top" : "center"}
-      />
-    </View>
-  );
+  // ── Auth wall ──────────────────────────────────────────────────────────
+  if (!isAuthenticated) {
+    return (
+      <View style={[styles.authWall, { paddingTop: topPad + 40 }]}>
+        <View style={styles.authIconWrap}>
+          <Feather name="lock" size={28} color={TEAL} />
+        </View>
+        <Text style={styles.authTitle}>Sign In Required</Text>
+        <Text style={styles.authSub}>You need to be logged in to list your car for sale.</Text>
+        <Pressable style={styles.authBtn} onPress={() => router.push("/auth/login")}>
+          <Text style={styles.authBtnText}>Sign In</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+
+      {/* ── Header ── */}
+      <View style={[styles.header, { paddingTop: topPad + 10 }]}>
+        <Text style={styles.headerTitle}>Sell your car</Text>
+      </View>
+
+      {/* ── Progress stepper ── */}
+      <View style={styles.stepperWrap}>
+        {STEPS.map((step, i) => (
+          <React.Fragment key={step}>
+            <View style={styles.stepItem}>
+              <View style={[styles.stepDot, i === 0 && styles.stepDotActive]}>
+                <Text style={[styles.stepNum, i === 0 && styles.stepNumActive]}>{i + 1}</Text>
+              </View>
+              <Text style={[styles.stepLabel, i === 0 && styles.stepLabelActive]}>{step}</Text>
+            </View>
+            {i < STEPS.length - 1 && (
+              <View style={[styles.stepLine, i === 0 && styles.stepLineActive]} />
+            )}
+          </React.Fragment>
+        ))}
+      </View>
+
       <ScrollView
-        style={styles.container}
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: insets.bottom + 100 },
-        ]}
+        style={styles.scroll}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 110 }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Glass header */}
-        <View
-          style={[
-            styles.sellHeader,
-            {
-              paddingTop: topPad + 14,
-              backgroundColor: "#FFFFFF",
-              borderBottomWidth: 1,
-              borderBottomColor: "rgba(0,0,0,0.07)",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.04,
-              shadowRadius: 8,
-              elevation: 2,
-            },
-          ]}
-        >
-          <View style={styles.sellHeaderBadge}>
-            <Feather name="tag" size={13} color="#0098AA" />
-            <Text style={[styles.sellHeaderBadgeText, { color: "#0098AA" }]}>SELL YOUR CAR</Text>
-          </View>
-          <Text style={[styles.screenTitle, { color: "#0F172A" }]}>List Your Car</Text>
-          <Text style={[styles.screenSubtitle, { color: "#64748B" }]}>
-            Reach thousands of buyers across Ghana
+
+        {/* ── Photos ── */}
+        <View style={styles.card}>
+          <SectionHeader
+            title="Vehicle photos"
+            right={<Text style={styles.photoCount}>{images.length} / 10 photos added</Text>}
+          />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.photoRow}>
+              {images.length < 10 && (
+                <Pressable style={styles.addPhoto} onPress={pickImages}>
+                  <Feather name="plus" size={22} color={TEAL} />
+                  <Text style={styles.addPhotoText}>Add</Text>
+                </Pressable>
+              )}
+              {images.map((uri, i) => (
+                <View key={i} style={styles.photoThumb}>
+                  <Image source={{ uri }} style={styles.thumbImg} />
+                  {i === 0 && (
+                    <View style={styles.coverBadge}><Text style={styles.coverText}>Cover</Text></View>
+                  )}
+                  <Pressable style={styles.removePhoto} onPress={() => setImages(prev => prev.filter((_,j) => j !== i))}>
+                    <Feather name="x" size={10} color="#fff" />
+                  </Pressable>
+                </View>
+              ))}
+              {images.length === 0 && (
+                <>
+                  {[0,1,2].map(i => (
+                    <View key={i} style={styles.photoEmpty} />
+                  ))}
+                </>
+              )}
+            </View>
+          </ScrollView>
+          <Text style={styles.photoHint}>
+            Tap + to select photos from your gallery. First photo will be the cover.
           </Text>
         </View>
 
-        {/* Cards wrapper */}
-        <View style={styles.cardsWrapper}>
-
         {/* ── VIN Lookup ── */}
         <View style={styles.card}>
-          <View style={styles.vinTitleRow}>
-            <View style={styles.vinIconBg}>
-              <Feather name="search" size={14} color="#0098AA" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.sectionTitle}>VIN Auto-Fill</Text>
-              <Text style={styles.sectionSubtitle}>
-                Enter your 17-digit VIN to auto-fill make, model & year
-              </Text>
-            </View>
-          </View>
-
+          <SectionHeader title="VIN lookup" right={<Text style={styles.optionalTag}>optional</Text>} />
           <View style={styles.vinRow}>
             <TextInput
               style={[
                 styles.vinInput,
                 vinDecoded && { borderColor: "#22C55E" },
-                vinError ? { borderColor: "#EF4444" } : undefined,
+                !!vinError  && { borderColor: "#EF4444" },
               ]}
               value={vin}
-              onChangeText={(t) => {
+              onChangeText={t => {
                 setVin(t.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, ""));
                 setVinDecoded(false);
                 setVinError("");
               }}
-              placeholder="e.g. 1HGCM82633A123456"
-              placeholderTextColor={Colors.light.textTertiary}
+              placeholder="Enter 17-character VIN…"
+              placeholderTextColor={PLACEHOLDER}
               maxLength={17}
               autoCapitalize="characters"
               autoCorrect={false}
             />
             <Pressable
-              style={[
-                styles.vinBtn,
-                { opacity: vin.length === 17 && !vinLoading ? 1 : 0.45 },
-              ]}
+              style={[styles.vinBtn, (vin.length !== 17 || vinLoading) && { opacity: 0.45 }]}
               onPress={decodeVIN}
               disabled={vin.length !== 17 || vinLoading}
             >
-              {vinLoading ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Feather name="zap" size={16} color="#fff" />
-              )}
+              {vinLoading
+                ? <ActivityIndicator size="small" color="#fff" />
+                : <Text style={styles.vinBtnText}>Look up</Text>
+              }
             </Pressable>
           </View>
-
-          <Text style={styles.vinCounter}>{vin.length}/17</Text>
-
           {vinDecoded && (
             <View style={styles.vinSuccess}>
-              <Feather name="check-circle" size={15} color="#22C55E" />
-              <Text style={styles.vinSuccessText}>
-                VIN decoded! Fields below have been auto-filled.
-              </Text>
+              <Feather name="check-circle" size={14} color="#22C55E" />
+              <Text style={styles.vinSuccessText}>Fields auto-filled from VIN</Text>
             </View>
           )}
           {!!vinError && (
-            <View style={styles.vinErrorBox}>
-              <Feather name="alert-circle" size={15} color="#EF4444" />
+            <View style={styles.vinError}>
+              <Feather name="alert-circle" size={14} color="#EF4444" />
               <Text style={styles.vinErrorText}>{vinError}</Text>
             </View>
           )}
         </View>
 
-        {/* Photo upload */}
+        {/* ── Vehicle Details ── */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Photos</Text>
-          <Text style={styles.sectionSubtitle}>
-            Add up to 10 photos ({images.length}/10)
-          </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.imagesRow}>
-              {images.map((uri, i) => (
-                <View key={i} style={styles.imageThumb}>
-                  <Image source={{ uri }} style={styles.thumbImage} />
-                  <Pressable
-                    style={styles.removeImage}
-                    onPress={() =>
-                      setImages((prev) => prev.filter((_, j) => j !== i))
-                    }
-                  >
-                    <Feather name="x" size={12} color="#fff" />
-                  </Pressable>
-                </View>
-              ))}
-              {images.length < 10 && (
-                <Pressable style={styles.addImageBtn} onPress={pickImages}>
-                  <Feather name="camera" size={24} color={Colors.primary} />
-                  <Text style={styles.addImageText}>Add Photo</Text>
-                </Pressable>
-              )}
+          <SectionHeader title="Vehicle details" />
+
+          {/* Brand | Year */}
+          <View style={styles.row2}>
+            <InlinePicker label="Brand" value={brand} options={CAR_BRANDS} onSelect={setBrand} required />
+            <View style={{ width: 12 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={ip.label}>Year <Text style={{ color: TEAL }}>•</Text></Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={year}
+                onChangeText={setYear}
+                placeholder="2024"
+                placeholderTextColor={PLACEHOLDER}
+                keyboardType="numeric"
+                maxLength={4}
+              />
             </View>
-          </ScrollView>
+          </View>
+
+          {/* Model */}
+          <View style={{ marginTop: 14 }}>
+            <Text style={ip.label}>Model <Text style={{ color: TEAL }}>•</Text></Text>
+            <TextInput
+              style={styles.fieldInput}
+              value={model}
+              onChangeText={setModel}
+              placeholder="e.g. Corolla, Hilux…"
+              placeholderTextColor={PLACEHOLDER}
+            />
+          </View>
+
+          {/* Type | Condition */}
+          <View style={[styles.row2, { marginTop: 14 }]}>
+            <InlinePicker label="Type" value={vehicleType} options={VEHICLE_TYPES} onSelect={setVehicleType} />
+            <View style={{ width: 12 }} />
+            <InlinePicker label="Condition" value={condition} options={CONDITIONS} onSelect={setCondition} required />
+          </View>
+
+          {/* Fuel | Transmission */}
+          <View style={[styles.row2, { marginTop: 14 }]}>
+            <InlinePicker label="Fuel" value={fuelType} options={FUEL_TYPES} onSelect={setFuelType} />
+            <View style={{ width: 12 }} />
+            <InlinePicker label="Transmission" value={transmission} options={TRANSMISSIONS} onSelect={setTransmission} />
+          </View>
+
+          {/* Mileage | Location */}
+          <View style={[styles.row2, { marginTop: 14 }]}>
+            <View style={{ flex: 1 }}>
+              <Text style={ip.label}>Mileage (km)</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={mileage}
+                onChangeText={setMileage}
+                placeholder="0"
+                placeholderTextColor={PLACEHOLDER}
+                keyboardType="numeric"
+              />
+            </View>
+            <View style={{ width: 12 }} />
+            <InlinePicker label="Location" value={location} options={GHANA_CITIES} onSelect={setLocation} required />
+          </View>
         </View>
 
-        {/* Vehicle Details */}
+        {/* ── Asking Price ── */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Vehicle Details</Text>
-          <PickerRow
-            label="Vehicle Type *"
-            value={vehicleType}
-            options={VEHICLE_TYPES}
-            onSelect={setVehicleType}
-          />
-          <PickerRow
-            label="Brand *"
-            value={brand}
-            options={CAR_BRANDS}
-            onSelect={setBrand}
-          />
-          <InputField
-            label="Model *"
-            value={model}
-            onChangeText={setModel}
-            placeholder="e.g. Land Cruiser V8"
-          />
-          <InputField
-            label="Year *"
-            value={year}
-            onChangeText={setYear}
-            placeholder="e.g. 2020"
-            keyboardType="numeric"
-          />
-          <InputField
-            label="Mileage (km)"
-            value={mileage}
-            onChangeText={setMileage}
-            placeholder="e.g. 45000"
-            keyboardType="numeric"
-          />
-        </View>
-
-        {/* Specs */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Specifications</Text>
-          <PickerRow
-            label="Fuel Type"
-            value={fuelType}
-            options={FUEL_TYPES}
-            onSelect={setFuelType}
-          />
-          <PickerRow
-            label="Transmission"
-            value={transmission}
-            options={TRANSMISSIONS}
-            onSelect={setTransmission}
-          />
-          <PickerRow
-            label="Condition *"
-            value={condition}
-            options={CONDITIONS}
-            onSelect={setCondition}
-          />
-          <PickerRow
-            label="Location *"
-            value={location}
-            options={GHANA_CITIES}
-            onSelect={setLocation}
-          />
-        </View>
-
-        {/* Pricing */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Pricing</Text>
-          <View style={styles.priceContainer}>
-            <View style={styles.currencyBadge}>
-              <Text style={styles.currencyText}>GHS</Text>
+          <SectionHeader title="Asking price" right={<Text style={{ color: TEAL, fontSize: 12, fontFamily: "Inter_600SemiBold" }}>•</Text>} />
+          <View style={styles.priceRow}>
+            <View style={styles.ghsBadge}>
+              <Text style={styles.ghsText}>GHS</Text>
             </View>
             <TextInput
               style={styles.priceInput}
               value={price}
               onChangeText={setPrice}
-              placeholder="Enter price"
-              placeholderTextColor={Colors.light.textTertiary}
+              placeholder="Enter amount"
+              placeholderTextColor={PLACEHOLDER}
               keyboardType="numeric"
             />
           </View>
+          <View style={styles.negotiableRow}>
+            <Switch
+              value={negotiable}
+              onValueChange={setNegotiable}
+              trackColor={{ false: BORDER, true: TEAL }}
+              thumbColor="#fff"
+              ios_backgroundColor={BORDER}
+            />
+            <Text style={styles.negotiableText}>Price is negotiable</Text>
+          </View>
         </View>
 
-        {/* Description */}
+        {/* ── Description ── */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Description</Text>
-          <InputField
-            label="Tell buyers about the car"
+          <SectionHeader title="Description" />
+          <TextInput
+            style={styles.descInput}
             value={description}
-            onChangeText={setDescription}
-            placeholder="Condition, features, history, why you're selling..."
+            onChangeText={t => t.length <= 500 && setDescription(t)}
+            placeholder={"Describe your vehicle — condition, features, service history…"}
+            placeholderTextColor={PLACEHOLDER}
             multiline
+            numberOfLines={5}
+            textAlignVertical="top"
           />
+          <Text style={styles.charCount}>{description.length} / 500</Text>
         </View>
 
-        {/* ── Boost Your Listing ── */}
+        {/* ── Boost banner ── */}
         <Pressable style={styles.boostCard} onPress={() => router.push("/advertise")}>
-          <LinearGradient
-            colors={["#7A2000", "#FF6B00", "#FF8C38"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.boostGradient}
-          >
-            <View style={styles.boostLeft}>
-              <View style={styles.boostIconBg}>
-                <Feather name="zap" size={20} color="#0EB5CA" />
-              </View>
-              <View style={styles.boostText}>
-                <Text style={styles.boostTitle}>Boost Your Listing</Text>
-                <Text style={styles.boostSub}>Sponsored · Featured · Urgent Badge</Text>
-              </View>
-            </View>
-            <View style={styles.boostArrow}>
-              <Feather name="arrow-right" size={16} color="#0EB5CA" />
-            </View>
-          </LinearGradient>
+          <View style={styles.boostIcon}>
+            <Feather name="square" size={10} color={TEAL} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.boostTitle}>Boost your listing</Text>
+            <Text style={styles.boostSub}>Get 5× more views with a sponsored ad</Text>
+          </View>
+          <Feather name="square" size={14} color={MUTED} />
         </Pressable>
 
-        {/* Submit */}
+        {/* ── Footer note ── */}
+        <Text style={styles.footerNote}>
+          Your listing will be reviewed before going live.{" "}
+          <Text style={{ color: TEAL, fontFamily: "Inter_500Medium" }}>Required fields must be filled.</Text>
+        </Text>
+
+        {/* ── Submit ── */}
         <Pressable
-          style={({ pressed }) => [
-            styles.submitBtn,
-            pressed && { opacity: 0.85 },
-            submitting && { opacity: 0.7 },
-          ]}
+          style={[styles.submitBtn, submitting && { opacity: 0.65 }]}
           onPress={handleSubmit}
           disabled={submitting}
         >
-          <LinearGradient
-            colors={["#CC3D00", "#FF6B00"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.submitGradient}
-          >
-            <Feather name="upload-cloud" size={20} color="#fff" />
-            <Text style={styles.submitText}>
-              {submitting ? "Posting..." : "Post Listing"}
-            </Text>
-          </LinearGradient>
+          {submitting
+            ? <ActivityIndicator color="#fff" />
+            : <Text style={styles.submitText}>Post listing</Text>
+          }
         </Pressable>
 
-        </View>{/* end cardsWrapper */}
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.backgroundSecondary,
+  // Auth wall
+  authWall: {
+    flex: 1, backgroundColor: BG, alignItems: "center",
+    paddingHorizontal: 32, gap: 14,
   },
-  content: {
-    gap: 0,
+  authIconWrap: {
+    width: 64, height: 64, borderRadius: 32,
+    backgroundColor: TEAL_LIGHT, alignItems: "center", justifyContent: "center",
+    marginBottom: 4,
   },
-  cardsWrapper: {
-    padding: 16,
-    gap: 14,
+  authTitle:   { fontSize: 20, fontFamily: "Inter_700Bold",    color: TEXT, textAlign: "center" },
+  authSub:     { fontSize: 14, fontFamily: "Inter_400Regular", color: MUTED, textAlign: "center", lineHeight: 22 },
+  authBtn: {
+    marginTop: 8, height: 50, width: "100%",
+    backgroundColor: TEAL, borderRadius: 14,
+    alignItems: "center", justifyContent: "center",
   },
-  sellHeader: {
-    paddingHorizontal: 18,
-    paddingBottom: 22,
-    gap: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+  authBtnText: { color: "#fff", fontSize: 16, fontFamily: "Inter_700Bold" },
+
+  // Header
+  header: {
+    backgroundColor: TEAL,
+    paddingHorizontal: 20,
+    paddingBottom: 14,
   },
-  sellHeaderBadge: {
+  headerTitle: { fontSize: 18, fontFamily: "Inter_700Bold", color: "#fff" },
+
+  // Stepper
+  stepperWrap: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(14,181,202,0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(14,181,202,0.32)",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    alignSelf: "flex-start",
-    marginBottom: 4,
+    backgroundColor: CARD,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
   },
-  sellHeaderBadgeText: {
-    fontSize: 10,
-    fontFamily: "Inter_700Bold",
-    letterSpacing: 1.5,
-  },
-  screenTitle: {
-    fontSize: 26,
-    fontFamily: "Inter_600SemiBold",
-  },
-  screenSubtitle: {
-    fontSize: 14,
-    fontFamily: "Inter_400Regular",
-    marginBottom: 4,
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    gap: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.light.text,
-  },
-  sectionSubtitle: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    color: Colors.light.textTertiary,
-    marginTop: 0,
-  },
+  stepItem:        { alignItems: "center", gap: 4 },
+  stepDot:         { width: 26, height: 26, borderRadius: 13, backgroundColor: INPUT_BG, borderWidth: 1.5, borderColor: BORDER, alignItems: "center", justifyContent: "center" },
+  stepDotActive:   { backgroundColor: TEAL, borderColor: TEAL },
+  stepNum:         { fontSize: 12, fontFamily: "Inter_700Bold", color: MUTED },
+  stepNumActive:   { color: "#fff" },
+  stepLabel:       { fontSize: 10, fontFamily: "Inter_400Regular", color: MUTED },
+  stepLabelActive: { color: TEAL, fontFamily: "Inter_600SemiBold" },
+  stepLine:        { flex: 1, height: 1.5, backgroundColor: BORDER, marginBottom: 12 },
+  stepLineActive:  { backgroundColor: TEAL },
 
-  vinTitleRow: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
-  vinIconBg: {
-    width: 30,
-    height: 30,
-    borderRadius: 9,
-    backgroundColor: "rgba(14,181,202,0.12)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 2,
+  // Layout
+  scroll:   { flex: 1, backgroundColor: BG },
+  content:  { padding: 16, gap: 12 },
+  card:     {
+    backgroundColor: CARD, borderRadius: 16, padding: 16,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
   },
-  vinRow: { flexDirection: "row", gap: 8, marginTop: 4 },
+  row2: { flexDirection: "row", alignItems: "flex-start" },
+
+  // Photos
+  photoCount: { fontSize: 11, fontFamily: "Inter_500Medium", color: TEAL },
+  photoRow:   { flexDirection: "row", gap: 8, paddingVertical: 4 },
+  addPhoto: {
+    width: 76, height: 76, borderRadius: 10,
+    borderWidth: 2, borderColor: TEAL, borderStyle: "dashed",
+    backgroundColor: TEAL_LIGHT, alignItems: "center", justifyContent: "center", gap: 2,
+  },
+  addPhotoText: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: TEAL },
+  photoThumb: { width: 76, height: 76, borderRadius: 10, overflow: "hidden", position: "relative" },
+  thumbImg:   { width: "100%", height: "100%" },
+  coverBadge: {
+    position: "absolute", bottom: 0, left: 0, right: 0,
+    backgroundColor: "rgba(14,181,202,0.85)", paddingVertical: 3, alignItems: "center",
+  },
+  coverText:  { fontSize: 9, fontFamily: "Inter_700Bold", color: "#fff" },
+  removePhoto: {
+    position: "absolute", top: 4, right: 4,
+    width: 18, height: 18, borderRadius: 9,
+    backgroundColor: "rgba(0,0,0,0.55)", alignItems: "center", justifyContent: "center",
+  },
+  photoEmpty: { width: 76, height: 76, borderRadius: 10, backgroundColor: INPUT_BG, borderWidth: 1.5, borderColor: BORDER },
+  photoHint:  { fontSize: 11, fontFamily: "Inter_400Regular", color: MUTED, lineHeight: 16, marginTop: 4 },
+
+  // VIN
+  optionalTag: { fontSize: 11, fontFamily: "Inter_400Regular", color: MUTED, fontStyle: "italic" },
+  vinRow:    { flexDirection: "row", gap: 10 },
   vinInput: {
-    flex: 1,
-    height: 48,
-    borderWidth: 1.5,
-    borderColor: "#E2E8F0",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.light.text,
-    backgroundColor: "#F8FAFC",
-    letterSpacing: 1,
+    flex: 1, height: 46, backgroundColor: INPUT_BG,
+    borderRadius: 10, borderWidth: 1.5, borderColor: BORDER,
+    paddingHorizontal: 14, fontSize: 13,
+    fontFamily: "Inter_600SemiBold", color: TEXT, letterSpacing: 1,
   },
   vinBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "#0EB5CA",
-    alignItems: "center",
-    justifyContent: "center",
+    height: 46, paddingHorizontal: 18, borderRadius: 10,
+    backgroundColor: TEAL, alignItems: "center", justifyContent: "center",
   },
-  vinCounter: {
-    fontSize: 11,
-    fontFamily: "Inter_400Regular",
-    color: Colors.light.textTertiary,
-    textAlign: "right",
-    marginTop: 0,
-  },
+  vinBtnText:    { color: "#fff", fontSize: 14, fontFamily: "Inter_700Bold" },
   vinSuccess: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(34,197,94,0.08)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "rgba(34,197,94,0.25)",
+    flexDirection: "row", alignItems: "center", gap: 6, marginTop: 8,
+    backgroundColor: "rgba(34,197,94,0.08)", padding: 10, borderRadius: 8,
+    borderWidth: 1, borderColor: "rgba(34,197,94,0.2)",
   },
-  vinSuccessText: {
-    fontSize: 12,
-    fontFamily: "Inter_500Medium",
-    color: "#16A34A",
-    flex: 1,
+  vinSuccessText: { fontSize: 12, fontFamily: "Inter_500Medium", color: "#16A34A" },
+  vinError: {
+    flexDirection: "row", alignItems: "center", gap: 6, marginTop: 8,
+    backgroundColor: "rgba(239,68,68,0.07)", padding: 10, borderRadius: 8,
+    borderWidth: 1, borderColor: "rgba(239,68,68,0.2)",
   },
-  vinErrorBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(239,68,68,0.07)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "rgba(239,68,68,0.2)",
-  },
-  vinErrorText: {
-    fontSize: 12,
-    fontFamily: "Inter_500Medium",
-    color: "#DC2626",
-    flex: 1,
+  vinErrorText: { fontSize: 12, fontFamily: "Inter_500Medium", color: "#DC2626", flex: 1 },
+
+  // Fields
+  fieldInput: {
+    height: 44, backgroundColor: INPUT_BG, borderRadius: 10,
+    borderWidth: 1.5, borderColor: BORDER,
+    paddingHorizontal: 12, fontSize: 14,
+    fontFamily: "Inter_400Regular", color: TEXT,
   },
 
-  imagesRow: {
-    flexDirection: "row",
-    gap: 10,
-    paddingBottom: 4,
-    paddingTop: 4,
-  },
-  imageThumb: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    overflow: "hidden",
-    position: "relative",
-  },
-  thumbImage: {
-    width: "100%",
-    height: "100%",
-  },
-  removeImage: {
-    position: "absolute",
-    top: 4,
-    right: 4,
-    width: 20,
-    height: 20,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  addImageBtn: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    backgroundColor: Colors.primary + "12",
-    borderWidth: 2,
-    borderColor: Colors.primary + "40",
-    borderStyle: "dashed",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-  },
-  addImageText: {
-    fontSize: 10,
-    color: Colors.primary,
-    fontFamily: "Inter_500Medium",
-    textAlign: "center",
-  },
-  fieldContainer: {
-    gap: 6,
-  },
-  fieldLabel: {
-    fontSize: 13,
-    fontFamily: "Inter_500Medium",
-    color: Colors.light.textSecondary,
-  },
-  input: {
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-    fontSize: 15,
-    color: Colors.light.text,
-    fontFamily: "Inter_400Regular",
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-  },
-  inputMulti: {
-    height: 100,
-    textAlignVertical: "top",
-    paddingTop: 12,
-  },
-  priceContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    overflow: "hidden",
-  },
-  currencyBadge: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
-  currencyText: {
-    color: "#fff",
-    fontFamily: "Inter_700Bold",
-    fontSize: 15,
-  },
+  // Price
+  priceRow: { flexDirection: "row", alignItems: "center", gap: 0, borderWidth: 1.5, borderColor: BORDER, borderRadius: 10, overflow: "hidden", backgroundColor: INPUT_BG },
+  ghsBadge: { height: 48, paddingHorizontal: 16, backgroundColor: TEAL, alignItems: "center", justifyContent: "center" },
+  ghsText:  { color: "#fff", fontSize: 14, fontFamily: "Inter_700Bold" },
   priceInput: {
-    flex: 1,
-    paddingHorizontal: 14,
-    fontSize: 18,
-    color: Colors.light.text,
-    fontFamily: "Inter_700Bold",
-    padding: 0,
-    paddingVertical: 13,
+    flex: 1, height: 48, paddingHorizontal: 14,
+    fontSize: 15, fontFamily: "Inter_500Medium", color: TEXT,
   },
-  boostCard: {
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  boostGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  boostLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-  boostIconBg: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "rgba(14,181,202,0.12)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  boostText: { gap: 2, flex: 1 },
-  boostTitle: {
-    fontSize: 15,
-    fontFamily: "Inter_700Bold",
-    color: "#fff",
-  },
-  boostSub: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.65)",
-  },
-  boostArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: "rgba(14,181,202,0.12)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  submitBtn: {
-    borderRadius: 14,
-    overflow: "hidden",
-    marginTop: 4,
-  },
-  submitGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    gap: 10,
-  },
-  submitText: {
-    fontSize: 17,
-    fontFamily: "Inter_700Bold",
-    color: "#fff",
-  },
-  authWall: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-    padding: 40,
-    backgroundColor: "#fff",
-  },
-  authTitle: {
-    fontSize: 22,
-    fontFamily: "Inter_700Bold",
-    color: Colors.light.text,
-  },
-  authText: {
-    fontSize: 14,
-    color: Colors.light.textSecondary,
-    fontFamily: "Inter_400Regular",
-    textAlign: "center",
-  },
-  authBtn: {
-    borderRadius: 14,
-    overflow: "hidden",
-    marginTop: 8,
-    width: "100%",
-  },
-  authBtnGradient: {
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  authBtnText: {
-    fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
-    color: "#fff",
-  },
-});
+  negotiableRow: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 12 },
+  negotiableText: { fontSize: 13, fontFamily: "Inter_400Regular", color: MUTED },
 
-const pStyles = StyleSheet.create({
-  container: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    overflow: "hidden",
+  // Description
+  descInput: {
+    minHeight: 110, backgroundColor: INPUT_BG,
+    borderRadius: 10, borderWidth: 1.5, borderColor: BORDER,
+    padding: 12, fontSize: 14, fontFamily: "Inter_400Regular",
+    color: TEXT, lineHeight: 22,
   },
-  trigger: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-    backgroundColor: Colors.light.backgroundSecondary,
+  charCount: { fontSize: 11, fontFamily: "Inter_400Regular", color: PLACEHOLDER, textAlign: "right", marginTop: 6 },
+
+  // Boost
+  boostCard: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    backgroundColor: CARD, borderRadius: 14, padding: 16,
+    borderWidth: 1.5, borderColor: BORDER,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
   },
-  label: {
-    fontSize: 13,
-    color: Colors.light.textSecondary,
-    fontFamily: "Inter_500Medium",
+  boostIcon: { width: 36, height: 36, borderRadius: 9, backgroundColor: TEAL_LIGHT, alignItems: "center", justifyContent: "center" },
+  boostTitle: { fontSize: 14, fontFamily: "Inter_700Bold", color: TEXT, marginBottom: 2 },
+  boostSub:   { fontSize: 12, fontFamily: "Inter_400Regular", color: MUTED },
+
+  // Footer
+  footerNote: { fontSize: 11, fontFamily: "Inter_400Regular", color: MUTED, textAlign: "center", lineHeight: 18, paddingHorizontal: 8 },
+  submitBtn: {
+    height: 52, backgroundColor: TEAL, borderRadius: 14,
+    alignItems: "center", justifyContent: "center",
+    shadowColor: TEAL, shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,
   },
-  valueRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  value: {
-    fontSize: 15,
-    color: Colors.light.text,
-    fontFamily: "Inter_400Regular",
-  },
-  placeholder: {
-    color: Colors.light.textTertiary,
-  },
-  dropdown: {
-    maxHeight: 180,
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: Colors.light.border,
-  },
-  option: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.backgroundSecondary,
-  },
-  optionActive: {
-    backgroundColor: Colors.primary + "0A",
-  },
-  optionText: {
-    fontSize: 14,
-    color: Colors.light.text,
-    fontFamily: "Inter_400Regular",
-  },
-  optionTextActive: {
-    color: Colors.primary,
-    fontFamily: "Inter_600SemiBold",
-  },
+  submitText: { color: "#fff", fontSize: 16, fontFamily: "Inter_700Bold", letterSpacing: 0.2 },
 });
