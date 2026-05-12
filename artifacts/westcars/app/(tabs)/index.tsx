@@ -16,7 +16,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { CarCard } from "@/components/CarCard";
+import { CarCard, VideoAdCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { CAR_BRANDS, formatPrice } from "@/utils/ghanaData";
@@ -414,6 +414,9 @@ export default function HomeScreen() {
             })}
           </ScrollView>
         </View>
+
+        {/* ── Video Ad slot ── */}
+        <VideoAdCard style={{ marginHorizontal: 10, marginTop: 6 }} />
 
         {/* ── Sponsored Banner → leads to Advertise ── */}
         <Pressable onPress={() => router.push("/advertise")} style={styles.promoBannerWrap}>

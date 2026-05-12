@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { Video, ResizeMode } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
@@ -577,5 +578,195 @@ const sponsoredStyles = StyleSheet.create({
   promoStripDot: {
     color: "rgba(255,255,255,0.6)",
     fontSize: 11,
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VIDEO AD CARD
+// ─────────────────────────────────────────────────────────────────────────────
+interface VideoAdCardProps {
+  videoUri?: string;
+  title?: string;
+  packageName?: string;
+  style?: object;
+}
+
+export function VideoAdCard({ videoUri, title, packageName, style }: VideoAdCardProps) {
+  const { isDark } = useTheme();
+  const scale = useRef(new Animated.Value(1)).current;
+  const nativeDriver = Platform.OS !== "web";
+
+  const pressIn = () =>
+    Animated.spring(scale, { toValue: 0.97, useNativeDriver: nativeDriver, speed: 80, bounciness: 0 }).start();
+  const pressOut = () =>
+    Animated.spring(scale, { toValue: 1, useNativeDriver: nativeDriver, speed: 28, bounciness: 5 }).start();
+
+  return (
+    <Animated.View style={[videoAdStyles.wrap, { transform: [{ scale }] }, style]}>
+      <Pressable
+        onPress={() => router.push("/advertise")}
+        onPressIn={pressIn}
+        onPressOut={pressOut}
+        style={videoAdStyles.card}
+      >
+        <View style={videoAdStyles.mediaWrap}>
+          {videoUri ? (
+            <Video
+              source={{ uri: videoUri }}
+              style={videoAdStyles.video}
+              resizeMode={ResizeMode.COVER}
+              shouldPlay
+              isLooping
+              isMuted
+              useNativeControls={false}
+            />
+          ) : (
+            <LinearGradient
+              colors={["#006F80", "#0EB5CA", "#38D1E5"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={videoAdStyles.placeholder}
+            >
+              <View style={videoAdStyles.playBtn}>
+                <Feather name="play" size={28} color="#fff" />
+              </View>
+              <Text style={videoAdStyles.placeholderTitle}>
+                {title ?? "Advertise Here"}
+              </Text>
+              <Text style={videoAdStyles.placeholderSub}>
+                Book a Video Ad slot
+              </Text>
+            </LinearGradient>
+          )}
+
+          {videoUri && (
+            <LinearGradient
+              colors={["transparent", "rgba(0,0,0,0.65)"]}
+              style={videoAdStyles.scrim}
+              pointerEvents="none"
+            />
+          )}
+
+          <View style={videoAdStyles.badge}>
+            <Feather name="video" size={9} color="#fff" />
+            <Text style={videoAdStyles.badgeText}>VIDEO AD</Text>
+          </View>
+
+          {videoUri && (
+            <View style={videoAdStyles.bottomRow}>
+              <Text style={videoAdStyles.bottomTitle} numberOfLines={1}>
+                {title ?? packageName ?? "Sponsored"}
+              </Text>
+              <View style={videoAdStyles.bookBtn}>
+                <Text style={videoAdStyles.bookBtnText}>Book →</Text>
+              </View>
+            </View>
+          )}
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+const videoAdStyles = StyleSheet.create({
+  wrap: { marginBottom: 2 },
+  card: {
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#0D1117",
+    shadowColor: "#0EB5CA",
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 5,
+  },
+  mediaWrap: {
+    height: 200,
+    position: "relative",
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+  },
+  placeholder: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  playBtn: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  placeholderTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: -0.3,
+  },
+  placeholderSub: {
+    color: "rgba(255,255,255,0.75)",
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+  },
+  scrim: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+  },
+  badge: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#0EB5CA",
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: 9,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 1.0,
+  },
+  bottomRow: {
+    position: "absolute",
+    bottom: 10,
+    left: 10,
+    right: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  bottomTitle: {
+    color: "#fff",
+    fontSize: 13,
+    fontFamily: "Inter_600SemiBold",
+    flex: 1,
+    marginRight: 8,
+  },
+  bookBtn: {
+    backgroundColor: "#0EB5CA",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  bookBtnText: {
+    color: "#fff",
+    fontSize: 12,
+    fontFamily: "Inter_700Bold",
   },
 });
