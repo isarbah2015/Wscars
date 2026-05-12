@@ -1,0 +1,374 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'SF Pro Display', sans-serif; background: var(--color-background-tertiary); }
+  .phone-wrap { display: flex; gap: 16px; padding: 16px; justify-content: center; flex-wrap: wrap; }
+  .phone { width: 340px; background: #f5f5f5; border-radius: 36px; overflow: hidden; border: 6px solid #1a1a1a; position: relative; min-height: 680px; box-shadow: 0 0 0 1px #333; }
+  .screen { background: #fff; height: 100%; display: flex; flex-direction: column; }
+  .tab-label { font-size: 10px; text-align: center; margin-top: 2px; font-weight: 500; }
+
+  .nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 10px; }
+  .nav-back { width: 32px; height: 32px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+  .nav-title { font-size: 15px; font-weight: 600; color: #111; }
+  .nav-action { width: 32px; height: 32px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+
+  .avatar-section { display: flex; flex-direction: column; align-items: center; padding: 20px 18px 16px; gap: 10px; }
+  .avatar-ring { position: relative; }
+  .avatar-img { width: 88px; height: 88px; border-radius: 50%; background: linear-gradient(135deg, #e0e0e0, #c8c8c8); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: #666; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.12); overflow: hidden; }
+  .avatar-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .camera-badge { position: absolute; bottom: 0; right: 0; width: 26px; height: 26px; background: #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; cursor: pointer; }
+  .camera-badge svg { width: 13px; height: 13px; }
+  .seller-name { font-size: 20px; font-weight: 700; color: #111; letter-spacing: -0.3px; }
+  .seller-meta { font-size: 13px; color: #888; }
+  .verified-badge { display: flex; align-items: center; gap: 4px; background: #f0f9f0; border-radius: 20px; padding: 3px 10px; }
+  .verified-badge span { font-size: 11px; color: #2d7a2d; font-weight: 600; }
+
+  .stats-row { display: flex; padding: 0 18px 16px; gap: 10px; }
+  .stat-card { flex: 1; background: #f7f7f7; border-radius: 14px; padding: 12px 8px; text-align: center; }
+  .stat-val { font-size: 18px; font-weight: 700; color: #111; letter-spacing: -0.5px; }
+  .stat-lbl { font-size: 10px; color: #999; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .section { padding: 0 18px 14px; }
+  .section-title { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 10px; letter-spacing: -0.2px; }
+
+  .info-card { background: #f7f7f7; border-radius: 14px; overflow: hidden; }
+  .info-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 0.5px solid #e8e8e8; }
+  .info-row:last-child { border-bottom: none; }
+  .info-row-left { display: flex; align-items: center; gap: 10px; }
+  .info-icon { width: 28px; height: 28px; background: #ebebeb; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .info-label { font-size: 13px; color: #555; }
+  .info-value { font-size: 13px; font-weight: 600; color: #111; }
+
+  .listing-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 0 18px 4px; scrollbar-width: none; }
+  .listing-scroll::-webkit-scrollbar { display: none; }
+  .listing-chip { flex-shrink: 0; background: #f7f7f7; border-radius: 12px; padding: 10px 12px; width: 120px; }
+  .listing-car-img { width: 96px; height: 52px; object-fit: cover; border-radius: 8px; background: #e5e5e5; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
+  .listing-car-name { font-size: 10px; font-weight: 700; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .listing-car-price { font-size: 10px; color: #888; margin-top: 1px; }
+
+  .action-btn { margin: 0 18px 14px; background: #111; border-radius: 16px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; gap: 8px; }
+  .action-btn.secondary { background: #f0f0f0; }
+  .action-btn span { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
+  .action-btn.secondary span { color: #111; }
+  .action-btn svg { width: 18px; height: 18px; }
+
+  .upload-sheet { position: absolute; bottom: 0; left: 0; right: 0; background: #fff; border-radius: 20px 20px 0 0; padding: 16px 18px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 10; }
+  .sheet-handle { width: 36px; height: 4px; background: #ddd; border-radius: 4px; margin: 0 auto 14px; }
+  .sheet-title { font-size: 16px; font-weight: 700; color: #111; margin-bottom: 14px; }
+  .sheet-options { display: flex; gap: 10px; margin-bottom: 14px; }
+  .sheet-opt { flex: 1; background: #f7f7f7; border-radius: 14px; padding: 14px 8px; text-align: center; cursor: pointer; }
+  .sheet-opt-icon { width: 40px; height: 40px; background: #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; }
+  .sheet-opt-label { font-size: 12px; font-weight: 600; color: #111; }
+  .progress-wrap { background: #f0f0f0; border-radius: 20px; height: 6px; margin: 0 0 10px; overflow: hidden; }
+  .progress-bar { height: 100%; background: #111; border-radius: 20px; width: 72%; transition: width 0.3s; }
+  .progress-text { font-size: 11px; color: #888; text-align: center; }
+  .remove-row { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; cursor: pointer; }
+  .remove-row span { font-size: 13px; color: #e24b4a; font-weight: 600; }
+
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { background: #f0f0f0; border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 600; color: #555; }
+  .chip.active { background: #111; color: #fff; }
+
+  .tab-bar { display: flex; border-top: 0.5px solid #e8e8e8; background: #fff; padding: 8px 0 4px; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
+  .tab-item.active svg { stroke: #111; }
+  .tab-item svg { stroke: #ccc; transition: stroke 0.15s; }
+
+  .screen-2 .avatar-img { background: linear-gradient(135deg, #d0e8f0, #b8d8e8); color: #4a7a8a; }
+
+  .scroll-area { flex: 1; overflow-y: auto; scrollbar-width: none; }
+  .scroll-area::-webkit-scrollbar { display: none; }
+</style>
+
+<h2 class="sr-only">Profile screen designs for car marketplace app — own profile with upload and seller view</h2>
+
+<div class="phone-wrap">
+
+  <!-- SCREEN 1: app/(tabs)/profile.tsx — Own Profile -->
+  <div class="phone">
+    <div class="screen">
+      <div class="nav-bar">
+        <div style="width:32px"></div>
+        <span class="nav-title">My Profile</span>
+        <button class="nav-action" title="Settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+
+      <div class="scroll-area">
+        <div class="avatar-section">
+          <div class="avatar-ring">
+            <div class="avatar-img">JD</div>
+            <div class="camera-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
+          </div>
+          <div class="seller-name">James Davidson</div>
+          <div class="seller-meta">Member since 2021 · Singapore</div>
+          <div class="verified-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2d7a2d" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Verified Seller</span>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-val">12</div>
+            <div class="stat-lbl">Listings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">4.9</div>
+            <div class="stat-lbl">Rating</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">47</div>
+            <div class="stat-lbl">Sales</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Account Details</div>
+          <div class="info-card">
+            <div class="info-row">
+              <div class="info-row-left">
+                <div class="info-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </div>
+                <span class="info-label">Email</span>
+              </div>
+              <span class="info-value">james@email.com</span>
+            </div>
+            <div class="info-row">
+              <div class="info-row-left">
+                <div class="info-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.52 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+                <span class="info-label">Phone</span>
+              </div>
+              <span class="info-value">+65 9123 4567</span>
+            </div>
+            <div class="info-row">
+              <div class="info-row-left">
+                <div class="info-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <span class="info-label">Location</span>
+              </div>
+              <span class="info-value">Orchard, SG</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">My Listings</div>
+          <div class="listing-scroll">
+            <div class="listing-chip">
+              <div class="listing-car-img">
+                <svg width="48" height="28" viewBox="0 0 48 28" fill="none"><rect x="4" y="14" width="40" height="10" rx="4" fill="#ddd"/><rect x="8" y="8" width="28" height="10" rx="3" fill="#e5e5e5"/><circle cx="12" cy="24" r="4" fill="#aaa"/><circle cx="36" cy="24" r="4" fill="#aaa"/></svg>
+              </div>
+              <div class="listing-car-name">Porsche 911 S</div>
+              <div class="listing-car-price">S$420,000</div>
+            </div>
+            <div class="listing-chip">
+              <div class="listing-car-img">
+                <svg width="48" height="28" viewBox="0 0 48 28" fill="none"><rect x="4" y="14" width="40" height="10" rx="4" fill="#ddd"/><rect x="10" y="9" width="24" height="9" rx="3" fill="#e5e5e5"/><circle cx="12" cy="24" r="4" fill="#aaa"/><circle cx="36" cy="24" r="4" fill="#aaa"/></svg>
+              </div>
+              <div class="listing-car-name">BMW M4 Comp.</div>
+              <div class="listing-car-price">S$280,000</div>
+            </div>
+            <div class="listing-chip">
+              <div class="listing-car-img">
+                <svg width="48" height="28" viewBox="0 0 48 28" fill="none"><rect x="4" y="14" width="40" height="10" rx="4" fill="#ddd"/><rect x="6" y="10" width="32" height="8" rx="3" fill="#e5e5e5"/><circle cx="12" cy="24" r="4" fill="#aaa"/><circle cx="36" cy="24" r="4" fill="#aaa"/></svg>
+              </div>
+              <div class="listing-car-name">Tesla Model S</div>
+              <div class="listing-car-price">S$195,000</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height: 14px;"></div>
+        <div class="action-btn secondary" style="margin-bottom: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span style="color:#111;">Edit Profile</span>
+        </div>
+        <div class="action-btn" style="margin-bottom: 20px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>+ New Listing</span>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <div class="tab-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span class="tab-label" style="color:#ccc">Home</span>
+        </div>
+        <div class="tab-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="tab-label" style="color:#ccc">Search</span>
+        </div>
+        <div class="tab-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="tab-label" style="color:#ccc">Saved</span>
+        </div>
+        <div class="tab-item active">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="tab-label" style="color:#111; font-weight:700">Profile</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: app/user/[id].tsx — Seller Profile -->
+  <div class="phone screen-2">
+    <div class="screen" style="position:relative;">
+      <div class="nav-bar">
+        <button class="nav-back" title="Back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <span class="nav-title">Seller Profile</span>
+        <button class="nav-action" title="Share">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+      </div>
+
+      <div class="scroll-area">
+        <div class="avatar-section">
+          <div class="avatar-ring">
+            <div class="avatar-img" style="background:linear-gradient(135deg,#d4e8d4,#b8d4b8);color:#3a6a3a;font-size:26px;">SK</div>
+          </div>
+          <div class="seller-name">Sarah Kim</div>
+          <div class="seller-meta">Member since 2019 · Buona Vista, SG</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div class="verified-badge">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2d7a2d" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Verified</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:3px;background:#fff8e6;border-radius:20px;padding:3px 10px;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="#e8a020" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span style="font-size:11px;color:#a06010;font-weight:700;">4.9</span>
+              <span style="font-size:11px;color:#a06010;">(38 reviews)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-val">8</div>
+            <div class="stat-lbl">Active</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">38</div>
+            <div class="stat-lbl">Sales</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">~2h</div>
+            <div class="stat-lbl">Response</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Specialises In</div>
+          <div class="chip-row">
+            <div class="chip active">Luxury</div>
+            <div class="chip active">Sports</div>
+            <div class="chip">SUVs</div>
+            <div class="chip">EV</div>
+            <div class="chip">Japanese</div>
+          </div>
+        </div>
+
+        <div class="section" style="margin-top:4px;">
+          <div class="section-title">Active Listings</div>
+          <div class="listing-scroll">
+            <div class="listing-chip">
+              <div class="listing-car-img">
+                <svg width="48" height="28" viewBox="0 0 48 28" fill="none"><rect x="4" y="14" width="40" height="10" rx="4" fill="#ddd"/><rect x="8" y="8" width="28" height="10" rx="3" fill="#e5e5e5"/><circle cx="12" cy="24" r="4" fill="#aaa"/><circle cx="36" cy="24" r="4" fill="#aaa"/></svg>
+              </div>
+              <div class="listing-car-name">Ferrari 296</div>
+              <div class="listing-car-price">S$1.2M</div>
+            </div>
+            <div class="listing-chip">
+              <div class="listing-car-img">
+                <svg width="48" height="28" viewBox="0 0 48 28" fill="none"><rect x="4" y="14" width="40" height="10" rx="4" fill="#ddd"/><rect x="10" y="9" width="24" height="9" rx="3" fill="#e5e5e5"/><circle cx="12" cy="24" r="4" fill="#aaa"/><circle cx="36" cy="24" r="4" fill="#aaa"/></svg>
+              </div>
+              <div class="listing-car-name">Lamborghini U.</div>
+              <div class="listing-car-price">S$980,000</div>
+            </div>
+            <div class="listing-chip">
+              <div class="listing-car-img">
+                <svg width="48" height="28" viewBox="0 0 48 28" fill="none"><rect x="4" y="14" width="40" height="10" rx="4" fill="#ddd"/><rect x="6" y="10" width="32" height="8" rx="3" fill="#e5e5e5"/><circle cx="12" cy="24" r="4" fill="#aaa"/><circle cx="36" cy="24" r="4" fill="#aaa"/></svg>
+              </div>
+              <div class="listing-car-name">McLaren 720S</div>
+              <div class="listing-car-price">S$760,000</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section" style="margin-top:8px;">
+          <div class="section-title">Contact</div>
+          <div class="info-card">
+            <div class="info-row">
+              <div class="info-row-left">
+                <div class="info-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.52 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+                <span class="info-label">Response rate</span>
+              </div>
+              <span class="info-value" style="color:#2d7a2d;">98%</span>
+            </div>
+            <div class="info-row">
+              <div class="info-row-left">
+                <div class="info-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <span class="info-label">Last active</span>
+              </div>
+              <span class="info-value">2 hrs ago</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:14px;"></div>
+        <div class="action-btn secondary" style="margin-bottom:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span style="color:#111;">Message Seller</span>
+        </div>
+        <div class="action-btn" style="margin-bottom:20px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.52 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span>Call Seller</span>
+        </div>
+      </div>
+
+      <!-- Upload sheet overlay (shown on own profile only as preview) -->
+      <div class="upload-sheet" id="uploadSheet" style="display:none;">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">Update Profile Photo</div>
+        <div class="sheet-options">
+          <div class="sheet-opt">
+            <div class="sheet-opt-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+            <div class="sheet-opt-label">Camera</div>
+          </div>
+          <div class="sheet-opt">
+            <div class="sheet-opt-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <div class="sheet-opt-label">Library</div>
+          </div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"></div>
+        </div>
+        <div class="progress-text">Uploading to Firebase Storage… 72%</div>
+        <div class="remove-row">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e24b4a" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          <span>Remove Photo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

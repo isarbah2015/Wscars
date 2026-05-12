@@ -1,0 +1,120 @@
+Here are both production screens — now here's the actual code to drop in:
+
+app/(tabs)/profile.tsx — your own profile, always shows the upload button:
+tsximport { useState, useCallback } from 'react'
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { Image } from 'expo-image'
+import * as ImagePicker from 'expo-image-picker'
+import { router } from 'expo-router'
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
+import { doc, updateDoc } from 'firebase/firestore'
+import { storage, db, auth } from '@/lib/firebase'
+import BottomSheet from '@/components/BottomSheet'
+
+export default function ProfileScreen() {
+  const user = auth.currentUser!
+  const [photoURL, setPhotoURL] = useState(user.photoURL)
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null)
+  const [sheetOpen, setSheetOpen] = useState(false)
+
+  const pickAndUpload = useCallback(async (fromCamera: boolean) => {
+    const result = fromCamera
+      ? await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.8 })
+      : await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.8 })
+
+    if (result.canceled) return
+    setSheetOpen(false)
+
+    const uri = result.assets[0].uri
+    const blob = await (await fetch(uri)).blob()
+    const storageRef = ref(storage, `avatars/${user.uid}.jpg`)
+
+    const task = uploadBytesResumable(storageRef, blob, { contentType: 'image/jpeg' })
+    task.on('state_changed',
+      snap => setUploadProgress(snap.bytesTransferred / snap.totalBytes),
+      err => { Alert.alert('Upload failed', err.message); setUploadProgress(null) },
+      async () => {
+        const url = await getDownloadURL(task.snapshot.ref)
+        await updateDoc(doc(db, 'users', user.uid), { photoURL: url })
+        setPhotoURL(url)
+        setUploadProgress(null)
+      }
+    )
+  }, [user])
+
+  const removePhoto = useCallback(async () => {
+    await updateDoc(doc(db, 'users', user.uid), { photoURL: null })
+    setPhotoURL(null)
+    setSheetOpen(false)
+  }, [user])
+
+  return (
+    <View style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Avatar */}
+        <TouchableOpacity onPress={() => setSheetOpen(true)} style={styles.avatarWrap}>
+          {photoURL
+            ? <Image source={{ uri: photoURL }} style={styles.avatar} />
+            : <View style={[styles.avatar, styles.avatarFallback]}>
+                <Text style={styles.initials}>{user.displayName?.slice(0,2).toUpperCase()}</Text>
+              </View>
+          }
+          <View style={styles.cameraBadge}>
+            {/* camera icon */}
+          </View>
+        </TouchableOpacity>
+
+        {uploadProgress !== null && (
+          <View style={styles.progressWrap}>
+            <View style={[styles.progressBar, { width: `${uploadProgress * 100}%` }]} />
+          </View>
+        )}
+
+        {/* Stats, listings, etc. — same pattern as car detail page */}
+      </ScrollView>
+
+      {/* Upload bottom sheet */}
+      <BottomSheet visible={sheetOpen} onClose={() => setSheetOpen(false)}>
+        <TouchableOpacity onPress={() => pickAndUpload(true)}>
+          <Text>Camera</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => pickAndUpload(false)}>
+          <Text>Photo Library</Text>
+        </TouchableOpacity>
+        {photoURL && (
+          <TouchableOpacity onPress={removePhoto}>
+            <Text style={{ color: '#e24b4a' }}>Remove Photo</Text>
+          </TouchableOpacity>
+        )}
+      </BottomSheet>
+    </View>
+  )
+}
+
+app/user/[id].tsx — ownership check gates the upload:
+tsximport { useLocalSearchParams } from 'expo-router'
+import { auth } from '@/lib/firebase'
+
+export default function UserProfileScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>()
+  const isOwner = auth.currentUser?.uid === id
+
+  return (
+    <View>
+      <TouchableOpacity
+        onPress={isOwner ? () => setSheetOpen(true) : undefined}
+        disabled={!isOwner}
+      >
+        <AvatarImage userId={id} />
+        {isOwner && <CameraBadge />}
+      </TouchableOpacity>
+
+      {/* Same upload logic — only renders if isOwner */}
+      {isOwner && <UploadSheet ... />}
+
+      {/* Seller-only: message/call buttons when !isOwner */}
+      {!isOwner && <ContactButtons sellerId={id} />}
+    </View>
+  )
+}
+Key things to wire up: extract the avatar upload logic into a shared useAvatarUpload(userId) hook that both screens import — keeps it DRY. The isOwner flag on user/[id].tsx controls whether the camera badge renders and whether the sheet can open. Want me to write the full useAvatarUpload hook next?

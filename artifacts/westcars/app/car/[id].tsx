@@ -7,7 +7,7 @@
 //                  fallback → MOCK_CARS (utils/mockData.ts)
 // ─────────────────────────────────────────────────────────────
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -527,7 +527,7 @@ const styles = StyleSheet.create({
   notFoundText: { fontSize: 16, fontWeight: "600" },
   notFoundBtn: {
     marginTop: 4, paddingHorizontal: 20, paddingVertical: 10,
-    backgroundColor: "#111", borderRadius: 12,
+    backgroundColor: "#0EB5CA", borderRadius: 12,
   },
   notFoundBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
 
@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
   imgPlaceholderText: { fontSize: 13, color: "#ccc" },
   dotRow:             { flexDirection: "row", justifyContent: "center", gap: 5, paddingVertical: 10 },
   dot:                { width: 5, height: 5, borderRadius: 3, backgroundColor: "#ddd" },
-  dotActive:          { width: 14, backgroundColor: "#111" },
+  dotActive:          { width: 14, backgroundColor: "#0EB5CA" },
   imgCount: {
     position: "absolute", bottom: 14, right: 14,
     backgroundColor: "rgba(0,0,0,0.4)", borderRadius: 10,
@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
 
   // Price
   priceBadge: {
-    backgroundColor: "#111", borderRadius: 14,
+    backgroundColor: "#0EB5CA", borderRadius: 14,
     paddingHorizontal: 18, paddingVertical: 10,
     alignSelf: "flex-start", marginBottom: 16,
   },
@@ -687,7 +687,7 @@ const styles = StyleSheet.create({
   sellerAvImg: { width: 42, height: 42, borderRadius: 21 },
   sellerAv: {
     width: 42, height: 42, borderRadius: 21,
-    backgroundColor: "#111", alignItems: "center", justifyContent: "center", flexShrink: 0,
+    backgroundColor: "#0EB5CA", alignItems: "center", justifyContent: "center", flexShrink: 0,
   },
   sellerAvText:    { color: "#fff", fontSize: 13, fontWeight: "700" },
   sellerInfo:      { flex: 1, minWidth: 0 },
@@ -708,7 +708,7 @@ const styles = StyleSheet.create({
     flexDirection: "column", alignItems: "center", gap: 4,
   },
   bLabel: { fontSize: 11, fontWeight: "700", flexShrink: 1, textAlign: "center" },
-  bCall:  { backgroundColor: "#111" },
+  bCall:  { backgroundColor: "#0EB5CA" },
   bWa:    { backgroundColor: "#1DAB54" },
   bChat: {
     ...Platform.select({
