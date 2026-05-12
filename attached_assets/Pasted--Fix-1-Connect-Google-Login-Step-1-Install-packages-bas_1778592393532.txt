@@ -1,0 +1,246 @@
+🔧 Fix 1: Connect Google Login
+Step 1: Install packages
+bash
+npm install @react-native-google-signin/google-signin @react-native-firebase/auth
+Step 2: Update context/AppContext.tsx
+Add imports:
+
+tsx
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import auth from '@react-native-firebase/auth';
+Add configuration (inside the provider component):
+
+tsx
+useEffect(() => {
+  GoogleSignin.configure({
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    offlineAccess: true,
+  });
+}, []);
+Replace the stub handler:
+
+tsx
+const handleGoogleSignIn = async () => {
+  try {
+    await GoogleSignin.hasPlayServices();
+    const { idToken } = await GoogleSignin.signIn();
+    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+    await auth().signInWithCredential(googleCredential);
+    router.replace('/(tabs)/home');
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
+};
+Step 3: Add client IDs to app.json
+json
+"android": {
+  "config": {
+    "googleServices": {
+      "clientId": "YOUR_ANDROID_CLIENT_ID"
+    }
+  }
+},
+"ios": {
+  "config": {
+    "googleServicesIos": {
+      "clientId": "YOUR_IOS_CLIENT_ID"
+    }
+  }
+}
+🔧 Fix 2: Sign‑In / Create Account Not Working
+File: app/auth/login.tsx
+tsx
+const handleLogin = async () => {
+  if (!email || !password) return alert('Enter email and password');
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    router.replace('/(tabs)/home');
+  } catch (err) {
+    alert(err.message);
+  }
+};
+File: app/auth/signup.tsx
+tsx
+const handleSignUp = async () => {
+  if (!email || !password || !name) return alert('All fields required');
+  try {
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(userCred.user, { displayName: name });
+    await setDoc(doc(db, 'users', userCred.user.uid), {
+      name,
+      email,
+      createdAt: new Date().toISOString(),
+    });
+    router.replace('/(tabs)/home');
+  } catch (err) {
+    alert(err.message);
+  }
+};
+Ensure buttons have onPress pointing to these handlers.
+
+🔧 Fix 3: Show Password When Typing
+Add to both login.tsx and signup.tsx:
+
+tsx
+const [showPassword, setShowPassword] = useState(false);
+Replace TextInput:
+
+tsx
+<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+  <TextInput
+    style={{ flex: 1 }}
+    placeholder="Password"
+    secureTextEntry={!showPassword}
+    value={password}
+    onChangeText={setPassword}
+  />
+  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+    <Text>{showPassword ? 'Hide' : 'Show'}</Text>
+  </TouchableOpacity>
+</View>
+Same for confirmPassword in sign‑up.
+
+🔧 Fix 4: Remove All Mock Data from Production Build
+Delete any mockCars, dummyCars arrays in home.tsx, search.tsx, etc.
+
+Ensure only Firestore data is used:
+
+tsx
+const [cars, setCars] = useState([]);
+useEffect(() => {
+  const fetch = async () => {
+    const snap = await getDocs(collection(db, 'cars'));
+    setCars(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  };
+  fetch();
+}, []);
+Delete test entries from Firebase Console → Firestore → cars collection.
+
+Remove any seedMockData() calls or wrap in if (__DEV__).
+
+🔧 Fix 5: Premium Filter UI (Price Slider, Professional Look)
+Current problem: Basic filter design, icons cut off, no range slider.
+Solution – Use a slider for price range
+Install a slider library:
+
+bash
+npm install @react-native-community/slider
+Create a custom filter component (components/PriceSlider.tsx):
+
+tsx
+import Slider from '@react-native-community/slider';
+
+export default function PriceSlider({ min, max, onValueChange }) {
+  const [low, setLow] = useState(min);
+  const [high, setHigh] = useState(max);
+  return (
+    <View style={{ padding: 16 }}>
+      <Text style={styles.label}>Price range (GHS)</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Text>GHS {low}</Text>
+        <Text>GHS {high}</Text>
+      </View>
+      <Slider
+        minimumValue={min}
+        maximumValue={max}
+        value={high}
+        onValueChange={val => {
+          setHigh(val);
+          onValueChange([low, val]);
+        }}
+        minimumTrackTintColor="#FF6B00"
+        maximumTrackTintColor="#ddd"
+        thumbTintColor="#FF6B00"
+      />
+      {/* For dual range, use two sliders or a library like 'multislider' */}
+    </View>
+  );
+}
+Improve filter layout (no cut‑off icons)
+Add horizontal padding to scroll views: contentContainerStyle={{ paddingHorizontal: 16 }}
+
+Ensure each filter chip has enough margin and no overflow:
+
+tsx
+<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16 }}>
+  {brands.map(b => (
+    <TouchableOpacity style={{ marginRight: 12, paddingVertical: 8, paddingHorizontal: 16, borderRadius: 30, backgroundColor: selected === b ? '#FF6B00' : '#f0f0f0' }}>
+      <Text style={{ color: selected === b ? 'white' : '#333' }}>{b}</Text>
+    </TouchableOpacity>
+  ))}
+</ScrollView>
+Remove any absolute positioning that may cause clipping.
+
+🔧 Fix 6: Horizontal Scroll Must Not Cut Cards at Screen Edges
+Solution: Add contentContainerStyle with horizontal padding to all horizontal FlatList or ScrollView components.
+
+Example:
+
+tsx
+<FlatList
+  horizontal
+  data={categories}
+  renderItem={...}
+  showsHorizontalScrollIndicator={false}
+  contentContainerStyle={{ paddingHorizontal: 16 }}
+  // Ensures first and last items are not cut off
+/>
+Also ensure cards have marginRight for spacing, and no negative margins.
+
+🔧 Fix 7: Inconsistent Car Listing Cards – Different Sizes Everywhere
+Root cause: Cards have fixed widths, but different content lengths or missing flex properties.
+
+Solution – Standardise card dimensions:
+
+tsx
+// In your CarCard component
+const styles = StyleSheet.create({
+  card: {
+    width: (Dimensions.get('window').width - 48) / 2, // 2 columns with 16px margins on each side
+    marginBottom: 16,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  image: {
+    width: '100%',
+    height: 130,
+    resizeMode: 'cover',
+  },
+  content: {
+    padding: 12,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  price: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FF6B00',
+    marginBottom: 4,
+  },
+  // Ensure all text has fixed line heights
+  text: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: '#666',
+  },
+});
+Also check parent FlatList configuration:
+
+tsx
+<FlatList
+  data={cars}
+  numColumns={2}
+  keyExtractor={item => item.id}
+  columnWrapperStyle={{ justifyContent: 'space-between' }}
+  renderItem={({ item }) => <CarCard car={item} />}
+/>
+Make sure every card receives the same props and does not have additional margins/paddings that differ between home screen, search screen, and favorites screen.
