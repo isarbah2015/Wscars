@@ -306,7 +306,6 @@ export function CarCard({ car, style }: CarCardProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: (Dimensions.get('window').width - 48) / 2,
   },
   card: {
     borderRadius: 16,

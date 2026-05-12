@@ -534,8 +534,8 @@ const S = StyleSheet.create({
 
   // List
   listContent: { padding: 12, paddingBottom: 100 },
-  row:         { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
-  cardStyle:   { width: (SCREEN_W - 36) / 2 },
+  row:         { flexDirection: "row", paddingHorizontal: 8, gap: 8, marginBottom: 8 },
+  cardStyle:   { flex: 1 },
 
   // Empty state
   empty: {
