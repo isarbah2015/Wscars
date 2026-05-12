@@ -1,0 +1,314 @@
+File 1 — utils/ghanaData.ts
+Tell Replit:
+
+In utils/ghanaData.ts, replace the TRANSMISSIONS constant on line 92 with this:
+
+tsexport const TRANSMISSIONS = ["Automatic", "Manual", "Semi-Auto", "CVT", "DCT"];
+
+Then replace the GHANA_CITIES constant (lines 5–26) with this:
+
+tsexport const GHANA_CITIES = [
+  "Accra", "Kumasi", "Takoradi", "Tamale", "Cape Coast",
+  "Sunyani", "Koforidua", "Ho", "Wa", "Bolgatanga",
+  "Tema", "Ashaiman", "Kasoa", "Winneba", "Saltpond",
+  "Techiman", "Obuasi", "Tarkwa", "Dunkwa", "Ejura",
+  "Kintampo", "Mampong", "Nkawkaw", "Sefwi Wiawso", "Berekum",
+  "Wenchi", "Dormaa Ahenkro", "Goaso", "Bibiani", "Axim",
+  "Half Assini", "Prestea", "Bogoso", "Agona Swedru", "Mankessim",
+  "Elmina", "Apam", "Mumford", "Dawhenya", "Adentan",
+];
+
+File 2 — app/(tabs)/search.tsx
+Tell Replit:
+
+In app/(tabs)/search.tsx, replace the entire FilterModal function (lines 197–353) and its styles block fS (lines 779–838) with the following. Do not touch anything else in the file.
+
+tsxconst PRICE_MIN = 0;
+const PRICE_MAX = 500000;
+const PRICE_STEP = 5000;
+
+const ALL_BRANDS = CAR_BRANDS;
+
+function FilterModal({
+  visible, onClose, onApply, initial,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  onApply: (f: FilterState) => void;
+  initial: FilterState;
+}) {
+  const [priceMin, setPriceMin] = React.useState(initial.priceMin ?? PRICE_MIN);
+  const [priceMax, setPriceMax] = React.useState(initial.priceMax ?? PRICE_MAX);
+  const [brands, setBrands] = React.useState<string[]>(initial.brands ?? []);
+  const [transmissions, setTransmissions] = React.useState<string[]>(initial.transmissions ?? []);
+  const [conditions, setConditions] = React.useState<string[]>(initial.conditions ?? []);
+  const [cities, setCities] = React.useState<string[]>(initial.cities ?? []);
+  const [showAllBrands, setShowAllBrands] = React.useState(false);
+  const [showAllCities, setShowAllCities] = React.useState(false);
+
+  React.useEffect(() => {
+    if (visible) {
+      setPriceMin(initial.priceMin ?? PRICE_MIN);
+      setPriceMax(initial.priceMax ?? PRICE_MAX);
+      setBrands(initial.brands ?? []);
+      setTransmissions(initial.transmissions ?? []);
+      setConditions(initial.conditions ?? []);
+      setCities(initial.cities ?? []);
+      setShowAllBrands(false);
+      setShowAllCities(false);
+    }
+  }, [visible]);
+
+  const fmt = (v: number) =>
+    v >= 1000 ? `GHS ${(v / 1000).toFixed(0)}k` : `GHS ${v}`;
+
+  const toggle = (arr: string[], set: (a: string[]) => void, val: string) =>
+    set(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
+
+  const reset = () => {
+    setPriceMin(PRICE_MIN); setPriceMax(PRICE_MAX);
+    setBrands([]); setTransmissions([]);
+    setConditions([]); setCities([]);
+  };
+
+  const apply = () => onApply({ priceMin, priceMax, brands, transmissions, conditions, cities });
+
+  const visibleBrands = showAllBrands ? ALL_BRANDS : ALL_BRANDS.slice(0, 15);
+  const visibleCities = showAllCities ? GHANA_CITIES : GHANA_CITIES.slice(0, 8);
+
+  const PRESETS = [
+    { label: "Under 30k", min: 0, max: 30000 },
+    { label: "30k – 100k", min: 30000, max: 100000 },
+    { label: "100k – 300k", min: 100000, max: 300000 },
+    { label: "300k+", min: 300000, max: 500000 },
+  ];
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <View style={fS.overlay}>
+        <TouchableOpacity style={fS.backdrop} onPress={onClose} activeOpacity={1} />
+        <View style={fS.sheet}>
+          <View style={fS.handle} />
+
+          <View style={fS.header}>
+            <Text style={fS.title}>Filter listings</Text>
+            <TouchableOpacity onPress={reset} hitSlop={12}>
+              <Text style={fS.resetTxt}>Reset all</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={fS.scroll}>
+
+            {/* ── Price range ── */}
+            <View style={fS.section}>
+              <Text style={fS.secLabel}>Price range</Text>
+              <View style={fS.priceRow}>
+                <View>
+                  <Text style={fS.priceCaption}>Minimum</Text>
+                  <Text style={fS.priceVal}>{fmt(priceMin)}</Text>
+                </View>
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text style={fS.priceCaption}>Maximum</Text>
+                  <Text style={fS.priceVal}>{fmt(priceMax)}</Text>
+                </View>
+              </View>
+
+              <View style={fS.sliderWrap}>
+                <View style={fS.track}>
+                  <View style={[
+                    fS.fill,
+                    {
+                      left: `${(priceMin / PRICE_MAX) * 100}%`,
+                      right: `${100 - (priceMax / PRICE_MAX) * 100}%`,
+                    },
+                  ]} />
+                </View>
+                <Slider
+                  style={fS.slider}
+                  minimumValue={PRICE_MIN}
+                  maximumValue={PRICE_MAX}
+                  step={PRICE_STEP}
+                  value={priceMin}
+                  onValueChange={(v) => { if (v < priceMax - PRICE_STEP) setPriceMin(v); }}
+                  minimumTrackTintColor="transparent"
+                  maximumTrackTintColor="transparent"
+                  thumbTintColor="#FF6B00"
+                />
+                <Slider
+                  style={[fS.slider, { position: "absolute", left: 0, right: 0 }]}
+                  minimumValue={PRICE_MIN}
+                  maximumValue={PRICE_MAX}
+                  step={PRICE_STEP}
+                  value={priceMax}
+                  onValueChange={(v) => { if (v > priceMin + PRICE_STEP) setPriceMax(v); }}
+                  minimumTrackTintColor="transparent"
+                  maximumTrackTintColor="transparent"
+                  thumbTintColor="#FF6B00"
+                />
+              </View>
+
+              <View style={fS.presetsRow}>
+                {PRESETS.map(p => (
+                  <TouchableOpacity
+                    key={p.label}
+                    style={[fS.presetChip, priceMin === p.min && priceMax === p.max && fS.chipActive]}
+                    onPress={() => { setPriceMin(p.min); setPriceMax(p.max); }}
+                  >
+                    <Text style={[fS.chipTxt, priceMin === p.min && priceMax === p.max && fS.chipTxtActive]}>
+                      {p.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={fS.divider} />
+
+            {/* ── Brand ── */}
+            <View style={fS.section}>
+              <Text style={fS.secLabel}>Brand</Text>
+              <View style={fS.brandGrid}>
+                {visibleBrands.map(b => (
+                  <TouchableOpacity
+                    key={b}
+                    style={[fS.brandItem, brands.includes(b) && fS.brandActive]}
+                    onPress={() => toggle(brands, setBrands, b)}
+                  >
+                    <Text style={[fS.brandTxt, brands.includes(b) && fS.brandTxtActive]} numberOfLines={1}>
+                      {b}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {!showAllBrands && ALL_BRANDS.length > 15 && (
+                <TouchableOpacity style={fS.showMore} onPress={() => setShowAllBrands(true)}>
+                  <Text style={fS.showMoreTxt}>+ {ALL_BRANDS.length - 15} more brands</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <View style={fS.divider} />
+
+            {/* ── Transmission ── */}
+            <View style={fS.section}>
+              <Text style={fS.secLabel}>Transmission</Text>
+              <View style={fS.chipsRow}>
+                {TRANSMISSIONS.map(t => (
+                  <TouchableOpacity
+                    key={t}
+                    style={[fS.chip, transmissions.includes(t) && fS.chipActive]}
+                    onPress={() => toggle(transmissions, setTransmissions, t)}
+                  >
+                    <Text style={[fS.chipTxt, transmissions.includes(t) && fS.chipTxtActive]}>{t}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={fS.divider} />
+
+            {/* ── Condition ── */}
+            <View style={fS.section}>
+              <Text style={fS.secLabel}>Condition</Text>
+              <View style={fS.chipsRow}>
+                {CONDITIONS.map(c => (
+                  <TouchableOpacity
+                    key={c}
+                    style={[fS.chip, conditions.includes(c) && fS.chipActive]}
+                    onPress={() => toggle(conditions, setConditions, c)}
+                  >
+                    <Text style={[fS.chipTxt, conditions.includes(c) && fS.chipTxtActive]}>{c}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={fS.divider} />
+
+            {/* ── Location ── */}
+            <View style={fS.section}>
+              <Text style={fS.secLabel}>Location</Text>
+              <View style={fS.chipsRow}>
+                {visibleCities.map(city => (
+                  <TouchableOpacity
+                    key={city}
+                    style={[fS.chip, cities.includes(city) && fS.chipActive]}
+                    onPress={() => toggle(cities, setCities, city)}
+                  >
+                    <Text style={[fS.chipTxt, cities.includes(city) && fS.chipTxtActive]}>{city}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {!showAllCities && GHANA_CITIES.length > 8 && (
+                <TouchableOpacity style={fS.showMore} onPress={() => setShowAllCities(true)}>
+                  <Text style={fS.showMoreTxt}>+ {GHANA_CITIES.length - 8} more cities</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+          </ScrollView>
+
+          {/* ── Bottom actions ── */}
+          <View style={fS.bottom}>
+            <TouchableOpacity style={fS.closeBtn} onPress={onClose}>
+              <Text style={fS.closeTxt}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={fS.applyBtn} onPress={apply}>
+              <Text style={fS.applyTxt}>Apply filters</Text>
+            </TouchableOpacity>
+          </View>
+
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const fS = StyleSheet.create({
+  overlay: { flex: 1, justifyContent: "flex-end" },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.5)" },
+  sheet: { backgroundColor: "#fff", borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "92%", overflow: "hidden" },
+  handle: { width: 36, height: 4, borderRadius: 2, backgroundColor: "#E5E5EA", alignSelf: "center", marginTop: 12 },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingVertical: 16 },
+  title: { fontSize: 17, fontWeight: "500", color: "#1C1C1E" },
+  resetTxt: { fontSize: 14, color: "#FF6B00", fontWeight: "500" },
+  scroll: { paddingBottom: 8 },
+  section: { paddingHorizontal: 20, paddingVertical: 16 },
+  secLabel: { fontSize: 11, fontWeight: "500", color: "#8E8E93", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 },
+  divider: { height: 0.5, backgroundColor: "#E5E5EA", marginHorizontal: 20 },
+  priceRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
+  priceCaption: { fontSize: 11, color: "#8E8E93", marginBottom: 2 },
+  priceVal: { fontSize: 16, fontWeight: "500", color: "#1C1C1E" },
+  sliderWrap: { height: 40, justifyContent: "center", marginBottom: 12 },
+  track: { height: 4, backgroundColor: "#E5E5EA", borderRadius: 2, marginHorizontal: 10 },
+  fill: { position: "absolute", height: 4, backgroundColor: "#FF6B00", borderRadius: 2 },
+  slider: { position: "absolute", left: 0, right: 0, height: 40 },
+  presetsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  brandGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  brandItem: { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F9F9F9" },
+  brandActive: { backgroundColor: "#FF6B00", borderColor: "#FF6B00" },
+  brandTxt: { fontSize: 12, fontWeight: "500", color: "#3C3C43" },
+  brandTxtActive: { color: "#fff" },
+  showMore: { marginTop: 10, alignItems: "center", paddingVertical: 6 },
+  showMoreTxt: { fontSize: 13, color: "#FF6B00", fontWeight: "500" },
+  chipsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  chip: { paddingVertical: 7, paddingHorizontal: 14, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F2F2F7" },
+  chipActive: { backgroundColor: "#FF6B00", borderColor: "#FF6B00" },
+  chipTxt: { fontSize: 13, color: "#3C3C43" },
+  chipTxtActive: { color: "#fff" },
+  presetChip: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F2F2F7" },
+  bottom: { flexDirection: "row", gap: 10, padding: 16, paddingBottom: 32, borderTopWidth: 0.5, borderTopColor: "#E5E5EA" },
+  closeBtn: { flex: 1, padding: 14, borderRadius: 14, backgroundColor: "#F2F2F7", alignItems: "center" },
+  closeTxt: { fontSize: 15, fontWeight: "500", color: "#3C3C43" },
+  applyBtn: { flex: 2, padding: 14, borderRadius: 14, backgroundColor: "#FF6B00", alignItems: "center" },
+  applyTxt: { fontSize: 15, fontWeight: "500", color: "#fff" },
+});
+
+One important note for Replit: The dual-handle slider requires @react-native-community/slider. Check if it's already installed:
+bashgrep "community/slider" package.json
+If it's not there, tell Replit to run:
+bashnpx expo install @react-native-community/slider
+Then add this import at the top of search.tsx alongside the other imports:
+tsximport Slider from "@react-native-community/slider";
+Also make sure TRANSMISSIONS, CONDITIONS, and GHANA_CITIES are imported from utils/ghanaData.ts at the top of search.tsx — they should already be there but confirm before applying.
+That's the complete fix. Two files only. Nothing else touched. Report back
