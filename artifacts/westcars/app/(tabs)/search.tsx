@@ -497,7 +497,7 @@ const S = StyleSheet.create({
   searchInput: {
     flex: 1, flexDirection: "row", alignItems: "center",
     backgroundColor: INPUT_BG, borderRadius: 12,
-    paddingHorizontal: 14, height: 46, gap: 10,
+    paddingHorizontal: 14, height: 46, minHeight: 46, gap: 10,
   },
   input: {
     flex: 1, fontSize: 14, fontFamily: "Inter_400Regular",
@@ -507,6 +507,7 @@ const S = StyleSheet.create({
     width: 46, height: 46, borderRadius: 12,
     backgroundColor: ORANGE,
     alignItems: "center", justifyContent: "center",
+    flexShrink: 0,
   },
   filterDot: {
     position: "absolute", top: 8, right: 8,
