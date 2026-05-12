@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -321,6 +321,9 @@ export default function SearchScreen() {
   const [activeFilters, setActiveFilters] = useState<ModalFilters | null>(null);
   const [quickFilter,   setQuickFilter]   = useState<QuickFilterKey>("All");
 
+  const chipScrollRef = useRef<ScrollView>(null);
+  const chipLayouts   = useRef<Partial<Record<QuickFilterKey, { x: number; width: number }>>>({});
+
   useEffect(() => {
     if (brandParam) {
       setActiveFilters((prev) => ({ ...(prev ?? DEFAULT_FILTERS), brand: brandParam }));
@@ -379,6 +382,22 @@ export default function SearchScreen() {
     }
     return result;
   }, [cars, matchesQuery, matchesModalFilters]);
+
+  const sortedFilters = React.useMemo(() => {
+    const [allChip, ...rest] = QUICK_FILTERS;
+    const sorted = [...rest].sort((a, b) => (chipCounts[b.key] ?? 0) - (chipCounts[a.key] ?? 0));
+    return [allChip, ...sorted];
+  }, [chipCounts]);
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const layout = chipLayouts.current[quickFilter];
+      if (!layout || !chipScrollRef.current) return;
+      const scrollX = Math.max(0, layout.x - 12);
+      chipScrollRef.current.scrollTo({ x: scrollX, animated: true });
+    }, 0);
+    return () => clearTimeout(id);
+  }, [quickFilter, sortedFilters]);
 
   const listData = React.useMemo(() => {
     const seeded = filtered.map((car) => ({
@@ -486,17 +505,24 @@ export default function SearchScreen() {
 
         {/* Chip row — paddingHorizontal on contentContainerStyle stops edge clipping */}
         <ScrollView
+          ref={chipScrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={S.chipRow}
         >
-          {QUICK_FILTERS.map(({ key, label, color }) => {
+          {sortedFilters.map(({ key, label, color }) => {
             const active = quickFilter === key;
             const count = chipCounts[key] ?? 0;
             const isEmpty = count === 0 && key !== "All";
             return (
               <Pressable
                 key={key}
+                onLayout={(e) => {
+                  chipLayouts.current[key] = {
+                    x: e.nativeEvent.layout.x,
+                    width: e.nativeEvent.layout.width,
+                  };
+                }}
                 style={[
                   S.chip,
                   active
