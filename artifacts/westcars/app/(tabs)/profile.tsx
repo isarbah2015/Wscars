@@ -238,7 +238,7 @@ export default function ProfileScreen() {
         </View>
         {uploadProgress !== null && (
           <View style={styles.uploadProgressTrack}>
-            <View style={[styles.uploadProgressFill, { width: `${Math.round(uploadProgress * 100)}%` as any }]} />
+            <View style={[styles.uploadProgressFill, { width: 88 * uploadProgress }]} />
           </View>
         )}
 

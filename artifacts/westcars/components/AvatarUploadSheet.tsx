@@ -1,7 +1,3 @@
-// components/AvatarUploadSheet.tsx
-// WestCars — reusable bottom sheet for avatar upload
-// Uses react-native-svg inline icons (no external icon lib required)
-
 import { Modal, Pressable, View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import Svg, { Path, Circle, Rect, Polyline } from 'react-native-svg'
 
