@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
@@ -368,8 +369,30 @@ export default function SearchScreen() {
   const [activeFilters, setActiveFilters] = useState<ModalFilters | null>(null);
   const [quickFilter,   setQuickFilter]   = useState<QuickFilterKey>("All");
 
-  const chipScrollRef = useRef<ScrollView>(null);
-  const chipLayouts   = useRef<Partial<Record<QuickFilterKey, { x: number; width: number }>>>({});
+  const chipScrollRef  = useRef<ScrollView>(null);
+  const chipLayouts    = useRef<Partial<Record<QuickFilterKey, { x: number; width: number }>>>({});
+  const hasHydrated    = useRef(false);
+
+  const STORAGE_KEY = "westcars:quickFilter";
+
+  useEffect(() => {
+    if (category || brandParam) {
+      hasHydrated.current = true;
+      return;
+    }
+    AsyncStorage.getItem(STORAGE_KEY).then((saved) => {
+      if (saved && QUICK_FILTERS.some((f) => f.key === saved)) {
+        setQuickFilter(saved as QuickFilterKey);
+      }
+    }).catch(() => {}).finally(() => {
+      hasHydrated.current = true;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydrated.current) return;
+    AsyncStorage.setItem(STORAGE_KEY, quickFilter).catch(() => {});
+  }, [quickFilter]);
 
   useEffect(() => {
     if (brandParam) {
