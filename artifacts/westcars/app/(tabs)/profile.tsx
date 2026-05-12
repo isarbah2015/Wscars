@@ -190,12 +190,12 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     if (Platform.OS === "web") {
       logout();
-      router.replace("/(tabs)");
+      setTimeout(() => { router.replace("/(tabs)"); }, 100);
       return;
     }
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
       { text: "Cancel", style: "cancel" },
-      { text: "Sign Out", style: "destructive", onPress: () => { logout(); router.replace("/(tabs)"); } },
+      { text: "Sign Out", style: "destructive", onPress: () => { logout(); setTimeout(() => { router.replace("/(tabs)"); }, 100); } },
     ]);
   };
 

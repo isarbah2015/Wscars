@@ -30,7 +30,7 @@ export default function LoginScreen() {
     try {
       setLoading(true);
       await signInWithEmailAndPassword(auth!, email.trim(), password);
-      router.replace('/(tabs)');
+      setTimeout(() => { router.replace('/(tabs)'); }, 100);
     } catch (e: any) {
       const msg = e.code === 'auth/invalid-credential'
         ? 'Incorrect email or password'
