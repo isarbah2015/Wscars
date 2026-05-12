@@ -44,13 +44,13 @@ export default function WelcomeScreen() {
           toValue: trackWidth,
           duration: 1300,
           easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.delay(600),
         Animated.timing(shimmerX, {
           toValue: -trackWidth,
           duration: 0,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ])
     );
@@ -62,13 +62,13 @@ export default function WelcomeScreen() {
           toValue: 1.12,
           duration: 600,
           easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.timing(thumbPulse, {
           toValue: 1,
           duration: 600,
           easing: Easing.in(Easing.quad),
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.delay(200),
       ])
