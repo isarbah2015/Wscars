@@ -39,7 +39,7 @@ function FAQItem({ item, isDark, colors }: { item: typeof FAQS[0]; isDark: boole
   const toggle = () => {
     const next = !open;
     setOpen(next);
-    Animated.spring(anim, { toValue: next ? 1 : 0, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
+    Animated.spring(anim, { toValue: next ? 1 : 0, useNativeDriver: false, speed: 40, bounciness: 0 }).start();
   };
 
   const rotate = anim.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "180deg"] });

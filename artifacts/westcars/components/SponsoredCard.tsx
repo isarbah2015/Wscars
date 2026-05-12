@@ -31,9 +31,9 @@ export function SponsoredCard({ car, style }: SponsoredCardProps) {
 
   const scale = useRef(new Animated.Value(1)).current;
   const pressIn = () =>
-    Animated.spring(scale, { toValue: 0.975, useNativeDriver: true, speed: 80, bounciness: 0 }).start();
+    Animated.spring(scale, { toValue: 0.975, useNativeDriver: false, speed: 80, bounciness: 0 }).start();
   const pressOut = () =>
-    Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 28, bounciness: 4 }).start();
+    Animated.spring(scale, { toValue: 1, useNativeDriver: false, speed: 28, bounciness: 4 }).start();
 
   return (
     <Animated.View style={[{ transform: [{ scale }] }, style]}>
