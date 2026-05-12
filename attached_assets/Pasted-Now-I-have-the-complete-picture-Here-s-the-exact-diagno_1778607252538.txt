@@ -1,0 +1,112 @@
+Now I have the complete picture. Here's the exact diagnosis and fix plan:
+Two broken parallel paths — we're killing one and fixing the other:
+
+❌ Kill — the useAuthRequest hook + stub in AppContext.tsx (wrong hook, never calls Firebase, always returns false)
+✅ Fix — the GoogleAuthBridge + promptRef pattern in login.tsx (right hook, just needs loginWithGoogle to actually call Firebase)
+
+
+Exact Replit instructions:
+
+Fix 1 — Google Login
+File 1: context/AppContext.tsx
+Step 1 — Remove the broken Google hook and its response listener. Find and delete these three blocks (lines ~289–304):
+jsconst [_, googleResponse, googlePromptAsync] = Google.useAuthRequest({
+  androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? 'placeholder',
+  webClientId:     process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? 'placeholder',
+});
+jsuseEffect(() => {
+  if (googleResponse?.type === 'success') {
+    const { id_token } = googleResponse.params;
+    if (id_token) loginWithGoogle(id_token);
+  }
+}, [googleResponse, loginWithGoogle]);
+jsconst loginWithGooglePopup = useCallback(async (): Promise<boolean> => {
+  if (googlePromptAsync) await googlePromptAsync();
+  return false;
+}, [googlePromptAsync]);
+Step 2 — Replace the loginWithGoogle stub (lines ~284–288) with the real implementation:
+jsconst loginWithGoogle = useCallback(async (idToken: string, accessToken?: string): Promise<boolean> => {
+  if (!useFirebase) return false;
+  try {
+    const { auth } = await import('@/lib/firebase-persistence');
+    const { GoogleAuthProvider, signInWithCredential } = await import('firebase/auth');
+    if (!auth) return false;
+    const credential = GoogleAuthProvider.credential(idToken, accessToken);
+    const result = await signInWithCredential(auth, credential);
+    const fbUser = result.user;
+    // Upsert user doc in Firestore
+    const { db } = await import('@/lib/firebase');
+    const { doc, setDoc, getDoc, serverTimestamp } = await import('firebase/firestore');
+    if (db) {
+      const ref = doc(db, 'users', fbUser.uid);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        await setDoc(ref, {
+          id: fbUser.uid,
+          name: fbUser.displayName ?? 'User',
+          email: fbUser.email ?? '',
+          phone: '',
+          photoURL: fbUser.photoURL ?? '',
+          createdAt: serverTimestamp(),
+          favorites: [],
+          blockedUsers: [],
+        });
+      }
+    }
+    return true;
+  } catch (err) {
+    console.error('[Google sign-in]', err);
+    return false;
+  }
+}, [useFirebase]);
+Step 3 — Add back loginWithGooglePopup as a no-op passthrough (login.tsx uses GoogleAuthBridge's promptRef directly, but the context value still needs to export this name):
+jsconst loginWithGooglePopup = useCallback(async (): Promise<boolean> => {
+  return false; // login.tsx uses GoogleAuthBridge promptRef directly
+}, []);
+Step 4 — Remove the Google import from expo-auth-session/providers/google at the top of AppContext if it's only used by the deleted hook. Find:
+jsimport * as Google from 'expo-auth-session/providers/google';
+Delete that line entirely.
+
+File 2: components/GoogleAuthBridge.native.tsx
+This is currently a no-op stub. Replace the entire file contents with the real implementation from GoogleAuthBridge.tsx — they should be identical since you're on a dev build, not Expo Go:
+tsx// @ts-nocheck
+/**
+ * GoogleAuthBridge — Native (Android / iOS) — REAL IMPLEMENTATION
+ * Requires a full dev/production build (not Expo Go)
+ */
+import React, { useEffect } from "react";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
+WebBrowser.maybeCompleteAuthSession();
+
+export function GoogleAuthBridge({
+  onIdToken,
+  promptRef,
+}: {
+  onIdToken: (idToken: string, accessToken?: string) => void;
+  promptRef: React.MutableRefObject<(() => Promise<void>) | null>;
+}) {
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    iosClientId:     process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    webClientId:     process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  });
+
+  useEffect(() => {
+    if (response?.type === "success") {
+      const { id_token, access_token } = response.params as Record<string, string>;
+      if (id_token) onIdToken(id_token, access_token ?? undefined);
+    }
+  }, [response, onIdToken]);
+
+  useEffect(() => {
+    if (!promptAsync) { promptRef.current = null; return; }
+    promptRef.current = async () => { await promptAsync(); };
+    return () => { promptRef.current = null; };
+  }, [request, promptAsync, promptRef]);
+
+  return null;
+}
+
+Also add to Replit secrets if not already there:
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID = <your iOS client ID from Google Cloud Console>

@@ -1,13 +1,39 @@
-import React from "react";
+// @ts-nocheck
+/**
+ * GoogleAuthBridge — Native (Android / iOS) — REAL IMPLEMENTATION
+ * Requires a full dev/production build (not Expo Go)
+ */
+import React, { useEffect } from "react";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
 
-// expo-auth-session/providers/google requires ExpoCryptoAES which is a
-// custom native module NOT included in Expo Go. It only works in a full
-// development or production build. We keep this file as a no-op so the
-// app loads in Expo Go without crashing. Google sign-in can be wired back
-// here once a proper native build is used.
-export function GoogleAuthBridge(_props: {
+WebBrowser.maybeCompleteAuthSession();
+
+export function GoogleAuthBridge({
+  onIdToken,
+  promptRef,
+}: {
   onIdToken: (idToken: string, accessToken?: string) => void;
   promptRef: React.MutableRefObject<(() => Promise<void>) | null>;
 }) {
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    iosClientId:     process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    webClientId:     process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  });
+
+  useEffect(() => {
+    if (response?.type === "success") {
+      const { id_token, access_token } = response.params as Record<string, string>;
+      if (id_token) onIdToken(id_token, access_token ?? undefined);
+    }
+  }, [response, onIdToken]);
+
+  useEffect(() => {
+    if (!promptAsync) { promptRef.current = null; return; }
+    promptRef.current = async () => { await promptAsync(); };
+    return () => { promptRef.current = null; };
+  }, [request, promptAsync, promptRef]);
+
   return null;
 }

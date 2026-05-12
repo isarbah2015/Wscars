@@ -7,14 +7,10 @@
  */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
 import { Car, Conversation, Message, Report, Review, Transaction, User } from "@/types";
 import { ADMIN_USER, MOCK_CARS, MOCK_CONVERSATIONS, MOCK_MESSAGES, MOCK_USERS } from "@/utils/mockData";
 import { isFirebaseReady } from "@/lib/firebase";
 import * as fb from "@/services/firebase";
-
-WebBrowser.maybeCompleteAuthSession();
 
 interface AppContextType {
   currentUser: User | null;
@@ -281,27 +277,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return true;
   }, [useFirebase]);
 
-  const loginWithGoogle = useCallback(async (_idToken: string, _accessToken?: string): Promise<boolean> => {
-    console.warn('Google sign-in: add EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID and EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID to enable');
-    return false;
-  }, []);
-
-  const [_, googleResponse, googlePromptAsync] = Google.useAuthRequest({
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? 'placeholder',
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? 'placeholder',
-  });
-
-  useEffect(() => {
-    if (googleResponse?.type === 'success') {
-      const { id_token } = googleResponse.params;
-      if (id_token) loginWithGoogle(id_token);
+  const loginWithGoogle = useCallback(async (idToken: string, accessToken?: string): Promise<boolean> => {
+    if (!useFirebase) return false;
+    try {
+      const { auth } = await import('@/lib/firebase-persistence');
+      const { GoogleAuthProvider, signInWithCredential } = await import('firebase/auth');
+      if (!auth) return false;
+      const credential = GoogleAuthProvider.credential(idToken, accessToken);
+      const result = await signInWithCredential(auth, credential);
+      const fbUser = result.user;
+      const { db } = await import('@/lib/firebase');
+      const { doc, setDoc, getDoc, serverTimestamp } = await import('firebase/firestore');
+      if (db) {
+        const ref = doc(db, 'users', fbUser.uid);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          await setDoc(ref, {
+            id: fbUser.uid,
+            name: fbUser.displayName ?? 'User',
+            email: fbUser.email ?? '',
+            phone: '',
+            photoURL: fbUser.photoURL ?? '',
+            createdAt: serverTimestamp(),
+            favorites: [],
+            blockedUsers: [],
+          });
+        }
+      }
+      return true;
+    } catch (err) {
+      console.error('[Google sign-in]', err);
+      return false;
     }
-  }, [googleResponse, loginWithGoogle]);
+  }, [useFirebase]);
 
   const loginWithGooglePopup = useCallback(async (): Promise<boolean> => {
-    if (googlePromptAsync) await googlePromptAsync();
-    return false;
-  }, [googlePromptAsync]);
+    return false; // login.tsx uses GoogleAuthBridge promptRef directly
+  }, []);
 
   const logout = useCallback(async () => {
     if (useFirebase) {
