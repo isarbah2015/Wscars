@@ -123,10 +123,27 @@ function matchesQuickFilter(car: Car, key: QuickFilterKey): boolean {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
+// MODAL FILTERS TYPE
+// ─────────────────────────────────────────────────────────────────────────────
+type PriceRange = typeof PRICE_RANGES[0];
+
+interface ModalFilters {
+  brand:        string;
+  model:        string;
+  location:     string;
+  fuelType:     string;
+  transmission: string;
+  condition:    string;
+  priceRange:   PriceRange | null;
+}
+
+type ModalFilterKey = keyof ModalFilters;
+
+// ─────────────────────────────────────────────────────────────────────────────
 // FILTER MODAL — theme-aware
 // ─────────────────────────────────────────────────────────────────────────────
 function FilterModal({ visible, onClose, onApply }: {
-  visible: boolean; onClose: () => void; onApply: (f: any) => void;
+  visible: boolean; onClose: () => void; onApply: (f: ModalFilters) => void;
 }) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -283,6 +300,11 @@ function FilterModal({ visible, onClose, onApply }: {
   );
 }
 
+const DEFAULT_FILTERS: ModalFilters = {
+  brand: "Any", model: "Any", location: "Any",
+  fuelType: "Any", transmission: "Any", condition: "Any", priceRange: null,
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN SEARCH SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
@@ -296,12 +318,12 @@ export default function SearchScreen() {
 
   const [query,         setQuery]         = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
-  const [activeFilters, setActiveFilters] = useState<any>(null);
+  const [activeFilters, setActiveFilters] = useState<ModalFilters | null>(null);
   const [quickFilter,   setQuickFilter]   = useState<QuickFilterKey>("All");
 
   useEffect(() => {
     if (brandParam) {
-      setActiveFilters((prev: any) => ({ ...(prev || {}), brand: brandParam }));
+      setActiveFilters((prev) => ({ ...(prev ?? DEFAULT_FILTERS), brand: brandParam }));
       setQuickFilter("All"); setQuery("");
     }
   }, [brandParam]);
@@ -371,6 +393,35 @@ export default function SearchScreen() {
     return v !== "Any";
   });
 
+  // ── Active filter chips ────────────────────────────────────────────────────
+  const activeFilterChips = React.useMemo(() => {
+    if (!activeFilters) return [];
+    const chips: { key: ModalFilterKey; label: string }[] = [];
+    const { brand, model, location, fuelType, transmission, condition, priceRange } = activeFilters;
+    if (brand && brand !== "Any")               chips.push({ key: "brand",        label: brand });
+    if (model && model !== "Any")               chips.push({ key: "model",        label: model });
+    if (location && location !== "Any")         chips.push({ key: "location",     label: location });
+    if (fuelType && fuelType !== "Any")         chips.push({ key: "fuelType",     label: fuelType });
+    if (transmission && transmission !== "Any") chips.push({ key: "transmission", label: transmission });
+    if (condition && condition !== "Any")       chips.push({ key: "condition",    label: condition });
+    if (priceRange)                             chips.push({ key: "priceRange",   label: priceRange.label });
+    return chips;
+  }, [activeFilters]);
+
+  const removeFilter = React.useCallback((key: ModalFilterKey) => {
+    setActiveFilters((prev: ModalFilters | null) => {
+      if (!prev) return prev;
+      const next: ModalFilters = key === "priceRange"
+        ? { ...prev, priceRange: null }
+        : { ...prev, [key]: "Any" };
+      const stillActive =
+        next.brand !== "Any" || next.model !== "Any" || next.location !== "Any" ||
+        next.fuelType !== "Any" || next.transmission !== "Any" ||
+        next.condition !== "Any" || next.priceRange !== null;
+      return stillActive ? next : null;
+    });
+  }, []);
+
   return (
     <View style={[S.root, { backgroundColor: colors.background }]}>
 
@@ -414,6 +465,24 @@ export default function SearchScreen() {
             {hasFilters && <View style={S.filterDot} />}
           </Pressable>
         </View>
+
+        {/* ── Active modal filter chips ── */}
+        {activeFilterChips.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={S.activeChipRow}
+          >
+            {activeFilterChips.map(({ key, label }) => (
+              <View key={key} style={[S.activeChip, { backgroundColor: colors.accentLight, borderColor: TEAL }]}>
+                <Text style={[S.activeChipText, { color: TEAL }]}>{label}</Text>
+                <Pressable onPress={() => removeFilter(key)} hitSlop={8}>
+                  <Feather name="x" size={13} color={TEAL} />
+                </Pressable>
+              </View>
+            ))}
+          </ScrollView>
+        )}
 
         {/* Chip row — paddingHorizontal on contentContainerStyle stops edge clipping */}
         <ScrollView
@@ -542,6 +611,19 @@ const S = StyleSheet.create({
     width: 7, height: 7, borderRadius: 4,
     backgroundColor: "#fff",
     borderWidth: 1.5, borderColor: ORANGE,
+  },
+
+  activeChipRow: {
+    flexDirection: "row", gap: 8,
+    paddingHorizontal: 14, paddingBottom: 8,
+  },
+  activeChip: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    paddingHorizontal: 10, paddingVertical: 5,
+    borderRadius: 20, borderWidth: 1.5,
+  },
+  activeChipText: {
+    fontSize: 12, fontFamily: "Inter_600SemiBold",
   },
 
   chipRow: {
