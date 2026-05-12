@@ -626,11 +626,8 @@ export default function CarDetailScreen() {
           onPress={handleCall}
           android_ripple={{ color: "rgba(255,255,255,0.2)" }}
         >
-          <Feather name="phone" size={18} color="#fff" />
-          <View style={styles.btnTextBlock}>
-            <Text style={styles.stickyBtnLabel}>Call</Text>
-            <Text style={styles.stickyBtnSub}>9am – 9pm</Text>
-          </View>
+          <Feather name="phone" size={20} color="#fff" />
+          <Text style={styles.stickyBtnLabel} numberOfLines={1}>Call</Text>
         </Pressable>
 
         {/* WhatsApp */}
@@ -639,11 +636,8 @@ export default function CarDetailScreen() {
           onPress={handleWhatsApp}
           android_ripple={{ color: "rgba(255,255,255,0.2)" }}
         >
-          <Feather name="message-square" size={18} color="#fff" />
-          <View style={styles.btnTextBlock}>
-            <Text style={styles.stickyBtnLabel}>WhatsApp</Text>
-            <Text style={styles.stickyBtnSub}>Quick reply</Text>
-          </View>
+          <Feather name="message-square" size={20} color="#fff" />
+          <Text style={styles.stickyBtnLabel} numberOfLines={1}>WhatsApp</Text>
         </Pressable>
 
         {/* Chat */}
@@ -652,11 +646,8 @@ export default function CarDetailScreen() {
           onPress={() => handleMessage()}
           android_ripple={{ color: "rgba(255,255,255,0.2)" }}
         >
-          <Feather name="message-circle" size={18} color="#fff" />
-          <View style={styles.btnTextBlock}>
-            <Text style={styles.stickyBtnLabel}>Chat</Text>
-            <Text style={styles.stickyBtnSub}>In-app</Text>
-          </View>
+          <Feather name="message-circle" size={20} color="#fff" />
+          <Text style={styles.stickyBtnLabel} numberOfLines={1}>Chat</Text>
         </Pressable>
       </View>
     </View>
@@ -941,7 +932,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     paddingHorizontal: 12,
-    paddingTop: 12,
+    paddingTop: 10,
     borderTopWidth: 1,
     shadowColor: "#000",
     shadowOpacity: 0.06,
@@ -951,17 +942,18 @@ const styles = StyleSheet.create({
   },
   stickyBtn: {
     flex: 1,
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
-    paddingVertical: 12,
+    gap: 4,
+    paddingVertical: 10,
     borderRadius: 14,
+    minWidth: 0,
   },
   callBtn: {
     backgroundColor: "#22C55E",
     shadowColor: "#22C55E",
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
     elevation: 5,
@@ -969,7 +961,7 @@ const styles = StyleSheet.create({
   whatsappBtn: {
     backgroundColor: "#25D366",
     shadowColor: "#25D366",
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
     elevation: 5,
@@ -977,12 +969,16 @@ const styles = StyleSheet.create({
   chatBtn: {
     backgroundColor: "#0EB5CA",
     shadowColor: "#0EB5CA",
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
     elevation: 5,
   },
-  btnTextBlock: { alignItems: "flex-start" },
-  stickyBtnLabel: { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
-  stickyBtnSub: { color: "rgba(255,255,255,0.75)", fontSize: 10, fontFamily: "Inter_400Regular" },
+  stickyBtnLabel: {
+    color: "#fff",
+    fontSize: 11,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 0.2,
+    flexShrink: 1,
+  },
 });
