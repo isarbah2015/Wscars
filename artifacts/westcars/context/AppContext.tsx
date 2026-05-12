@@ -75,18 +75,33 @@ const STORAGE_KEYS = {
 };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const useFirebase = isFirebaseReady() && !__DEV__;
+  // Gate: use Firebase whenever it has been initialised successfully.
+  // The old `&& !__DEV__` guard was the root cause of mock data leaking into
+  // production — if Firebase init failed silently (missing secrets, network
+  // error, etc.) useFirebase became false in prod and MOCK_CARS pre-loaded.
+  const useFirebase = isFirebaseReady();
+
+  // Only seed mock data in dev builds when Firebase is also unavailable.
+  // In production, if Firebase isn't ready we surface an error — never mocks.
+  const useMocks = !useFirebase && __DEV__;
+
+  if (!useFirebase && !__DEV__) {
+    console.error(
+      "[AppContext] PRODUCTION: Firebase is not ready — real data unavailable. " +
+      "Check that all EXPO_PUBLIC_FIREBASE_* env vars are set in the EAS build."
+    );
+  }
 
   const [currentUser,    setCurrentUser]    = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [favorites,      setFavorites]      = useState<string[]>([]);
-  const [cars,           setCars]           = useState<Car[]>(useFirebase ? [] : MOCK_CARS);
-  const [conversations,  setConversations]  = useState<Conversation[]>(useFirebase ? [] : MOCK_CONVERSATIONS);
+  const [cars,           setCars]           = useState<Car[]>(useMocks ? MOCK_CARS : []);
+  const [conversations,  setConversations]  = useState<Conversation[]>(useMocks ? MOCK_CONVERSATIONS : []);
   const [messages,       setMessages]       = useState<Record<string, Message[]>>(
-    useFirebase ? {} : { conv1: MOCK_MESSAGES, conv2: [] },
+    useMocks ? { conv1: MOCK_MESSAGES, conv2: [] } : {},
   );
   const [isLoading,      setIsLoading]      = useState(true);
-  const [reviews,        setReviews]        = useState<Review[]>(useFirebase ? [] : MOCK_REVIEWS);
+  const [reviews,        setReviews]        = useState<Review[]>(useMocks ? MOCK_REVIEWS : []);
   const [reports,        setReports]        = useState<Report[]>([]);
   const [transactions,   setTransactions]   = useState<Transaction[]>([]);
   const [blockedUsers,   setBlockedUsers]   = useState<string[]>([]);

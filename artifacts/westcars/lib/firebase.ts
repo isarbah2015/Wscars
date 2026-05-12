@@ -44,10 +44,14 @@ if (missing.length === 0) {
   } catch (err) {
     console.warn("[firebase] init failed:", err);
   }
-} else if (__DEV__) {
-  console.warn(
-    `[firebase] Missing config keys: ${missing.join(", ")}. ` +
-    `Set EXPO_PUBLIC_FIREBASE_* secrets to enable Firebase.`,
+} else {
+  // Always warn — not just in dev — so production crash logs surface this.
+  const level = __DEV__ ? "warn" : "error";
+  console[level](
+    `[firebase] Missing required config keys: ${missing.join(", ")}. ` +
+    (__DEV__
+      ? "Set EXPO_PUBLIC_FIREBASE_* secrets to enable Firebase."
+      : "PRODUCTION BUILD has no Firebase config — check EAS secrets / env vars."),
   );
 }
 
