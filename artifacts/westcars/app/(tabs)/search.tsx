@@ -388,7 +388,7 @@ export default function SearchScreen() {
             )}
           </View>
           <Pressable
-            style={[S.filterBtn, hasFilters && S.filterBtnActive]}
+            style={S.filterBtn}
             onPress={() => setFilterVisible(true)}
           >
             <Feather name="sliders" size={18} color="#fff" />
@@ -508,9 +508,6 @@ const S = StyleSheet.create({
     backgroundColor: ORANGE,
     alignItems: "center", justifyContent: "center",
   },
-  filterBtnActive: {
-    backgroundColor: ORANGE,
-  },
   filterDot: {
     position: "absolute", top: 8, right: 8,
     width: 7, height: 7, borderRadius: 4,
@@ -521,7 +518,7 @@ const S = StyleSheet.create({
   // Chip row — paddingHorizontal: 14 on contentContainerStyle stops edge clipping
   chipRow: {
     flexDirection: "row", gap: 8,
-    paddingHorizontal: 14, paddingBottom: 2,
+    paddingLeft: 14, paddingRight: 60, paddingBottom: 2,
   },
   chip: {
     paddingHorizontal: 16, paddingVertical: 8,
@@ -537,7 +534,7 @@ const S = StyleSheet.create({
 
   // List
   listContent: { padding: 12, paddingBottom: 100 },
-  row:         { justifyContent: "space-between", marginBottom: 12 },
+  row:         { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
   cardStyle:   { width: (SCREEN_W - 36) / 2 },
 
   // Empty state
