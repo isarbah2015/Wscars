@@ -19,7 +19,6 @@
       }
     },
     "ios": {
-      "googleServicesFile": "./GoogleService-Info.plist",
       "supportsTablet": false,
       "bundleIdentifier": "gh.westcars.app",
       "buildNumber": "1",
