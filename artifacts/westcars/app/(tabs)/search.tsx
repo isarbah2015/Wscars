@@ -1,6 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -16,14 +15,16 @@ import {
   Text,
   TextInput,
   TextStyle,
+  TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import Slider from "@react-native-community/slider";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Car } from "@/types";
-import { CONDITIONS, FUEL_TYPES, GHANA_CITIES, TRANSMISSIONS } from "@/utils/ghanaData";
+import { CAR_BRANDS, CONDITIONS, GHANA_CITIES, TRANSMISSIONS } from "@/utils/ghanaData";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -59,13 +60,11 @@ const BRAND_MODELS: Record<string, string[]> = {
   Acura:       ["TLX","RDX","MDX","ILX","NSX"],
 };
 
-// ─── Price ranges ──────────────────────────────────────────
-const PRICE_RANGES = [
-  { label: "Under GHS 30k",  sub: "Under",  main: "GHS 30k",  min: 0,      max: 30000   },
-  { label: "Under GHS 60k",  sub: "Under",  main: "GHS 60k",  min: 0,      max: 60000   },
-  { label: "Under GHS 100k", sub: "Under",  main: "GHS 100k", min: 0,      max: 100000  },
-  { label: "Above GHS 100k", sub: "Above",  main: "GHS 100k", min: 100000, max: 9999999 },
-];
+// ─── Price + slider constants ─────────────────────────────
+const PRICE_MIN  = 0;
+const PRICE_MAX  = 500_000;
+const PRICE_STEP = 5_000;
+const ALL_BRANDS = CAR_BRANDS;
 
 // ─── Quick filters ─────────────────────────────────────────
 type QuickFilterKey = "All"|"SUV"|"Sedan"|"Tokunbo"|"Budget"|"Luxury"|"Pickup"|"Truck"|"Bus"|"Heavy"|"Moto"|"New";
@@ -89,7 +88,7 @@ const QUICK_FILTERS: { key: QuickFilterKey; label: string; color: string }[] = [
 const TEAL   = "#0EB5CA";
 const ORANGE = "#F97316";
 
-// ─── Chip row layout constants (shared by stylesheet + scroll calculation) ──
+// ─── Chip row layout constants ────────────────────────────
 const CHIP_ROW_PADDING_LEFT = 14;
 const CHIP_ROW_GAP          = 8;
 
@@ -156,7 +155,7 @@ function mapCategoryToFilter(cat: string): { quickFilter: QuickFilterKey; query:
   return { quickFilter: "All", query: cat };
 }
 
-// ─── Quick-filter predicate (extracted for reuse) ────────
+// ─── Quick-filter predicate ───────────────────────────────
 function matchesQuickFilter(car: Car, key: QuickFilterKey): boolean {
   const cat = car.category?.toLowerCase() ?? "";
   if (key === "SUV")     return cat.includes("suv") || cat.includes("4x4") || cat.includes("4×4");
@@ -170,192 +169,271 @@ function matchesQuickFilter(car: Car, key: QuickFilterKey): boolean {
   if (key === "Heavy")   return cat.includes("excavator") || cat.includes("bulldozer") || cat.includes("crane") || cat.includes("forklift") || cat.includes("loader") || cat.includes("grader") || cat.includes("compactor") || cat.includes("mixer") || cat.includes("tractor") || cat.includes("harvester") || cat.includes("ambulance") || cat.includes("fire truck");
   if (key === "Moto")    return cat.includes("motorcycle") || cat.includes("scooter") || cat.includes("atv") || cat.includes("dirt bike") || cat.includes("quad");
   if (key === "New")     return car.condition === "New";
-  return true; // "All"
+  return true;
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
-// MODAL FILTERS TYPE
+// FILTER STATE TYPE
 // ─────────────────────────────────────────────────────────────────────────────
-type PriceRange = typeof PRICE_RANGES[0];
-
-interface ModalFilters {
-  brand:        string;
-  model:        string;
-  location:     string;
-  fuelType:     string;
-  transmission: string;
-  condition:    string;
-  priceRange:   PriceRange | null;
+interface FilterState {
+  priceMin:      number;
+  priceMax:      number;
+  brands:        string[];
+  transmissions: string[];
+  conditions:    string[];
+  cities:        string[];
 }
 
-type ModalFilterKey = keyof ModalFilters;
+const DEFAULT_FILTERS: FilterState = {
+  priceMin:      PRICE_MIN,
+  priceMax:      PRICE_MAX,
+  brands:        [],
+  transmissions: [],
+  conditions:    [],
+  cities:        [],
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FILTER MODAL — theme-aware
+// FILTER MODAL
 // ─────────────────────────────────────────────────────────────────────────────
-function FilterModal({ visible, onClose, onApply }: {
-  visible: boolean; onClose: () => void; onApply: (f: ModalFilters) => void;
+function FilterModal({
+  visible, onClose, onApply, initial,
+}: {
+  visible:  boolean;
+  onClose:  () => void;
+  onApply:  (f: FilterState) => void;
+  initial:  FilterState;
 }) {
-  const insets = useSafeAreaInsets();
-  const { colors } = useTheme();
+  const [priceMin,      setPriceMin]      = React.useState(initial.priceMin);
+  const [priceMax,      setPriceMax]      = React.useState(initial.priceMax);
+  const [brands,        setBrands]        = React.useState<string[]>(initial.brands);
+  const [transmissions, setTransmissions] = React.useState<string[]>(initial.transmissions);
+  const [conditions,    setConditions]    = React.useState<string[]>(initial.conditions);
+  const [cities,        setCities]        = React.useState<string[]>(initial.cities);
+  const [showAllBrands, setShowAllBrands] = React.useState(false);
+  const [showAllCities, setShowAllCities] = React.useState(false);
 
-  const [brand,        setBrand]        = useState("Any");
-  const [model,        setModel]        = useState("Any");
-  const [location,     setLocation]     = useState("Any");
-  const [fuelType,     setFuelType]     = useState("Any");
-  const [transmission, setTransmission] = useState("Any");
-  const [condition,    setCondition]    = useState("Any");
-  const [priceRange,   setPriceRange]   = useState<typeof PRICE_RANGES[0] | null>(null);
+  React.useEffect(() => {
+    if (visible) {
+      setPriceMin(initial.priceMin);
+      setPriceMax(initial.priceMax);
+      setBrands(initial.brands);
+      setTransmissions(initial.transmissions);
+      setConditions(initial.conditions);
+      setCities(initial.cities);
+      setShowAllBrands(false);
+      setShowAllCities(false);
+    }
+  }, [visible]);
+
+  const fmt = (v: number) =>
+    v >= 1000 ? `GHS ${(v / 1000).toFixed(0)}k` : `GHS ${v}`;
+
+  const toggle = (arr: string[], set: (a: string[]) => void, val: string) =>
+    set(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
 
   const reset = () => {
-    setBrand("Any"); setModel("Any"); setLocation("Any"); setFuelType("Any");
-    setTransmission("Any"); setCondition("Any"); setPriceRange(null);
+    setPriceMin(PRICE_MIN); setPriceMax(PRICE_MAX);
+    setBrands([]); setTransmissions([]);
+    setConditions([]); setCities([]);
   };
 
-  const activeCount = [
-    brand !== "Any", model !== "Any", location !== "Any", fuelType !== "Any",
-    transmission !== "Any", condition !== "Any", priceRange !== null,
-  ].filter(Boolean).length;
+  const apply = () => {
+    onApply({ priceMin, priceMax, brands, transmissions, conditions, cities });
+    onClose();
+  };
 
-  const TOP_BRANDS = ["Toyota","Honda","Hyundai","Mercedes","Kia","Ford","BMW","Nissan","Volkswagen","Mitsubishi","Lexus","Isuzu","Suzuki","Mazda","Subaru"];
+  const visibleBrands = showAllBrands ? ALL_BRANDS : ALL_BRANDS.slice(0, 15);
+  const visibleCities = showAllCities ? GHANA_CITIES : GHANA_CITIES.slice(0, 8);
 
-  const SectionLabel = ({ label }: { label: string }) => (
-    <Text style={[fS.sectionLabel, { color: colors.accent }]}>{label}</Text>
-  );
-
-  const PillWrap = ({ options, selected, onSelect }: {
-    options: string[]; selected: string; onSelect: (v: string) => void;
-  }) => (
-    <View style={fS.pillWrap}>
-      {options.map((opt) => {
-        const active = selected === opt;
-        return (
-          <Pressable
-            key={opt}
-            style={[
-              fS.pill,
-              { backgroundColor: colors.inputBg, borderColor: colors.border },
-              active && { borderColor: TEAL, backgroundColor: colors.accentLight },
-            ]}
-            onPress={() => onSelect(active ? "Any" : opt)}
-          >
-            <Text style={[
-              fS.pillText,
-              { color: colors.textSecondary },
-              active && { color: TEAL, fontFamily: "Inter_600SemiBold" },
-            ]}>
-              {opt}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
+  const PRESETS = [
+    { label: "Under 30k",   min: 0,       max: 30_000  },
+    { label: "30k – 100k",  min: 30_000,  max: 100_000 },
+    { label: "100k – 300k", min: 100_000, max: 300_000 },
+    { label: "300k+",       min: 300_000, max: 500_000 },
+  ];
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen">
-      <View style={[fS.root, { backgroundColor: colors.background, paddingBottom: insets.bottom + 16 }]}>
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <View style={fS.overlay}>
+        <TouchableOpacity style={fS.backdrop} onPress={onClose} activeOpacity={1} />
+        <View style={fS.sheet}>
+          <View style={fS.handle} />
 
-        <View style={[fS.handle, { backgroundColor: colors.border }]} />
-
-        <View style={fS.titleRow}>
-          <Text style={[fS.title, { color: colors.text }]}>Filters</Text>
-          {activeCount > 0 && (
-            <View style={fS.countPill}>
-              <Text style={fS.countPillText}>{activeCount}</Text>
-            </View>
-          )}
-        </View>
-
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={fS.body}>
-
-          <SectionLabel label="BRAND" />
-          <PillWrap options={TOP_BRANDS} selected={brand} onSelect={(b) => { setBrand(b); setModel("Any"); }} />
-
-          {brand !== "Any" && BRAND_MODELS[brand] && (
-            <>
-              <SectionLabel label={`${brand.toUpperCase()} MODEL`} />
-              <PillWrap options={BRAND_MODELS[brand]} selected={model} onSelect={setModel} />
-            </>
-          )}
-
-          <SectionLabel label="PRICE RANGE" />
-          <View style={fS.priceGrid}>
-            {PRICE_RANGES.map((pr) => {
-              const active = priceRange?.label === pr.label;
-              return (
-                <Pressable
-                  key={pr.label}
-                  style={[
-                    fS.priceCard,
-                    { backgroundColor: colors.inputBg, borderColor: colors.border },
-                    active && { borderColor: TEAL, backgroundColor: colors.accentLight },
-                  ]}
-                  onPress={() => setPriceRange(active ? null : pr)}
-                >
-                  <Text style={[fS.priceSub, { color: colors.textTertiary }, active && { color: TEAL }]}>
-                    {pr.sub}
-                  </Text>
-                  <Text style={[fS.priceMain, { color: colors.text }, active && { color: TEAL }]}>
-                    {pr.main}
-                  </Text>
-                </Pressable>
-              );
-            })}
+          <View style={fS.header}>
+            <Text style={fS.title}>Filter listings</Text>
+            <TouchableOpacity onPress={reset} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+              <Text style={fS.resetTxt}>Reset all</Text>
+            </TouchableOpacity>
           </View>
 
-          <SectionLabel label="CONDITION" />
-          <PillWrap options={CONDITIONS} selected={condition} onSelect={setCondition} />
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={fS.scroll}>
 
-          <SectionLabel label="FUEL" />
-          <PillWrap options={FUEL_TYPES} selected={fuelType} onSelect={setFuelType} />
+            {/* ── Price range ── */}
+            <View style={fS.section}>
+              <Text style={fS.secLabel}>Price range (GHS)</Text>
+              <View style={fS.priceRow}>
+                <View>
+                  <Text style={fS.priceCaption}>Minimum</Text>
+                  <Text style={fS.priceVal}>{fmt(priceMin)}</Text>
+                </View>
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text style={fS.priceCaption}>Maximum</Text>
+                  <Text style={fS.priceVal}>{fmt(priceMax)}</Text>
+                </View>
+              </View>
 
-          <SectionLabel label="TRANSMISSION" />
-          <PillWrap options={TRANSMISSIONS} selected={transmission} onSelect={setTransmission} />
+              <View style={fS.sliderWrap}>
+                <View style={fS.track}>
+                  <View style={[
+                    fS.fill,
+                    {
+                      left:  `${(priceMin / PRICE_MAX) * 100}%` as any,
+                      right: `${100 - (priceMax / PRICE_MAX) * 100}%` as any,
+                    },
+                  ]} />
+                </View>
+                <Slider
+                  style={fS.slider}
+                  minimumValue={PRICE_MIN}
+                  maximumValue={PRICE_MAX}
+                  step={PRICE_STEP}
+                  value={priceMin}
+                  onValueChange={(v) => { if (v < priceMax - PRICE_STEP) setPriceMin(v); }}
+                  minimumTrackTintColor="transparent"
+                  maximumTrackTintColor="transparent"
+                  thumbTintColor="#FF6B00"
+                />
+                <Slider
+                  style={[fS.slider, { position: "absolute", left: 0, right: 0 }]}
+                  minimumValue={PRICE_MIN}
+                  maximumValue={PRICE_MAX}
+                  step={PRICE_STEP}
+                  value={priceMax}
+                  onValueChange={(v) => { if (v > priceMin + PRICE_STEP) setPriceMax(v); }}
+                  minimumTrackTintColor="transparent"
+                  maximumTrackTintColor="transparent"
+                  thumbTintColor="#FF6B00"
+                />
+              </View>
 
-          <SectionLabel label="LOCATION" />
-          <PillWrap options={GHANA_CITIES} selected={location} onSelect={setLocation} />
+              <View style={fS.presetsRow}>
+                {PRESETS.map(p => {
+                  const active = priceMin === p.min && priceMax === p.max;
+                  return (
+                    <TouchableOpacity
+                      key={p.label}
+                      style={[fS.presetChip, active && fS.chipActive]}
+                      onPress={() => { setPriceMin(p.min); setPriceMax(p.max); }}
+                    >
+                      <Text style={[fS.chipTxt, active && fS.chipTxtActive]}>{p.label}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
 
-          <View style={{ height: 16 }} />
-        </ScrollView>
+            <View style={fS.divider} />
 
-        <View style={[fS.footer, { borderTopColor: colors.border }]}>
-          <Pressable
-            style={[fS.resetBtn, { borderColor: colors.border }, activeCount === 0 && { opacity: 0.38 }]}
-            onPress={reset}
-            disabled={activeCount === 0}
-          >
-            <Text style={[fS.resetText, { color: colors.textSecondary }]}>Reset</Text>
-          </Pressable>
-          <Pressable
-            style={fS.applyBtnWrap}
-            onPress={() => {
-              onApply({ brand, model, location, fuelType, transmission, condition, priceRange });
-              onClose();
-            }}
-          >
-            <LinearGradient
-              colors={[TEAL, "#0098AA"]}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-              style={fS.applyBtn}
-            >
-              <Text style={fS.applyText}>
-                {activeCount > 0 ? `Show Results · ${activeCount} filter${activeCount > 1 ? "s" : ""}` : "Show All Results"}
-              </Text>
-            </LinearGradient>
-          </Pressable>
+            {/* ── Brand ── */}
+            <View style={fS.section}>
+              <Text style={fS.secLabel}>Brand</Text>
+              <View style={fS.brandGrid}>
+                {visibleBrands.map(b => (
+                  <TouchableOpacity
+                    key={b}
+                    style={[fS.brandItem, brands.includes(b) && fS.brandActive]}
+                    onPress={() => toggle(brands, setBrands, b)}
+                  >
+                    <Text style={[fS.brandTxt, brands.includes(b) && fS.brandTxtActive]} numberOfLines={1}>
+                      {b}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {!showAllBrands && ALL_BRANDS.length > 15 && (
+                <TouchableOpacity style={fS.showMore} onPress={() => setShowAllBrands(true)}>
+                  <Text style={fS.showMoreTxt}>+ {ALL_BRANDS.length - 15} more brands</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <View style={fS.divider} />
+
+            {/* ── Transmission ── */}
+            <View style={fS.section}>
+              <Text style={fS.secLabel}>Transmission</Text>
+              <View style={fS.chipsRow}>
+                {TRANSMISSIONS.map(t => (
+                  <TouchableOpacity
+                    key={t}
+                    style={[fS.chip, transmissions.includes(t) && fS.chipActive]}
+                    onPress={() => toggle(transmissions, setTransmissions, t)}
+                  >
+                    <Text style={[fS.chipTxt, transmissions.includes(t) && fS.chipTxtActive]}>{t}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={fS.divider} />
+
+            {/* ── Condition ── */}
+            <View style={fS.section}>
+              <Text style={fS.secLabel}>Condition</Text>
+              <View style={fS.chipsRow}>
+                {CONDITIONS.map(c => (
+                  <TouchableOpacity
+                    key={c}
+                    style={[fS.chip, conditions.includes(c) && fS.chipActive]}
+                    onPress={() => toggle(conditions, setConditions, c)}
+                  >
+                    <Text style={[fS.chipTxt, conditions.includes(c) && fS.chipTxtActive]}>{c}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={fS.divider} />
+
+            {/* ── Location ── */}
+            <View style={fS.section}>
+              <Text style={fS.secLabel}>Location</Text>
+              <View style={fS.chipsRow}>
+                {visibleCities.map(city => (
+                  <TouchableOpacity
+                    key={city}
+                    style={[fS.chip, cities.includes(city) && fS.chipActive]}
+                    onPress={() => toggle(cities, setCities, city)}
+                  >
+                    <Text style={[fS.chipTxt, cities.includes(city) && fS.chipTxtActive]}>{city}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {!showAllCities && GHANA_CITIES.length > 8 && (
+                <TouchableOpacity style={fS.showMore} onPress={() => setShowAllCities(true)}>
+                  <Text style={fS.showMoreTxt}>+ {GHANA_CITIES.length - 8} more cities</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+          </ScrollView>
+
+          {/* ── Bottom actions ── */}
+          <View style={fS.bottom}>
+            <TouchableOpacity style={fS.closeBtn} onPress={onClose}>
+              <Text style={fS.closeTxt}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={fS.applyBtn} onPress={apply}>
+              <Text style={fS.applyTxt}>Apply filters</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
-
       </View>
     </Modal>
   );
 }
-
-const DEFAULT_FILTERS: ModalFilters = {
-  brand: "Any", model: "Any", location: "Any",
-  fuelType: "Any", transmission: "Any", condition: "Any", priceRange: null,
-};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN SEARCH SCREEN
@@ -370,7 +448,7 @@ export default function SearchScreen() {
 
   const [query,         setQuery]         = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
-  const [activeFilters, setActiveFilters] = useState<ModalFilters | null>(null);
+  const [activeFilters, setActiveFilters] = useState<FilterState | null>(null);
   const [quickFilter,   setQuickFilter]   = useState<QuickFilterKey>("All");
 
   const chipScrollRef  = useRef<ScrollView>(null);
@@ -400,7 +478,10 @@ export default function SearchScreen() {
 
   useEffect(() => {
     if (brandParam) {
-      setActiveFilters((prev) => ({ ...(prev ?? DEFAULT_FILTERS), brand: brandParam }));
+      setActiveFilters((prev) => ({
+        ...(prev ?? DEFAULT_FILTERS),
+        brands: [brandParam],
+      }));
       setQuickFilter("All"); setQuery("");
     }
   }, [brandParam]);
@@ -425,17 +506,13 @@ export default function SearchScreen() {
 
   const matchesModalFilters = React.useCallback((car: Car) => {
     if (!activeFilters) return true;
-    const { brand, model, location, fuelType, transmission, condition, priceRange } = activeFilters;
-    const minP = priceRange?.min ?? 0;
-    const maxP = priceRange?.max ?? 9999999;
+    const { brands, transmissions, conditions, cities, priceMin, priceMax } = activeFilters;
     return (
-      (!brand || brand === "Any" || car.brand === brand) &&
-      (!model || model === "Any" || car.model.toLowerCase().includes(model.toLowerCase())) &&
-      (!location || location === "Any" || car.location === location) &&
-      (!fuelType || fuelType === "Any" || car.fuelType === fuelType) &&
-      (!transmission || transmission === "Any" || car.transmission === transmission) &&
-      (!condition || condition === "Any" || car.condition === condition) &&
-      car.price >= minP && car.price <= maxP
+      (brands.length        === 0 || brands.includes(car.brand)) &&
+      (transmissions.length === 0 || transmissions.includes(car.transmission ?? "")) &&
+      (conditions.length    === 0 || conditions.includes(car.condition)) &&
+      (cities.length        === 0 || cities.includes(car.location)) &&
+      car.price >= priceMin && car.price <= priceMax
     );
   }, [activeFilters]);
 
@@ -446,7 +523,7 @@ export default function SearchScreen() {
     return matchesModalFilters(car);
   });
 
-  // ── Per-chip counts (query + modal filters applied, quick-filter per chip) ─
+  // ── Per-chip counts ────────────────────────────────────────────────────────
   const chipCounts = React.useMemo(() => {
     const result: Record<QuickFilterKey, number> = {} as Record<QuickFilterKey, number>;
     for (const { key } of QUICK_FILTERS) {
@@ -466,9 +543,6 @@ export default function SearchScreen() {
   useEffect(() => {
     const id = setTimeout(() => {
       if (!chipScrollRef.current) return;
-      // Compute x from the current sorted order + stored chip widths.
-      // This avoids reading stale onLayout x-values that haven't refreshed
-      // yet after a reorder.
       let x = CHIP_ROW_PADDING_LEFT;
       for (const { key } of sortedFilters) {
         if (key === quickFilter) break;
@@ -487,36 +561,49 @@ export default function SearchScreen() {
     return seeded.map((x) => ({ type: "car" as const, item: x.car }));
   }, [filtered]);
 
-  const hasFilters = !!activeFilters && Object.entries(activeFilters).some(([k, v]) => {
-    if (k === "priceRange") return v !== null;
-    return v !== "Any";
-  });
+  const hasFilters = !!activeFilters && (
+    activeFilters.brands.length        > 0 ||
+    activeFilters.transmissions.length > 0 ||
+    activeFilters.conditions.length    > 0 ||
+    activeFilters.cities.length        > 0 ||
+    activeFilters.priceMin !== PRICE_MIN ||
+    activeFilters.priceMax !== PRICE_MAX
+  );
 
-  // ── Active filter chips ────────────────────────────────────────────────────
+  // ── Active filter chips (summary) ──────────────────────────────────────────
   const activeFilterChips = React.useMemo(() => {
     if (!activeFilters) return [];
-    const chips: { key: ModalFilterKey; label: string }[] = [];
-    const { brand, model, location, fuelType, transmission, condition, priceRange } = activeFilters;
-    if (brand && brand !== "Any")               chips.push({ key: "brand",        label: brand });
-    if (model && model !== "Any")               chips.push({ key: "model",        label: model });
-    if (location && location !== "Any")         chips.push({ key: "location",     label: location });
-    if (fuelType && fuelType !== "Any")         chips.push({ key: "fuelType",     label: fuelType });
-    if (transmission && transmission !== "Any") chips.push({ key: "transmission", label: transmission });
-    if (condition && condition !== "Any")       chips.push({ key: "condition",    label: condition });
-    if (priceRange)                             chips.push({ key: "priceRange",   label: priceRange.label });
+    const chips: { key: string; label: string }[] = [];
+    const { brands, transmissions, conditions, cities, priceMin, priceMax } = activeFilters;
+    if (brands.length === 1)        chips.push({ key: "brands",        label: brands[0] });
+    else if (brands.length > 1)     chips.push({ key: "brands",        label: `${brands.length} brands` });
+    if (transmissions.length === 1)      chips.push({ key: "transmissions", label: transmissions[0] });
+    else if (transmissions.length > 1)   chips.push({ key: "transmissions", label: `${transmissions.length} transmissions` });
+    if (conditions.length === 1)    chips.push({ key: "conditions",    label: conditions[0] });
+    else if (conditions.length > 1) chips.push({ key: "conditions",    label: `${conditions.length} conditions` });
+    if (cities.length === 1)        chips.push({ key: "cities",        label: cities[0] });
+    else if (cities.length > 1)     chips.push({ key: "cities",        label: `${cities.length} cities` });
+    if (priceMin !== PRICE_MIN || priceMax !== PRICE_MAX) {
+      const lo = `${(priceMin / 1000).toFixed(0)}k`;
+      const hi = priceMax >= PRICE_MAX ? "max" : `${(priceMax / 1000).toFixed(0)}k`;
+      chips.push({ key: "price", label: `₵${lo} – ₵${hi}` });
+    }
     return chips;
   }, [activeFilters]);
 
-  const removeFilter = React.useCallback((key: ModalFilterKey) => {
-    setActiveFilters((prev: ModalFilters | null) => {
+  const removeFilter = React.useCallback((key: string) => {
+    setActiveFilters((prev) => {
       if (!prev) return prev;
-      const next: ModalFilters = key === "priceRange"
-        ? { ...prev, priceRange: null }
-        : { ...prev, [key]: "Any" };
+      let next: FilterState;
+      if (key === "brands")        next = { ...prev, brands: [] };
+      else if (key === "transmissions") next = { ...prev, transmissions: [] };
+      else if (key === "conditions")    next = { ...prev, conditions: [] };
+      else if (key === "cities")        next = { ...prev, cities: [] };
+      else                              next = { ...prev, priceMin: PRICE_MIN, priceMax: PRICE_MAX };
       const stillActive =
-        next.brand !== "Any" || next.model !== "Any" || next.location !== "Any" ||
-        next.fuelType !== "Any" || next.transmission !== "Any" ||
-        next.condition !== "Any" || next.priceRange !== null;
+        next.brands.length > 0 || next.transmissions.length > 0 ||
+        next.conditions.length > 0 || next.cities.length > 0 ||
+        next.priceMin !== PRICE_MIN || next.priceMax !== PRICE_MAX;
       return stillActive ? next : null;
     });
   }, []);
@@ -586,7 +673,7 @@ export default function SearchScreen() {
           </ScrollView>
         )}
 
-        {/* Chip row — paddingHorizontal on contentContainerStyle stops edge clipping */}
+        {/* Chip row */}
         <ScrollView
           ref={chipScrollRef}
           horizontal
@@ -666,12 +753,13 @@ export default function SearchScreen() {
         visible={filterVisible}
         onClose={() => setFilterVisible(false)}
         onApply={(f) => setActiveFilters(f)}
+        initial={activeFilters ?? DEFAULT_FILTERS}
       />
     </View>
   );
 }
 
-// ─── Styles (brand/layout only — theme colours applied inline) ────────────────
+// ─── Search screen styles ──────────────────────────────────────────────────────
 const S = StyleSheet.create({
   root: { flex: 1 },
 
@@ -775,64 +863,50 @@ const S = StyleSheet.create({
   clearBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: TEAL },
 });
 
-// ─── Filter modal styles (layout only) ───────────────────────────────────────
+// ─── Filter modal styles ───────────────────────────────────────────────────────
 const fS = StyleSheet.create({
-  root: { flex: 1, paddingTop: 12 },
+  overlay:    { flex: 1, justifyContent: "flex-end" },
+  backdrop:   { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.5)" },
+  sheet:      { backgroundColor: "#fff", borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "92%", overflow: "hidden" },
+  handle:     { width: 36, height: 4, borderRadius: 2, backgroundColor: "#E5E5EA", alignSelf: "center", marginTop: 12 },
+  header:     { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingVertical: 16 },
+  title:      { fontSize: 17, fontFamily: "Manrope_800ExtraBold", color: "#1C1C1E" },
+  resetTxt:   { fontSize: 14, color: "#FF6B00", fontFamily: "Inter_600SemiBold" },
+  scroll:     { paddingBottom: 8 },
+  section:    { paddingHorizontal: 20, paddingVertical: 16 },
+  secLabel:   { fontSize: 11, fontFamily: "Inter_700Bold", color: "#8E8E93", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 },
+  divider:    { height: 0.5, backgroundColor: "#E5E5EA", marginHorizontal: 20 },
 
-  handle: {
-    width: 40, height: 4, borderRadius: 2,
-    alignSelf: "center", marginBottom: 16,
-  },
-  titleRow: {
-    flexDirection: "row", alignItems: "center", gap: 10,
-    paddingHorizontal: 20, marginBottom: 4,
-  },
-  title: { fontSize: 22, fontFamily: "Manrope_800ExtraBold" },
-  countPill: {
-    backgroundColor: TEAL, borderRadius: 12,
-    paddingHorizontal: 10, paddingVertical: 3,
-  },
-  countPillText: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#fff" },
+  priceRow:    { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
+  priceCaption:{ fontSize: 11, color: "#8E8E93", fontFamily: "Inter_400Regular", marginBottom: 2 },
+  priceVal:    { fontSize: 16, fontFamily: "Inter_700Bold", color: "#1C1C1E" },
 
-  body: { paddingHorizontal: 20, paddingTop: 8 },
+  sliderWrap: { height: 40, justifyContent: "center", marginBottom: 12 },
+  track:      { height: 4, backgroundColor: "#E5E5EA", borderRadius: 2, marginHorizontal: 10 },
+  fill:       { position: "absolute", height: 4, backgroundColor: "#FF6B00", borderRadius: 2 },
+  slider:     { position: "absolute", left: 0, right: 0, height: 40 },
 
-  sectionLabel: {
-    fontSize: 11, fontFamily: "Inter_700Bold",
-    letterSpacing: 1.2, marginTop: 20, marginBottom: 10,
-  },
+  presetsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  presetChip: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F2F2F7" },
 
-  pillWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  pill: {
-    paddingHorizontal: 14, paddingVertical: 9,
-    borderRadius: 20, borderWidth: 1.5,
-  },
-  pillText: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  brandGrid:      { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  brandItem:      { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F9F9F9" },
+  brandActive:    { backgroundColor: "#FF6B00", borderColor: "#FF6B00" },
+  brandTxt:       { fontSize: 12, fontFamily: "Inter_500Medium", color: "#3C3C43" },
+  brandTxtActive: { color: "#fff" },
 
-  priceGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  priceCard: {
-    width: (SCREEN_W - 60) / 2,
-    paddingVertical: 14, paddingHorizontal: 16,
-    borderRadius: 12, borderWidth: 1.5, gap: 2,
-  },
-  priceSub:  { fontSize: 10, fontFamily: "Inter_400Regular" },
-  priceMain: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  showMore:    { marginTop: 10, alignItems: "center", paddingVertical: 6 },
+  showMoreTxt: { fontSize: 13, color: "#FF6B00", fontFamily: "Inter_600SemiBold" },
 
-  footer: {
-    flexDirection: "row", alignItems: "center",
-    paddingHorizontal: 20, paddingTop: 14, gap: 12,
-    borderTopWidth: 1,
-  },
-  resetBtn: {
-    flex: 1, height: 50, borderRadius: 12,
-    borderWidth: 1.5,
-    alignItems: "center", justifyContent: "center",
-  },
-  resetText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
-  applyBtnWrap: { flex: 2 },
-  applyBtn: {
-    height: 50, borderRadius: 12,
-    alignItems: "center", justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-  applyText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
+  chipsRow:    { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  chip:        { paddingVertical: 7, paddingHorizontal: 14, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F2F2F7" },
+  chipActive:  { backgroundColor: "#FF6B00", borderColor: "#FF6B00" },
+  chipTxt:     { fontSize: 13, fontFamily: "Inter_500Medium", color: "#3C3C43" },
+  chipTxtActive:{ color: "#fff" },
+
+  bottom:    { flexDirection: "row", gap: 10, padding: 16, paddingBottom: 32, borderTopWidth: 0.5, borderTopColor: "#E5E5EA" },
+  closeBtn:  { flex: 1, padding: 14, borderRadius: 14, backgroundColor: "#F2F2F7", alignItems: "center" },
+  closeTxt:  { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#3C3C43" },
+  applyBtn:  { flex: 2, padding: 14, borderRadius: 14, backgroundColor: "#FF6B00", alignItems: "center" },
+  applyTxt:  { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" },
 });

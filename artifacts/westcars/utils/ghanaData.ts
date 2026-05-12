@@ -3,26 +3,14 @@ export const CURRENCY_SYMBOL = "₵";
 export const COUNTRY_CODE = "+233";
 
 export const GHANA_CITIES = [
-  "Accra",
-  "Kumasi",
-  "Tamale",
-  "Takoradi",
-  "Cape Coast",
-  "Koforidua",
-  "Sunyani",
-  "Ho",
-  "Wa",
-  "Bolgatanga",
-  "Tema",
-  "Obuasi",
-  "Techiman",
-  "Winneba",
-  "Kasoa",
-  "Teshie",
-  "Madina",
-  "Ashaiman",
-  "Bawku",
-  "Berekum",
+  "Accra", "Kumasi", "Takoradi", "Tamale", "Cape Coast",
+  "Sunyani", "Koforidua", "Ho", "Wa", "Bolgatanga",
+  "Tema", "Ashaiman", "Kasoa", "Winneba", "Saltpond",
+  "Techiman", "Obuasi", "Tarkwa", "Dunkwa", "Ejura",
+  "Kintampo", "Mampong", "Nkawkaw", "Sefwi Wiawso", "Berekum",
+  "Wenchi", "Dormaa Ahenkro", "Goaso", "Bibiani", "Axim",
+  "Half Assini", "Prestea", "Bogoso", "Agona Swedru", "Mankessim",
+  "Elmina", "Apam", "Mumford", "Dawhenya", "Adentan",
 ];
 
 export const CAR_BRANDS = [
@@ -89,7 +77,7 @@ export const CAR_BRANDS = [
 
 export const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid", "Electric", "LPG"];
 
-export const TRANSMISSIONS = ["Automatic", "Manual"];
+export const TRANSMISSIONS = ["Automatic", "Manual", "Semi-Auto", "CVT", "DCT"];
 
 export const CONDITIONS = ["New", "Foreign Used", "Ghana Used", "Tokunbo"];
 
