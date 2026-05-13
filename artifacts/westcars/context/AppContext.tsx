@@ -70,12 +70,43 @@ const STORAGE_KEYS = {
   REGISTERED_USERS: "@westcars_registered_users",
 };
 
+// ── Mock review seed data (must be declared before AppProvider) ───────────────
+const MOCK_REVIEWS: Review[] = [
+  {
+    id: "rev1", fromUserId: "user2", fromUserName: "Ama Mensah",
+    fromUserAvatar: "https://randomuser.me/api/portraits/women/44.jpg",
+    toUserId: "user1", carId: "car1", rating: 5,
+    comment: "Very honest seller. Car was exactly as described. Smooth transaction!",
+    createdAt: "2024-11-15T10:00:00Z",
+  },
+  {
+    id: "rev2", fromUserId: "user3", fromUserName: "Kofi Boateng",
+    fromUserAvatar: "https://randomuser.me/api/portraits/men/67.jpg",
+    toUserId: "user1", carId: "car2", rating: 4,
+    comment: "Good experience. Seller was responsive and fair on price.",
+    createdAt: "2024-10-20T09:00:00Z",
+  },
+  {
+    id: "rev3", fromUserId: "user1", fromUserName: "Kwame Asante",
+    fromUserAvatar: "https://randomuser.me/api/portraits/men/32.jpg",
+    toUserId: "user2", rating: 4,
+    comment: "Reliable buyer. Payment was fast. Recommended!",
+    createdAt: "2024-09-05T14:30:00Z",
+  },
+];
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   // Gate: use Firebase whenever it has been initialised successfully.
   // The old `&& !__DEV__` guard was the root cause of mock data leaking into
   // production — if Firebase init failed silently (missing secrets, network
   // error, etc.) useFirebase became false in prod and MOCK_CARS pre-loaded.
-  const useFirebase = isFirebaseReady();
+  const [useFirebase, setUseFirebase] = useState(() => isFirebaseReady());
+
+  useEffect(() => {
+    if (!useFirebase && isFirebaseReady()) {
+      setUseFirebase(true);
+    }
+  }, []);
 
   // Only seed mock data in dev builds when Firebase is also unavailable.
   // In production, if Firebase isn't ready we surface an error — never mocks.
@@ -694,28 +725,3 @@ export function useApp() {
   if (!ctx) throw new Error("useApp must be used within AppProvider");
   return ctx;
 }
-
-// ── Mock review seed data ──────────────────────────────────────────────────
-const MOCK_REVIEWS: Review[] = [
-  {
-    id: "rev1", fromUserId: "user2", fromUserName: "Ama Mensah",
-    fromUserAvatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    toUserId: "user1", carId: "car1", rating: 5,
-    comment: "Very honest seller. Car was exactly as described. Smooth transaction!",
-    createdAt: "2024-11-15T10:00:00Z",
-  },
-  {
-    id: "rev2", fromUserId: "user3", fromUserName: "Kofi Boateng",
-    fromUserAvatar: "https://randomuser.me/api/portraits/men/67.jpg",
-    toUserId: "user1", carId: "car2", rating: 4,
-    comment: "Good experience. Seller was responsive and fair on price.",
-    createdAt: "2024-10-20T09:00:00Z",
-  },
-  {
-    id: "rev3", fromUserId: "user1", fromUserName: "Kwame Asante",
-    fromUserAvatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    toUserId: "user2", rating: 4,
-    comment: "Reliable buyer. Payment was fast. Recommended!",
-    createdAt: "2024-09-05T14:30:00Z",
-  },
-];

@@ -38,7 +38,7 @@ const queryClient = new QueryClient();
 function useAuthRedirect() {
   const router = useRouter();
   const segments = useSegments();
-  const prevAuthRef = useRef<boolean | null>(null);
+  const prevAuthRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (!auth) return;
@@ -47,8 +47,8 @@ function useAuthRedirect() {
       const isAuthed = !!user;
       const wasAuthed = prevAuthRef.current;
 
-      // Just signed IN (null → true) and we're on the login/signup screen → go back
-      if (wasAuthed === false && isAuthed) {
+      // Just signed IN and we're on the login/signup screen → go back
+      if (!wasAuthed && isAuthed) {
         const onLoginScreen =
           segments.includes("login") ||
           segments.includes("signup");

@@ -1,0 +1,111 @@
+✅ One-Shot Fix Prompt
+
+Copy everything below and paste it as your opening message:
+
+
+You are fixing a React Native / Expo Router app called Westcars. I will describe 6 bugs. Fix all of them. Do not change anything unrelated. Here is the full context:
+
+Architecture overview
+
+Expo Router v3, Firebase Auth + Firestore, TypeScript
+Auth files: app/auth/login.tsx, app/auth/signup.tsx
+Firebase init: lib/firebase.ts (Firestore/Storage) + lib/firebase-persistence (Auth, platform-specific, not uploaded)
+Central state: context/AppContext.tsx
+Auth guard: useAuthRedirect() in app/_layout.tsx
+Profile: app/(tabs)/profile.tsx — uses useAvatarUpload hook + AvatarUploadSheet component
+Advertise: app/advertise.tsx — teal-themed, routes to app/advertise-book.tsx
+
+
+Bug 1 — Auth redirect loops back to login after sign-in
+Location: app/_layout.tsx → useAuthRedirect()
+Problem: prevAuthRef.current starts as null. The condition wasAuthed === false && isAuthed never fires on first sign-in because null !== false.
+Fix: Change the initial ref value:
+tsconst prevAuthRef = useRef<boolean | null>(null);
+// → change to:
+const prevAuthRef = useRef<boolean>(false);
+And update the type annotation accordingly. The null check is no longer needed since false is the correct initial assumption (not authed yet).
+
+Bug 2 — Login/Signup both call router.replace('/(tabs)') immediately after Firebase auth, but useAuthRedirect in _layout.tsx also calls router.back() — causing a double-navigation race
+Location: app/auth/login.tsx line ~35, app/auth/signup.tsx line ~37
+Problem: After signInWithEmailAndPassword / createUserWithEmailAndPassword resolves, each screen does setTimeout(() => router.replace('/(tabs)'), 100). Meanwhile useAuthRedirect also fires router.back(). Two navigations race.
+Fix: Remove the setTimeout(() => router.replace('/(tabs)'), 100) calls from both login.tsx and signup.tsx. Let useAuthRedirect in _layout.tsx handle navigation exclusively — it already watches onAuthStateChanged and calls router.back() when the user lands on login/signup. This is the correct single source of truth.
+
+Bug 3 — AppContext imports MOCK_REVIEWS before it is declared (used before const)
+Location: context/AppContext.tsx
+Problem: MOCK_REVIEWS is declared at the very bottom of the file (after export function useApp()), but it's referenced inside AppProvider body at the top — specifically in useState<Review[]>(useMocks ? MOCK_REVIEWS : []) and inside loadMockStored. JavaScript hoists var but not const/let, so this causes a ReferenceError at runtime.
+Fix: Move the const MOCK_REVIEWS: Review[] = [...] declaration to the top of the file, before the AppProvider function definition.
+
+Bug 4 — Profile photo upload shows no progress / silently fails
+Location: app/(tabs)/profile.tsx
+Problem: The profile screen reads uploadProgress and isUploading from useAvatarUpload, but there is no visual indicator rendered while avatarUploading === true. If the upload fails, the user sees nothing. Additionally the AvatarUploadSheet component is mounted unconditionally but avatarSheetOpen is never set to true from the avatar tap handler — the sheet never opens.
+Fix two things:
+
+Add an upload progress overlay on the avatar. Inside the avatar Pressable, add:
+
+tsx{avatarUploading && (
+  <View style={styles.avatarUploading}>
+    <ActivityIndicator color="#fff" size="small" />
+    {uploadProgress > 0 && (
+      <Text style={styles.avatarUploadPct}>{Math.round(uploadProgress)}%</Text>
+    )}
+  </View>
+)}
+With styles:
+tsavatarUploading: {
+  ...StyleSheet.absoluteFillObject,
+  backgroundColor: 'rgba(0,0,0,0.45)',
+  borderRadius: 44,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+avatarUploadPct: { color: '#fff', fontSize: 11, marginTop: 2 },
+
+Find the avatar Pressable onPress handler and make it open the sheet:
+
+tsxonPress={() => setAvatarSheetOpen(true)}
+(It is currently either missing or pointing to the wrong handler.)
+
+Bug 5 — app/advertise.tsx uses #008080 teal but the rest of the app uses #0EB5CA
+Location: app/advertise.tsx
+Problem: The advertise page was themed with CSS teal (#008080) instead of the app's brand teal (#0EB5CA). The hero icon, package cards, feature check icons, radio buttons, book button, and TEAL_LIGHT/TEAL_DARK are all wrong.
+Fix: Replace the three color constants at the top of advertise.tsx:
+ts// Before:
+const TEAL       = '#008080'
+const TEAL_LIGHT = '#e0f2f2'
+const TEAL_DARK  = '#006666'
+
+// After:
+const TEAL       = '#0EB5CA'
+const TEAL_LIGHT = '#E8F9FC'
+const TEAL_DARK  = '#0A9BB0'
+No other changes needed — all usages already reference these constants.
+
+Bug 6 — context/AppContext.tsx imports isFirebaseReady from @/lib/firebase but the useFirebase gate is evaluated once at render time (not reactive)
+Location: context/AppContext.tsx line ~12
+Problem: const useFirebase = isFirebaseReady() is called during the component render and never updates. If Firebase initialises asynchronously (e.g. on slow devices), useFirebase is permanently false for that session and the app runs on mock data even though Firebase became ready.
+Fix: Convert to a useState + useEffect pattern:
+tsx// Replace:
+const useFirebase = isFirebaseReady();
+
+// With:
+const [useFirebase, setUseFirebase] = useState(() => isFirebaseReady());
+
+useEffect(() => {
+  // Poll once after mount in case Firebase finished initialising
+  // after the first synchronous render
+  if (!useFirebase && isFirebaseReady()) {
+    setUseFirebase(true);
+  }
+}, []);
+Also update the useMocks derivation to use the state value (it already does since it reads useFirebase). No other changes needed.
+
+Please output the complete fixed file contents for:
+
+app/_layout.tsx
+app/auth/login.tsx
+app/auth/signup.tsx
+context/AppContext.tsx
+app/(tabs)/profile.tsx (avatar section only if file is large — clearly mark what changed)
+app/advertise.tsx
+
+Do not output files that have no changes.

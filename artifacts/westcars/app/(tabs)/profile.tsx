@@ -230,6 +230,14 @@ export default function ProfileScreen() {
               <Feather name="user" size={36} color="#0098AA" />
             </View>
           )}
+          {avatarUploading && (
+            <View style={styles.avatarUploadingOverlay}>
+              <ActivityIndicator color="#fff" size="small" />
+              {uploadProgress !== null && uploadProgress > 0 && (
+                <Text style={styles.avatarUploadPct}>{Math.round(uploadProgress * 100)}%</Text>
+              )}
+            </View>
+          )}
           <Pressable style={styles.editAvatarBtn} onPress={() => setAvatarSheetOpen(true)} disabled={avatarUploading}>
             {avatarUploading
               ? <ActivityIndicator size={12} color="#FFFFFF" />
@@ -699,6 +707,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#0EB5CA", borderWidth: 2, borderColor: "#fff",
     alignItems: "center", justifyContent: "center",
   },
+  avatarUploadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    borderRadius: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarUploadPct: { color: "#fff", fontSize: 11, marginTop: 2 },
   uploadProgressTrack: {
     height: 3, borderRadius: 2,
     backgroundColor: "rgba(14,181,202,0.2)",

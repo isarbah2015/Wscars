@@ -1,20 +1,17 @@
 // app/advertise.tsx
-// FIX #7 — WestCars teal theme applied throughout
-// All orange/amber accents replaced with TEAL (#008080) / TEAL_LIGHT (#e0f2f2) / TEAL_DARK (#006666)
-// AD_PACKAGES, handleBook, sticky bookBar all preserved exactly — only colors changed
 
 import React, { useState } from 'react'
 import {
-  View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  SafeAreaView, Pressable,
+  View, Text, TouchableOpacity, StyleSheet, ScrollView, Pressable,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Feather } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 
 // ─── WestCars palette ─────────────────────────────────────────────────────────
-const TEAL       = '#008080'
-const TEAL_LIGHT = '#e0f2f2'
-const TEAL_DARK  = '#006666'
+const TEAL       = '#0EB5CA'
+const TEAL_LIGHT = '#E8F9FC'
+const TEAL_DARK  = '#0A9BB0'
 
 // ─── Packages ─────────────────────────────────────────────────────────────────
 const AD_PACKAGES = [
@@ -67,6 +64,7 @@ const AD_PACKAGES = [
 
 export default function AdvertisePage() {
   const router = useRouter()
+  const insets = useSafeAreaInsets()
   const [selected, setSelected] = useState<string>('featured')
 
   const selectedPkg = AD_PACKAGES.find(p => p.id === selected)!
@@ -84,10 +82,10 @@ export default function AdvertisePage() {
   }
 
   return (
-    <SafeAreaView style={s.safe}>
+    <View style={s.safe}>
 
       {/* ── Header ── */}
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + 14 }]}>
         <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
           <Feather name="arrow-left" size={22} color={TEAL_DARK} />
         </TouchableOpacity>
@@ -191,7 +189,7 @@ export default function AdvertisePage() {
         </TouchableOpacity>
       </View>
 
-    </SafeAreaView>
+    </View>
   )
 }
 

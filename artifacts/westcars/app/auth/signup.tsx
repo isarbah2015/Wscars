@@ -42,7 +42,6 @@ export default function SignupScreen() {
       setLoading(true);
       const cred = await createUserWithEmailAndPassword(auth!, email.trim(), password);
       await updateProfile(cred.user, { displayName: name.trim() });
-      setTimeout(() => { router.replace('/(tabs)'); }, 100);
     } catch (e: any) {
       const msg = e.code === 'auth/email-already-in-use'  ? 'An account with this email already exists'
                 : e.code === 'auth/invalid-email'          ? 'Please enter a valid email address'
