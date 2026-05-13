@@ -362,33 +362,36 @@ export default function SellScreen() {
             title="Vehicle photos"
             right={<Text style={styles.photoCount}>{images.length} / 10 photos added</Text>}
           />
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.photoRow}>
-              {images.length < 10 && (
-                <Pressable style={styles.addPhoto} onPress={pickImages}>
-                  <Feather name="plus" size={22} color={TEAL} />
-                  <Text style={styles.addPhotoText}>Add</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.photoScroll}
+            contentContainerStyle={styles.photoScrollContent}
+          >
+            {images.length < 10 && (
+              <Pressable style={styles.addPhoto} onPress={pickImages}>
+                <Feather name="plus" size={22} color={TEAL} />
+                <Text style={styles.addPhotoText}>Add</Text>
+              </Pressable>
+            )}
+            {images.map((uri, i) => (
+              <View key={i} style={styles.photoThumb}>
+                <Image source={{ uri }} style={styles.thumbImg} />
+                {i === 0 && (
+                  <View style={styles.coverBadge}><Text style={styles.coverText}>Cover</Text></View>
+                )}
+                <Pressable style={styles.removePhoto} onPress={() => setImages(prev => prev.filter((_,j) => j !== i))}>
+                  <Feather name="x" size={10} color="#fff" />
                 </Pressable>
-              )}
-              {images.map((uri, i) => (
-                <View key={i} style={styles.photoThumb}>
-                  <Image source={{ uri }} style={styles.thumbImg} />
-                  {i === 0 && (
-                    <View style={styles.coverBadge}><Text style={styles.coverText}>Cover</Text></View>
-                  )}
-                  <Pressable style={styles.removePhoto} onPress={() => setImages(prev => prev.filter((_,j) => j !== i))}>
-                    <Feather name="x" size={10} color="#fff" />
-                  </Pressable>
-                </View>
-              ))}
-              {images.length === 0 && (
-                <>
-                  {[0,1,2].map(i => (
-                    <View key={i} style={styles.photoEmpty} />
-                  ))}
-                </>
-              )}
-            </View>
+              </View>
+            ))}
+            {images.length === 0 && (
+              <>
+                {[0,1,2].map(i => (
+                  <View key={i} style={styles.photoEmpty} />
+                ))}
+              </>
+            )}
           </ScrollView>
           <Text style={styles.photoHint}>
             Tap + to select photos from your gallery. First photo will be the cover.
@@ -679,12 +682,15 @@ const styles = StyleSheet.create({
     backgroundColor: CARD, borderRadius: 16, padding: 16,
     shadowColor: "#000", shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
+    overflow: "visible",
   },
   row2: { flexDirection: "row", alignItems: "flex-start" },
 
   // Photos
-  photoCount: { fontSize: 11, fontFamily: "Inter_500Medium", color: TEAL },
-  photoRow:   { flexDirection: "row", gap: 8, paddingVertical: 4 },
+  photoCount:         { fontSize: 11, fontFamily: "Inter_500Medium", color: TEAL },
+  photoScroll:        { marginHorizontal: -16 },
+  photoScrollContent: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingVertical: 4 },
+  photoRow:           { flexDirection: "row", gap: 8, paddingVertical: 4 },
   addPhoto: {
     width: 76, height: 76, borderRadius: 10,
     borderWidth: 2, borderColor: TEAL, borderStyle: "dashed",

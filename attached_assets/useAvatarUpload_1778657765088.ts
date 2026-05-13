@@ -51,6 +51,7 @@ export function useAvatarUpload({
 
       if (status === 'granted') return true
 
+      // Denied — prompt to open Settings
       Alert.alert(
         source === 'camera' ? 'Camera Access Needed' : 'Photo Library Access Needed',
         source === 'camera'
@@ -74,10 +75,6 @@ export function useAvatarUpload({
   const uploadBlob = useCallback(
     (blob: Blob): Promise<string> => {
       return new Promise((resolve, reject) => {
-        if (!storage) {
-          reject(new Error('Firebase Storage not initialised'))
-          return
-        }
         const storageRef = ref(storage, `avatars/${userId}.jpg`)
         const task = uploadBytesResumable(storageRef, blob, {
           contentType: 'image/jpeg',
@@ -129,8 +126,7 @@ export function useAvatarUpload({
         const blob = await response.blob()
         const downloadURL = await uploadBlob(blob)
 
-        if (!db) throw new Error('Firestore not initialised')
-
+        // FIX: write to `avatar` field to match WestCars User schema
         await updateDoc(doc(db, 'users', userId), {
           avatar: downloadURL,
           photoUpdatedAt: new Date().toISOString(),
@@ -155,14 +151,11 @@ export function useAvatarUpload({
     setError(null)
     setIsUploading(true)
     try {
-      if (storage) {
-        try {
-          await deleteObject(ref(storage, `avatars/${userId}.jpg`))
-        } catch {
-          // File may not exist — ignore
-        }
+      try {
+        await deleteObject(ref(storage, `avatars/${userId}.jpg`))
+      } catch {
+        // File may not exist — ignore
       }
-      if (!db) throw new Error('Firestore not initialised')
       await updateDoc(doc(db, 'users', userId), {
         avatar: null,
         photoUpdatedAt: new Date().toISOString(),

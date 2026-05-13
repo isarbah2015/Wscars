@@ -1,3 +1,7 @@
+// app/_layout.tsx
+// FIX #2: Added auth state listener — after login, router.back() fires automatically
+// so the user lands back on the screen they came from (sell, profile, etc.)
+
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -18,11 +22,10 @@ import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { onAuthStateChanged } from "firebase/auth";
-
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { AppProvider } from "@/context/AppContext";
+import { AppProvider, useApp } from "@/context/AppContext";
 import { ThemeProvider } from "@/context/ThemeContext";
-import { auth } from "@/lib/firebase-persistence";
+import { auth } from "@/lib/firebase";
 
 const FEATHER_TTF = require("../assets/fonts/Feather.ttf");
 const IONICONS_TTF = require("../assets/fonts/Ionicons.ttf");
@@ -47,7 +50,7 @@ function useAuthRedirect() {
       const isAuthed = !!user;
       const wasAuthed = prevAuthRef.current;
 
-      // Just signed IN (null → true) and we're on the login/signup screen → go back
+      // Just signed IN (null → true) and we're on the login screen → go back
       if (wasAuthed === false && isAuthed) {
         const onLoginScreen =
           segments.includes("login") ||

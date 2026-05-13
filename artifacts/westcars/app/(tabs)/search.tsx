@@ -179,6 +179,7 @@ interface FilterState {
   priceMin:      number;
   priceMax:      number;
   brands:        string[];
+  models:        string[];
   transmissions: string[];
   conditions:    string[];
   cities:        string[];
@@ -188,6 +189,7 @@ const DEFAULT_FILTERS: FilterState = {
   priceMin:      PRICE_MIN,
   priceMax:      PRICE_MAX,
   brands:        [],
+  models:        [],
   transmissions: [],
   conditions:    [],
   cities:        [],
@@ -207,6 +209,7 @@ function FilterModal({
   const [priceMin,      setPriceMin]      = React.useState(initial.priceMin);
   const [priceMax,      setPriceMax]      = React.useState(initial.priceMax);
   const [brands,        setBrands]        = React.useState<string[]>(initial.brands);
+  const [models,        setModels]        = React.useState<string[]>(initial.models);
   const [transmissions, setTransmissions] = React.useState<string[]>(initial.transmissions);
   const [conditions,    setConditions]    = React.useState<string[]>(initial.conditions);
   const [cities,        setCities]        = React.useState<string[]>(initial.cities);
@@ -221,6 +224,7 @@ function FilterModal({
       setTransmissions(initial.transmissions);
       setConditions(initial.conditions);
       setCities(initial.cities);
+      setModels(initial.models);
       setShowAllBrands(false);
       setShowAllCities(false);
     }
@@ -235,11 +239,11 @@ function FilterModal({
   const reset = () => {
     setPriceMin(PRICE_MIN); setPriceMax(PRICE_MAX);
     setBrands([]); setTransmissions([]);
-    setConditions([]); setCities([]);
+    setConditions([]); setCities([]); setModels([]);
   };
 
   const apply = () => {
-    onApply({ priceMin, priceMax, brands, transmissions, conditions, cities });
+    onApply({ priceMin, priceMax, brands, models, transmissions, conditions, cities });
     onClose();
   };
 
@@ -294,7 +298,7 @@ function FilterModal({
                   ]} />
                 </View>
                 <Slider
-                  style={fS.slider}
+                  style={[fS.slider, { zIndex: priceMin > PRICE_MAX * 0.9 ? 2 : 1 }]}
                   minimumValue={PRICE_MIN}
                   maximumValue={PRICE_MAX}
                   step={PRICE_STEP}
@@ -302,10 +306,10 @@ function FilterModal({
                   onValueChange={(v) => { if (v < priceMax - PRICE_STEP) setPriceMin(v); }}
                   minimumTrackTintColor="transparent"
                   maximumTrackTintColor="transparent"
-                  thumbTintColor="#FF6B00"
+                  thumbTintColor={TEAL}
                 />
                 <Slider
-                  style={[fS.slider, { position: "absolute", left: 0, right: 0 }]}
+                  style={[fS.slider, { position: "absolute", left: 0, right: 0, zIndex: priceMin > PRICE_MAX * 0.9 ? 1 : 2 }]}
                   minimumValue={PRICE_MIN}
                   maximumValue={PRICE_MAX}
                   step={PRICE_STEP}
@@ -313,7 +317,7 @@ function FilterModal({
                   onValueChange={(v) => { if (v > priceMin + PRICE_STEP) setPriceMax(v); }}
                   minimumTrackTintColor="transparent"
                   maximumTrackTintColor="transparent"
-                  thumbTintColor="#FF6B00"
+                  thumbTintColor={TEAL}
                 />
               </View>
 
@@ -359,6 +363,34 @@ function FilterModal({
             </View>
 
             <View style={fS.divider} />
+
+            {brands.length === 1 && BRAND_MODELS[brands[0]] && (
+              <>
+                <View style={fS.section}>
+                  <Text style={fS.secLabel}>Model — {brands[0]}</Text>
+                  <View style={fS.chipsRow}>
+                    {BRAND_MODELS[brands[0]].map(model => {
+                      const active = models.includes(model);
+                      return (
+                        <TouchableOpacity
+                          key={model}
+                          style={[fS.chip, active && fS.chipActive]}
+                          onPress={() => toggle(models, setModels, model)}
+                        >
+                          <Text style={[fS.chipTxt, active && fS.chipTxtActive]}>{model}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                  {models.length > 0 && (
+                    <TouchableOpacity onPress={() => setModels([])}>
+                      <Text style={{ color: TEAL, fontSize: 12, marginTop: 6 }}>Clear model</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <View style={fS.divider} />
+              </>
+            )}
 
             {/* ── Transmission ── */}
             <View style={fS.section}>
@@ -506,9 +538,10 @@ export default function SearchScreen() {
 
   const matchesModalFilters = React.useCallback((car: Car) => {
     if (!activeFilters) return true;
-    const { brands, transmissions, conditions, cities, priceMin, priceMax } = activeFilters;
+    const { brands, models, transmissions, conditions, cities, priceMin, priceMax } = activeFilters;
     return (
       (brands.length        === 0 || brands.includes(car.brand)) &&
+      (models.length        === 0 || models.includes(car.model)) &&
       (transmissions.length === 0 || transmissions.includes(car.transmission ?? "")) &&
       (conditions.length    === 0 || conditions.includes(car.condition)) &&
       (cities.length        === 0 || cities.includes(car.location)) &&

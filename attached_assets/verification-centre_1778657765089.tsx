@@ -1,13 +1,13 @@
 // app/verification-centre.tsx
 // FIX #6 — Two-step verification: Phone OTP first, then ID/Passport photo upload
-// Step 1: Firebase phone OTP → verifiedPhone badge
+// Step 1: Firebase phone OTP (existing) → verifiedPhone badge
 // Step 2: Upload National ID or Passport photo → verifiedId badge (pending admin review)
 
 import React, { useState } from 'react'
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
   SafeAreaView, Modal, TextInput, ActivityIndicator,
-  Alert, Image, Pressable, Linking,
+  Alert, Image, Pressable,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { Feather } from '@expo/vector-icons'
@@ -15,23 +15,23 @@ import { useRouter } from 'expo-router'
 import {
   PhoneAuthProvider,
   signInWithCredential,
+  RecaptchaVerifier,
 } from 'firebase/auth'
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { auth } from '@/lib/firebase-persistence'
-import { db, storage } from '@/lib/firebase'
+import { auth, db, storage } from '@/lib/firebase'
 import { useApp } from '@/context/AppContext'
 
 const TEAL       = '#008080'
 const TEAL_LIGHT = '#e0f2f2'
 const TEAL_DARK  = '#006666'
 
-// ─── Badge ────────────────────────────────────────────────────────────────────
+// ─── Badge row ────────────────────────────────────────────────────────────────
 
 function Badge({ label, done, pending }: { label: string; done: boolean; pending?: boolean }) {
-  const bg    = done ? TEAL : pending ? '#FFF3CD' : TEAL_LIGHT
+  const bg = done ? TEAL : pending ? '#FFF3CD' : TEAL_LIGHT
   const color = done ? '#fff' : pending ? '#856404' : TEAL_DARK
-  const icon  = done ? 'check' : pending ? 'clock' : 'circle'
+  const icon = done ? 'check' : pending ? 'clock' : 'circle'
   return (
     <View style={[badgeS.wrap, { backgroundColor: bg }]}>
       <Feather name={icon as any} size={12} color={color} />
@@ -41,7 +41,7 @@ function Badge({ label, done, pending }: { label: string; done: boolean; pending
 }
 const badgeS = StyleSheet.create({
   wrap: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  txt:  { fontSize: 12, fontWeight: '700' },
+  txt: { fontSize: 12, fontWeight: '700' },
 })
 
 // ─── Step card ────────────────────────────────────────────────────────────────
@@ -83,26 +83,27 @@ function StepCard({
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export default function VerificationCentreScreen() {
+export default function VerificationCentre() {
   const router = useRouter()
   const { currentUser } = useApp()
 
+  // Verification state from user profile
   const verifiedPhone = !!currentUser?.verifiedPhone
   const verifiedId    = !!currentUser?.verifiedId
   const idPending     = !!currentUser?.idVerificationPending
 
   // Phone OTP state
-  const [phoneModal,      setPhoneModal]      = useState(false)
-  const [phoneNum,        setPhoneNum]        = useState('')
-  const [otpCode,         setOtpCode]         = useState('')
-  const [verificationId,  setVerificationId]  = useState<string | null>(null)
-  const [phoneLoading,    setPhoneLoading]    = useState(false)
+  const [phoneModal, setPhoneModal]     = useState(false)
+  const [phoneNum, setPhoneNum]         = useState('')
+  const [otpCode, setOtpCode]           = useState('')
+  const [verificationId, setVerificationId] = useState<string | null>(null)
+  const [phoneLoading, setPhoneLoading] = useState(false)
 
   // ID upload state
-  const [idModal,     setIdModal]     = useState(false)
-  const [idType,      setIdType]      = useState<'national_id' | 'passport'>('national_id')
-  const [idImageUri,  setIdImageUri]  = useState<string | null>(null)
-  const [idUploading, setIdUploading] = useState(false)
+  const [idModal, setIdModal]           = useState(false)
+  const [idType, setIdType]             = useState<'national_id' | 'passport'>('national_id')
+  const [idImageUri, setIdImageUri]     = useState<string | null>(null)
+  const [idUploading, setIdUploading]   = useState(false)
 
   // ── Phone OTP ───────────────────────────────────────────────────────────────
 
@@ -110,6 +111,10 @@ export default function VerificationCentreScreen() {
     if (!phoneNum.trim()) return
     setPhoneLoading(true)
     try {
+      // Firebase web SDK phone auth
+      const provider = new PhoneAuthProvider(auth!)
+      // For Expo/React Native, use expo-firebase-recaptcha or pass verifier
+      // Here we use confirmationResult pattern compatible with RN Firebase
       const { confirmationResult } = await (auth as any).signInWithPhoneNumber(
         phoneNum.startsWith('+') ? phoneNum : `+233${phoneNum.replace(/^0/, '')}`
       )
@@ -151,10 +156,7 @@ export default function VerificationCentreScreen() {
       Alert.alert(
         'Permission needed',
         'WestCars needs photo library access to upload your ID.',
-        [
-          { text: 'Not Now', style: 'cancel' },
-          { text: 'Open Settings', onPress: () => Linking.openSettings() },
-        ]
+        [{ text: 'Not Now', style: 'cancel' }, { text: 'Open Settings', onPress: () => require('react-native').Linking.openSettings() }]
       )
       return
     }
@@ -186,7 +188,7 @@ export default function VerificationCentreScreen() {
       setIdImageUri(null)
       Alert.alert(
         'Document Submitted ✓',
-        "Your document is under review. This usually takes up to 24 hours. You'll be notified once approved."
+        'Your document is under review. This usually takes up to 24 hours. You\'ll be notified once approved.'
       )
     } catch (err: any) {
       Alert.alert('Upload failed', err?.message ?? 'Could not upload document. Try again.')
@@ -195,7 +197,7 @@ export default function VerificationCentreScreen() {
     }
   }
 
-  // ── Trust score ──────────────────────────────────────────────────────────────
+  // ── Trust score (same formula as before) ────────────────────────────────────
   const trustScore = (verifiedPhone ? 40 : 0) + (verifiedId ? 60 : idPending ? 20 : 0)
 
   return (
@@ -346,9 +348,7 @@ export default function VerificationCentreScreen() {
               <>
                 <Feather name="upload" size={28} color={TEAL} />
                 <Text style={s.idUploadTxt}>Tap to select photo</Text>
-                <Text style={s.idUploadSub}>
-                  Front side of your {idType === 'passport' ? 'passport bio page' : 'Ghana Card'}
-                </Text>
+                <Text style={s.idUploadSub}>Front side of your {idType === 'passport' ? 'passport bio page' : 'Ghana Card'}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -381,8 +381,8 @@ export default function VerificationCentreScreen() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
-  safe:   { flex: 1, backgroundColor: '#f7fafa' },
-  scroll: { padding: 16, paddingBottom: 40 },
+  safe:      { flex: 1, backgroundColor: '#f7fafa' },
+  scroll:    { padding: 16, paddingBottom: 40 },
 
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -392,6 +392,7 @@ const s = StyleSheet.create({
   backBtn:     { width: 36 },
   headerTitle: { fontSize: 17, fontWeight: '800', color: TEAL_DARK },
 
+  // Score card
   scoreCard: {
     backgroundColor: '#fff', borderRadius: 18, padding: 20,
     marginBottom: 24, alignItems: 'center',
@@ -406,6 +407,7 @@ const s = StyleSheet.create({
 
   sectionLabel: { fontSize: 11, fontWeight: '700', color: TEAL, letterSpacing: 1, marginBottom: 8 },
 
+  // Step card
   stepCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     backgroundColor: '#fff', borderRadius: 16, padding: 16,
@@ -425,6 +427,7 @@ const s = StyleSheet.create({
   pendingTxt:  { fontSize: 12, color: '#856404', fontWeight: '600' },
   lockedNote:  { fontSize: 12, color: '#aaa', marginTop: 6, paddingLeft: 4 },
 
+  // Sheet
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },
   sheet: {
     backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24,
@@ -434,6 +437,7 @@ const s = StyleSheet.create({
   sheetTitle: { fontSize: 18, fontWeight: '800', color: '#111', marginBottom: 6 },
   sheetDesc:  { fontSize: 13, color: '#666', lineHeight: 19, marginBottom: 18 },
 
+  // Phone inputs
   inputRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     backgroundColor: '#f4fafa', borderRadius: 12, paddingHorizontal: 14,
@@ -443,15 +447,17 @@ const s = StyleSheet.create({
   flag:  { fontSize: 15, fontWeight: '700', color: '#333' },
   input: { flex: 1, fontSize: 16, color: '#111', fontWeight: '600' },
 
+  // Action button
   actionBtn: {
     height: 52, borderRadius: 16, backgroundColor: TEAL,
     alignItems: 'center', justifyContent: 'center', marginBottom: 10,
   },
   actionBtnDisabled: { backgroundColor: '#b2d8d8' },
-  actionBtnTxt:      { fontSize: 15, fontWeight: '800', color: '#fff' },
-  resendBtn:         { alignItems: 'center', paddingVertical: 8 },
-  resendTxt:         { fontSize: 13, color: TEAL, fontWeight: '600' },
+  actionBtnTxt: { fontSize: 15, fontWeight: '800', color: '#fff' },
+  resendBtn:    { alignItems: 'center', paddingVertical: 8 },
+  resendTxt:    { fontSize: 13, color: TEAL, fontWeight: '600' },
 
+  // ID upload
   typeRow:       { flexDirection: 'row', gap: 10, marginBottom: 16 },
   typeBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
@@ -467,10 +473,10 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: TEAL_LIGHT, borderStyle: 'dashed',
     alignItems: 'center', justifyContent: 'center', marginBottom: 12, overflow: 'hidden',
   },
-  idPreview:   { width: '100%', height: '100%' },
-  idUploadTxt: { fontSize: 14, fontWeight: '700', color: TEAL, marginTop: 8 },
-  idUploadSub: { fontSize: 12, color: '#888', marginTop: 4, textAlign: 'center', paddingHorizontal: 20 },
-  rePickBtn:   { alignItems: 'center', marginBottom: 12 },
-  rePickTxt:   { fontSize: 13, color: TEAL, fontWeight: '600' },
-  privacyNote: { fontSize: 11, color: '#999', textAlign: 'center', marginTop: 8, lineHeight: 16 },
+  idPreview:    { width: '100%', height: '100%' },
+  idUploadTxt:  { fontSize: 14, fontWeight: '700', color: TEAL, marginTop: 8 },
+  idUploadSub:  { fontSize: 12, color: '#888', marginTop: 4, textAlign: 'center', paddingHorizontal: 20 },
+  rePickBtn:    { alignItems: 'center', marginBottom: 12 },
+  rePickTxt:    { fontSize: 13, color: TEAL, fontWeight: '600' },
+  privacyNote:  { fontSize: 11, color: '#999', textAlign: 'center', marginTop: 8, lineHeight: 16 },
 })

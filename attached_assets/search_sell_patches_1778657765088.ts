@@ -1,0 +1,160 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// PATCH NOTES for search.tsx and sell.tsx
+// Drop these snippets into the correct locations in each file.
+// ─────────────────────────────────────────────────────────────────────────────
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FIX #3 — Minimum price slider can't move
+// Root cause: both sliders share the same absolute position stack. The MAX
+// slider sits on top and intercepts all touches when priceMin === 0, because
+// its thumb is also at the left edge. Fix: give the MIN slider a higher zIndex
+// when its thumb is at or near the left edge.
+//
+// REPLACE the two <Slider> blocks in FilterModal (lines ~296–318) with:
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/*
+<View style={fS.sliderWrap}>
+  <View style={fS.track}>
+    <View style={[fS.fill, {
+      left:  `${(priceMin / PRICE_MAX) * 100}%` as any,
+      right: `${100 - (priceMax / PRICE_MAX) * 100}%` as any,
+    }]} />
+  </View>
+
+  {/* MIN thumb — raised zIndex when near left edge so it's always tappable */}
+  <Slider
+    style={[fS.slider, { zIndex: priceMin <= priceMax / 2 ? 2 : 1 }]}
+    minimumValue={PRICE_MIN}
+    maximumValue={PRICE_MAX - PRICE_STEP}          // ← never reaches MAX
+    step={PRICE_STEP}
+    value={priceMin}
+    onValueChange={(v) => setPriceMin(Math.min(v, priceMax - PRICE_STEP))}
+    minimumTrackTintColor="transparent"
+    maximumTrackTintColor="transparent"
+    thumbTintColor="#008080"
+  />
+
+  {/* MAX thumb */}
+  <Slider
+    style={[fS.slider, { position: "absolute", left: 0, right: 0, zIndex: priceMin <= priceMax / 2 ? 1 : 2 }]}
+    minimumValue={PRICE_MIN + PRICE_STEP}          // ← never reaches MIN
+    maximumValue={PRICE_MAX}
+    step={PRICE_STEP}
+    value={priceMax}
+    onValueChange={(v) => setPriceMax(Math.max(v, priceMin + PRICE_STEP))}
+    minimumTrackTintColor="transparent"
+    maximumTrackTintColor="transparent"
+    thumbTintColor="#008080"
+  />
+</View>
+*/
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FIX #4 — Car brand models picker
+// Add a model dropdown that appears after a brand chip is selected.
+// Reads from the existing BRAND_MODELS map — no Firestore needed.
+//
+// 1. Add `models: string[]` to FilterState interface
+// 2. Add `models: []` to DEFAULT_FILTERS
+// 3. Add `const [models, setModels] = React.useState<string[]>(initial.models)`
+//    inside FilterModal
+// 4. Add to the useEffect sync block: `setModels(initial.models)`
+// 5. Pass `models` in the apply() call: `onApply({ ..., models })`
+// 6. INSERT this block in FilterModal's ScrollView, right after the brands section:
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/*
+{brands.length === 1 && BRAND_MODELS[brands[0]] && (
+  <View style={fS.section}>
+    <Text style={fS.secLabel}>Model — {brands[0]}</Text>
+    <View style={fS.chipRow}>
+      {BRAND_MODELS[brands[0]].map(model => {
+        const active = models.includes(model);
+        return (
+          <TouchableOpacity
+            key={model}
+            style={[fS.chip, active && fS.chipActive]}
+            onPress={() => toggle(models, setModels, model)}
+          >
+            <Text style={[fS.chipTxt, active && fS.chipTxtActive]}>{model}</Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+    {models.length > 0 && (
+      <TouchableOpacity onPress={() => setModels([])}>
+        <Text style={{ color: '#008080', fontSize: 12, marginTop: 6 }}>Clear model</Text>
+      </TouchableOpacity>
+    )}
+  </View>
+)}
+*/
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FIX #5 — Sell page photo horizontal scroll clipping
+// Root cause: the card has no horizontal overflow room and photoRow has no
+// paddingRight, so the last thumb gets clipped by the card boundary.
+//
+// REPLACE the photo ScrollView in sell.tsx (lines ~359–391) with:
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/*
+<View style={styles.card}>
+  <SectionHeader
+    title="Vehicle photos"
+    right={<Text style={styles.photoCount}>{images.length} / 10 photos added</Text>}
+  />
+  <ScrollView
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    contentContainerStyle={styles.photoScrollContent}  // ← new style key
+    style={styles.photoScroll}                          // ← new style key
+  >
+    {images.length < 10 && (
+      <Pressable style={styles.addPhoto} onPress={pickImages}>
+        <Feather name="plus" size={22} color={TEAL} />
+        <Text style={styles.addPhotoText}>Add</Text>
+      </Pressable>
+    )}
+    {images.map((uri, i) => (
+      <View key={i} style={styles.photoThumb}>
+        <Image source={{ uri }} style={styles.thumbImg} />
+        {i === 0 && (
+          <View style={styles.coverBadge}>
+            <Text style={styles.coverText}>Cover</Text>
+          </View>
+        )}
+        <Pressable
+          style={styles.removePhoto}
+          onPress={() => setImages(prev => prev.filter((_, j) => j !== i))}
+        >
+          <Feather name="x" size={10} color="#fff" />
+        </Pressable>
+      </View>
+    ))}
+    {images.length === 0 && (
+      <>{[0, 1, 2].map(i => <View key={i} style={styles.photoEmpty} />)}</>
+    )}
+  </ScrollView>
+</View>
+*/
+
+// ADD these two entries to the sell.tsx StyleSheet:
+/*
+  photoScroll: {
+    marginHorizontal: -16,       // bleed past card padding so thumbs aren't clipped
+  },
+  photoScrollContent: {
+    paddingHorizontal: 16,
+    paddingRight: 32,            // trailing breathing room so last thumb isn't cut
+    gap: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+*/
+// Also make sure the card itself has: overflow: 'visible'
+// Find the `card` style entry and add/change: overflow: 'visible'

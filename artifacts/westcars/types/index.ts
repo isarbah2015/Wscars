@@ -54,6 +54,9 @@ export interface User {
   totalSales?: number;
   isDealer?: boolean;
   favorites?: string[];
+  verifiedPhone?: boolean;
+  verifiedId?: boolean;
+  idVerificationPending?: boolean;
 }
 
 export interface CarRating {

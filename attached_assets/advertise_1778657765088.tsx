@@ -15,8 +15,9 @@ import { useRouter } from 'expo-router'
 const TEAL       = '#008080'
 const TEAL_LIGHT = '#e0f2f2'
 const TEAL_DARK  = '#006666'
+const TEAL_MID   = '#00a0a0'
 
-// ─── Packages ─────────────────────────────────────────────────────────────────
+// ─── Packages (preserve existing data, only color tokens changed) ─────────────
 const AD_PACKAGES = [
   {
     id: 'basic',
@@ -36,7 +37,7 @@ const AD_PACKAGES = [
     name: 'Featured',
     price: 'GHS 120',
     duration: '14 days',
-    highlight: true,
+    highlight: true,   // ← hero card
     badge: 'Most Popular',
     features: [
       'Top of search results',
@@ -148,7 +149,8 @@ export default function AdvertisePage() {
                 ))}
               </View>
 
-              <View style={s.selectRow}>
+              {/* Selection indicator */}
+              <View style={[s.selectRow]}>
                 <View style={[s.radio, active && s.radioActive, pkg.highlight && s.radioHero]}>
                   {active && <View style={s.radioDot} />}
                 </View>
@@ -209,6 +211,7 @@ const s = StyleSheet.create({
   backBtn:     { width: 36 },
   headerTitle: { fontSize: 17, fontWeight: '800', color: TEAL_DARK },
 
+  // Hero
   hero: {
     alignItems: 'center', paddingVertical: 24, marginBottom: 8,
   },
@@ -220,6 +223,7 @@ const s = StyleSheet.create({
   heroTitle: { fontSize: 22, fontWeight: '800', color: '#111', marginBottom: 6, textAlign: 'center' },
   heroSub:   { fontSize: 14, color: '#666', textAlign: 'center', lineHeight: 20, paddingHorizontal: 16 },
 
+  // Cards
   card: {
     backgroundColor: '#fff', borderRadius: 18, padding: 18, marginBottom: 14,
     borderWidth: 2, borderColor: 'transparent',
@@ -263,6 +267,7 @@ const s = StyleSheet.create({
   radioDot:    { width: 10, height: 10, borderRadius: 5, backgroundColor: TEAL },
   selectTxt:   { fontSize: 13, fontWeight: '600', color: '#888' },
 
+  // How it works
   howTitle: { fontSize: 16, fontWeight: '800', color: '#111', marginBottom: 12, marginTop: 8 },
   howRow:   { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
   howIcon: {
@@ -271,6 +276,7 @@ const s = StyleSheet.create({
   },
   howTxt: { fontSize: 14, color: '#444', fontWeight: '600' },
 
+  // Sticky bar
   bookBar: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 18, paddingVertical: 14,
