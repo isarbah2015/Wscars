@@ -155,3 +155,9 @@ id = "W-Ov_qSGaG68Ciio9WSEr"
 uri = "file://westcars_files.tar.gz"
 type = "unspecified"
 title = "Westcars source files"
+
+[[outputs]]
+id = "uqyREGsPn3OIuyydDe0Oh"
+uri = "file://westcars-fixes.zip"
+type = "unspecified"
+title = "westcars-fixes.zip"
