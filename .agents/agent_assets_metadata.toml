@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "jUylkv4nkbZ7T2TB7LWMy"
@@ -150,3 +149,9 @@ id = "Nzpflr-yqkLT8-XdLGR7i"
 uri = "file://artifacts/westcars/assets/images/welcome-car.png"
 type = "image"
 title = "generated_image"
+
+[[outputs]]
+id = "W-Ov_qSGaG68Ciio9WSEr"
+uri = "file://westcars_files.tar.gz"
+type = "unspecified"
+title = "Westcars source files"
