@@ -1,0 +1,99 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// ANDROID LOGO ICON FIX — W and C getting cut off
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Root cause: Android adaptive icons have a "safe zone" — only the central 66%
+// of the foreground image is guaranteed to be visible across all launcher shapes
+// (circle, squircle, rounded square, etc.). If your wc-logo is full-bleed in the
+// PNG, launchers that apply a circular mask will crop the edges.
+//
+// TWO options — pick one:
+//
+// ── OPTION A: Fix in app.json (recommended — no Photoshop needed) ─────────────
+//
+// In your app.json / app.config.js, change the android adaptive icon section:
+//
+//   "android": {
+//     "adaptiveIcon": {
+//       "foregroundImage": "./assets/images/adaptive-icon.png",
+//       "backgroundColor": "#0A1628"        ← keep your navy background
+//     }
+//   }
+//
+// Then in adaptive-icon.png:
+//   • Canvas size: 1024 × 1024 px
+//   • Logo should fit inside the central 680 × 680 px (66% of 1024) safe zone
+//   • Leave ~170 px padding on all four sides
+//   • Export as PNG with transparency
+//
+// If you're using Expo's default icon (icon.png → square), Expo auto-generates
+// the adaptive icon. In that case set the `icon` field to a version of your
+// logo with generous padding:
+//
+//   "icon": "./assets/images/icon.png"   ← 1024×1024, logo centred in 66% safe zone
+//
+// ── OPTION B: Quick fix with Expo's backgroundColor trick ────────────────────
+//
+// If you want the simplest fix without touching the PNG, tell Expo to use a
+// solid background + your existing icon but scale it down:
+//
+// In app.json:
+// {
+//   "expo": {
+//     "icon": "./assets/images/wc-logo.png",
+//     "android": {
+//       "adaptiveIcon": {
+//         "foregroundImage": "./assets/images/wc-logo.png",
+//         "backgroundColor": "#0A1628"
+//       }
+//     }
+//   }
+// }
+//
+// Then in your LOGO PNG file (wc-logo.png or adaptive-icon.png):
+//   • Open in any editor (even Figma/Canva)
+//   • Add padding: make the canvas 1024×1024 and place the "WC" logo
+//     so it occupies no more than 66% of the width and height
+//   • Export and replace the file — no app.json change needed
+//
+// ── VERIFICATION ─────────────────────────────────────────────────────────────
+//
+// After updating, run:
+//   npx expo build:android   (classic)
+//   OR
+//   eas build --platform android   (EAS)
+//
+// Or preview locally with:
+//   npx expo start → press 'a' → check in Android emulator
+//   or use: https://adaptiveicons.com to preview your PNG in the browser
+//
+// ─────────────────────────────────────────────────────────────────────────────
+// RECOMMENDED app.json snippet (drop into your existing file):
+// ─────────────────────────────────────────────────────────────────────────────
+
+const APP_JSON_ANDROID_SNIPPET = {
+  "android": {
+    "package": "com.westcars.app",   // keep your existing package name
+    "versionCode": 1,                 // keep your existing value
+    "adaptiveIcon": {
+      // Point to a 1024×1024 PNG where the logo sits inside the central 66%
+      "foregroundImage": "./assets/images/adaptive-icon.png",
+      // Navy brand background — shown as the icon background on all shapes
+      "backgroundColor": "#0A1628"
+    }
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FIGMA / CANVA QUICK GUIDE to fix the PNG without design software:
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// 1. Open Canva → "Custom size" → 1024 × 1024 px
+// 2. Background colour: #0A1628 (navy)
+// 3. Upload your wc-logo.png
+// 4. Resize it so width ≤ 670 px, then centre it on the canvas
+// 5. Download as PNG (transparent background if the navy is baked into the logo;
+//    or navy canvas if you want the colour from the PNG itself)
+// 6. Save as assets/images/adaptive-icon.png
+// 7. In app.json set foregroundImage to that file, backgroundColor to #0A1628
+//

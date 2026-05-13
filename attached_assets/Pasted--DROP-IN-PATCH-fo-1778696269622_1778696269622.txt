@@ -1,0 +1,58 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// DROP-IN PATCH for utils/ghanaData.ts
+// Replace your existing CAR_BRANDS array with this one.
+// Adds all major Chinese brands + other brands popular in Ghana.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const CAR_BRANDS: string[] = [
+  // ── Japanese ──────────────────────────────────────────────────────────────
+  "Toyota", "Honda", "Nissan", "Mazda", "Subaru", "Suzuki",
+  "Mitsubishi", "Isuzu", "Lexus", "Infiniti", "Acura",
+  // ── Korean ────────────────────────────────────────────────────────────────
+  "Hyundai", "Kia", "Genesis",
+  // ── German ────────────────────────────────────────────────────────────────
+  "Mercedes", "BMW", "Audi", "Volkswagen", "Porsche", "Opel",
+  // ── American ──────────────────────────────────────────────────────────────
+  "Ford", "Chevrolet", "Cadillac", "GMC", "Dodge", "Ram",
+  "Jeep", "Lincoln", "Hummer", "Tesla", "Rivian",
+  // ── British ───────────────────────────────────────────────────────────────
+  "Land Rover", "Volvo",
+  // ── French ────────────────────────────────────────────────────────────────
+  "Peugeot", "Renault", "Citroen", "Dacia",
+  // ── Italian ───────────────────────────────────────────────────────────────
+  "Fiat", "Alfa Romeo",
+  // ── Swedish ───────────────────────────────────────────────────────────────
+  "Polestar",
+  // ── Czech / Spanish ───────────────────────────────────────────────────────
+  "Skoda", "SEAT",
+  // ── Chinese passenger cars ────────────────────────────────────────────────
+  "BYD",         // Build Your Dreams — EVs + hybrids, very popular in Ghana
+  "Chery",       // Tiggo series — top-selling Chinese brand in W. Africa
+  "Geely",       // Coolray, Atlas — owns Volvo
+  "Haval",       // Great Wall Motors SUV brand — H6 is #1 Chinese SUV globally
+  "MG",          // Now owned by SAIC — ZS, HS popular in Ghana
+  "JAC",         // Jianghuai — SUVs + commercial
+  "BAIC",        // Beijing Auto
+  "Changan",     // CS series, Alsvin saloon
+  "Lifan",       // Budget SUVs
+  "SAIC",        // Parent brand (Maxus, Roewe)
+  "GAC",         // Guangzhou Auto — GS4, GS8
+  "Great Wall",  // Poer pickup, Tank 300
+  "Dongfeng",    // Fengon series
+  "FAW",         // First Auto Works — Besturn, Hongqi
+  "Foton",       // Tunland pickup, light trucks
+  "Zotye",       // Budget SUVs
+  // ── Chinese buses & trucks (common in Ghana) ──────────────────────────────
+  "King Long",   // Minibuses — ubiquitous as trotros
+  "Yutong",      // Intercity coaches
+  "Higer",       // Buses — Kumasi Metro, VIP
+  "Sinotruck",   // HOWO trucks — Ghana's #1 heavy truck
+  "Shacman",     // F3000, X3000 trucks
+  // ── Other ─────────────────────────────────────────────────────────────────
+  "Other",
+].sort((a, b) => {
+  // Keep "Other" always last
+  if (a === "Other") return 1;
+  if (b === "Other") return -1;
+  return a.localeCompare(b);
+});
