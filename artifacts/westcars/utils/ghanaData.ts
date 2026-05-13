@@ -13,67 +13,39 @@ export const GHANA_CITIES = [
   "Elmina", "Apam", "Mumford", "Dawhenya", "Adentan",
 ];
 
-export const CAR_BRANDS = [
-  // Japanese
-  "Toyota",
-  "Honda",
-  "Nissan",
-  "Mitsubishi",
-  "Suzuki",
-  "Mazda",
-  "Subaru",
-  "Isuzu",
-  "Lexus",
-  // Korean
-  "Hyundai",
-  "Kia",
-  // German
-  "Mercedes-Benz",
-  "BMW",
-  "Volkswagen",
-  "Audi",
-  "Opel",
-  "Porsche",
-  "Volvo",
-  // American
-  "Ford",
-  "Chevrolet",
-  "Jeep",
-  // British / European
-  "Land Rover",
-  "Peugeot",
-  "Renault",
-  // Chinese
-  "BYD",
-  "Chery",
-  "Haval",
-  "GAC",
-  "JAC",
-  "Changan",
-  "Geely",
-  "MG",
-  "Foton",
-  "BAIC",
-  "Dongfeng",
-  "Hongqi",
-  "Omoda",
-  "Jetour",
-  "Sinotruk",
-  "Yutong",
-  "King Long",
-  "Higer",
-  "Maxus",
-  "Zotye",
-  // Other
-  "Hino",
-  "Mitsubishi Fuso",
-  "Infiniti",
-  "Acura",
-  "Tata",
-  "Great Wall",
-  "Lifan",
-  "Brilliance",
-];
+export const CAR_BRANDS: string[] = [
+  // ── Japanese ──────────────────────────────────────────────────────────────
+  "Toyota", "Honda", "Nissan", "Mazda", "Subaru", "Suzuki",
+  "Mitsubishi", "Isuzu", "Lexus", "Infiniti", "Acura",
+  // ── Korean ────────────────────────────────────────────────────────────────
+  "Hyundai", "Kia", "Genesis",
+  // ── German ────────────────────────────────────────────────────────────────
+  "Mercedes", "BMW", "Audi", "Volkswagen", "Porsche", "Opel",
+  // ── American ──────────────────────────────────────────────────────────────
+  "Ford", "Chevrolet", "Cadillac", "GMC", "Dodge", "Ram",
+  "Jeep", "Lincoln", "Hummer", "Tesla", "Rivian",
+  // ── British ───────────────────────────────────────────────────────────────
+  "Land Rover", "Volvo",
+  // ── French ────────────────────────────────────────────────────────────────
+  "Peugeot", "Renault", "Citroen", "Dacia",
+  // ── Italian ───────────────────────────────────────────────────────────────
+  "Fiat", "Alfa Romeo",
+  // ── Swedish ───────────────────────────────────────────────────────────────
+  "Polestar",
+  // ── Czech / Spanish ───────────────────────────────────────────────────────
+  "Skoda", "SEAT",
+  // ── Chinese passenger cars ────────────────────────────────────────────────
+  "BYD", "Chery", "Geely", "Haval", "MG", "JAC", "BAIC", "Changan",
+  "Lifan", "SAIC", "GAC", "Great Wall", "Dongfeng", "FAW", "Foton", "Zotye",
+  // ── Chinese buses & trucks ────────────────────────────────────────────────
+  "King Long", "Yutong", "Higer", "Sinotruck", "Shacman",
+  // ── Other ─────────────────────────────────────────────────────────────────
+  "Other",
+].sort((a, b) => {
+  if (a === "Other") return 1;
+  if (b === "Other") return -1;
+  return a.localeCompare(b);
+});
 
 export const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid", "Electric", "LPG"];
 

@@ -59,45 +59,47 @@ const BRAND_MODELS: Record<string, string[]> = {
   Infiniti:    ["Q50","QX50","QX60","QX80","G35","FX"],
   Acura:       ["TLX","RDX","MDX","ILX","NSX"],
   // ── Chinese brands ──────────────────────────────────────
-  BYD:          ["Atto 3","Han","Tang","Song Plus","Seal","Dolphin","e6","F3","F0","S6","Yuan Plus"],
-  Chery:        ["Tiggo 4","Tiggo 7","Tiggo 8","Arrizo 5","Arrizo 6","QQ","Omoda 5","Exeed TXL"],
-  Geely:        ["Emgrand","Atlas","Coolray","Azkarra","Okavango","Tugella","Preface","GX3 Pro"],
-  Haval:        ["H6","H9","H2","Jolion","F7","F7x","Dargo","Big Dog","Raptor"],
-  MG:           ["ZS","HS","RX5","MG3","MG5","MG6","One","Extender","VS","EZS"],
-  JAC:          ["S2","S3","S4","S7","T6","T8","J7","Refine S4","iEV7S"],
-  BAIC:         ["X55","X25","BJ40","BJ80","EU5","EX5","Senova X35","Senova X55"],
-  Changan:      ["CS35 Plus","CS55 Plus","CS75 Plus","CS85","UNI-T","UNI-K","Alsvin","Eado"],
-  Lifan:        ["X60","X70","X80","820","520","330","Myway"],
-  SAIC:         ["Roewe RX5","Roewe i5","Maxus T60","Maxus G10","Maxus D90"],
-  GAC:          ["GS4","GS5","GS8","GA4","GA6","GM6","Empow","GS3"],
-  "Great Wall":  ["Poer","Tank 300","Tank 500","Cannon","Wingle"],
-  Dongfeng:     ["AX7","AX5","A60","Fengon 500","Fengon 580","Fengon 600"],
-  FAW:          ["Besturn B70","Besturn X40","Besturn X80","Jilin"],
-  Foton:        ["Tunland","Gratour","Aumark","Toano","Sauvana"],
-  Zotye:        ["T600","T700","T800","Z560","SR7"],
-  "King Long":   ["Minivan","MPV 7-seater","Bus 15-seater","Bus 35-seater"],
-  Yutong:       ["Bus 18-seater","Bus 25-seater","Bus 35-seater","Bus 55-seater"],
-  Higer:        ["Bus 20-seater","Bus 30-seater","Bus 45-seater","Coach"],
-  Sinotruck:    ["Howo","Sitrak C7H","Hohan","Golden Prince","Light Truck"],
-  Shacman:      ["F3000","X3000","H3000","M3000","L3000"],
+  BYD:         ["Atto 3","Han","Tang","Song Plus","Seal","Dolphin","e6","F3","F0","S6","Yuan Plus"],
+  Chery:       ["Tiggo 4","Tiggo 7","Tiggo 8","Arrizo 5","Arrizo 6","QQ","Omoda 5","Exeed TXL"],
+  Geely:       ["Emgrand","Atlas","Coolray","Azkarra","Okavango","Tugella","Preface","GX3 Pro"],
+  Haval:       ["H6","H9","H2","Jolion","F7","F7x","Dargo","Big Dog","Raptor"],
+  MG:          ["ZS","HS","RX5","MG3","MG5","MG6","One","Extender","VS","EZS"],
+  JAC:         ["S2","S3","S4","S7","T6","T8","J7","Refine S4","iEV7S"],
+  BAIC:        ["X55","X25","BJ40","BJ80","EU5","EX5","Senova X35","Senova X55"],
+  Changan:     ["CS35 Plus","CS55 Plus","CS75 Plus","CS85","UNI-T","UNI-K","Alsvin","Eado"],
+  Lifan:       ["X60","X70","X80","820","520","330","Myway"],
+  SAIC:        ["Roewe RX5","Roewe i5","Maxus T60","Maxus G10","Maxus D90"],
+  GAC:         ["GS4","GS5","GS8","GA4","GA6","GM6","Empow","GS3"],
+  "Great Wall": ["Poer","Tank 300","Tank 500","Cannon","Wingle"],
+  Dongfeng:    ["AX7","AX5","A60","Fengon 500","Fengon 580","Fengon 600"],
+  FAW:         ["Besturn B70","Besturn X40","Besturn X80","Jilin"],
+  Foton:       ["Tunland","Gratour","Aumark","Toano","Sauvana"],
+  Zotye:       ["T600","T700","T800","Z560","SR7"],
+  "King Long":  ["Minivan","MPV 7-seater","Bus 15-seater","Bus 35-seater"],
+  Yutong:      ["Bus 18-seater","Bus 25-seater","Bus 35-seater","Bus 55-seater"],
+  Higer:       ["Bus 20-seater","Bus 30-seater","Bus 45-seater","Coach"],
+  Sinotruck:   ["Howo","Sitrak C7H","Hohan","Golden Prince","Light Truck"],
+  Shacman:     ["F3000","X3000","H3000","M3000","L3000"],
   // ── Other popular in Ghana ───────────────────────────────
-  Opel:         ["Astra","Insignia","Corsa","Mokka","Zafira","Vectra"],
-  Fiat:         ["500","Punto","Tipo","Bravo","Doblo","Panda"],
-  "Alfa Romeo": ["Giulia","Stelvio","Giulietta","147","156","159"],
-  Dacia:        ["Duster","Sandero","Logan","Spring"],
-  Skoda:        ["Octavia","Superb","Kodiaq","Karoq","Kamiq","Fabia"],
-  SEAT:         ["Ibiza","Leon","Ateca","Arona","Tarraco"],
-  Citroen:      ["C3","C4","C5","Berlingo","Jumper","Xsara"],
-  Ram:          ["1500","2500","3500","ProMaster"],
-  Hummer:       ["H1","H2","H3","EV"],
-  Lincoln:      ["Navigator","Aviator","Corsair","MKZ","Continental"],
-  Genesis:      ["GV80","GV70","G80","G70","G90"],
-  Tesla:        ["Model S","Model 3","Model X","Model Y","Cybertruck"],
-  Rivian:       ["R1T","R1S"],
-  Polestar:     ["2","3","4"],
+  Opel:        ["Astra","Insignia","Corsa","Mokka","Zafira","Vectra"],
+  Fiat:        ["500","Punto","Tipo","Bravo","Doblo","Panda"],
+  "Alfa Romeo":["Giulia","Stelvio","Giulietta","147","156","159"],
+  Dacia:       ["Duster","Sandero","Logan","Spring"],
+  Skoda:       ["Octavia","Superb","Kodiaq","Karoq","Kamiq","Fabia"],
+  SEAT:        ["Ibiza","Leon","Ateca","Arona","Tarraco"],
+  Citroen:     ["C3","C4","C5","Berlingo","Jumper","Xsara"],
+  "Ram":       ["1500","2500","3500","ProMaster"],
+  Hummer:      ["H1","H2","H3","EV"],
+  Lincoln:     ["Navigator","Aviator","Corsair","MKZ","Continental"],
+  Genesis:     ["GV80","GV70","G80","G70","G90"],
+  Tesla:       ["Model S","Model 3","Model X","Model Y","Cybertruck"],
+  Rivian:      ["R1T","R1S"],
+  Polestar:    ["2","3","4"],
 };
 
 // ─── All brands (extends CAR_BRANDS with any not already listed) ──────────────
+// We inline the full sorted list so the sell form and filter both benefit even
+// if ghanaData.ts hasn't been updated yet.
 const EXTENDED_BRANDS: string[] = [
   ...new Set([
     ...CAR_BRANDS,
@@ -132,9 +134,11 @@ const QUICK_FILTERS: { key: QuickFilterKey; label: string; color: string }[] = [
   { key: "Moto",    label: "Moto",    color: "#0F766E" },
 ];
 
+// ─── Brand colours (static) ───────────────────────────────
 const TEAL   = "#0EB5CA";
 const ORANGE = "#F97316";
 
+// ─── Chip row layout constants ────────────────────────────
 const CHIP_ROW_PADDING_LEFT = 14;
 const CHIP_ROW_GAP          = 8;
 
@@ -153,41 +157,55 @@ function AnimatedCount({
   useEffect(() => {
     if (value === displayed.current) return;
     const fadeOut = Animated.timing(opacity, {
-      toValue: 0, duration: 90, useNativeDriver: true,
+      toValue: 0,
+      duration: 90,
+      useNativeDriver: true,
     });
     let fadeIn: Animated.CompositeAnimation | null = null;
     fadeOut.start(({ finished }) => {
       if (!finished) return;
       displayed.current = value;
       setShown(value);
-      fadeIn = Animated.timing(opacity, { toValue: 1, duration: 110, useNativeDriver: true });
+      fadeIn = Animated.timing(opacity, {
+        toValue: 1,
+        duration: 110,
+        useNativeDriver: true,
+      });
       fadeIn.start();
     });
-    return () => { fadeOut.stop(); fadeIn?.stop(); };
+    return () => {
+      fadeOut.stop();
+      fadeIn?.stop();
+    };
   }, [value]);
 
-  return <Animated.Text style={[style, { opacity }]}>{shown}</Animated.Text>;
+  return (
+    <Animated.Text style={[style, { opacity }]}>
+      {shown}
+    </Animated.Text>
+  );
 }
 
 function mapCategoryToFilter(cat: string): { quickFilter: QuickFilterKey; query: string } {
   const l = cat.toLowerCase();
-  if (l.includes("suv") || l.includes("4x4") || l.includes("4×4"))             return { quickFilter: "SUV",    query: "" };
-  if (l.includes("sedan"))                                                        return { quickFilter: "Sedan",  query: "" };
-  if (l.includes("pickup"))                                                       return { quickFilter: "Pickup", query: "" };
+  if (l.includes("suv") || l.includes("4x4") || l.includes("4×4"))              return { quickFilter: "SUV",    query: "" };
+  if (l.includes("sedan"))                                                         return { quickFilter: "Sedan",  query: "" };
+  if (l.includes("pickup"))                                                        return { quickFilter: "Pickup", query: "" };
   if (l.includes("cargo truck") || l.includes("tipper") || l.includes("flatbed") ||
-      l.includes("tanker") || l.includes("box truck"))                           return { quickFilter: "Truck",  query: "" };
-  if (l.includes("bus") || l.includes("minibus") || l.includes("coach"))        return { quickFilter: "Bus",    query: "" };
+      l.includes("tanker") || l.includes("box truck"))                            return { quickFilter: "Truck",  query: "" };
+  if (l.includes("bus") || l.includes("minibus") || l.includes("coach"))         return { quickFilter: "Bus",    query: "" };
   if (l.includes("excavator") || l.includes("bulldozer") || l.includes("crane") ||
       l.includes("forklift") || l.includes("loader") || l.includes("grader") ||
       l.includes("compactor") || l.includes("mixer") || l.includes("tractor") ||
-      l.includes("harvester") || l.includes("ambulance") || l.includes("fire")) return { quickFilter: "Heavy",  query: "" };
+      l.includes("harvester") || l.includes("ambulance") || l.includes("fire"))  return { quickFilter: "Heavy",  query: "" };
   if (l.includes("motorcycle") || l.includes("scooter") || l.includes("atv") ||
-      l.includes("dirt bike") || l.includes("quad"))                             return { quickFilter: "Moto",   query: "" };
-  if (l.includes("hatchback"))                                                    return { quickFilter: "All",    query: "hatchback" };
-  if (l.includes("van") || l.includes("station wagon"))                          return { quickFilter: "All",    query: l };
+      l.includes("dirt bike") || l.includes("quad"))                              return { quickFilter: "Moto",   query: "" };
+  if (l.includes("hatchback"))                                                     return { quickFilter: "All",    query: "hatchback" };
+  if (l.includes("van") || l.includes("station wagon"))                           return { quickFilter: "All",    query: l };
   return { quickFilter: "All", query: cat };
 }
 
+// ─── Quick-filter predicate ───────────────────────────────
 function matchesQuickFilter(car: Car, key: QuickFilterKey): boolean {
   const cat = car.category?.toLowerCase() ?? "";
   if (key === "SUV")     return cat.includes("suv") || cat.includes("4x4") || cat.includes("4×4");
@@ -205,7 +223,7 @@ function matchesQuickFilter(car: Car, key: QuickFilterKey): boolean {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FILTER STATE
+// FILTER STATE TYPE
 // ─────────────────────────────────────────────────────────────────────────────
 interface FilterState {
   priceMin:      number;
@@ -218,8 +236,13 @@ interface FilterState {
 }
 
 const DEFAULT_FILTERS: FilterState = {
-  priceMin: PRICE_MIN, priceMax: PRICE_MAX,
-  brands: [], models: [], transmissions: [], conditions: [], cities: [],
+  priceMin:      PRICE_MIN,
+  priceMax:      PRICE_MAX,
+  brands:        [],
+  models:        [],
+  transmissions: [],
+  conditions:    [],
+  cities:        [],
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -228,7 +251,10 @@ const DEFAULT_FILTERS: FilterState = {
 function FilterModal({
   visible, onClose, onApply, initial,
 }: {
-  visible: boolean; onClose: () => void; onApply: (f: FilterState) => void; initial: FilterState;
+  visible:  boolean;
+  onClose:  () => void;
+  onApply:  (f: FilterState) => void;
+  initial:  FilterState;
 }) {
   const [priceMin,      setPriceMin]      = React.useState(initial.priceMin);
   const [priceMax,      setPriceMax]      = React.useState(initial.priceMax);
@@ -242,20 +268,30 @@ function FilterModal({
 
   React.useEffect(() => {
     if (visible) {
-      setPriceMin(initial.priceMin); setPriceMax(initial.priceMax);
-      setBrands(initial.brands); setTransmissions(initial.transmissions);
-      setConditions(initial.conditions); setCities(initial.cities);
-      setModels(initial.models); setShowAllBrands(false); setShowAllCities(false);
+      setPriceMin(initial.priceMin);
+      setPriceMax(initial.priceMax);
+      setBrands(initial.brands);
+      setTransmissions(initial.transmissions);
+      setConditions(initial.conditions);
+      setCities(initial.cities);
+      setModels(initial.models);
+      setShowAllBrands(false);
+      setShowAllCities(false);
     }
   }, [visible]);
 
-  const fmt = (v: number) => v >= 1000 ? `GHS ${(v / 1000).toFixed(0)}k` : `GHS ${v}`;
+  const fmt = (v: number) =>
+    v >= 1000 ? `GHS ${(v / 1000).toFixed(0)}k` : `GHS ${v}`;
+
   const toggle = (arr: string[], set: (a: string[]) => void, val: string) =>
     set(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
+
   const reset = () => {
     setPriceMin(PRICE_MIN); setPriceMax(PRICE_MAX);
-    setBrands([]); setTransmissions([]); setConditions([]); setCities([]); setModels([]);
+    setBrands([]); setTransmissions([]);
+    setConditions([]); setCities([]); setModels([]);
   };
+
   const apply = () => {
     onApply({ priceMin, priceMax, brands, models, transmissions, conditions, cities });
     onClose();
@@ -277,6 +313,7 @@ function FilterModal({
         <TouchableOpacity style={fS.backdrop} onPress={onClose} activeOpacity={1} />
         <View style={fS.sheet}>
           <View style={fS.handle} />
+
           <View style={fS.header}>
             <Text style={fS.title}>Filter listings</Text>
             <TouchableOpacity onPress={reset} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
@@ -299,38 +336,57 @@ function FilterModal({
                   <Text style={fS.priceVal}>{fmt(priceMax)}</Text>
                 </View>
               </View>
+
               <View style={fS.sliderWrap}>
                 <View style={fS.track}>
-                  <View style={[fS.fill, {
-                    left:  `${(priceMin / PRICE_MAX) * 100}%` as any,
-                    right: `${100 - (priceMax / PRICE_MAX) * 100}%` as any,
-                  }]} />
+                  <View style={[
+                    fS.fill,
+                    {
+                      left:  `${(priceMin / PRICE_MAX) * 100}%` as any,
+                      right: `${100 - (priceMax / PRICE_MAX) * 100}%` as any,
+                    },
+                  ]} />
                 </View>
                 <Slider
                   style={[fS.slider, { zIndex: priceMin > PRICE_MAX * 0.9 ? 2 : 1 }]}
-                  minimumValue={PRICE_MIN} maximumValue={PRICE_MAX} step={PRICE_STEP} value={priceMin}
+                  minimumValue={PRICE_MIN}
+                  maximumValue={PRICE_MAX}
+                  step={PRICE_STEP}
+                  value={priceMin}
                   onValueChange={(v) => { if (v < priceMax - PRICE_STEP) setPriceMin(v); }}
-                  minimumTrackTintColor="transparent" maximumTrackTintColor="transparent" thumbTintColor={TEAL}
+                  minimumTrackTintColor="transparent"
+                  maximumTrackTintColor="transparent"
+                  thumbTintColor={TEAL}
                 />
                 <Slider
                   style={[fS.slider, { position: "absolute", left: 0, right: 0, zIndex: priceMin > PRICE_MAX * 0.9 ? 1 : 2 }]}
-                  minimumValue={PRICE_MIN} maximumValue={PRICE_MAX} step={PRICE_STEP} value={priceMax}
+                  minimumValue={PRICE_MIN}
+                  maximumValue={PRICE_MAX}
+                  step={PRICE_STEP}
+                  value={priceMax}
                   onValueChange={(v) => { if (v > priceMin + PRICE_STEP) setPriceMax(v); }}
-                  minimumTrackTintColor="transparent" maximumTrackTintColor="transparent" thumbTintColor={TEAL}
+                  minimumTrackTintColor="transparent"
+                  maximumTrackTintColor="transparent"
+                  thumbTintColor={TEAL}
                 />
               </View>
+
               <View style={fS.presetsRow}>
                 {PRESETS.map(p => {
                   const active = priceMin === p.min && priceMax === p.max;
                   return (
-                    <TouchableOpacity key={p.label} style={[fS.presetChip, active && fS.chipActive]}
-                      onPress={() => { setPriceMin(p.min); setPriceMax(p.max); }}>
+                    <TouchableOpacity
+                      key={p.label}
+                      style={[fS.presetChip, active && fS.chipActive]}
+                      onPress={() => { setPriceMin(p.min); setPriceMax(p.max); }}
+                    >
                       <Text style={[fS.chipTxt, active && fS.chipTxtActive]}>{p.label}</Text>
                     </TouchableOpacity>
                   );
                 })}
               </View>
             </View>
+
             <View style={fS.divider} />
 
             {/* ── Brand ── */}
@@ -338,9 +394,14 @@ function FilterModal({
               <Text style={fS.secLabel}>Brand</Text>
               <View style={fS.brandGrid}>
                 {visibleBrands.map(b => (
-                  <TouchableOpacity key={b} style={[fS.brandItem, brands.includes(b) && fS.brandActive]}
-                    onPress={() => toggle(brands, setBrands, b)}>
-                    <Text style={[fS.brandTxt, brands.includes(b) && fS.brandTxtActive]} numberOfLines={1}>{b}</Text>
+                  <TouchableOpacity
+                    key={b}
+                    style={[fS.brandItem, brands.includes(b) && fS.brandActive]}
+                    onPress={() => toggle(brands, setBrands, b)}
+                  >
+                    <Text style={[fS.brandTxt, brands.includes(b) && fS.brandTxtActive]} numberOfLines={1}>
+                      {b}
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -350,6 +411,7 @@ function FilterModal({
                 </TouchableOpacity>
               )}
             </View>
+
             <View style={fS.divider} />
 
             {brands.length === 1 && BRAND_MODELS[brands[0]] && (
@@ -360,8 +422,11 @@ function FilterModal({
                     {BRAND_MODELS[brands[0]].map(model => {
                       const active = models.includes(model);
                       return (
-                        <TouchableOpacity key={model} style={[fS.chip, active && fS.chipActive]}
-                          onPress={() => toggle(models, setModels, model)}>
+                        <TouchableOpacity
+                          key={model}
+                          style={[fS.chip, active && fS.chipActive]}
+                          onPress={() => toggle(models, setModels, model)}
+                        >
                           <Text style={[fS.chipTxt, active && fS.chipTxtActive]}>{model}</Text>
                         </TouchableOpacity>
                       );
@@ -382,13 +447,17 @@ function FilterModal({
               <Text style={fS.secLabel}>Transmission</Text>
               <View style={fS.chipsRow}>
                 {TRANSMISSIONS.map(t => (
-                  <TouchableOpacity key={t} style={[fS.chip, transmissions.includes(t) && fS.chipActive]}
-                    onPress={() => toggle(transmissions, setTransmissions, t)}>
+                  <TouchableOpacity
+                    key={t}
+                    style={[fS.chip, transmissions.includes(t) && fS.chipActive]}
+                    onPress={() => toggle(transmissions, setTransmissions, t)}
+                  >
                     <Text style={[fS.chipTxt, transmissions.includes(t) && fS.chipTxtActive]}>{t}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
+
             <View style={fS.divider} />
 
             {/* ── Condition ── */}
@@ -396,13 +465,17 @@ function FilterModal({
               <Text style={fS.secLabel}>Condition</Text>
               <View style={fS.chipsRow}>
                 {CONDITIONS.map(c => (
-                  <TouchableOpacity key={c} style={[fS.chip, conditions.includes(c) && fS.chipActive]}
-                    onPress={() => toggle(conditions, setConditions, c)}>
+                  <TouchableOpacity
+                    key={c}
+                    style={[fS.chip, conditions.includes(c) && fS.chipActive]}
+                    onPress={() => toggle(conditions, setConditions, c)}
+                  >
                     <Text style={[fS.chipTxt, conditions.includes(c) && fS.chipTxtActive]}>{c}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
+
             <View style={fS.divider} />
 
             {/* ── Location ── */}
@@ -410,8 +483,11 @@ function FilterModal({
               <Text style={fS.secLabel}>Location</Text>
               <View style={fS.chipsRow}>
                 {visibleCities.map(city => (
-                  <TouchableOpacity key={city} style={[fS.chip, cities.includes(city) && fS.chipActive]}
-                    onPress={() => toggle(cities, setCities, city)}>
+                  <TouchableOpacity
+                    key={city}
+                    style={[fS.chip, cities.includes(city) && fS.chipActive]}
+                    onPress={() => toggle(cities, setCities, city)}
+                  >
                     <Text style={[fS.chipTxt, cities.includes(city) && fS.chipTxtActive]}>{city}</Text>
                   </TouchableOpacity>
                 ))}
@@ -425,6 +501,7 @@ function FilterModal({
 
           </ScrollView>
 
+          {/* ── Bottom actions ── */}
           <View style={fS.bottom}>
             <TouchableOpacity style={fS.closeBtn} onPress={onClose}>
               <Text style={fS.closeTxt}>Cancel</Text>
@@ -433,6 +510,7 @@ function FilterModal({
               <Text style={fS.applyTxt}>Apply filters</Text>
             </TouchableOpacity>
           </View>
+
         </View>
       </View>
     </Modal>
@@ -455,16 +533,24 @@ export default function SearchScreen() {
   const [activeFilters, setActiveFilters] = useState<FilterState | null>(null);
   const [quickFilter,   setQuickFilter]   = useState<QuickFilterKey>("All");
 
-  const chipScrollRef = useRef<ScrollView>(null);
-  const chipLayouts   = useRef<Partial<Record<QuickFilterKey, { x: number; width: number }>>>({});
-  const hasHydrated   = useRef(false);
-  const STORAGE_KEY   = "westcars:quickFilter";
+  const chipScrollRef  = useRef<ScrollView>(null);
+  const chipLayouts    = useRef<Partial<Record<QuickFilterKey, { x: number; width: number }>>>({});
+  const hasHydrated    = useRef(false);
+
+  const STORAGE_KEY = "westcars:quickFilter";
 
   useEffect(() => {
-    if (category || brandParam) { hasHydrated.current = true; return; }
+    if (category || brandParam) {
+      hasHydrated.current = true;
+      return;
+    }
     AsyncStorage.getItem(STORAGE_KEY).then((saved) => {
-      if (saved && QUICK_FILTERS.some((f) => f.key === saved)) setQuickFilter(saved as QuickFilterKey);
-    }).catch(() => {}).finally(() => { hasHydrated.current = true; });
+      if (saved && QUICK_FILTERS.some((f) => f.key === saved)) {
+        setQuickFilter(saved as QuickFilterKey);
+      }
+    }).catch(() => {}).finally(() => {
+      hasHydrated.current = true;
+    });
   }, []);
 
   useEffect(() => {
@@ -474,7 +560,10 @@ export default function SearchScreen() {
 
   useEffect(() => {
     if (brandParam) {
-      setActiveFilters((prev) => ({ ...(prev ?? DEFAULT_FILTERS), brands: [brandParam] }));
+      setActiveFilters((prev) => ({
+        ...(prev ?? DEFAULT_FILTERS),
+        brands: [brandParam],
+      }));
       setQuickFilter("All"); setQuery("");
     }
   }, [brandParam]);
@@ -486,6 +575,7 @@ export default function SearchScreen() {
     }
   }, [category]);
 
+  // ── Shared helpers ─────────────────────────────────────────────────────────
   const matchesQuery = React.useCallback((car: Car) => {
     const q = query.toLowerCase();
     return !q
@@ -509,10 +599,14 @@ export default function SearchScreen() {
     );
   }, [activeFilters]);
 
-  const filtered = cars.filter((car: Car) =>
-    matchesQuery(car) && matchesQuickFilter(car, quickFilter) && matchesModalFilters(car)
-  );
+  // ── Filtering logic ────────────────────────────────────────────────────────
+  const filtered = cars.filter((car: Car) => {
+    if (!matchesQuery(car)) return false;
+    if (!matchesQuickFilter(car, quickFilter)) return false;
+    return matchesModalFilters(car);
+  });
 
+  // ── Per-chip counts ────────────────────────────────────────────────────────
   const chipCounts = React.useMemo(() => {
     const result: Record<QuickFilterKey, number> = {} as Record<QuickFilterKey, number>;
     for (const { key } of QUICK_FILTERS) {
@@ -525,7 +619,8 @@ export default function SearchScreen() {
 
   const sortedFilters = React.useMemo(() => {
     const [allChip, ...rest] = QUICK_FILTERS;
-    return [allChip, ...[...rest].sort((a, b) => (chipCounts[b.key] ?? 0) - (chipCounts[a.key] ?? 0))];
+    const sorted = [...rest].sort((a, b) => (chipCounts[b.key] ?? 0) - (chipCounts[a.key] ?? 0));
+    return [allChip, ...sorted];
   }, [chipCounts]);
 
   useEffect(() => {
@@ -550,23 +645,27 @@ export default function SearchScreen() {
   }, [filtered]);
 
   const hasFilters = !!activeFilters && (
-    activeFilters.brands.length > 0 || activeFilters.transmissions.length > 0 ||
-    activeFilters.conditions.length > 0 || activeFilters.cities.length > 0 ||
-    activeFilters.priceMin !== PRICE_MIN || activeFilters.priceMax !== PRICE_MAX
+    activeFilters.brands.length        > 0 ||
+    activeFilters.transmissions.length > 0 ||
+    activeFilters.conditions.length    > 0 ||
+    activeFilters.cities.length        > 0 ||
+    activeFilters.priceMin !== PRICE_MIN ||
+    activeFilters.priceMax !== PRICE_MAX
   );
 
+  // ── Active filter chips (summary) ──────────────────────────────────────────
   const activeFilterChips = React.useMemo(() => {
     if (!activeFilters) return [];
     const chips: { key: string; label: string }[] = [];
     const { brands, transmissions, conditions, cities, priceMin, priceMax } = activeFilters;
-    if (brands.length === 1)             chips.push({ key: "brands",        label: brands[0] });
-    else if (brands.length > 1)          chips.push({ key: "brands",        label: `${brands.length} brands` });
+    if (brands.length === 1)        chips.push({ key: "brands",        label: brands[0] });
+    else if (brands.length > 1)     chips.push({ key: "brands",        label: `${brands.length} brands` });
     if (transmissions.length === 1)      chips.push({ key: "transmissions", label: transmissions[0] });
     else if (transmissions.length > 1)   chips.push({ key: "transmissions", label: `${transmissions.length} transmissions` });
-    if (conditions.length === 1)         chips.push({ key: "conditions",    label: conditions[0] });
-    else if (conditions.length > 1)      chips.push({ key: "conditions",    label: `${conditions.length} conditions` });
-    if (cities.length === 1)             chips.push({ key: "cities",        label: cities[0] });
-    else if (cities.length > 1)          chips.push({ key: "cities",        label: `${cities.length} cities` });
+    if (conditions.length === 1)    chips.push({ key: "conditions",    label: conditions[0] });
+    else if (conditions.length > 1) chips.push({ key: "conditions",    label: `${conditions.length} conditions` });
+    if (cities.length === 1)        chips.push({ key: "cities",        label: cities[0] });
+    else if (cities.length > 1)     chips.push({ key: "cities",        label: `${cities.length} cities` });
     if (priceMin !== PRICE_MIN || priceMax !== PRICE_MAX) {
       const lo = `${(priceMin / 1000).toFixed(0)}k`;
       const hi = priceMax >= PRICE_MAX ? "max" : `${(priceMax / 1000).toFixed(0)}k`;
@@ -579,7 +678,7 @@ export default function SearchScreen() {
     setActiveFilters((prev) => {
       if (!prev) return prev;
       let next: FilterState;
-      if (key === "brands")             next = { ...prev, brands: [] };
+      if (key === "brands")        next = { ...prev, brands: [] };
       else if (key === "transmissions") next = { ...prev, transmissions: [] };
       else if (key === "conditions")    next = { ...prev, conditions: [] };
       else if (key === "cities")        next = { ...prev, cities: [] };
@@ -596,14 +695,22 @@ export default function SearchScreen() {
     <View style={[S.root, { backgroundColor: colors.background }]}>
 
       {/* ── Header ── */}
-      <View style={[S.header, { paddingTop: topPad + 10, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+      <View style={[S.header, {
+        paddingTop: topPad + 10,
+        backgroundColor: colors.card,
+        borderBottomColor: colors.border,
+      }]}>
+
         <View style={S.titleRow}>
           <View>
             <Text style={S.eyebrow}>WESTCARS</Text>
             <Text style={[S.title, { color: colors.text }]}>Search</Text>
           </View>
           <View style={S.countPill}>
-            <AnimatedCount value={filtered.length.toLocaleString()} style={S.countNum} />
+            <AnimatedCount
+              value={filtered.length.toLocaleString()}
+              style={S.countNum}
+            />
             <Text style={S.countLbl}>cars</Text>
           </View>
         </View>
@@ -631,8 +738,13 @@ export default function SearchScreen() {
           </Pressable>
         </View>
 
+        {/* ── Active modal filter chips ── */}
         {activeFilterChips.length > 0 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={S.activeChipRow}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={S.activeChipRow}
+          >
             {activeFilterChips.map(({ key, label }) => (
               <View key={key} style={[S.activeChip, { backgroundColor: colors.accentLight, borderColor: TEAL }]}>
                 <Text style={[S.activeChipText, { color: TEAL }]}>{label}</Text>
@@ -644,15 +756,26 @@ export default function SearchScreen() {
           </ScrollView>
         )}
 
-        <ScrollView ref={chipScrollRef} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={S.chipRow}>
+        {/* Chip row */}
+        <ScrollView
+          ref={chipScrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={S.chipRow}
+        >
           {sortedFilters.map(({ key, label, color }) => {
-            const active  = quickFilter === key;
-            const count   = chipCounts[key] ?? 0;
+            const active = quickFilter === key;
+            const count = chipCounts[key] ?? 0;
             const isEmpty = count === 0 && key !== "All";
             return (
               <Pressable
                 key={key}
-                onLayout={(e) => { chipLayouts.current[key] = { x: e.nativeEvent.layout.x, width: e.nativeEvent.layout.width }; }}
+                onLayout={(e) => {
+                  chipLayouts.current[key] = {
+                    x: e.nativeEvent.layout.x,
+                    width: e.nativeEvent.layout.width,
+                  };
+                }}
                 style={[
                   S.chip,
                   active
@@ -662,7 +785,9 @@ export default function SearchScreen() {
                 ]}
                 onPress={() => setQuickFilter(key)}
               >
-                <Text style={[S.chipText, { color: active ? "#fff" : colors.textSecondary }]}>{label}</Text>
+                <Text style={[S.chipText, { color: active ? "#fff" : colors.textSecondary }]}>
+                  {label}
+                </Text>
                 <View style={[S.chipBadge, active ? S.chipBadgeActive : S.chipBadgeInactive]}>
                   <AnimatedCount
                     value={count >= 1000 ? `${Math.floor(count / 1000)}k` : count}
@@ -673,6 +798,7 @@ export default function SearchScreen() {
             );
           })}
         </ScrollView>
+
       </View>
 
       {/* ── Results ── */}
@@ -716,35 +842,88 @@ export default function SearchScreen() {
   );
 }
 
-// ─── Search screen styles ─────────────────────────────────────────────────────
+// ─── Search screen styles ──────────────────────────────────────────────────────
 const S = StyleSheet.create({
-  root:   { flex: 1 },
-  header: { paddingBottom: 10, borderBottomWidth: 1 },
+  root: { flex: 1 },
 
-  titleRow:  { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", paddingHorizontal: 18, marginBottom: 12 },
-  eyebrow:   { fontSize: 11, fontFamily: "Inter_600SemiBold", color: TEAL, letterSpacing: 1.5, marginBottom: 2 },
-  title:     { fontSize: 28, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.5 },
+  header: {
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+  },
 
-  countPill: { backgroundColor: TEAL, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 6, alignItems: "center", marginTop: 4 },
-  countNum:  { fontSize: 14, fontFamily: "Inter_700Bold", color: "#fff" },
-  countLbl:  { fontSize: 10, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.85)" },
+  titleRow: {
+    flexDirection: "row", alignItems: "flex-start",
+    justifyContent: "space-between",
+    paddingHorizontal: 18, marginBottom: 12,
+  },
+  eyebrow: {
+    fontSize: 11, fontFamily: "Inter_600SemiBold",
+    color: TEAL, letterSpacing: 1.5, marginBottom: 2,
+  },
+  title: { fontSize: 28, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.5 },
 
-  searchRow:   { flexDirection: "row", alignItems: "center", paddingHorizontal: 14, gap: 10, marginBottom: 10 },
-  searchInput: { flex: 1, flexDirection: "row", alignItems: "center", borderRadius: 12, borderWidth: 1, paddingHorizontal: 14, height: 46, minHeight: 46, gap: 10 },
-  input:       { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular" },
+  countPill: {
+    backgroundColor: TEAL, borderRadius: 12,
+    paddingHorizontal: 12, paddingVertical: 6,
+    alignItems: "center", marginTop: 4,
+  },
+  countNum: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#fff" },
+  countLbl: { fontSize: 10, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.85)" },
 
-  filterBtn: { width: 46, height: 46, borderRadius: 12, backgroundColor: ORANGE, alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  filterDot: { position: "absolute", top: 8, right: 8, width: 7, height: 7, borderRadius: 4, backgroundColor: "#fff", borderWidth: 1.5, borderColor: ORANGE },
+  searchRow: {
+    flexDirection: "row", alignItems: "center",
+    paddingHorizontal: 14, gap: 10, marginBottom: 10,
+  },
+  searchInput: {
+    flex: 1, flexDirection: "row", alignItems: "center",
+    borderRadius: 12, borderWidth: 1,
+    paddingHorizontal: 14, height: 46, minHeight: 46, gap: 10,
+  },
+  input: { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular" },
 
-  activeChipRow: { flexDirection: "row", gap: 8, paddingHorizontal: 14, paddingBottom: 8 },
-  activeChip:    { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, borderWidth: 1.5 },
-  activeChipText:{ fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  filterBtn: {
+    width: 46, height: 46, borderRadius: 12,
+    backgroundColor: ORANGE,
+    alignItems: "center", justifyContent: "center",
+    flexShrink: 0,
+  },
+  filterDot: {
+    position: "absolute", top: 8, right: 8,
+    width: 7, height: 7, borderRadius: 4,
+    backgroundColor: "#fff",
+    borderWidth: 1.5, borderColor: ORANGE,
+  },
 
-  chipRow:      { flexDirection: "row", gap: CHIP_ROW_GAP, paddingLeft: CHIP_ROW_PADDING_LEFT, paddingRight: 60, paddingBottom: 2 },
-  chip:         { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, flexDirection: "row", alignItems: "center", gap: 6 },
-  chipDimmed:   { opacity: 0.38 },
-  chipText:     { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  chipBadge:    { borderRadius: 10, paddingHorizontal: 5, paddingVertical: 1, minWidth: 20, alignItems: "center" },
+  activeChipRow: {
+    flexDirection: "row", gap: 8,
+    paddingHorizontal: 14, paddingBottom: 8,
+  },
+  activeChip: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    paddingHorizontal: 10, paddingVertical: 5,
+    borderRadius: 20, borderWidth: 1.5,
+  },
+  activeChipText: {
+    fontSize: 12, fontFamily: "Inter_600SemiBold",
+  },
+
+  chipRow: {
+    flexDirection: "row", gap: CHIP_ROW_GAP,
+    paddingLeft: CHIP_ROW_PADDING_LEFT, paddingRight: 60, paddingBottom: 2,
+  },
+  chip: {
+    paddingHorizontal: 12, paddingVertical: 7,
+    borderRadius: 20,
+    flexDirection: "row", alignItems: "center", gap: 6,
+  },
+  chipDimmed: {
+    opacity: 0.38,
+  },
+  chipText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+
+  chipBadge: {
+    borderRadius: 10, paddingHorizontal: 5, paddingVertical: 1, minWidth: 20, alignItems: "center",
+  },
   chipBadgeActive:   { backgroundColor: "rgba(255,255,255,0.25)" },
   chipBadgeInactive: { backgroundColor: "rgba(255,255,255,0.08)" },
   chipBadgeText:     { fontSize: 10, fontFamily: "Inter_700Bold" },
@@ -754,30 +933,36 @@ const S = StyleSheet.create({
   row:         { flexDirection: "row", paddingHorizontal: 8, gap: 8, marginBottom: 8 },
   cardStyle:   { flex: 1 },
 
-  empty:      { flex: 1, alignItems: "center", justifyContent: "center", paddingTop: 80, gap: 10 },
+  empty: {
+    flex: 1, alignItems: "center", justifyContent: "center",
+    paddingTop: 80, gap: 10,
+  },
   emptyTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
   emptySub:   { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", paddingHorizontal: 40 },
-  clearBtn:   { marginTop: 8, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 20, borderWidth: 1.5, borderColor: TEAL },
-  clearBtnText:{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: TEAL },
+  clearBtn: {
+    marginTop: 8, paddingHorizontal: 20, paddingVertical: 10,
+    borderRadius: 20, borderWidth: 1.5, borderColor: TEAL,
+  },
+  clearBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: TEAL },
 });
 
-// ─── Filter modal styles ──────────────────────────────────────────────────────
+// ─── Filter modal styles ───────────────────────────────────────────────────────
 const fS = StyleSheet.create({
-  overlay:  { flex: 1, justifyContent: "flex-end" },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.5)" },
-  sheet:    { backgroundColor: "#fff", borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "92%", overflow: "hidden" },
-  handle:   { width: 36, height: 4, borderRadius: 2, backgroundColor: "#E5E5EA", alignSelf: "center", marginTop: 12 },
-  header:   { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingVertical: 16 },
-  title:    { fontSize: 17, fontFamily: "Manrope_800ExtraBold", color: "#1C1C1E" },
-  resetTxt: { fontSize: 14, color: "#FF6B00", fontFamily: "Inter_600SemiBold" },
-  scroll:   { paddingBottom: 8 },
-  section:  { paddingHorizontal: 20, paddingVertical: 16 },
-  secLabel: { fontSize: 11, fontFamily: "Inter_700Bold", color: "#8E8E93", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 },
-  divider:  { height: 0.5, backgroundColor: "#E5E5EA", marginHorizontal: 20 },
+  overlay:    { flex: 1, justifyContent: "flex-end" },
+  backdrop:   { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.5)" },
+  sheet:      { backgroundColor: "#fff", borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "92%", overflow: "hidden" },
+  handle:     { width: 36, height: 4, borderRadius: 2, backgroundColor: "#E5E5EA", alignSelf: "center", marginTop: 12 },
+  header:     { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingVertical: 16 },
+  title:      { fontSize: 17, fontFamily: "Manrope_800ExtraBold", color: "#1C1C1E" },
+  resetTxt:   { fontSize: 14, color: "#FF6B00", fontFamily: "Inter_600SemiBold" },
+  scroll:     { paddingBottom: 8 },
+  section:    { paddingHorizontal: 20, paddingVertical: 16 },
+  secLabel:   { fontSize: 11, fontFamily: "Inter_700Bold", color: "#8E8E93", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 },
+  divider:    { height: 0.5, backgroundColor: "#E5E5EA", marginHorizontal: 20 },
 
-  priceRow:     { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
-  priceCaption: { fontSize: 11, color: "#8E8E93", fontFamily: "Inter_400Regular", marginBottom: 2 },
-  priceVal:     { fontSize: 16, fontFamily: "Inter_700Bold", color: "#1C1C1E" },
+  priceRow:    { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
+  priceCaption:{ fontSize: 11, color: "#8E8E93", fontFamily: "Inter_400Regular", marginBottom: 2 },
+  priceVal:    { fontSize: 16, fontFamily: "Inter_700Bold", color: "#1C1C1E" },
 
   sliderWrap: { height: 40, justifyContent: "center", marginBottom: 12 },
   track:      { height: 4, backgroundColor: "#E5E5EA", borderRadius: 2, marginHorizontal: 10 },
@@ -796,15 +981,15 @@ const fS = StyleSheet.create({
   showMore:    { marginTop: 10, alignItems: "center", paddingVertical: 6 },
   showMoreTxt: { fontSize: 13, color: "#FF6B00", fontFamily: "Inter_600SemiBold" },
 
-  chipsRow:     { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  chip:         { paddingVertical: 7, paddingHorizontal: 14, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F2F2F7" },
-  chipActive:   { backgroundColor: "#FF6B00", borderColor: "#FF6B00" },
-  chipTxt:      { fontSize: 13, fontFamily: "Inter_500Medium", color: "#3C3C43" },
+  chipsRow:    { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  chip:        { paddingVertical: 7, paddingHorizontal: 14, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F2F2F7" },
+  chipActive:  { backgroundColor: "#FF6B00", borderColor: "#FF6B00" },
+  chipTxt:     { fontSize: 13, fontFamily: "Inter_500Medium", color: "#3C3C43" },
   chipTxtActive:{ color: "#fff" },
 
-  bottom:   { flexDirection: "row", gap: 10, padding: 16, paddingBottom: 32, borderTopWidth: 0.5, borderTopColor: "#E5E5EA" },
-  closeBtn: { flex: 1, padding: 14, borderRadius: 14, backgroundColor: "#F2F2F7", alignItems: "center" },
-  closeTxt: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#3C3C43" },
-  applyBtn: { flex: 2, padding: 14, borderRadius: 14, backgroundColor: "#FF6B00", alignItems: "center" },
-  applyTxt: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" },
+  bottom:    { flexDirection: "row", gap: 10, padding: 16, paddingBottom: 32, borderTopWidth: 0.5, borderTopColor: "#E5E5EA" },
+  closeBtn:  { flex: 1, padding: 14, borderRadius: 14, backgroundColor: "#F2F2F7", alignItems: "center" },
+  closeTxt:  { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#3C3C43" },
+  applyBtn:  { flex: 2, padding: 14, borderRadius: 14, backgroundColor: "#FF6B00", alignItems: "center" },
+  applyTxt:  { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" },
 });

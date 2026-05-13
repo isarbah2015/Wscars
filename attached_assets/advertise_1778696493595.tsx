@@ -34,6 +34,7 @@ const FLYER_PACKAGES = [
     price: 'GHS 50',
     duration: '7 days',
     highlight: false,
+    // Exact ad dimensions in pixels
     dimensions: { w: 320, h: 100, label: '320 × 100 px  —  Mobile Banner' },
     features: [
       'Mobile banner placement',
@@ -139,6 +140,7 @@ export default function AdvertisePage() {
   const [adType,   setAdType]   = useState<AdType>('flyer')
   const [selected, setSelected] = useState<string>('flyer_featured')
 
+  // When ad type tab switches, default-select the middle (highlighted) package
   const switchType = (t: AdType) => {
     setAdType(t)
     setSelected(t === 'flyer' ? 'flyer_featured' : 'video_featured')
@@ -313,6 +315,7 @@ const s = StyleSheet.create({
   root:   { flex: 1, backgroundColor: '#F0FAFB' },
   scroll: { padding: 16, paddingBottom: 40 },
 
+  // Header
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 14,
@@ -322,6 +325,7 @@ const s = StyleSheet.create({
   backBtn:     { width: 36, alignItems: 'flex-start' },
   headerTitle: { fontSize: 17, fontWeight: '800', color: NAVY },
 
+  // Ad type tabs
   tabRow: {
     flexDirection: 'row',
     paddingHorizontal: 16,
@@ -347,6 +351,7 @@ const s = StyleSheet.create({
   tabTag:         { fontSize: 10, color: '#888', fontWeight: '500', marginTop: 1 },
   tabTagActive:   { color: 'rgba(255,255,255,0.8)' },
 
+  // Hero
   hero: { alignItems: 'center', paddingVertical: 20, marginBottom: 4 },
   heroIcon: {
     width: 56, height: 56, borderRadius: 28,
@@ -356,6 +361,7 @@ const s = StyleSheet.create({
   heroTitle: { fontSize: 20, fontWeight: '800', color: NAVY, marginBottom: 6, textAlign: 'center' },
   heroSub:   { fontSize: 13, color: '#555', textAlign: 'center', lineHeight: 19, paddingHorizontal: 12 },
 
+  // Cards
   card: {
     backgroundColor: '#fff', borderRadius: 20, padding: 18, marginBottom: 14,
     borderWidth: 2, borderColor: 'transparent',
@@ -382,6 +388,7 @@ const s = StyleSheet.create({
   pkgDuration:{ fontSize: 12, color: '#888', fontWeight: '600', marginTop: 2 },
   price:      { fontSize: 20, fontWeight: '800', color: TEAL_DARK },
 
+  // Dimensions chip — always fully visible
   dimChip: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 6,
     backgroundColor: TEAL_LIGHT, borderRadius: 10,
@@ -407,9 +414,11 @@ const s = StyleSheet.create({
   radioDotHero:   { backgroundColor: '#fff' },
   selectTxt:      { fontSize: 13, fontWeight: '600', color: '#999' },
 
+  // Shared text overrides for hero card
   textWhite:    { color: '#fff' },
   textWhiteDim: { color: 'rgba(255,255,255,0.85)' },
 
+  // How it works
   howTitle: { fontSize: 16, fontWeight: '800', color: NAVY, marginBottom: 12, marginTop: 4 },
   howRow:   { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
   howIcon: {
@@ -418,6 +427,7 @@ const s = StyleSheet.create({
   },
   howTxt: { fontSize: 14, color: '#444', fontWeight: '600' },
 
+  // Sticky book bar
   bookBar: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 18, paddingTop: 14,
