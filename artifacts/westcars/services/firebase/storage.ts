@@ -8,8 +8,10 @@
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, isFirebaseReady } from "@/lib/firebase";
 
-const ensureReady = () => {
-  if (!isFirebaseReady() || !storage) throw new Error("Firebase not configured.");
+const ensureReady = (): void => {
+  if (!isFirebaseReady() || !storage) {
+    throw new Error('[Storage] Not ready — check Firebase config and storage initialization');
+  }
 };
 
 const localUriToBlob = async (uri: string): Promise<Blob> => {

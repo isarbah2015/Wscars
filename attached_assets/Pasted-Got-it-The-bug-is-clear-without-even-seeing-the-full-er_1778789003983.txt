@@ -1,0 +1,71 @@
+Got it. The bug is clear without even seeing the full error.
+Root cause: useAvatarUpload.ts imports storage directly from @/lib/firebase — which can be null. It checks if (!storage) but the uploadBytesResumable call uses storage with a non-null assertion or without re-checking after the async fetch() blob conversion. The promise rejects uncaught somewhere in that chain, hence "Uncaught (in promise) TypeError: erro..."
+
+The Fix
+Since services/firebase/storage.ts already has a clean uploadAvatar with proper null checks and blob conversion — use that instead. Delete the parallel implementation.
+Replace the upload logic in useAvatarUpload.ts:
+typescript// REMOVE these direct imports:
+// import { storage, db } from '@/lib/firebase';
+// import { uploadBytesResumable, ... } from 'firebase/storage';
+
+// KEEP only:
+import { db } from '@/lib/firebase';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { uploadAvatar } from '@/services/firebase/storage'; // ← use the service layer
+
+// Replace your upload block with:
+const upload = async (uri: string, userId: string) => {
+  try {
+    // uploadAvatar handles: null storage check, fetch→blob, uploadBytes, getDownloadURL
+    const url = await uploadAvatar(userId, uri);
+
+    // Update Firestore
+    if (!db) throw new Error('Firestore not ready');
+    await updateDoc(doc(db, 'users', userId), {
+      avatar: url,
+      photoUpdatedAt: serverTimestamp(),
+    });
+
+    onSuccess?.(url);
+  } catch (err: any) {
+    console.error('[useAvatarUpload]', err?.code ?? err?.message ?? err);
+    // surface to UI here — setError(err.message) or Alert.alert(...)
+  }
+};
+And for removePhoto, keep the Firestore null directly but wrap in try/catch:
+typescriptconst removePhoto = async (userId: string, existingUrl?: string) => {
+  try {
+    if (!db) throw new Error('Firestore not ready');
+    
+    // Delete from Storage if URL exists
+    if (existingUrl) {
+      const { storage } = await import('@/lib/firebase');
+      const { ref, deleteObject } = await import('firebase/storage');
+      if (storage) {
+        const fileRef = ref(storage, existingUrl);
+        await deleteObject(fileRef).catch(() => {}); // ignore if already deleted
+      }
+    }
+
+    await updateDoc(doc(db, 'users', userId), {
+      avatar: null,
+      photoUpdatedAt: serverTimestamp(),
+    });
+
+    onSuccess?.(null);
+  } catch (err: any) {
+    console.error('[removePhoto]', err?.code ?? err?.message ?? err);
+  }
+};
+
+Also check services/firebase/storage.ts ensureReady
+Same pattern as auth — make sure it checks storage explicitly:
+typescriptimport { storage } from '@/lib/firebase';
+
+function ensureReady(): void {
+  if (!isFirebaseReady() || !storage) {
+    throw new Error('[Storage] Not ready — check Firebase config and storage initialization');
+  }
+}
+
+Apply these, rebuild, and the profile photo upload will go through the service layer with proper error handling. You'll see real errors in Metro instead of the truncated toast.
