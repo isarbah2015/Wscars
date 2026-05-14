@@ -36,28 +36,26 @@ const queryClient = new QueryClient();
 // When signed out, any protected tab shows its own inline auth wall (existing behaviour).
 
 function useAuthRedirect() {
-  const router = useRouter();
   const segments = useSegments();
+  const router = useRouter();
 
   useEffect(() => {
-    if (!auth) return;
-
     const unsub = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Authed on every call (cold open + transitions) — go to tabs if on
-        // an auth screen. Excludes splash so its animation still plays.
-        const onAuthScreen =
-          segments.includes("login") ||
-          segments.includes("signup") ||
-          segments.includes("welcome");
-        if (onAuthScreen) {
-          router.replace("/(tabs)");
-        }
+      const isAuthed = !!user;
+      const onAuthScreen =
+        segments.includes("login") ||
+        segments.includes("signup") ||
+        segments.includes("welcome") ||
+        segments.length === 0; // splash / initial load
+
+      if (isAuthed && onAuthScreen) {
+        router.replace("/(tabs)");
+      } else if (!isAuthed && !onAuthScreen) {
+        router.replace("/welcome");
       }
     });
-
     return unsub;
-  }, []);
+  }, [segments]);
 }
 
 function RootLayoutNav() {

@@ -1,0 +1,111 @@
+Now I have everything. Here's the full diagnosis and all fixes:
+
+Root Cause — Confirmed
+ensureReady() in your service layer calls isFirebaseReady() which checks app !== null && db !== null — but never checks auth. Meanwhile auth! is used with a non-null assertion. If auth is null, TypeScript trusts the ! and passes null to Firebase functions which silently no-ops or throws an uncaught error that AppContext never catches.
+The chain: auth can be null → ensureReady() doesn't catch it → signInWithEmailAndPassword(null!, ...) → silent failure.
+
+All 3 Fixed Files
+Fix 1 — lib/firebase-persistence.ts
+Already written above — apply this first. auth is now Auth never null, throws immediately if Firebase env vars are missing.
+Fix 2 — services/firebase/auth.ts — add auth to ensureReady
+In your ensureReady() function, add the auth check:
+typescriptimport { auth } from '@/lib/firebase-persistence';
+
+function ensureReady(): void {
+  if (!isFirebaseReady() || !auth) {
+    throw new Error(
+      '[Firebase] Not ready — check EXPO_PUBLIC_FIREBASE_* env vars and auth initialization.'
+    );
+  }
+}
+And simplify subscribeAuth — the null check is no longer needed since auth is guaranteed:
+typescriptexport function subscribeAuth(cb: (user: User | null) => void): Unsubscribe {
+  if (!isFirebaseReady()) { cb(null); return () => {}; }
+  return onAuthStateChanged(auth, async (fbUser) => {
+    if (!fbUser) { cb(null); return; }
+    const u = await loadOrCreateUserDoc(fbUser);
+    cb(u);
+  });
+}
+Fix 3 — context/AppContext.tsx — catch errors in login/signup
+typescriptconst login = useCallback(async (email: string, password: string): Promise<boolean> => {
+  if (useFirebase) {
+    try {
+      const user = await fb.signInEmail(email, password);
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      return true;
+    } catch (err: any) {
+      console.error('[login]', err?.code, err?.message);
+      // Surface this to your UI — e.g. setAuthError(err.message)
+      return false;
+    }
+  }
+  // mock fallback...
+}, [useFirebase]);
+
+const signup = useCallback(async (name, email, phone, password): Promise<boolean> => {
+  if (useFirebase) {
+    try {
+      const user = await fb.signUpEmail(name, email, phone, password);
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      return true;
+    } catch (err: any) {
+      console.error('[signup]', err?.code, err?.message);
+      return false;
+    }
+  }
+  // mock fallback...
+}, [useFirebase]);
+
+const loginWithGoogle = useCallback(async (idToken: string, accessToken?: string): Promise<boolean> => {
+  if (!useFirebase) return false;
+  try {
+    // Use the clean service wrapper — no dynamic imports needed
+    const user = await fb.signInWithGoogleIdToken(idToken, accessToken);
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+    return true;
+  } catch (err: any) {
+    console.error('[Google sign-in]', err?.code, err?.message);
+    return false;
+  }
+}, [useFirebase]);
+Fix 4 — app/_layout.tsx — fix cold-open redirect
+Replace useAuthRedirect with this:
+typescriptfunction useAuthRedirect() {
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      const isAuthed = !!user;
+      const onAuthScreen =
+        segments.includes('login') ||
+        segments.includes('signup') ||
+        segments.includes('welcome') ||
+        segments.length === 0; // splash / initial load
+
+      if (isAuthed && onAuthScreen) {
+        // Logged in but on auth screen — always redirect (handles cold open)
+        router.replace('/(tabs)');
+      } else if (!isAuthed && !onAuthScreen) {
+        // Not logged in but inside the app — push back to welcome
+        router.replace('/welcome');
+      }
+      // Otherwise stay put
+    });
+    return unsub;
+  }, [segments]); // segments in deps so it re-evaluates on navigation
+}
+Key change: removed prevAuthRef entirely. The old logic only redirected on transition. This version redirects based on current state on every auth check — so cold open with a restored session correctly pushes to tabs immediately.
+
+Apply Order
+
+lib/firebase-persistence.ts — auth is now non-null
+services/firebase/auth.ts — ensureReady() includes auth check
+context/AppContext.tsx — try/catch on login, signup, loginWithGoogle simplified
+app/_layout.tsx — useAuthRedirect rebuilt without prevAuthRef
+
+After these 4 changes, restart Metro completely (r in terminal isn't enough — full npx expo start --clear) so the new auth init is picked up fresh. Then test login — you should now see actual error messages in the console if anything is still misconfigured, instead of silence.
