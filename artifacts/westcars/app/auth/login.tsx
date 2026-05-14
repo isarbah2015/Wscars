@@ -39,15 +39,26 @@ export default function LoginScreen() {
 
   useEffect(() => {
     if (response?.type === 'success') {
-      const { id_token, access_token } = response.authentication ?? {};
-      if (id_token) {
+      // expo-auth-session v7: id_token is in response.params (raw OAuth params,
+      // snake_case) for the implicit flow, and idToken (camelCase) on
+      // response.authentication for the PKCE/code flow. Check both.
+      const idToken =
+        response.params?.id_token ??
+        (response.authentication as any)?.idToken;
+      const accessToken =
+        response.authentication?.accessToken ??
+        response.params?.access_token;
+
+      if (idToken) {
         setGoogleLoading(true);
-        loginWithGoogle(id_token, access_token ?? undefined)
+        loginWithGoogle(idToken, accessToken ?? undefined)
           .catch(() => setError('Google sign-in failed. Please try again.'))
           .finally(() => setGoogleLoading(false));
+      } else {
+        setError('Google returned no ID token. Check your OAuth client configuration.');
       }
     } else if (response?.type === 'error') {
-      setError('Google sign-in was cancelled or failed.');
+      setError('Google sign-in failed: ' + (response.error?.message ?? 'unknown error'));
     }
   }, [response]);
 
