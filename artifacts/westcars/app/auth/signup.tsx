@@ -12,13 +12,14 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth } from '../../lib/firebase-persistence';
+import { useApp } from '../../context/AppContext';
+import { authErrorMessage } from '../../services/firebase/auth';
 
 const WC_LOGO = require('../../assets/images/wc-logo.png');
 
 export default function SignupScreen() {
   const router = useRouter();
+  const { signup } = useApp();
   const emailRef    = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const confirmRef  = useRef<TextInput>(null);
@@ -36,19 +37,13 @@ export default function SignupScreen() {
     if (!name.trim() || !email.trim() || !password || !confirm) {
       setError('Please fill in all fields'); return;
     }
-    if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
+    if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
     if (password !== confirm) { setError('Passwords do not match'); return; }
     try {
       setLoading(true);
-      const cred = await createUserWithEmailAndPassword(auth!, email.trim(), password);
-      await updateProfile(cred.user, { displayName: name.trim() });
+      await signup(name.trim(), email.trim(), '', password);
     } catch (e: any) {
-      const msg = e.code === 'auth/email-already-in-use'  ? 'An account with this email already exists'
-                : e.code === 'auth/invalid-email'          ? 'Please enter a valid email address'
-                : e.code === 'auth/weak-password'          ? 'Password is too weak — use at least 6 characters'
-                : e.code === 'auth/unauthorized-domain'    ? 'Sign-in is not enabled for this preview URL. Please open the app in Expo Go on your phone instead.'
-                : 'Sign up failed. Please try again';
-      setError(msg);
+      setError(authErrorMessage(e));
     } finally { setLoading(false); }
   };
 
@@ -64,7 +59,6 @@ export default function SignupScreen() {
       >
         <View style={styles.card}>
 
-          {/* Logo + nav row */}
           <View style={styles.topRow}>
             <Image source={WC_LOGO} style={styles.logo} resizeMode="contain" />
             <TouchableOpacity onPress={() => router.push('/auth/login')} activeOpacity={0.7} style={styles.navBtn}>
@@ -116,7 +110,7 @@ export default function SignupScreen() {
             <TextInput
               ref={passwordRef}
               style={[styles.input, { marginBottom: 0, flex: 1, borderWidth: 0 }]}
-              placeholder="••••••••••"
+              placeholder="Min. 8 characters"
               placeholderTextColor="#94A3B8"
               value={password}
               onChangeText={setPassword}
@@ -282,12 +276,6 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   btnDisabled: { opacity: 0.55 },
-  btnArrow: {
-    width: 28, height: 28, borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  btnArrowIcon: { color: '#fff', fontSize: 16, lineHeight: 20 },
   primaryBtnText: { color: '#fff', fontSize: 16, fontFamily: 'Inter_700Bold', letterSpacing: 0.3 },
 
   guestBtn: { alignItems: 'center', marginTop: 22, paddingVertical: 6 },
@@ -304,5 +292,5 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   eyeBtn: { paddingHorizontal: 8 },
-  eyeText: { color: '#0EB5CA', fontSize: 13, fontFamily: 'Inter_600SemiBold' },
+  eyeText: { color: TEAL, fontSize: 13, fontFamily: 'Inter_600SemiBold' },
 });

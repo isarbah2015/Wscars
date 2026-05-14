@@ -7,11 +7,11 @@ import {
   Platform,
   KeyboardAvoidingView,
   StyleSheet,
+  View,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../../lib/firebase-persistence';
+import { authErrorMessage, sendPasswordResetEmail } from '../../services/firebase/auth';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -22,21 +22,20 @@ export default function ForgotPasswordScreen() {
 
   const handleReset = async () => {
     setError('');
-    if (!email.trim()) {
-      setError('Please enter your email address');
+    if (!email.trim() || !email.includes('@')) {
+      setError('Please enter a valid email address');
       return;
     }
     try {
       setLoading(true);
-      await sendPasswordResetEmail(auth!, email.trim());
+      await sendPasswordResetEmail(email.trim().toLowerCase());
       setSent(true);
     } catch (e: any) {
-      const msg = e.code === 'auth/user-not-found'
-        ? 'No account found with this email'
-        : e.code === 'auth/invalid-email'
-        ? 'Please enter a valid email address'
-        : 'Failed to send reset email. Please try again';
-      setError(msg);
+      if (e.code === 'auth/user-not-found') {
+        setSent(true);
+      } else {
+        setError(authErrorMessage(e));
+      }
     } finally {
       setLoading(false);
     }
@@ -45,96 +44,155 @@ export default function ForgotPasswordScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Reset Password</Text>
-        <Text style={styles.subtitle}>
-          {sent
-            ? 'Check your email for a reset link.'
-            : 'Enter your email and we\'ll send a reset link.'}
-        </Text>
-
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-
-        {!sent && (
-          <>
-            <TextInput
-              style={styles.input}
-              placeholder="Email address"
-              placeholderTextColor="#999"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="email"
-              returnKeyType="done"
-              editable={!loading}
-              textAlign="left"
-              onSubmitEditing={handleReset}
-            />
-
-            <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleReset}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
-              {loading
-                ? <ActivityIndicator color="#fff" />
-                : <Text style={styles.buttonText}>Send Reset Link</Text>
-              }
-            </TouchableOpacity>
-          </>
-        )}
-
-        <TouchableOpacity
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-          style={styles.link}
-        >
-          <Text style={styles.linkText}>
-            <Text style={styles.linkBold}>Back to Sign In</Text>
+        <View style={styles.card}>
+          <Text style={styles.title}>Reset Password</Text>
+          <Text style={styles.subtitle}>
+            {sent
+              ? 'Check your inbox (and spam folder). The link expires in 1 hour.'
+              : "Enter your email and we'll send you a reset link."}
           </Text>
-        </TouchableOpacity>
 
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          {!sent && (
+            <>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="your@email.com"
+                placeholderTextColor="#94A3B8"
+                value={email}
+                onChangeText={(t) => { setEmail(t); setError(''); }}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                returnKeyType="send"
+                editable={!loading}
+                onSubmitEditing={handleReset}
+              />
+
+              <TouchableOpacity
+                style={[styles.primaryBtn, loading && styles.btnDisabled]}
+                onPress={handleReset}
+                disabled={loading}
+                activeOpacity={0.85}
+              >
+                {loading
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.primaryBtnText}>Send Reset Link</Text>
+                }
+              </TouchableOpacity>
+            </>
+          )}
+
+          <TouchableOpacity
+            onPress={() => router.back()}
+            activeOpacity={0.7}
+            style={styles.backBtn}
+          >
+            <Text style={styles.backText}>Back to Sign In</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
+const TEAL = '#0EB5CA';
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A1628' },
-  scroll: { flexGrow: 1, padding: 24, justifyContent: 'center' },
-  title: { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 8 },
-  subtitle: { fontSize: 16, color: '#aaa', marginBottom: 32 },
-  input: {
-    height: 52,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#000',
-    marginBottom: 16,
-    textAlign: 'left',
+  container: { flex: 1, backgroundColor: '#EDF4F7' },
+  scroll: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 32,
   },
-  button: {
+
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    paddingHorizontal: 24,
+    paddingTop: 36,
+    paddingBottom: 32,
+    shadowColor: '#0A1628',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.10,
+    shadowRadius: 20,
+    elevation: 6,
+  },
+
+  title: {
+    fontSize: 32,
+    fontFamily: 'Manrope_800ExtraBold',
+    color: '#0F172A',
+    letterSpacing: -0.8,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    color: '#64748B',
+    marginBottom: 28,
+    lineHeight: 22,
+  },
+
+  error: {
+    color: '#EF4444',
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 12,
+    fontFamily: 'Inter_500Medium',
+  },
+
+  label: {
+    alignSelf: 'flex-start',
+    fontSize: 11,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#475569',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: 7,
+  },
+  input: {
+    width: '100%',
     height: 52,
-    backgroundColor: '#00C897',
-    borderRadius: 10,
+    backgroundColor: '#F5FBFC',
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    fontSize: 15,
+    color: '#0F172A',
+    marginBottom: 14,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    fontFamily: 'Inter_400Regular',
+  },
+
+  primaryBtn: {
+    width: '100%',
+    height: 52,
+    backgroundColor: TEAL,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
+    marginTop: 4,
+    shadowColor: TEAL,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  error: { color: '#ff4444', marginBottom: 16, fontSize: 14, textAlign: 'center' },
-  link: { marginTop: 24, alignItems: 'center' },
-  linkText: { color: '#aaa', fontSize: 14 },
-  linkBold: { color: '#00C897', fontWeight: '700' },
+  btnDisabled: { opacity: 0.55 },
+  primaryBtnText: { color: '#fff', fontSize: 16, fontFamily: 'Inter_700Bold', letterSpacing: 0.3 },
+
+  backBtn: { alignItems: 'center', marginTop: 24, paddingVertical: 6 },
+  backText: { color: TEAL, fontSize: 14, fontFamily: 'Inter_600SemiBold' },
 });

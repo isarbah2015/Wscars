@@ -1,0 +1,911 @@
+/**
+ * WestCars — Complete Unified Auth Flow
+ * ======================================
+ * Covers:
+ *  1. Firebase Email/Password Sign-In & Sign-Up
+ *  2. Google OAuth (Expo AuthSession)
+ *  3. Password Reset (with spam-safe messaging)
+ *  4. Session Persistence (onAuthStateChanged at root)
+ *  5. Profile Photo Upload (Camera + Gallery, Android-safe)
+ *  6. Profile update (Firestore + Firebase Auth profile)
+ *  7. Sign Out
+ *
+ * Dependencies (install these):
+ *   npx expo install expo-auth-session expo-web-browser expo-image-picker
+ *   npm install firebase
+ *
+ * Setup:
+ *   1. Create firebase.js with your Firebase config (see bottom of file)
+ *   2. Enable Email/Password + Google in Firebase Console → Authentication → Sign-in method
+ *   3. Add your SHA-1 fingerprint to Firebase for Android Google Sign-In
+ *   4. Add redirect URIs to Google Cloud Console OAuth client (see comments in googleSignIn)
+ *   5. Add SPF/DKIM DNS records for your domain so reset emails don't go to spam
+ */
+
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Image,
+  Linking,
+} from 'react-native';
+
+// Firebase
+import { initializeApp } from 'firebase/app';
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signOut,
+  updateProfile,
+  GoogleAuthProvider,
+  signInWithCredential,
+} from 'firebase/auth';
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  updateDoc,
+  getDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from 'firebase/storage';
+
+// Expo
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+import * as ImagePicker from 'expo-image-picker';
+import * as AuthSession from 'expo-auth-session';
+
+// ─────────────────────────────────────────────
+// STEP 0 — Firebase initialisation
+// Replace with your actual config from Firebase Console → Project Settings
+// ─────────────────────────────────────────────
+
+const firebaseConfig = {
+  apiKey: 'YOUR_API_KEY',
+  authDomain: 'YOUR_PROJECT.firebaseapp.com',
+  projectId: 'YOUR_PROJECT_ID',
+  storageBucket: 'YOUR_PROJECT.appspot.com',
+  messagingSenderId: 'YOUR_SENDER_ID',
+  appId: 'YOUR_APP_ID',
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// Required for Expo Google Auth to complete the session
+WebBrowser.maybeCompleteAuthSession();
+
+// ─────────────────────────────────────────────
+// STEP 1 — Auth Context
+// Wrap your entire app in <AuthProvider> so any screen
+// can call useAuth() to get user state + auth methods.
+// ─────────────────────────────────────────────
+
+const AuthContext = createContext(null);
+
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
+  return ctx;
+};
+
+export const AuthProvider = ({ children }) => {
+  // undefined = still checking (show splash)
+  // null      = definitely logged out
+  // object    = logged in user
+  const [user, setUser] = useState(undefined);
+  const [userProfile, setUserProfile] = useState(null);
+
+  // ── Session persistence: fires on every app open ──
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        await loadUserProfile(firebaseUser.uid);
+      } else {
+        setUser(null);
+        setUserProfile(null);
+      }
+    });
+    return unsubscribe; // cleanup listener on unmount
+  }, []);
+
+  const loadUserProfile = async (uid) => {
+    try {
+      const snap = await getDoc(doc(db, 'users', uid));
+      if (snap.exists()) setUserProfile(snap.data());
+    } catch (e) {
+      console.error('loadUserProfile error:', e);
+    }
+  };
+
+  // ── Sign Up (email/password) ──
+  const signUp = useCallback(async (email, password, displayName) => {
+    const credential = await createUserWithEmailAndPassword(
+      auth,
+      email.trim().toLowerCase(),
+      password
+    );
+    // Set display name on Firebase Auth profile
+    await updateProfile(credential.user, { displayName });
+    // Create Firestore user document
+    await setDoc(doc(db, 'users', credential.user.uid), {
+      uid: credential.user.uid,
+      displayName,
+      email: email.trim().toLowerCase(),
+      photoURL: null,
+      location: 'Accra',
+      trustScore: 15,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return credential.user;
+  }, []);
+
+  // ── Sign In (email/password) ──
+  const signIn = useCallback(async (email, password) => {
+    const credential = await signInWithEmailAndPassword(
+      auth,
+      email.trim().toLowerCase(),
+      password
+    );
+    return credential.user;
+  }, []);
+
+  // ── Password Reset ──
+  const resetPassword = useCallback(async (email) => {
+    await sendPasswordResetEmail(auth, email.trim().toLowerCase());
+  }, []);
+
+  // ── Sign Out ──
+  const logOut = useCallback(async () => {
+    await signOut(auth);
+  }, []);
+
+  // ── Update Profile Photo ──
+  const updateUserPhoto = useCallback(async (localUri) => {
+    if (!auth.currentUser) throw new Error('Not authenticated');
+
+    const response = await fetch(localUri);
+    const blob = await response.blob();
+
+    const storageRef = ref(storage, `profiles/${auth.currentUser.uid}.jpg`);
+    await uploadBytes(storageRef, blob);
+
+    const downloadUrl = await getDownloadURL(storageRef);
+
+    // Update Firebase Auth profile
+    await updateProfile(auth.currentUser, { photoURL: downloadUrl });
+
+    // Update Firestore document
+    await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+      photoURL: downloadUrl,
+      updatedAt: serverTimestamp(),
+    });
+
+    // Refresh local profile state
+    setUserProfile((prev) => ({ ...prev, photoURL: downloadUrl }));
+
+    return downloadUrl;
+  }, []);
+
+  const value = {
+    user,           // Firebase Auth user object or null
+    userProfile,    // Firestore user document data
+    isLoading: user === undefined,
+    isAuthenticated: !!user,
+    signUp,
+    signIn,
+    resetPassword,
+    logOut,
+    updateUserPhoto,
+    reloadProfile: () => user && loadUserProfile(user.uid),
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+// ─────────────────────────────────────────────
+// STEP 2 — Root App Component
+// This is what you put in App.js (or _layout.tsx for Expo Router)
+// It reads auth state and routes to the right stack.
+// ─────────────────────────────────────────────
+
+export const AppRoot = () => {
+  const { isLoading, isAuthenticated } = useAuth();
+
+  if (isLoading) return <SplashScreen />;
+  return isAuthenticated ? <MainAppPlaceholder /> : <AuthNavigator />;
+};
+
+// Wrap AppRoot with the provider in your actual App.js:
+//
+//   export default function App() {
+//     return (
+//       <AuthProvider>
+//         <AppRoot />
+//       </AuthProvider>
+//     );
+//   }
+
+// ─────────────────────────────────────────────
+// STEP 3 — Auth Navigator (manages sign-in screens)
+// ─────────────────────────────────────────────
+
+type AuthScreen = 'signin' | 'signup' | 'reset';
+
+const AuthNavigator = () => {
+  const [screen, setScreen] = useState<AuthScreen>('signin');
+
+  return (
+    <View style={{ flex: 1 }}>
+      {screen === 'signin' && (
+        <SignInScreen
+          onGoSignUp={() => setScreen('signup')}
+          onGoReset={() => setScreen('reset')}
+        />
+      )}
+      {screen === 'signup' && (
+        <SignUpScreen onGoSignIn={() => setScreen('signin')} />
+      )}
+      {screen === 'reset' && (
+        <ResetPasswordScreen onGoBack={() => setScreen('signin')} />
+      )}
+    </View>
+  );
+};
+
+// ─────────────────────────────────────────────
+// STEP 4 — Sign In Screen
+// ─────────────────────────────────────────────
+
+const SignInScreen = ({ onGoSignUp, onGoReset }) => {
+  const { signIn } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Google Auth setup
+  // Add these exact redirect URIs to Google Cloud Console:
+  //   https://auth.expo.io/@YOUR_EXPO_USERNAME/westcars
+  //   com.westcars.app:/oauth2callback
+  const [request, response, promptGoogleAsync] = Google.useAuthRequest({
+    webClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+    iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com',
+    androidClientId: 'YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com',
+    redirectUri: AuthSession.makeRedirectUri({ useProxy: true }),
+  });
+
+  // Handle Google OAuth response
+  useEffect(() => {
+    if (response?.type === 'success') {
+      handleGoogleSuccess(response.authentication?.idToken);
+    } else if (response?.type === 'error') {
+      setError('Google sign-in failed. Please try again.');
+    }
+  }, [response]);
+
+  const handleGoogleSuccess = async (idToken) => {
+    if (!idToken) { setError('Google sign-in failed — no token received.'); return; }
+    setLoading(true);
+    setError('');
+    try {
+      const credential = GoogleAuthProvider.credential(idToken);
+      const result = await signInWithCredential(auth, credential);
+      // Create Firestore doc if first time Google sign-in
+      const userDoc = doc(db, 'users', result.user.uid);
+      const snap = await getDoc(userDoc);
+      if (!snap.exists()) {
+        await setDoc(userDoc, {
+          uid: result.user.uid,
+          displayName: result.user.displayName || '',
+          email: result.user.email,
+          photoURL: result.user.photoURL || null,
+          location: 'Accra',
+          trustScore: 15,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      }
+    } catch (e) {
+      setError(parseAuthError(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailSignIn = async () => {
+    if (!email || !password) { setError('Please fill in all fields.'); return; }
+    setLoading(true);
+    setError('');
+    try {
+      await signIn(email, password);
+    } catch (e) {
+      setError(parseAuthError(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <View style={styles.logoRow}>
+          <Text style={styles.logoText}>WC</Text>
+          <Text style={styles.appName}>WestCars</Text>
+        </View>
+
+        <Text style={styles.title}>Welcome back</Text>
+        <Text style={styles.subtitle}>Sign in to your account</Text>
+
+        {error ? <ErrorBanner message={error} /> : null}
+
+        <TextInput
+          style={styles.input}
+          placeholder="Email address"
+          placeholderTextColor="#8A9BB0"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          returnKeyType="next"
+          value={email}
+          onChangeText={(t) => { setEmail(t); setError(''); }}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#8A9BB0"
+          secureTextEntry
+          returnKeyType="done"
+          onSubmitEditing={handleEmailSignIn}
+          value={password}
+          onChangeText={(t) => { setPassword(t); setError(''); }}
+        />
+
+        <TouchableOpacity onPress={onGoReset} style={styles.forgotRow}>
+          <Text style={styles.link}>Forgot password?</Text>
+        </TouchableOpacity>
+
+        <PrimaryButton
+          title="Sign In"
+          onPress={handleEmailSignIn}
+          loading={loading}
+        />
+
+        <Divider label="or" />
+
+        <GoogleButton
+          onPress={() => promptGoogleAsync()}
+          disabled={!request || loading}
+        />
+
+        <TouchableOpacity onPress={onGoSignUp} style={styles.switchRow}>
+          <Text style={styles.switchText}>
+            Don't have an account?{' '}
+            <Text style={styles.link}>Sign up</Text>
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+};
+
+// ─────────────────────────────────────────────
+// STEP 5 — Sign Up Screen
+// ─────────────────────────────────────────────
+
+const SignUpScreen = ({ onGoSignIn }) => {
+  const { signUp } = useAuth();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSignUp = async () => {
+    if (!name || !email || !password || !confirm) {
+      setError('Please fill in all fields.');
+      return;
+    }
+    if (password !== confirm) {
+      setError('Passwords do not match.');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      await signUp(email, password, name);
+    } catch (e) {
+      setError(parseAuthError(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <View style={styles.logoRow}>
+          <Text style={styles.logoText}>WC</Text>
+          <Text style={styles.appName}>WestCars</Text>
+        </View>
+
+        <Text style={styles.title}>Create account</Text>
+        <Text style={styles.subtitle}>Join WestCars to buy and sell</Text>
+
+        {error ? <ErrorBanner message={error} /> : null}
+
+        <TextInput
+          style={styles.input}
+          placeholder="Full name"
+          placeholderTextColor="#8A9BB0"
+          autoCapitalize="words"
+          value={name}
+          onChangeText={(t) => { setName(t); setError(''); }}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email address"
+          placeholderTextColor="#8A9BB0"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={(t) => { setEmail(t); setError(''); }}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password (min 8 characters)"
+          placeholderTextColor="#8A9BB0"
+          secureTextEntry
+          value={password}
+          onChangeText={(t) => { setPassword(t); setError(''); }}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm password"
+          placeholderTextColor="#8A9BB0"
+          secureTextEntry
+          returnKeyType="done"
+          onSubmitEditing={handleSignUp}
+          value={confirm}
+          onChangeText={(t) => { setConfirm(t); setError(''); }}
+        />
+
+        <PrimaryButton title="Create Account" onPress={handleSignUp} loading={loading} />
+
+        <TouchableOpacity onPress={onGoSignIn} style={styles.switchRow}>
+          <Text style={styles.switchText}>
+            Already have an account?{' '}
+            <Text style={styles.link}>Sign in</Text>
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+};
+
+// ─────────────────────────────────────────────
+// STEP 6 — Reset Password Screen
+// ─────────────────────────────────────────────
+
+const ResetPasswordScreen = ({ onGoBack }) => {
+  const { resetPassword } = useAuth();
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleReset = async () => {
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      await resetPassword(email);
+      setSent(true);
+    } catch (e) {
+      // Security: don't reveal whether the email exists
+      // Treat user-not-found the same as success
+      if (e.code === 'auth/user-not-found') {
+        setSent(true);
+      } else {
+        setError(parseAuthError(e));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={[styles.screen, { backgroundColor: '#0D1B2A' }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <Text style={[styles.title, { color: '#FFFFFF' }]}>Reset Password</Text>
+        <Text style={[styles.subtitle, { color: '#8A9BB0' }]}>
+          {sent
+            ? "Check your inbox (and spam folder). The link expires in 1 hour."
+            : "Enter your email and we'll send a reset link."}
+        </Text>
+
+        {error ? <ErrorBanner message={error} /> : null}
+
+        {!sent && (
+          <>
+            <TextInput
+              style={[styles.input, { backgroundColor: '#FFFFFF', color: '#0D1B2A' }]}
+              placeholder="Email address"
+              placeholderTextColor="#8A9BB0"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              returnKeyType="send"
+              onSubmitEditing={handleReset}
+              value={email}
+              onChangeText={(t) => { setEmail(t); setError(''); }}
+            />
+            <PrimaryButton title="Send Reset Link" onPress={handleReset} loading={loading} />
+          </>
+        )}
+
+        <TouchableOpacity onPress={onGoBack} style={styles.switchRow}>
+          <Text style={[styles.link, { textAlign: 'center' }]}>Back to Sign In</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+};
+
+// ─────────────────────────────────────────────
+// STEP 7 — Profile Photo Hook
+// Use this hook anywhere in your app where you need
+// to let the user update their profile photo.
+// ─────────────────────────────────────────────
+
+export const useProfilePhoto = () => {
+  const { updateUserPhoto } = useAuth();
+  const [uploading, setUploading] = useState(false);
+
+  // Request permission then open camera
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Camera permission needed',
+        'WestCars needs camera access to take a profile photo.',
+        [
+          { text: 'Not Now', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+        ]
+      );
+      return null;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (result.canceled) return null;
+    return upload(result.assets[0].uri);
+  };
+
+  // Request permission then open gallery
+  const pickFromGallery = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Gallery permission needed',
+        'WestCars needs access to your photos.',
+        [
+          { text: 'Not Now', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+        ]
+      );
+      return null;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (result.canceled) return null;
+    return upload(result.assets[0].uri);
+  };
+
+  // Show an action sheet to let user choose camera or gallery
+  const promptPhotoSource = () => {
+    Alert.alert('Update Profile Photo', 'Choose a source', [
+      { text: 'Camera', onPress: takePhoto },
+      { text: 'Choose from Gallery', onPress: pickFromGallery },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  };
+
+  const upload = async (localUri) => {
+    setUploading(true);
+    try {
+      const url = await updateUserPhoto(localUri);
+      return url;
+    } catch (e) {
+      Alert.alert('Upload failed', 'Check your connection and try again.');
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return { promptPhotoSource, takePhoto, pickFromGallery, uploading };
+};
+
+// Usage in your ProfileScreen:
+//
+//   const { promptPhotoSource, uploading } = useProfilePhoto();
+//
+//   <TouchableOpacity onPress={promptPhotoSource}>
+//     <Image source={{ uri: userProfile.photoURL }} style={styles.avatar} />
+//     {uploading && <ActivityIndicator style={StyleSheet.absoluteFill} />}
+//   </TouchableOpacity>
+
+// ─────────────────────────────────────────────
+// STEP 8 — Error message parser
+// Maps Firebase error codes to human-readable messages
+// ─────────────────────────────────────────────
+
+const parseAuthError = (error) => {
+  const map = {
+    'auth/user-not-found': 'No account found with this email.',
+    'auth/wrong-password': 'Incorrect password. Try again.',
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/email-already-in-use': 'An account with this email already exists.',
+    'auth/weak-password': 'Choose a stronger password (min 8 characters).',
+    'auth/too-many-requests': 'Too many attempts. Please try again later.',
+    'auth/network-request-failed': 'Network error. Check your connection.',
+    'auth/invalid-credential': 'Incorrect email or password.',
+    'auth/popup-closed-by-user': 'Sign-in cancelled.',
+    'auth/cancelled-popup-request': 'Sign-in cancelled.',
+    'auth/account-exists-with-different-credential':
+      'An account with this email exists using a different sign-in method.',
+    'auth/requires-recent-login':
+      'Please sign out and sign back in to do this.',
+  };
+  return map[error?.code] || error?.message || 'Something went wrong. Please try again.';
+};
+
+// ─────────────────────────────────────────────
+// Shared UI Components
+// ─────────────────────────────────────────────
+
+const PrimaryButton = ({ title, onPress, loading, disabled }) => (
+  <TouchableOpacity
+    style={[styles.primaryBtn, (loading || disabled) && styles.primaryBtnDisabled]}
+    onPress={onPress}
+    disabled={loading || disabled}
+    activeOpacity={0.85}
+  >
+    {loading
+      ? <ActivityIndicator color="#FFFFFF" />
+      : <Text style={styles.primaryBtnText}>{title}</Text>}
+  </TouchableOpacity>
+);
+
+const GoogleButton = ({ onPress, disabled }) => (
+  <TouchableOpacity
+    style={[styles.googleBtn, disabled && styles.primaryBtnDisabled]}
+    onPress={onPress}
+    disabled={disabled}
+    activeOpacity={0.85}
+  >
+    <Text style={styles.googleBtnG}>G</Text>
+    <Text style={styles.googleBtnText}>Continue with Google</Text>
+  </TouchableOpacity>
+);
+
+const ErrorBanner = ({ message }) => (
+  <View style={styles.errorBanner}>
+    <Text style={styles.errorText}>{message}</Text>
+  </View>
+);
+
+const Divider = ({ label }) => (
+  <View style={styles.dividerRow}>
+    <View style={styles.dividerLine} />
+    <Text style={styles.dividerLabel}>{label}</Text>
+    <View style={styles.dividerLine} />
+  </View>
+);
+
+const SplashScreen = () => (
+  <View style={[styles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
+    <Text style={[styles.logoText, { fontSize: 40 }]}>WC</Text>
+    <ActivityIndicator color="#1DA49C" style={{ marginTop: 24 }} />
+  </View>
+);
+
+const MainAppPlaceholder = () => {
+  const { user, logOut } = useAuth();
+  return (
+    <View style={[styles.screen, { justifyContent: 'center', alignItems: 'center', padding: 24 }]}>
+      <Text style={styles.title}>Welcome, {user?.displayName || user?.email}!</Text>
+      <Text style={styles.subtitle}>Replace this with your main app navigator.</Text>
+      <TouchableOpacity style={[styles.primaryBtn, { marginTop: 24 }]} onPress={logOut}>
+        <Text style={styles.primaryBtnText}>Sign Out</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+// ─────────────────────────────────────────────
+// Styles — WestCars teal/dark theme
+// ─────────────────────────────────────────────
+
+const TEAL = '#1DA49C';
+const DARK = '#0D1B2A';
+const ERROR_BG = '#FEE2E2';
+const ERROR_TEXT = '#991B1B';
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#F4F7FA',
+  },
+  container: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 40,
+  },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 32,
+    gap: 10,
+  },
+  logoText: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: TEAL,
+    letterSpacing: 1,
+  },
+  appName: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: DARK,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: DARK,
+    marginBottom: 6,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#5A7A94',
+    marginBottom: 28,
+  },
+  input: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: DARK,
+    borderWidth: 1,
+    borderColor: '#D8E4EE',
+    marginBottom: 12,
+  },
+  forgotRow: {
+    alignSelf: 'flex-end',
+    marginBottom: 20,
+    marginTop: -4,
+  },
+  link: {
+    color: TEAL,
+    fontWeight: '500',
+    fontSize: 14,
+  },
+  primaryBtn: {
+    backgroundColor: TEAL,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  primaryBtnDisabled: {
+    opacity: 0.55,
+  },
+  primaryBtnText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  googleBtn: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#D8E4EE',
+    gap: 10,
+  },
+  googleBtnG: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#4285F4',
+  },
+  googleBtnText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: DARK,
+  },
+  errorBanner: {
+    backgroundColor: ERROR_BG,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 14,
+  },
+  errorText: {
+    color: ERROR_TEXT,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+    gap: 10,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#D8E4EE',
+  },
+  dividerLabel: {
+    fontSize: 13,
+    color: '#8A9BB0',
+  },
+  switchRow: {
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  switchText: {
+    fontSize: 14,
+    color: '#5A7A94',
+  },
+});
