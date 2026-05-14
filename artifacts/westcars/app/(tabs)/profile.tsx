@@ -223,35 +223,56 @@ export default function ProfileScreen() {
         borderBottomWidth: 1,
         borderBottomColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
       }]}>
-        <View style={styles.avatarArea}>
-          {(uploadedAvatar ?? currentUser.avatar) ? (
-            <Image source={{ uri: uploadedAvatar ?? currentUser.avatar! }} style={styles.avatar} />
-          ) : (
-            <View style={[styles.avatarPlaceholder, {
-              backgroundColor: isDark ? "rgba(14,181,202,0.15)" : "rgba(14,181,202,0.10)",
-              borderColor: "#0EB5CA",
-            }]}>
-              <Feather name="user" size={36} color="#0098AA" />
-            </View>
-          )}
-          {avatarUploading && (
-            <View style={styles.avatarUploadingOverlay}>
-              <ActivityIndicator color="#fff" size="small" />
-              {uploadProgress !== null && uploadProgress > 0 && (
-                <Text style={styles.avatarUploadPct}>{Math.round(uploadProgress * 100)}%</Text>
-              )}
-            </View>
-          )}
-          <Pressable style={styles.editAvatarBtn} onPress={() => setAvatarSheetOpen(true)} disabled={avatarUploading}>
+        <Pressable onPress={() => !avatarUploading && setAvatarSheetOpen(true)} style={styles.avatarArea}>
+          {/* Gradient ring */}
+          <LinearGradient
+            colors={["#0EB5CA", "#5DDFEF", "#0EB5CA"]}
+            start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+            style={styles.avatarRing}
+          >
+            {(uploadedAvatar ?? currentUser.avatar) ? (
+              <Image
+                source={{ uri: uploadedAvatar ?? currentUser.avatar! }}
+                style={styles.avatar}
+              />
+            ) : (
+              <View style={[styles.avatarPlaceholder, {
+                backgroundColor: isDark ? "rgba(14,181,202,0.18)" : "rgba(14,181,202,0.12)",
+              }]}>
+                <Feather name="user" size={44} color="#0098AA" />
+              </View>
+            )}
+
+            {/* Upload overlay */}
+            {avatarUploading && (
+              <View style={styles.avatarUploadingOverlay}>
+                <ActivityIndicator color="#fff" size="small" />
+                {uploadProgress !== null && uploadProgress > 0 && (
+                  <Text style={styles.avatarUploadPct}>{Math.round(uploadProgress * 100)}%</Text>
+                )}
+              </View>
+            )}
+          </LinearGradient>
+
+          {/* Camera badge */}
+          <View style={styles.editAvatarBtn}>
             {avatarUploading
-              ? <ActivityIndicator size={12} color="#FFFFFF" />
-              : <Feather name="camera" size={14} color="#FFFFFF" />}
-          </Pressable>
-        </View>
-        {uploadProgress !== null && (
-          <View style={styles.uploadProgressTrack}>
-            <View style={[styles.uploadProgressFill, { width: 88 * uploadProgress }]} />
+              ? <ActivityIndicator size={13} color="#FFFFFF" />
+              : <Feather name="camera" size={15} color="#FFFFFF" />}
           </View>
+        </Pressable>
+
+        {/* "Change Photo" label / progress bar */}
+        {uploadProgress !== null ? (
+          <View style={styles.uploadProgressTrack}>
+            <View style={[styles.uploadProgressFill, { width: 110 * uploadProgress }]} />
+          </View>
+        ) : (
+          <Pressable onPress={() => !avatarUploading && setAvatarSheetOpen(true)}>
+            <Text style={[styles.changePhotoHint, { color: avatarUploading ? "#94A3B8" : "#0EB5CA" }]}>
+              {avatarUploading ? "Uploading…" : "Change Photo"}
+            </Text>
+          </Pressable>
         )}
 
         <Text style={[styles.userName, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>
@@ -698,31 +719,41 @@ const styles = StyleSheet.create({
 
   // Profile header
   profileHeader: { padding: 20, alignItems: "center", gap: 6, paddingBottom: 24 },
-  avatarArea: { position: "relative", marginBottom: 4 },
-  avatar: { width: 88, height: 88, borderRadius: 44, borderWidth: 3, borderColor: "#0EB5CA" },
+  avatarArea: { position: "relative", marginBottom: 2 },
+  avatarRing: {
+    width: 118, height: 118, borderRadius: 59,
+    padding: 3,
+    alignItems: "center", justifyContent: "center",
+  },
+  avatar: { width: 112, height: 112, borderRadius: 56 },
   avatarPlaceholder: {
-    width: 88, height: 88, borderRadius: 44,
-    borderWidth: 3,
+    width: 112, height: 112, borderRadius: 56,
     alignItems: "center", justifyContent: "center",
   },
   editAvatarBtn: {
-    position: "absolute", bottom: 2, right: 2,
-    width: 28, height: 28, borderRadius: 14,
-    backgroundColor: "#0EB5CA", borderWidth: 2, borderColor: "#fff",
+    position: "absolute", bottom: 4, right: 4,
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: "#0EB5CA", borderWidth: 2.5, borderColor: "#fff",
     alignItems: "center", justifyContent: "center",
+    shadowColor: "#0EB5CA", shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4, shadowRadius: 6, elevation: 4,
   },
   avatarUploadingOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.45)",
-    borderRadius: 44,
+    borderRadius: 56,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarUploadPct: { color: "#fff", fontSize: 11, marginTop: 2 },
+  changePhotoHint: {
+    fontSize: 12, fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.2, marginTop: 4, marginBottom: 2,
+  },
   uploadProgressTrack: {
     height: 3, borderRadius: 2,
     backgroundColor: "rgba(14,181,202,0.2)",
-    width: 88, marginTop: 6, overflow: "hidden",
+    width: 110, marginTop: 6, marginBottom: 2, overflow: "hidden",
   },
   uploadProgressFill: {
     height: "100%", borderRadius: 2,

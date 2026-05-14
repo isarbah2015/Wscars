@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Text, TextInput, TouchableOpacity, ActivityIndicator,
   Platform, KeyboardAvoidingView, StyleSheet, View, Image,
@@ -6,61 +6,18 @@ import {
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
 import { auth } from '../../lib/firebase-persistence';
-import { useApp } from '../../context/AppContext';
-
-WebBrowser.maybeCompleteAuthSession();
 
 const WC_LOGO = require('../../assets/images/wc-logo.png');
 
-const GOOGLE_IOS_ID     = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
-const GOOGLE_ANDROID_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
-const GOOGLE_WEB_ID     = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
-const GOOGLE_CONFIGURED = !!(GOOGLE_IOS_ID || GOOGLE_ANDROID_ID || GOOGLE_WEB_ID);
-
 export default function LoginScreen() {
   const router = useRouter();
-  const { loginWithGoogle } = useApp();
   const passwordRef = useRef<TextInput>(null);
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
   const [loading,      setLoading]      = useState(false);
-  const [googleLoading,setGoogleLoading]= useState(false);
   const [error,        setError]        = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    iosClientId:     GOOGLE_IOS_ID,
-    androidClientId: GOOGLE_ANDROID_ID,
-    webClientId:     GOOGLE_WEB_ID,
-  });
-
-  useEffect(() => {
-    if (response?.type === 'success') {
-      // expo-auth-session v7: id_token is in response.params (raw OAuth params,
-      // snake_case) for the implicit flow, and idToken (camelCase) on
-      // response.authentication for the PKCE/code flow. Check both.
-      const idToken =
-        response.params?.id_token ??
-        (response.authentication as any)?.idToken;
-      const accessToken =
-        response.authentication?.accessToken ??
-        response.params?.access_token;
-
-      if (idToken) {
-        setGoogleLoading(true);
-        loginWithGoogle(idToken, accessToken ?? undefined)
-          .catch(() => setError('Google sign-in failed. Please try again.'))
-          .finally(() => setGoogleLoading(false));
-      } else {
-        setError('Google returned no ID token. Check your OAuth client configuration.');
-      }
-    } else if (response?.type === 'error') {
-      setError('Google sign-in failed: ' + (response.error?.message ?? 'unknown error'));
-    }
-  }, [response]);
 
   const handleLogin = async () => {
     setError('');
@@ -82,15 +39,6 @@ export default function LoginScreen() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogle = async () => {
-    if (!GOOGLE_CONFIGURED) {
-      setError('Google sign-in is not configured yet. Set EXPO_PUBLIC_GOOGLE_*_CLIENT_ID secrets.');
-      return;
-    }
-    setError('');
-    await promptAsync();
   };
 
   return (
@@ -117,32 +65,6 @@ export default function LoginScreen() {
           <Text style={styles.subtitle}>Sign in to your Westcars account</Text>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
-
-          {/* ── Google button ── */}
-          <TouchableOpacity
-            style={[styles.googleBtn, (googleLoading || !request) && styles.btnDisabled]}
-            onPress={handleGoogle}
-            disabled={googleLoading || !request}
-            activeOpacity={0.85}
-          >
-            {googleLoading ? (
-              <ActivityIndicator color={TEAL} size="small" />
-            ) : (
-              <>
-                <View style={styles.googleIcon}>
-                  <Text style={styles.googleIconText}>G</Text>
-                </View>
-                <Text style={styles.googleBtnText}>Continue with Google</Text>
-              </>
-            )}
-          </TouchableOpacity>
-
-          {/* ── Divider ── */}
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
 
           <Text style={styles.label}>Email</Text>
           <TextInput
@@ -229,29 +151,6 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 14, fontFamily: 'Inter_400Regular', color: '#64748B', marginBottom: 20 },
 
   error: { color: '#EF4444', fontSize: 13, textAlign: 'center', marginBottom: 12, fontFamily: 'Inter_500Medium' },
-
-  // Google button
-  googleBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-    width: '100%', height: 52,
-    backgroundColor: '#fff',
-    borderRadius: 16, borderWidth: 1.5, borderColor: '#E2E8F0',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06, shadowRadius: 6, elevation: 2,
-    marginBottom: 16,
-  },
-  googleIcon: {
-    width: 24, height: 24, borderRadius: 12,
-    backgroundColor: '#fff', borderWidth: 1, borderColor: '#E2E8F0',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  googleIconText: { fontSize: 14, fontFamily: 'Inter_700Bold', color: '#4285F4' },
-  googleBtnText:  { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#0F172A' },
-
-  // Divider
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
-  dividerLine:{ flex: 1, height: 1, backgroundColor: '#E2E8F0' },
-  dividerText:{ fontSize: 12, fontFamily: 'Inter_500Medium', color: '#94A3B8' },
 
   label: {
     alignSelf: 'flex-start', fontSize: 11, fontFamily: 'Inter_600SemiBold',
