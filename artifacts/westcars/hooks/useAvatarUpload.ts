@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Alert, Platform, Linking } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import {
@@ -19,6 +19,13 @@ export interface AvatarUploadState {
   error: string | null
 }
 
+export interface UseAvatarUploadOptions {
+  userId: string
+  initialPhotoURL: string | null | undefined
+  /** Called with the new download URL after a successful upload. */
+  onSuccess?: (url: string) => void
+}
+
 export interface UseAvatarUploadReturn extends AvatarUploadState {
   pickAndUpload: (source: UploadSource) => Promise<void>
   removePhoto: () => Promise<void>
@@ -28,17 +35,24 @@ export interface UseAvatarUploadReturn extends AvatarUploadState {
 export function useAvatarUpload({
   userId,
   initialPhotoURL,
-}: {
-  userId: string
-  initialPhotoURL: string | null | undefined
-}): UseAvatarUploadReturn {
+  onSuccess,
+}: UseAvatarUploadOptions): UseAvatarUploadReturn {
 
   const [photoURL, setPhotoURL] = useState<string | null>(initialPhotoURL ?? null)
   const [progress, setProgress] = useState<number | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // ── FIX #1: Permission denied → open phone Settings directly ────────────────
+  // Re-sync when the parent provides a real URL after async Firebase load.
+  // Only update if we don't already have a locally-set URL (avoids overwriting
+  // a freshly-uploaded photo with the stale Firestore value).
+  useEffect(() => {
+    if (initialPhotoURL && !photoURL) {
+      setPhotoURL(initialPhotoURL)
+    }
+  }, [initialPhotoURL])
+
+  // ── Permission ────────────────────────────────────────────────────────────────
 
   const requestPermission = useCallback(
     async (source: UploadSource): Promise<boolean> => {
@@ -58,10 +72,7 @@ export function useAvatarUpload({
           : 'WestCars needs photo library access. Tap "Open Settings" and enable Photos.',
         [
           { text: 'Not Now', style: 'cancel' },
-          {
-            text: 'Open Settings',
-            onPress: () => Linking.openSettings(),
-          },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
         ]
       )
       return false
@@ -69,7 +80,7 @@ export function useAvatarUpload({
     []
   )
 
-  // ── Core upload ──────────────────────────────────────────────────────────────
+  // ── Core upload ───────────────────────────────────────────────────────────────
 
   const uploadBlob = useCallback(
     (blob: Blob): Promise<string> => {
@@ -94,7 +105,7 @@ export function useAvatarUpload({
     [userId]
   )
 
-  // ── Pick & Upload ────────────────────────────────────────────────────────────
+  // ── Pick & Upload ─────────────────────────────────────────────────────────────
 
   const pickAndUpload = useCallback(
     async (source: UploadSource): Promise<void> => {
@@ -137,6 +148,8 @@ export function useAvatarUpload({
         })
 
         setPhotoURL(downloadURL)
+        // Notify AppContext so currentUser.avatar stays in sync without restart.
+        onSuccess?.(downloadURL)
       } catch (err: any) {
         const message = err?.message ?? 'Upload failed. Please try again.'
         setError(message)
@@ -146,10 +159,10 @@ export function useAvatarUpload({
         setProgress(null)
       }
     },
-    [userId, requestPermission, uploadBlob]
+    [userId, requestPermission, uploadBlob, onSuccess]
   )
 
-  // ── Remove Photo ─────────────────────────────────────────────────────────────
+  // ── Remove Photo ──────────────────────────────────────────────────────────────
 
   const removePhoto = useCallback(async (): Promise<void> => {
     setError(null)
@@ -168,6 +181,7 @@ export function useAvatarUpload({
         photoUpdatedAt: new Date().toISOString(),
       })
       setPhotoURL(null)
+      onSuccess?.('')
     } catch (err: any) {
       const message = err?.message ?? 'Could not remove photo.'
       setError(message)
@@ -176,7 +190,7 @@ export function useAvatarUpload({
       setIsUploading(false)
       setProgress(null)
     }
-  }, [userId])
+  }, [userId, onSuccess])
 
   return {
     photoURL,

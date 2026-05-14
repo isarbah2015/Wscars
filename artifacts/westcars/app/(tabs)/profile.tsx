@@ -68,7 +68,11 @@ export default function ProfileScreen() {
   const [avatarSheetOpen, setAvatarSheetOpen] = useState(false);
   const { photoURL: uploadedAvatar, progress: uploadProgress, isUploading: avatarUploading,
           pickAndUpload, removePhoto } =
-    useAvatarUpload({ userId: currentUser?.id ?? "", initialPhotoURL: currentUser?.avatar });
+    useAvatarUpload({
+      userId: currentUser?.id ?? "",
+      initialPhotoURL: currentUser?.avatar,
+      onSuccess: (url) => updateUserProfile({ avatar: url || undefined }),
+    });
 
   if (!isAuthenticated || !currentUser) {
     return (
