@@ -45,15 +45,13 @@ function useAuthRedirect() {
       const onAuthScreen =
         segments.includes("login") ||
         segments.includes("signup") ||
-        segments.includes("forgot-password") ||
         segments.includes("welcome") ||
         segments.length === 0; // splash / initial load
 
-      // Only redirect signed-in users away from auth/welcome screens.
-      // Unauthenticated users can browse freely — protected screens show
-      // their own inline auth walls (profile tab, chat, etc.).
       if (isAuthed && onAuthScreen) {
         router.replace("/(tabs)");
+      } else if (!isAuthed && !onAuthScreen) {
+        router.replace("/welcome");
       }
     });
     return unsub;
