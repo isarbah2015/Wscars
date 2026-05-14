@@ -1,0 +1,111 @@
+⚠️ FIX GOOGLE SIGN-IN – DO NOT CHANGE OTHER CODE
+
+The error "redirect_uri_mismatch" means the redirect URI registered in Google Cloud Console does not match the one your app uses.
+
+---
+
+📌 STEP 1 – FIND YOUR APP'S REDIRECT URI
+
+Your app (Expo + React Native) uses one of these patterns:
+
+**For development (Expo Go):**
+exp://127.0.0.1:19000/--/expo-auth-session
+
+text
+or
+exp://localhost:19000/--/expo-auth-session
+
+text
+
+**For production (standalone app):**
+com.bebadrop.app:/oauth2redirect
+
+text
+or
+https://auth.expo.io/@your-username/bebadrop
+
+text
+
+**For web (if you have a web build):**
+http://localhost:8081/ (or your production web URL)
+
+text
+
+---
+
+📌 STEP 2 – UPDATE GOOGLE CLOUD CONSOLE
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/).
+2. Select your project (the one linked to BebaDrop).
+3. Navigate to **APIs & Services → Credentials**.
+4. Find your OAuth 2.0 Client ID (type: iOS, Android, or Web).
+5. Click **Edit**.
+6. Under **Authorized redirect URIs**, add **ALL** the URIs from Step 1 that apply to your app.
+
+**For Expo Go development (critical for testing):**
+- Add `exp://127.0.0.1:19000/--/expo-auth-session`
+- Add `exp://localhost:19000/--/expo-auth-session`
+
+**For production Android:**
+- Add `com.bebadrop.app:/oauth2redirect`
+
+**For production iOS:**
+- Add `com.bebadrop.app:/oauth2redirect` (same as Android)
+
+**For web:**
+- Add `http://localhost:8081/` (development)
+- Add `https://yourdomain.com/` (production)
+
+7. Save changes.
+
+---
+
+📌 STEP 3 – VERIFY YOUR APP CONFIGURATION
+
+In your `app.json` or `app.config.js`, ensure the `expo` field has:
+
+```json
+{
+  "expo": {
+    "scheme": "bebadrop",
+    "ios": {
+      "bundleIdentifier": "com.bebadrop.app",
+      "googleServicesFile": "./GoogleService-Info.plist"
+    },
+    "android": {
+      "package": "com.bebadrop.app",
+      "googleServicesFile": "./google-services.json"
+    }
+  }
+}
+The scheme must match the redirect URI prefix (e.g., bebadrop://). In your Google Sign-In code, you should be using:
+
+javascript
+import { makeRedirectUri } from 'expo-auth-session';
+
+const redirectUri = makeRedirectUri({
+  scheme: 'bebadrop',
+  path: 'oauth2redirect'
+});
+This will generate bebadrop://oauth2redirect which matches the URI you added in Google Cloud.
+
+📌 STEP 4 – CLEAR CACHE & RETRY
+
+After updating Google Cloud Console:
+
+Clear your app’s cache: expo start -c
+
+Uninstall and reinstall Expo Go (if testing on device)
+
+Try signing in again.
+
+If the error persists, run expo start --tunnel and use the tunnel URL for testing – it often resolves redirect URI mismatches during development.
+
+✅ AFTER FIX – VERIFY
+
+Google Sign-In works on Expo Go (development).
+
+Google Sign-In works on standalone builds (Android/iOS).
+
+No redirect_uri_mismatch error.
+
