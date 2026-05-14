@@ -44,7 +44,6 @@
         "android.permission.RECORD_AUDIO"
       ],
       "blockedPermissions": [
-        "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
       ]
@@ -77,7 +76,7 @@
         "expo-image-picker",
         {
           "photosPermission": "Westcars needs access to your photos to upload car images.",
-          "cameraPermission": false,
+          "cameraPermission": "Westcars needs camera access to take profile and car photos.",
           "microphonePermission": false
         }
       ]
