@@ -1,5 +1,7 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase-persistence";
 import { Animated, Easing, Image, StyleSheet, View } from "react-native";
 
 const LOGO   = require("@/assets/images/wc-logo.png");
@@ -42,15 +44,24 @@ export default function SplashScreen() {
     });
 
     const navTimer = setTimeout(() => {
-      try {
-        setTimeout(() => {
-          router.replace("/welcome");
-        }, 100);
-      } catch {
-        setTimeout(() => {
-          try { router.replace("/welcome"); } catch {}
-        }, 400);
+      if (!auth) {
+        router.replace("/welcome");
+        return;
       }
+      // Check Firebase auth state — resolves from local cache in < 200 ms.
+      // Signed-in users go straight to tabs; guests see the welcome screen.
+      const unsub = onAuthStateChanged(auth, (user) => {
+        unsub();
+        setTimeout(() => {
+          try {
+            router.replace(user ? "/(tabs)" : "/welcome");
+          } catch {
+            setTimeout(() => {
+              try { router.replace(user ? "/(tabs)" : "/welcome"); } catch {}
+            }, 400);
+          }
+        }, 100);
+      });
     }, 2600);
 
     return () => clearTimeout(navTimer);

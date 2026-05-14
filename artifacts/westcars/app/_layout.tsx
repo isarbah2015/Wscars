@@ -47,13 +47,16 @@ function useAuthRedirect() {
       const isAuthed = !!user;
       const wasAuthed = prevAuthRef.current;
 
-      // Just signed IN and we're on the login/signup screen → go back
+      // Just signed IN → always go to main tabs, regardless of which auth
+      // screen we're on (login, signup, or welcome). router.back() is unsafe
+      // here because login/welcome are reached via router.replace (no stack).
       if (!wasAuthed && isAuthed) {
-        const onLoginScreen =
+        const onAuthScreen =
           segments.includes("login") ||
-          segments.includes("signup");
-        if (onLoginScreen) {
-          router.back();
+          segments.includes("signup") ||
+          segments.includes("welcome");
+        if (onAuthScreen) {
+          router.replace("/(tabs)");
         }
       }
 
