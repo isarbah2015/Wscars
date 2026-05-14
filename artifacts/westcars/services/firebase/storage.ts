@@ -46,7 +46,9 @@ export async function uploadIdImage(userId: string, side: "front" | "back" | "se
 }
 
 export async function uploadAvatar(userId: string, uri: string): Promise<string> {
-  const path = `avatars/${userId}.${guessExt(uri)}`;
+  // Store as avatars/{userId}/profile.{ext} so the Storage rule can match
+  // on the {userId} segment independently of the file extension.
+  const path = `avatars/${userId}/profile.${guessExt(uri)}`;
   return uploadAt(uri, path);
 }
 

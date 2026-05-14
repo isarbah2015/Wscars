@@ -139,10 +139,14 @@ export function useAvatarUpload({
         const { storage } = await import('@/lib/firebase')
         const { ref, deleteObject } = await import('firebase/storage')
         if (storage) {
-          try {
-            await deleteObject(ref(storage, `avatars/${userId}.jpg`))
-          } catch {
-            // File may not exist — ignore
+          // Try common extensions — path is avatars/{userId}/profile.{ext}
+          for (const ext of ['jpg', 'jpeg', 'png', 'webp', 'heic']) {
+            try {
+              await deleteObject(ref(storage, `avatars/${userId}/profile.${ext}`))
+              break
+            } catch {
+              // File with this extension didn't exist — try next
+            }
           }
         }
       }
