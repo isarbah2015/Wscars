@@ -42,16 +42,19 @@ function useAuthRedirect() {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
       const isAuthed = !!user;
+      // Screens that belong to the auth/onboarding flow
       const onAuthScreen =
         segments.includes("login") ||
         segments.includes("signup") ||
+        segments.includes("forgot-password") ||
         segments.includes("welcome") ||
         segments.length === 0; // splash / initial load
 
+      // Only redirect signed-in users away from auth screens.
+      // Unauthenticated users browse freely; individual screens
+      // show inline auth prompts where needed.
       if (isAuthed && onAuthScreen) {
         router.replace("/(tabs)");
-      } else if (!isAuthed && !onAuthScreen) {
-        router.replace("/welcome");
       }
     });
     return unsub;
