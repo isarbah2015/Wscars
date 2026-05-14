@@ -45,6 +45,7 @@ function useAuthRedirect() {
       const onAuthScreen =
         segments.includes("login") ||
         segments.includes("signup") ||
+        segments.includes("forgot-password") ||
         segments.includes("welcome") ||
         segments.length === 0; // splash / initial load
 
