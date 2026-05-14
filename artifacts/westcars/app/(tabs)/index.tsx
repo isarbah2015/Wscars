@@ -248,24 +248,31 @@ export default function HomeScreen() {
           if (h > 0 && stickyH === 0) setStickyH(h);
         }}
       >
-        <Pressable
-          style={[styles.searchBox, {
-            backgroundColor: isDark ? "#1E293B" : "#F1F5F9",
-            borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
-          }]}
-          onPress={() => router.push("/(tabs)/search")}
-        >
-          <Ionicons name="car-sport-outline" size={26} color={isDark ? "#0EB5CA" : "#0098AA"} />
-          <View style={styles.searchBoxText}>
-            <Text style={[styles.searchBoxLabel, { color: isDark ? "#CBD5E1" : "#334155" }]}>Brand, model, location…</Text>
-            <Text style={[styles.searchBoxCount, { color: isDark ? "#64748B" : "#94A3B8" }]}>
-              {totalCount.toLocaleString()} listings available
-            </Text>
-          </View>
-          <View style={[styles.filterBtn, { backgroundColor: "#0EB5CA" }]}>
-            <Feather name="sliders" size={17} color="#FFFFFF" />
-          </View>
-        </Pressable>
+        <View style={[styles.searchBox, {
+          backgroundColor: isDark ? "#1E293B" : "#F1F5F9",
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+        }]}>
+          <Pressable
+            style={styles.searchBoxInner}
+            onPress={() => router.push("/(tabs)/search")}
+          >
+            <Ionicons name="car-sport-outline" size={26} color={isDark ? "#0EB5CA" : "#0098AA"} />
+            <View style={styles.searchBoxText}>
+              <Text style={[styles.searchBoxLabel, { color: isDark ? "#CBD5E1" : "#334155" }]}>Brand, model, location…</Text>
+              <Text style={[styles.searchBoxCount, { color: isDark ? "#64748B" : "#94A3B8" }]}>
+                {totalCount.toLocaleString()} listings available
+              </Text>
+            </View>
+          </Pressable>
+          <Pressable
+            onPress={() => router.push({ pathname: "/(tabs)/search", params: { openFilter: "1" } })}
+            hitSlop={8}
+          >
+            <View style={[styles.filterBtn, { backgroundColor: "#0EB5CA" }]}>
+              <Feather name="sliders" size={17} color="#FFFFFF" />
+            </View>
+          </Pressable>
+        </View>
       </View>
 
       {/* ── Scrollable body ── */}
@@ -712,6 +719,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 12,
     borderWidth: 1,
+  },
+  searchBoxInner: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
   searchBoxText: { flex: 1 },
   searchBoxLabel: {

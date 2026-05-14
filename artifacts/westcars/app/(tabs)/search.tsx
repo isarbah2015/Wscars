@@ -448,7 +448,7 @@ export default function SearchScreen() {
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 10 : insets.top;
 
-  const { category, brand: brandParam } = useLocalSearchParams<{ category?: string; brand?: string }>();
+  const { category, brand: brandParam, openFilter } = useLocalSearchParams<{ category?: string; brand?: string; openFilter?: string }>();
 
   const [query,         setQuery]         = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
@@ -466,6 +466,10 @@ export default function SearchScreen() {
       if (saved && QUICK_FILTERS.some((f) => f.key === saved)) setQuickFilter(saved as QuickFilterKey);
     }).catch(() => {}).finally(() => { hasHydrated.current = true; });
   }, []);
+
+  useEffect(() => {
+    if (openFilter === "1") setFilterVisible(true);
+  }, [openFilter]);
 
   useEffect(() => {
     if (!hasHydrated.current) return;
