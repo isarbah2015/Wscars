@@ -1,0 +1,156 @@
+Ran 8 commands
+Ran 8 commands
+
+Read Google sign-in implementation in login
+bash
+
+cat /home/claude/westcars/app/auth/login.tsx | grep -A 50 "google\|Google\|OAuth\|clientId\|GOOGLE" | head -60
+echo "---"
+grep -rn "GOOGLE\|google\|OAuth\|clientId\|expo-auth" /home/claude/westcars/app/auth/login.tsx | head -20
+Output
+
+---
+
+Find all Google auth related files
+bash
+
+find /home/claude/westcars -name "*.tsx" -o -name "*.ts" | xargs grep -l "google\|Google\|OAuth" 2>/dev/null | grep -v node_modules
+echo "---"
+cat /home/claude/westcars/lib/firebase.ts | grep -i "google\|oauth\|provider"
+Output
+
+/home/claude/westcars/app/_layout.tsx
+/home/claude/westcars/context/AppContext.tsx
+---
+
+Check Google OAuth config in AppContext and layout
+bash
+
+grep -n "google\|Google\|OAuth\|clientId\|WebClientId\|androidClient\|iosClient" /home/claude/westcars/context/AppContext.tsx | head -20
+echo "---"
+grep -n "google\|Google\|OAuth\|778261594022\|clientId" /home/claude/westcars/app/_layout.tsx | head -20
+Output
+
+30:  loginWithGoogle: (idToken: string, accessToken?: string) => Promise<boolean>;
+31:  loginWithGooglePopup: () => Promise<boolean>;
+280:  const loginWithGoogle = useCallback(async (idToken: string, accessToken?: string): Promise<boolean> => {
+284:      const { GoogleAuthProvider, signInWithCredential } = await import('firebase/auth');
+286:      const credential = GoogleAuthProvider.credential(idToken, accessToken);
+309:      console.error('[Google sign-in]', err);
+314:  const loginWithGooglePopup = useCallback(async (): Promise<boolean> => {
+315:    return false; // login.tsx uses GoogleAuthBridge promptRef directly
+674:    login, signup, loginWithGoogle, loginWithGooglePopup, logout, toggleFavorite, isFavorite, addCar, sendMessage,
+682:    login, signup, loginWithGoogle, loginWithGooglePopup, logout, toggleFavorite, isFavorite, addCar, sendMessage,
+---
+6:} from "@expo-google-fonts/inter";
+10:} from "@expo-google-fonts/manrope";
+
+Find where Google sign-in button is implemented
+bash
+
+# Find the login.tsx that actually has Google button
+find /home/claude/westcars -name "login.tsx" | xargs cat 2>/dev/null | grep -n "Google\|google\|OAuth\|expo-auth\|clientId" | head -20
+echo "==="
+# Check outputs folder for a newer login.tsx
+cat /mnt/user-data/outputs/login.tsx 2>/dev/null | grep -n "Google\|google\|OAuth\|clientId\|778261" | head -20
+Output
+
+===
+
+Check app config for OAuth scheme setup
+bash
+
+# Google sign in must be in uploaded files not yet in westcars folder
+ls /mnt/user-data/uploads/
+echo "---"
+# Check what the error means - project 778261594022 is the Firebase project number
+# The "access blocked" error means OAuth consent screen or authorized redirect URIs aren't set up
+# Let me check app.json for the scheme needed
+find /home/claude/westcars -name "app.json" -o -name "app.config.*" 2>/dev/null | head -3 | xargs cat 2>/dev/null | grep -A3 "scheme\|package\|bundleId\|google\|OAuth" | head -30
+Output
+
+_layout.tsx
+advertise-book.tsx
+advertise.tsx
+android_icon_fix_instructions.ts
+ghanaData_CAR_BRANDS_patch.ts
+search.tsx
+search_sell_patches.ts
+useAvatarUpload.ts
+verification-centre.tsx
+westcars-fixes.zip
+---
+
+Read app.json for scheme and package config
+bash
+
+find /home/claude/westcars -name "app.json" 2>/dev/null | head -2 | xargs cat 2>/dev/null | python3 -m json.tool 2>/dev/null | grep -A5 "scheme\|package\|bundle\|google\|OAuth\|web" | head -40
+Output
+
+exit code 0
+
+Find app config file
+bash
+
+find /home/claude/westcars -name "app.json" -o -name "app.config.js" -o -name "app.config.ts" 2>/dev/null
+find /home/claude -name "app.json" 2>/dev/null | head -5
+Output
+
+exit code 0
+
+Check avatar upload hook and profile usage
+bash
+
+# app.json not uploaded. Let me check useAvatarUpload for the spinning issue
+cat /mnt/user-data/uploads/useAvatarUpload.ts | grep -n "progress\|isUploading\|setProgress\|setIsUploading\|finally\|catch\|updateDoc\|avatar\|photoURL" | head -30
+echo "==="
+# Also check profile.tsx for how it uses the hook
+grep -n "avatarUploading\|uploadProgress\|isUploading\|progress\|AvatarUpload\|pickAndUpload" /home/claude/westcars/app/\(tabs\)/profile.tsx | head -20
+Output
+
+10:import { doc, updateDoc } from 'firebase/firestore'
+16:  photoURL: string | null
+17:  progress: number | null
+18:  isUploading: boolean
+36:  const [photoURL, setPhotoURL] = useState<string | null>(initialPhotoURL ?? null)
+37:  const [progress, setProgress] = useState<number | null>(null)
+38:  const [isUploading, setIsUploading] = useState(false)
+78:        const storageRef = ref(storage, `avatars/${userId}.jpg`)
+85:          (snapshot) => setProgress(snapshot.bytesTransferred / snapshot.totalBytes),
+121:      setIsUploading(true)
+122:      setProgress(0)
+129:        // FIX: write to `avatar` field to match WestCars User schema
+130:        await updateDoc(doc(db, 'users', userId), {
+131:          avatar: downloadURL,
+136:      } catch (err: any) {
+140:      } finally {
+141:        setIsUploading(false)
+142:        setProgress(null)
+152:    setIsUploading(true)
+155:        await deleteObject(ref(storage, `avatars/${userId}.jpg`))
+156:      } catch {
+159:      await updateDoc(doc(db, 'users', userId), {
+160:        avatar: null,
+164:    } catch (err: any) {
+168:    } finally {
+169:      setIsUploading(false)
+170:      setProgress(null)
+175:    photoURL,
+176:    progress,
+177:    isUploading,
+===
+21:import { useAvatarUpload } from "@/hooks/useAvatarUpload";
+22:import AvatarUploadSheet from "@/components/AvatarUploadSheet";
+69:  const { photoURL: uploadedAvatar, progress: uploadProgress, isUploading: avatarUploading,
+70:          pickAndUpload, removePhoto } =
+71:    useAvatarUpload({ userId: currentUser?.id ?? "", initialPhotoURL: currentUser?.avatar });
+233:          <Pressable style={styles.editAvatarBtn} onPress={() => setAvatarSheetOpen(true)} disabled={avatarUploading}>
+234:            {avatarUploading
+239:        {uploadProgress !== null && (
+240:          <View style={styles.uploadProgressTrack}>
+241:            <View style={[styles.uploadProgressFill, { width: 88 * uploadProgress }]} />
+630:    <AvatarUploadSheet
+633:      onCamera={() => { setAvatarSheetOpen(false); pickAndUpload("camera"); }}
+634:      onLibrary={() => { setAvatarSheetOpen(false); pickAndUpload("library"); }}
+702:  uploadProgressTrack: {
+707:  uploadProgressFill: {
