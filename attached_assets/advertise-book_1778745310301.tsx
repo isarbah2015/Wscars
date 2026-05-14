@@ -258,6 +258,7 @@ export default function AdvertiseBookScreen() {
 
   const handleUploadCreative = async () => {
     if (info.isVideo) {
+      // Video — use ImagePicker with video media type
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Permission needed", "Please allow access to your photo library to upload a video.");
@@ -281,6 +282,7 @@ export default function AdvertiseBookScreen() {
         setUploading(false);
       }
     } else {
+      // Flyer image — use ImagePicker with images only
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Permission needed", "Please allow access to your photo library to upload your flyer.");
@@ -334,7 +336,7 @@ export default function AdvertiseBookScreen() {
       return;
     }
     Alert.alert(
-      "Booking Confirmed!",
+      "Booking Confirmed! 🎉",
       `Thank you, ${businessName}!\n\nOur ads team will contact you on ${phone} within 24 hours to complete payment and activation.`,
       [{ text: "Done", onPress: () => { router.back(); router.back(); } }]
     );
@@ -359,6 +361,7 @@ export default function AdvertiseBookScreen() {
         </Pressable>
         <View style={styles.headerBody}>
           <View style={{ flex: 1 }}>
+            {/* Ad type badge */}
             <View style={styles.adTypeBadge}>
               <Feather
                 name={info.isVideo ? "film" : "image"}
@@ -404,6 +407,7 @@ export default function AdvertiseBookScreen() {
         ) : (
           <View style={[styles.darkCard, { margin: 16, gap: 12 }]}>
 
+            {/* Section title */}
             <View style={styles.uploadHeroHeader}>
               <Feather name={info.isVideo ? "film" : "image"} size={18} color={TEAL} />
               <Text style={styles.uploadHeroTitle}>
@@ -668,12 +672,12 @@ export default function AdvertiseBookScreen() {
             Order summary
           </Text>
           {[
-            { k: "Ad type",    v: info.isVideo ? "Video Ad" : "Flyer Ad" },
-            { k: "Package",    v: packageName || info.label },
-            { k: "Duration",   v: duration || "N/A" },
-            { k: "Dimensions", v: dimensions || (info.specs[1]?.value || "See specs") },
-            { k: "Region",     v: region },
-            { k: "Payment",    v: payMethod === "mobile" ? "Mobile Money" : "Bank Transfer" },
+            { k: "Ad type",   v: info.isVideo ? "Video Ad" : "Flyer Ad" },
+            { k: "Package",   v: packageName || info.label },
+            { k: "Duration",  v: duration || "N/A" },
+            { k: "Dimensions",v: dimensions || (info.specs[1]?.value || "See specs") },
+            { k: "Region",    v: region },
+            { k: "Payment",   v: payMethod === "mobile" ? "Mobile Money" : "Bank Transfer" },
           ].map((row, i) => (
             <View
               key={row.k}
@@ -829,7 +833,7 @@ const styles = StyleSheet.create({
   input:    { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular", color: "#fff" },
   textArea: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#fff", minHeight: 70 },
 
-  regionRow:        { flexDirection: "row", gap: 8, paddingVertical: 4 },
+  regionRow:       { flexDirection: "row", gap: 8, paddingVertical: 4 },
   regionChip: {
     paddingHorizontal: 14, paddingVertical: 8,
     borderRadius: 20, borderWidth: 1.5, borderColor: "rgba(255,255,255,0.2)",
@@ -854,7 +858,7 @@ const styles = StyleSheet.create({
   paySub:   { fontSize: 11, color: "rgba(255,255,255,0.4)", fontFamily: "Inter_400Regular", marginTop: 2 },
 
   // Summary
-  sumRow:      { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10 },
+  sumRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10 },
   sumKey:      { fontSize: 13, color: "rgba(255,255,255,0.5)", fontFamily: "Inter_400Regular" },
   sumVal:      { fontSize: 13, color: "#fff", fontFamily: "Inter_500Medium", textAlign: "right", flex: 1, paddingLeft: 16 },
   sumTotal:    { marginTop: 2 },
