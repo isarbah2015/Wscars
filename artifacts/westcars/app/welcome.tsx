@@ -8,6 +8,7 @@ import {
   Dimensions,
   Easing,
   Image as RNImage,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -211,6 +212,12 @@ export default function WelcomeScreen() {
           </PanGestureHandler>
         </View>
 
+        {/* Browse without signing in */}
+        <Pressable onPress={() => router.replace("/(tabs)")} style={styles.browseBtn}>
+          <Text style={styles.browseBtnText}>Browse listings without signing in</Text>
+          <Feather name="arrow-right" size={13} color="rgba(255,255,255,0.65)" />
+        </Pressable>
+
       </View>
     </View>
   );
@@ -313,7 +320,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#0EB5CA",      // teal — arrow stays white, fully visible
+    backgroundColor: "#0EB5CA",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 10,
@@ -322,5 +329,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.70,
     shadowRadius: 14,
     elevation: 10,
+  },
+
+  browseBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginTop: 18,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  browseBtnText: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: "rgba(255,255,255,0.65)",
+    textDecorationLine: "underline",
+    textDecorationColor: "rgba(255,255,255,0.35)",
   },
 });
