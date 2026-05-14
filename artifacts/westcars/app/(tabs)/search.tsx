@@ -18,7 +18,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Slider from "@react-native-community/slider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
@@ -289,35 +288,40 @@ function FilterModal({
             {/* ── Price range ── */}
             <View style={fS.section}>
               <Text style={fS.secLabel}>Price range (GHS)</Text>
-              <View style={fS.priceRow}>
-                <View>
-                  <Text style={fS.priceCaption}>Minimum</Text>
-                  <Text style={fS.priceVal}>{fmt(priceMin)}</Text>
+              <View style={fS.priceInputRow}>
+                <View style={fS.priceInputBox}>
+                  <Text style={fS.priceCaption}>Min price</Text>
+                  <TextInput
+                    style={fS.priceInput}
+                    value={priceMin === 0 ? "" : String(priceMin)}
+                    onChangeText={(t) => {
+                      const n = parseInt(t.replace(/[^0-9]/g, ""), 10);
+                      if (!isNaN(n) && n < priceMax) setPriceMin(n);
+                      else if (t === "") setPriceMin(0);
+                    }}
+                    placeholder="0"
+                    placeholderTextColor="#94A3B8"
+                    keyboardType="number-pad"
+                    returnKeyType="done"
+                  />
                 </View>
-                <View style={{ alignItems: "flex-end" }}>
-                  <Text style={fS.priceCaption}>Maximum</Text>
-                  <Text style={fS.priceVal}>{fmt(priceMax)}</Text>
+                <Text style={fS.priceDash}>—</Text>
+                <View style={fS.priceInputBox}>
+                  <Text style={fS.priceCaption}>Max price</Text>
+                  <TextInput
+                    style={fS.priceInput}
+                    value={priceMax >= PRICE_MAX ? "" : String(priceMax)}
+                    onChangeText={(t) => {
+                      const n = parseInt(t.replace(/[^0-9]/g, ""), 10);
+                      if (!isNaN(n) && n > priceMin) setPriceMax(n);
+                      else if (t === "") setPriceMax(PRICE_MAX);
+                    }}
+                    placeholder="Any"
+                    placeholderTextColor="#94A3B8"
+                    keyboardType="number-pad"
+                    returnKeyType="done"
+                  />
                 </View>
-              </View>
-              <View style={fS.sliderWrap}>
-                <View style={fS.track}>
-                  <View style={[fS.fill, {
-                    left:  `${(priceMin / PRICE_MAX) * 100}%` as any,
-                    right: `${100 - (priceMax / PRICE_MAX) * 100}%` as any,
-                  }]} />
-                </View>
-                <Slider
-                  style={[fS.slider, { zIndex: priceMin > PRICE_MAX * 0.9 ? 2 : 1 }]}
-                  minimumValue={PRICE_MIN} maximumValue={PRICE_MAX} step={PRICE_STEP} value={priceMin}
-                  onValueChange={(v) => { if (v < priceMax - PRICE_STEP) setPriceMin(v); }}
-                  minimumTrackTintColor="transparent" maximumTrackTintColor="transparent" thumbTintColor={TEAL}
-                />
-                <Slider
-                  style={[fS.slider, { position: "absolute", left: 0, right: 0, zIndex: priceMin > PRICE_MAX * 0.9 ? 1 : 2 }]}
-                  minimumValue={PRICE_MIN} maximumValue={PRICE_MAX} step={PRICE_STEP} value={priceMax}
-                  onValueChange={(v) => { if (v > priceMin + PRICE_STEP) setPriceMax(v); }}
-                  minimumTrackTintColor="transparent" maximumTrackTintColor="transparent" thumbTintColor={TEAL}
-                />
               </View>
               <View style={fS.presetsRow}>
                 {PRESETS.map(p => {
@@ -779,14 +783,11 @@ const fS = StyleSheet.create({
   secLabel: { fontSize: 11, fontFamily: "Inter_700Bold", color: "#8E8E93", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 },
   divider:  { height: 0.5, backgroundColor: "#E5E5EA", marginHorizontal: 20 },
 
-  priceRow:     { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
-  priceCaption: { fontSize: 11, color: "#8E8E93", fontFamily: "Inter_400Regular", marginBottom: 2 },
-  priceVal:     { fontSize: 16, fontFamily: "Inter_700Bold", color: "#1C1C1E" },
-
-  sliderWrap: { height: 40, justifyContent: "center", marginBottom: 12 },
-  track:      { height: 4, backgroundColor: "#E5E5EA", borderRadius: 2, marginHorizontal: 10 },
-  fill:       { position: "absolute", height: 4, backgroundColor: "#FF6B00", borderRadius: 2 },
-  slider:     { position: "absolute", left: 0, right: 0, height: 40 },
+  priceInputRow:  { flexDirection: "row", alignItems: "flex-end", gap: 10, marginBottom: 12 },
+  priceInputBox:  { flex: 1 },
+  priceCaption:   { fontSize: 11, color: "#8E8E93", fontFamily: "Inter_400Regular", marginBottom: 4 },
+  priceDash:      { fontSize: 18, color: "#8E8E93", marginBottom: 10, alignSelf: "flex-end" },
+  priceInput:     { height: 44, borderWidth: 1, borderColor: "#E5E5EA", borderRadius: 10, paddingHorizontal: 12, fontSize: 15, fontFamily: "Inter_500Medium", color: "#1C1C1E", backgroundColor: "#F9F9F9" },
 
   presetsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   presetChip: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F2F2F7" },
