@@ -144,8 +144,13 @@ export default function CarDetailScreen() {
 
   const handleChat = () =>
     requireAuth(async () => {
-      const convId = await startConversation(car);
-      router.push({ pathname: "/conversation/[id]", params: { id: convId } });
+      try {
+        const convId = await startConversation(car);
+        router.push({ pathname: "/conversation/[id]", params: { id: convId } });
+      } catch (err: any) {
+        console.error('[handleChat]', err?.message ?? err);
+        Alert.alert('Error', 'Could not open chat. Please try again.');
+      }
     });
 
   const handleSellerProfile = () =>

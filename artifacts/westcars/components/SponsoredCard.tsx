@@ -52,7 +52,7 @@ export function SponsoredCard({ car, style }: SponsoredCardProps) {
         >
           {/* ── Large image block ── */}
           <View style={styles.imageWrap}>
-            {!imgError ? (
+            {!imgError && car.images?.[0] ? (
               <Image
                 source={{ uri: car.images[0] }}
                 style={styles.image}
