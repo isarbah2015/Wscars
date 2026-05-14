@@ -38,19 +38,14 @@ const queryClient = new QueryClient();
 function useAuthRedirect() {
   const router = useRouter();
   const segments = useSegments();
-  const prevAuthRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (!auth) return;
 
     const unsub = onAuthStateChanged(auth, (user) => {
-      const isAuthed = !!user;
-      const wasAuthed = prevAuthRef.current;
-
-      // Just signed IN → always go to main tabs, regardless of which auth
-      // screen we're on (login, signup, or welcome). router.back() is unsafe
-      // here because login/welcome are reached via router.replace (no stack).
-      if (!wasAuthed && isAuthed) {
+      if (user) {
+        // Authed on every call (cold open + transitions) — go to tabs if on
+        // an auth screen. Excludes splash so its animation still plays.
         const onAuthScreen =
           segments.includes("login") ||
           segments.includes("signup") ||
@@ -59,8 +54,6 @@ function useAuthRedirect() {
           router.replace("/(tabs)");
         }
       }
-
-      prevAuthRef.current = isAuthed;
     });
 
     return unsub;
