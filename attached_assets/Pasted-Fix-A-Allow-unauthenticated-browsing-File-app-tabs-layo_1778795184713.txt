@@ -1,0 +1,140 @@
+Fix A – Allow unauthenticated browsing
+File: app/(tabs)/_layout.tsx
+
+Remove any auth guard that redirects to /welcome. The file should look like this (only keep the tab layout, no user checks):
+
+tsx
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+
+export default function TabLayout() {
+  return (
+    <Tabs screenOptions={{ headerShown: false }}>
+      <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: ({ color }) => <Ionicons name="home" size={24} color={color} /> }} />
+      <Tabs.Screen name="liked" options={{ title: "Liked", tabBarIcon: ({ color }) => <Ionicons name="heart" size={24} color={color} /> }} />
+      <Tabs.Screen name="sell" options={{ title: "Sell", tabBarIcon: ({ color }) => <Ionicons name="add-circle" size={24} color={color} /> }} />
+      <Tabs.Screen name="messages" options={{ title: "Chat", tabBarIcon: ({ color }) => <Ionicons name="chatbubble" size={24} color={color} /> }} />
+      <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ color }) => <Ionicons name="person" size={24} color={color} /> }} />
+    </Tabs>
+  );
+}
+Then, in each tab screen that requires login (e.g., liked.tsx, sell.tsx, messages.tsx, profile.tsx for editing), add a guard at the top:
+
+tsx
+import { useAuth } from '@/context/AuthContext';
+import { Redirect } from 'expo-router';
+
+export default function LikedScreen() {
+  const { user } = useAuth();
+  if (!user) return <Redirect href="/(auth)/login" />;
+  // rest of component
+}
+For profile.tsx, you can show public info without login, but protect sensitive actions.
+
+Fix B – First‑launch welcome page only
+File: app/_layout.tsx
+
+Add a flag to check if the user has seen the welcome screen:
+
+tsx
+import { useEffect, useState } from 'react';
+import { Stack } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+export default function RootLayout() {
+  const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkFirstLaunch = async () => {
+      const hasSeen = await AsyncStorage.getItem('hasSeenWelcome');
+      if (hasSeen === null) {
+        setIsFirstLaunch(true);
+        await AsyncStorage.setItem('hasSeenWelcome', 'true');
+      } else {
+        setIsFirstLaunch(false);
+      }
+    };
+    checkFirstLaunch();
+  }, []);
+
+  if (isFirstLaunch === null) return null; // splash
+
+  return (
+    <Stack>
+      {isFirstLaunch && <Stack.Screen name="welcome" options={{ headerShown: false }} />}
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+    </Stack>
+  );
+}
+Now the welcome page will only appear once, on first open.
+
+Fix C – Forgot password link
+1. Create new file: app/(auth)/forgot-password.tsx
+
+tsx
+import { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
+
+export default function ForgotPassword() {
+  const [phone, setPhone] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleReset = async () => {
+    if (!phone) {
+      Alert.alert('Error', 'Please enter your phone number');
+      return;
+    }
+    setLoading(true);
+    try {
+      // Call your backend API to send OTP
+      const res = await fetch('https://your-api.com/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+      if (res.ok) {
+        Alert.alert('Success', 'Reset code sent to your phone');
+        router.push('/(auth)/reset-password?phone=' + encodeURIComponent(phone));
+      } else {
+        throw new Error();
+      }
+    } catch {
+      Alert.alert('Error', 'Failed to send reset code. Try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <View style={{ flex: 1, padding: 20, justifyContent: 'center' }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>Reset Password</Text>
+      <TextInput
+        placeholder="Phone number"
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+        style={{ borderWidth: 1, borderColor: '#ccc', padding: 12, borderRadius: 8, marginBottom: 20 }}
+      />
+      <TouchableOpacity onPress={handleReset} disabled={loading} style={{ backgroundColor: '#0F5C5F', padding: 16, borderRadius: 8 }}>
+        <Text style={{ color: 'white', textAlign: 'center' }}>{loading ? 'Sending...' : 'Send Reset Code'}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 16 }}>
+        <Text style={{ textAlign: 'center', color: '#0F5C5F' }}>Back to Login</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+2. Update login screen (app/(auth)/login.tsx) – change the link:
+
+tsx
+<TouchableOpacity onPress={() => router.push('/(auth)/forgot-password')}>
+  <Text style={{ color: '#0F5C5F', marginTop: 8 }}>Forgot password?</Text>
+</TouchableOpacity>
+🔄 Step 3 – Force rebuild and clear cache
+After making manual changes, run:
+
+bash
+npx expo start --clear
