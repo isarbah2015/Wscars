@@ -115,7 +115,7 @@ export function useAvatarUpload({
           ? await ImagePicker.launchCameraAsync(pickerOptions)
           : await ImagePicker.launchImageLibraryAsync({
               ...pickerOptions,
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              mediaTypes: ['images'] as any,
             })
 
       if (result.canceled) return

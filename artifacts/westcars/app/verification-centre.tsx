@@ -6,9 +6,10 @@
 import React, { useState } from 'react'
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  SafeAreaView, Modal, TextInput, ActivityIndicator,
+  Modal, TextInput, ActivityIndicator,
   Alert, Image, Pressable, Linking,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import * as ImagePicker from 'expo-image-picker'
 import { Feather } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
@@ -159,7 +160,7 @@ export default function VerificationCentreScreen() {
       return
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'] as any,
       quality: 0.9,
       allowsEditing: false,
     })

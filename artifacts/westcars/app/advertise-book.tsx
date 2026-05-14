@@ -266,7 +266,7 @@ export default function AdvertiseBookScreen() {
       setUploading(true);
       try {
         const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+          mediaTypes: ['videos'] as any,
           allowsEditing: false,
           quality: 1,
         });
@@ -289,7 +289,7 @@ export default function AdvertiseBookScreen() {
       setUploading(true);
       try {
         const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          mediaTypes: ['images'] as any,
           allowsEditing: false,
           quality: 1,
         });

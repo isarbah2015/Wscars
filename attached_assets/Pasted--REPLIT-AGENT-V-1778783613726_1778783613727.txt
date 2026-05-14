@@ -1,0 +1,356 @@
+// ═══════════════════════════════════════════════════════════════════════════════
+// REPLIT AGENT VERIFICATION PROMPT
+// ═══════════════════════════════════════════════════════════════════════════════
+// Paste this entire prompt directly into Replit Agent chat.
+// It tells the agent exactly what to check, fix, and verify.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/*
+REPLIT AGENT PROMPT — PASTE THIS:
+
+I need you to audit and fix my WestCars Expo app. My exact versions are:
+- Expo SDK 54.0.25
+- React 19.1.0
+- React Native 0.81.5
+- Node.js 20.19.x (minimum required for SDK 54)
+
+Please do ALL of the following steps in order:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1 — VERSION AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Run this in the shell and show me the output:
+  npx expo-doctor@latest
+
+Then run:
+  npx expo install --check
+
+Fix every warning it shows. The most critical rule: react and react-dom MUST
+both be exactly "19.1.0" — not 19.2.x or any other version. Add these to
+package.json to prevent npm from upgrading them:
+  "overrides": { "react": "19.1.0", "react-dom": "19.1.0" }
+  "resolutions": { "react": "19.1.0", "react-dom": "19.1.0" }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2 — CLEAN INSTALL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Run:
+  rm -rf node_modules .expo package-lock.json
+  npm install
+  npx expo start --clear
+
+If it hangs on iOS Expo Go, switch to tunnel mode:
+  npx expo start --tunnel --clear
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 3 — SDK 54 BREAKING CHANGES TO FIX IN CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Search the entire codebase for these patterns and fix them:
+
+A) ImagePicker.MediaTypeOptions.Images → DEPRECATED in SDK 54
+   Replace with: mediaTypes: ['images']
+   Example fix:
+     BEFORE: mediaTypes: ImagePicker.MediaTypeOptions.Images
+     AFTER:  mediaTypes: ['images']
+
+B) <SafeAreaView> from 'react-native' → DEPRECATED in SDK 54
+   Replace with: import { SafeAreaView } from 'react-native-safe-area-context'
+
+C) expo-file-system imports
+   BEFORE: import * as FileSystem from 'expo-file-system'
+   AFTER:  import * as FileSystem from 'expo-file-system/legacy'
+   (the default export changed in SDK 54)
+
+D) Firebase version — must be 12.0.0 or higher
+   Check: npm ls firebase
+   If below 12, run: npx expo install firebase@latest
+
+E) Edge-to-edge on Android 16 — SDK 54 enables this by default.
+   Add to app.json if you see layout issues under the status bar:
+   "android": { "androidNavigationBar": { "enforceContrast": false } }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 4 — TEST EACH FIX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+After fixing, test each of these flows and confirm they work:
+
+1. EMAIL SIGN-IN: Sign in with email/password — should reach home screen
+2. GOOGLE SIGN-IN: Tap Google button — should complete OAuth without Error 400
+3. SESSION: Close app fully, reopen — should stay logged in, NOT go back to welcome screen
+4. PASSWORD RESET: Enter email on reset screen — should show "check your inbox" (even if email takes time)
+5. PROFILE PHOTO (CAMERA): Tap camera button on profile — should ask for camera permission, then open camera directly (not a picker with multiple apps)
+6. PROFILE PHOTO (GALLERY): Tap gallery button — should open photo library with crop tool
+7. PHOTO UPLOAD: After picking a photo — should upload to Firebase Storage and appear on profile
+8. FILTER SHEET: Tap filter icon on home — should open a bottom sheet with brand, price, year filters (no crash)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 5 — VERIFY FIREBASE AUTH PERSISTENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+In my App.js (or _layout.tsx), confirm there is an onAuthStateChanged listener
+at the ROOT level, like this:
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user); // null = logged out, object = logged in
+    });
+    return unsubscribe;
+  }, []);
+
+If this is missing, that is why the app returns to the welcome screen on reopen.
+Add it and wrap the navigation in a check: if user === null → show auth screens.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 6 — GOOGLE OAUTH REDIRECT URI FIX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The Google Sign-In Error 400 "invalid_request" is caused by a redirect URI mismatch.
+In my Google Cloud Console (console.cloud.google.com):
+  APIs & Services → Credentials → OAuth 2.0 Client → Authorized redirect URIs
+
+Add exactly:
+  https://auth.expo.io/@YOUR_EXPO_USERNAME/westcars
+
+And in the code, make sure useAuthRequest uses:
+  redirectUri: AuthSession.makeRedirectUri({ useProxy: true })
+
+Show me what the current redirectUri is in the code so I can add the exact
+string to Google Console.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 7 — ANDROID MANIFEST CHECK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+In AndroidManifest.xml (or app.json plugins section), confirm these exist:
+  <uses-permission android:name="android.permission.CAMERA" />
+  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+  <uses-permission android:name="android.permission.INTERNET" />
+
+If using app.json config plugins (managed workflow), confirm expo-image-picker
+plugin is listed in the plugins array in app.json.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 8 — FIREBASE STORAGE RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+In Firebase Console → Storage → Rules, paste these rules exactly
+(profile photo uploads will silently fail without them):
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /profiles/{userId}.jpg {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+    match /listings/{listingId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+  }
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+After all steps, run expo-doctor again and confirm 0 issues.
+Show me the final output.
+*/
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SDK 54-CORRECTED CODE SNIPPETS
+// Apply these fixes manually if the agent misses them
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── FIX 1: ImagePicker — SDK 54 correct syntax ──────────────────────────────
+// WRONG (deprecated, causes warnings in SDK 54):
+//   mediaTypes: ImagePicker.MediaTypeOptions.Images
+
+// CORRECT for SDK 54:
+const SDK54_CAMERA_CORRECT = async () => {
+  const { status } = await ImagePicker.requestCameraPermissionsAsync();
+  if (status !== 'granted') {
+    Alert.alert('Camera permission needed', 'Open Settings to allow camera access.', [
+      { text: 'Not Now', style: 'cancel' },
+      { text: 'Open Settings', onPress: () => Linking.openSettings() },
+    ]);
+    return;
+  }
+  const result = await ImagePicker.launchCameraAsync({
+    mediaTypes: ['images'],        // ← SDK 54: array string, NOT MediaTypeOptions
+    allowsEditing: true,
+    aspect: [1, 1],
+    quality: 0.85,
+  });
+  if (!result.canceled && result.assets?.[0]?.uri) {
+    uploadPhoto(result.assets[0].uri);
+  }
+};
+
+const SDK54_GALLERY_CORRECT = async () => {
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (status !== 'granted') {
+    Alert.alert('Gallery access needed', 'Open Settings to allow photo access.', [
+      { text: 'Not Now', style: 'cancel' },
+      { text: 'Open Settings', onPress: () => Linking.openSettings() },
+    ]);
+    return;
+  }
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ['images'],        // ← SDK 54: array string, NOT MediaTypeOptions
+    allowsEditing: true,
+    aspect: [1, 1],
+    quality: 0.85,
+  });
+  if (!result.canceled && result.assets?.[0]?.uri) {
+    uploadPhoto(result.assets[0].uri);
+  }
+};
+
+
+// ─── FIX 2: SafeAreaView — use react-native-safe-area-context in SDK 54 ──────
+// WRONG:
+//   import { SafeAreaView } from 'react-native';
+
+// CORRECT:
+//   import { SafeAreaView } from 'react-native-safe-area-context';
+//   Make sure your root App is wrapped in <SafeAreaProvider>:
+
+/*
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AuthProvider>
+        <AppRoot />
+      </AuthProvider>
+    </SafeAreaProvider>
+  );
+}
+*/
+
+
+// ─── FIX 3: Auth persistence — root-level onAuthStateChanged ─────────────────
+// This is why the app goes back to welcome on every open.
+// Must be in App.js root, NOT inside a screen component.
+
+/*
+import { onAuthStateChanged } from 'firebase/auth';
+
+export default function App() {
+  const [user, setUser] = useState(undefined); // undefined = still loading
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser); // Firebase handles persistence automatically
+    });
+    return unsubscribe;
+  }, []);
+
+  if (user === undefined) return <SplashScreen />;        // loading
+  if (user === null)      return <AuthNavigator />;       // not logged in
+  return <MainNavigator />;                               // logged in ✓
+}
+*/
+
+
+// ─── FIX 4: Google OAuth — correct redirect URI for Expo SDK 54 ──────────────
+// expo-auth-session v6 (for SDK 54) — useAuthRequest setup:
+
+/*
+import * as Google from 'expo-auth-session/providers/google';
+import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession(); // MUST be at module top level
+
+const [request, response, promptAsync] = Google.useAuthRequest({
+  webClientId:     'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+  iosClientId:     'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com',
+  androidClientId: 'YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com',
+  redirectUri: AuthSession.makeRedirectUri({ useProxy: true }),
+  // The URI above looks like: https://auth.expo.io/@username/westcars
+  // Add EXACTLY that string to Google Cloud Console → Authorized redirect URIs
+});
+
+useEffect(() => {
+  if (response?.type === 'success') {
+    const { idToken, accessToken } = response.authentication;
+    const credential = GoogleAuthProvider.credential(idToken, accessToken);
+    signInWithCredential(auth, credential);
+  }
+  if (response?.type === 'error') {
+    console.error('Google auth error:', response.error);
+  }
+}, [response]);
+*/
+
+
+// ─── FIX 5: expo-file-system import for SDK 54 ───────────────────────────────
+// SDK 54 changed the default export. Use /legacy to keep existing behavior.
+
+// BEFORE (breaks in SDK 54):
+//   import * as FileSystem from 'expo-file-system';
+
+// AFTER (works in SDK 54):
+//   import * as FileSystem from 'expo-file-system/legacy';
+
+
+// ─── FIX 6: Firebase 12+ — ES module import style ────────────────────────────
+// Must use modular SDK (v9+ tree-shakeable imports). Old compat style breaks.
+
+// WRONG (pre-v9 compat, breaks in SDK 54 with firebase 12):
+//   import firebase from 'firebase/app';
+//   firebase.auth().signIn(...)
+
+// CORRECT (modular):
+//   import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+//   import { getFirestore, doc, setDoc } from 'firebase/firestore';
+//   import { getStorage, ref, uploadBytes } from 'firebase/storage';
+
+
+// ─── FIX 7: Filter screen — no reanimated dependency ─────────────────────────
+// The "Something went wrong" crash on the filter screen was caused by
+// react-native-reanimated version mismatch. In SDK 54, reanimated MUST be v4:
+//
+//   "react-native-reanimated": "~4.1.0"
+//
+// If your filter screen uses Reanimated (BottomSheet, Animated components),
+// either:
+//   A) Upgrade to reanimated v4: npx expo install react-native-reanimated
+//   B) Use the plain Modal approach in WestCarsFilterAndPhoto.js (no reanimated)
+//      which avoids the dependency entirely.
+//
+// The FilterSheet in WestCarsFilterAndPhoto.js uses React Native's built-in
+// Modal with animationType="slide" — zero reanimated dependency.
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SHELL COMMANDS — Run these in Replit Shell in order
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/*
+# 1. Check Node version — must be 20.19.x or higher for SDK 54
+node --version
+
+# 2. Nuke everything and reinstall clean
+rm -rf node_modules .expo package-lock.json
+npm install
+
+# 3. Let Expo fix any remaining version mismatches automatically
+npx expo install --fix
+
+# 4. Run the doctor — should show 0 issues
+npx expo-doctor@latest
+
+# 5. Start with tunnel (most reliable on Replit)
+npx expo start --tunnel --clear
+
+# 6. If you see "Incompatible React versions" error:
+# Pin react exactly in package.json overrides/resolutions to "19.1.0"
+# then re-run: rm -rf node_modules && npm install
+
+# 7. Check what version of react is actually installed:
+npm ls react
+# Should show: react@19.1.0 with all "deduped" — no version conflicts
+*/

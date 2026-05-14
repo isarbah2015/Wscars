@@ -242,7 +242,7 @@ export default function SellScreen() {
   const pickImages = async () => {
     if (images.length >= 10) { Alert.alert("Limit reached", "You can add up to 10 photos."); return; }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'] as any,
       allowsMultipleSelection: true,
       quality: 0.8,
     });
