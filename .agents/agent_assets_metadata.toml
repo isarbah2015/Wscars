@@ -161,3 +161,9 @@ id = "uqyREGsPn3OIuyydDe0Oh"
 uri = "file://westcars-fixes.zip"
 type = "unspecified"
 title = "westcars-fixes.zip"
+
+[[outputs]]
+id = "sMKYaE17SoOzVOvVuq5A0"
+uri = "file://advertise-book.zip"
+type = "unspecified"
+title = "advertise-book.tsx"
