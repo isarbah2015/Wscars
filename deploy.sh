@@ -14,7 +14,7 @@ read msg
 git commit -m "$msg"
 git push
 
-echo "🚀 Triggering EAS preview build..."
-cd artifacts/westcars && eas build --platform android --profile preview
+echo "🚀 Triggering EAS production build (AAB)..."
+cd artifacts/westcars && eas build --platform android --profile production
 
 echo "✅ Done! Check expo.dev for build status."
