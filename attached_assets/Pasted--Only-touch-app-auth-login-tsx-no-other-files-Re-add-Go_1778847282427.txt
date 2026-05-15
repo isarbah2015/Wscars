@@ -1,0 +1,110 @@
+⚠️ Only touch app/auth/login.tsx — no other files.
+
+Re-add Google Sign-in to login.tsx. Add these imports back at the top:
+
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+
+Add this line after the imports:
+WebBrowser.maybeCompleteAuthSession();
+
+Add these constants after the WC_LOGO line:
+const GOOGLE_ANDROID_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
+const GOOGLE_WEB_ID     = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+const GOOGLE_CONFIGURED = !!(GOOGLE_ANDROID_ID || GOOGLE_WEB_ID);
+
+Add googleLoading state:
+const [googleLoading, setGoogleLoading] = useState(false);
+
+Add loginWithGoogle to the useApp destructure:
+const { loginWithGoogle } = useApp();
+
+Add the auth request hook after the existing useState calls:
+const [request, response, promptAsync] = Google.useAuthRequest({
+  androidClientId: GOOGLE_ANDROID_ID,
+  webClientId:     GOOGLE_WEB_ID,
+});
+
+Add this useEffect after the existing hooks:
+useEffect(() => {
+  if (response?.type === 'success') {
+    const idToken =
+      response.params?.id_token ??
+      (response.authentication as any)?.idToken;
+    const accessToken =
+      response.authentication?.accessToken ??
+      response.params?.access_token;
+    if (idToken) {
+      setGoogleLoading(true);
+      loginWithGoogle(idToken, accessToken ?? undefined)
+        .catch(() => setError('Google sign-in failed. Please try again.'))
+        .finally(() => setGoogleLoading(false));
+    } else {
+      setError('Google sign-in failed. Please try again.');
+    }
+  } else if (response?.type === 'error') {
+    setError('Google sign-in failed: ' + (response.error?.message ?? 'unknown error'));
+  }
+}, [response]);
+
+Add this handler function:
+const handleGoogle = async () => {
+  if (!GOOGLE_CONFIGURED) {
+    setError('Google sign-in is not configured.');
+    return;
+  }
+  setError('');
+  await promptAsync();
+};
+
+In the JSX, add the Google button and divider back between the subtitle 
+and the Email label — exactly here:
+
+  {error ? <Text style={styles.error}>{error}</Text> : null}
+
+  <TouchableOpacity
+    style={[styles.googleBtn, (googleLoading || !request) && styles.btnDisabled]}
+    onPress={handleGoogle}
+    disabled={googleLoading || !request}
+    activeOpacity={0.85}
+  >
+    {googleLoading ? (
+      <ActivityIndicator color="#0EB5CA" size="small" />
+    ) : (
+      <>
+        <View style={styles.googleIcon}>
+          <Text style={styles.googleIconText}>G</Text>
+        </View>
+        <Text style={styles.googleBtnText}>Continue with Google</Text>
+      </>
+    )}
+  </TouchableOpacity>
+
+  <View style={styles.dividerRow}>
+    <View style={styles.dividerLine} />
+    <Text style={styles.dividerText}>or</Text>
+    <View style={styles.dividerLine} />
+  </View>
+
+Add these styles back to the StyleSheet:
+  googleBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+    width: '100%', height: 52, backgroundColor: '#fff',
+    borderRadius: 16, borderWidth: 1.5, borderColor: '#E2E8F0',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06, shadowRadius: 6, elevation: 2, marginBottom: 16,
+  },
+  googleIcon: {
+    width: 24, height: 24, borderRadius: 12,
+    backgroundColor: '#fff', borderWidth: 1, borderColor: '#E2E8F0',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  googleIconText: { fontSize: 14, fontFamily: 'Inter_700Bold', color: '#4285F4' },
+  googleBtnText:  { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#0F172A' },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#E2E8F0' },
+  dividerText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: '#94A3B8' },
+
+Do not touch any other file.
+After changes run: ./deploy.sh
+Commit message: "feat: re-add Google Sign-in with correct OAuth config"
