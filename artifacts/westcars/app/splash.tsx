@@ -48,6 +48,8 @@ export default function SplashScreen() {
         router.replace("/welcome");
         return;
       }
+      // Check Firebase auth state — resolves from local cache in < 200 ms.
+      // Signed-in users go straight to tabs; guests see the welcome screen.
       const unsub = onAuthStateChanged(auth, (user) => {
         unsub();
         setTimeout(() => {

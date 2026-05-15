@@ -1,7 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -83,8 +82,6 @@ export default function WelcomeScreen() {
   const goToLogin = () => {
     if (unlocked) return;
     setUnlocked(true);
-    // Mark welcome as seen so returning guests skip it on next cold open
-    AsyncStorage.setItem("hasSeenWelcome", "true").catch(() => {});
     setTimeout(() => {
       router.replace("/auth/login");
     }, 100);
