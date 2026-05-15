@@ -295,9 +295,8 @@ function FilterModal({
                     style={fS.priceInput}
                     value={priceMin === 0 ? "" : String(priceMin)}
                     onChangeText={(t) => {
-                      const n = parseInt(t.replace(/[^0-9]/g, ""), 10);
-                      if (!isNaN(n) && n < priceMax) setPriceMin(n);
-                      else if (t === "") setPriceMin(0);
+                      const cleaned = t.replace(/[^0-9]/g, '');
+                      setPriceMin(cleaned === '' ? 0 : Number(cleaned));
                     }}
                     placeholder="0"
                     placeholderTextColor="#94A3B8"
@@ -312,9 +311,8 @@ function FilterModal({
                     style={fS.priceInput}
                     value={priceMax >= PRICE_MAX ? "" : String(priceMax)}
                     onChangeText={(t) => {
-                      const n = parseInt(t.replace(/[^0-9]/g, ""), 10);
-                      if (!isNaN(n) && n > priceMin) setPriceMax(n);
-                      else if (t === "") setPriceMax(PRICE_MAX);
+                      const cleaned = t.replace(/[^0-9]/g, '');
+                      setPriceMax(cleaned === '' ? PRICE_MAX : Number(cleaned));
                     }}
                     placeholder="Any"
                     placeholderTextColor="#94A3B8"
