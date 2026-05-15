@@ -1,0 +1,146 @@
+⚠️ CRITICAL INSTRUCTION: Do NOT refactor, reorganize, rename, or touch any file 
+not explicitly listed below. Do not "improve" unrelated code. Do not add new 
+dependencies. Make ONLY the exact changes listed. If unsure, do nothing and ask.
+
+---
+
+CHANGE 1 — app/auth/login.tsx
+Remove ALL Google Sign-in code:
+- Remove these imports: `expo-auth-session/providers/google`, `expo-web-browser`, 
+  `WebBrowser.maybeCompleteAuthSession()`, `loginWithGoogle` from useApp
+- Remove the 3 GOOGLE_*_ID constants and GOOGLE_CONFIGURED constant
+- Remove the `Google.useAuthRequest(...)` hook call and its entire useEffect block
+- Remove the `handleGoogle` function
+- Remove the Google button JSX (the TouchableOpacity with style={styles.googleBtn} 
+  and everything inside it)
+- Remove the divider row JSX (View with style={styles.dividerRow})
+- Remove googleLoading state
+- Remove these styles: googleBtn, googleIcon, googleIconText, googleBtnText, 
+  dividerRow, dividerLine, dividerText, btnDisabled on google button
+- Keep everything else exactly as-is
+
+Also fix the sign-in spinner bug: in handleLogin, add this check at the very top 
+of the function, before setError(''):
+  if (!auth) { setError('Authentication not available. Please restart the app.'); return; }
+
+---
+
+CHANGE 2 — utils/brandLogos.ts
+Replace the entire file with this:
+
+export const BRAND_LOGOS: Record<string, string> = {};
+
+export function getBrandLogo(brand: string): string | null {
+  return null;
+}
+
+export function getBrandInitials(brand: string): string {
+  return brand
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+Then find every place in the codebase that renders a brand logo image using 
+getBrandLogo(). Replace the <Image> with this pattern:
+  - If getBrandLogo() returns null, show a View with a background color of '#E8F7FA',
+    centered Text showing getBrandInitials(brand), color '#0EB5CA', 
+    fontFamily 'Inter_700Bold', fontSize 13
+  - Keep the same width/height/borderRadius that the Image had
+
+---
+
+CHANGE 3 — app/_layout.tsx
+Fix the "logged-in user sees welcome screen on reopen" bug.
+
+In the useAuthRedirect function, replace the entire useEffect with:
+
+useEffect(() => {
+  if (!auth) return;
+  const unsub = onAuthStateChanged(auth, (user) => {
+    const isAuthed = !!user;
+    const onAuthOrWelcomeScreen =
+      segments.includes('login') ||
+      segments.includes('signup') ||
+      segments.includes('welcome') ||
+      segments[0] === 'welcome' ||
+      segments.length === 0;
+    if (isAuthed && onAuthOrWelcomeScreen) {
+      router.replace('/(tabs)');
+    }
+    if (!isAuthed && !segments.includes('login') && !segments.includes('signup') && 
+        !segments.includes('forgot-password') && !segments.includes('welcome') &&
+        segments[0] !== undefined && segments[0] !== 'splash') {
+      router.replace('/welcome');
+    }
+    prevAuthRef.current = isAuthed;
+  });
+  return unsub;
+}, [segments]);
+
+---
+
+CHANGE 4 — app/auth/forgot-password.tsx
+The file already has the correct logic. Only fix: verify that 
+`services/firebase/auth.ts` exports both `sendPasswordResetEmail` and 
+`authErrorMessage`. If that file does not exist, create it at 
+`services/firebase/auth.ts` with exactly this content:
+
+import { sendPasswordResetEmail as fbSendReset, getAuth } from 'firebase/auth';
+import { auth } from '@/lib/firebase-persistence';
+
+export async function sendPasswordResetEmail(email: string): Promise<void> {
+  if (!auth) throw new Error('Auth not initialised');
+  await fbSendReset(auth, email);
+}
+
+export function authErrorMessage(e: any): string {
+  switch (e?.code) {
+    case 'auth/invalid-email': return 'Invalid email address';
+    case 'auth/user-not-found': return 'No account found with this email';
+    case 'auth/too-many-requests': return 'Too many attempts. Try again later';
+    default: return 'Something went wrong. Please try again';
+  }
+}
+
+---
+
+CHANGE 5 — app/auth/signup.tsx
+Find the success handling after account creation. After the Firebase 
+createUserWithEmailAndPassword call succeeds, before navigating away, add:
+
+Alert.alert(
+  'Account Created!',
+  'Welcome to Westcars! Your account has been created successfully.',
+  [{ text: 'Let\'s Go', onPress: () => router.replace('/(tabs)') }]
+);
+return; // prevent automatic navigation so the alert shows first
+
+Make sure `Alert` is imported from 'react-native' at the top of that file.
+
+---
+
+CHANGE 6 — hooks/useAvatarUpload.ts
+No changes needed to this file.
+
+Find the component that CALLS useAvatarUpload (likely screens/profile or 
+tabs/profile). Check that it passes a valid non-empty userId. Add this guard 
+at the top of pickAndUpload usage:
+  if (!userId) { Alert.alert('Error', 'You must be logged in to upload a photo'); return; }
+
+Also in the component that renders the avatar image: after a successful upload, 
+make sure the displayed image URI is taken from the `photoURL` returned by 
+useAvatarUpload, not from a stale local state variable.
+
+---
+
+DO NOT touch: 
+- lib/firebase.ts
+- lib/firebase-persistence.ts  
+- context/AppContext.tsx
+- context/ThemeContext.tsx
+- Any (tabs) screen not mentioned above
+- Any car listing or search screens
+- package.json or any config files

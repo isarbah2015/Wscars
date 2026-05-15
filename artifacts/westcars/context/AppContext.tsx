@@ -238,15 +238,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // ── Auth ─────────────────────────────────────────────────────────────────
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     if (useFirebase) {
-      try {
-        const user = await fb.signInEmail(email, password);
-        setCurrentUser(user);
-        setIsAuthenticated(true);
-        return true;
-      } catch (err: any) {
-        console.error('[login]', err?.code, err?.message);
-        return false;
-      }
+      // Let Firebase errors propagate — callers handle them with authErrorMessage().
+      const user = await fb.signInEmail(email, password);
+      // onAuthStateChanged will populate currentUser; pre-fill for snappier UX.
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      return true;
     }
     // ── Mock fallback ──
     const normalised = email.toLowerCase().trim();
@@ -284,15 +281,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const signup = useCallback(async (name: string, email: string, phone: string, password: string): Promise<boolean> => {
     if (useFirebase) {
-      try {
-        const user = await fb.signUpEmail(name, email, phone, password);
-        setCurrentUser(user);
-        setIsAuthenticated(true);
-        return true;
-      } catch (err: any) {
-        console.error('[signup]', err?.code, err?.message);
-        return false;
-      }
+      // Let Firebase errors propagate — callers handle them with authErrorMessage().
+      const user = await fb.signUpEmail(name, email, phone, password);
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      return true;
     }
     // ── Mock fallback ──
     const normalised = email.toLowerCase().trim();
@@ -318,12 +311,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const loginWithGoogle = useCallback(async (idToken: string, accessToken?: string): Promise<boolean> => {
     if (!useFirebase) return false;
     try {
-      const user = await fb.signInWithGoogleIdToken(idToken, accessToken);
-      setCurrentUser(user);
-      setIsAuthenticated(true);
+      const { auth } = await import('@/lib/firebase-persistence');
+      const { GoogleAuthProvider, signInWithCredential } = await import('firebase/auth');
+      if (!auth) return false;
+      const credential = GoogleAuthProvider.credential(idToken, accessToken);
+      const result = await signInWithCredential(auth, credential);
+      const fbUser = result.user;
+      const { db } = await import('@/lib/firebase');
+      const { doc, setDoc, getDoc, serverTimestamp } = await import('firebase/firestore');
+      if (db) {
+        const ref = doc(db, 'users', fbUser.uid);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          await setDoc(ref, {
+            id: fbUser.uid,
+            name: fbUser.displayName ?? 'User',
+            email: fbUser.email ?? '',
+            phone: '',
+            photoURL: fbUser.photoURL ?? '',
+            createdAt: serverTimestamp(),
+            favorites: [],
+            blockedUsers: [],
+          });
+        }
+      }
       return true;
-    } catch (err: any) {
-      console.error('[Google sign-in]', err?.code, err?.message);
+    } catch (err) {
+      console.error('[Google sign-in]', err);
       return false;
     }
   }, [useFirebase]);

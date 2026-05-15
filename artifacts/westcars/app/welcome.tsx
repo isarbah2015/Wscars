@@ -211,7 +211,6 @@ export default function WelcomeScreen() {
           </PanGestureHandler>
         </View>
 
-
       </View>
     </View>
   );
@@ -314,7 +313,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#0EB5CA",
+    backgroundColor: "#0EB5CA",      // teal — arrow stays white, fully visible
     alignItems: "center",
     justifyContent: "center",
     zIndex: 10,
@@ -324,5 +323,4 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 10,
   },
-
 });

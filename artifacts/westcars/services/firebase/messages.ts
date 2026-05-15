@@ -21,10 +21,8 @@ import {
 import { db, isFirebaseReady } from "@/lib/firebase";
 import { Car, Conversation, Message } from "@/types";
 
-const ensureReady = (): void => {
-  if (!isFirebaseReady() || !db) {
-    throw new Error('[Firestore] Not ready — check EXPO_PUBLIC_FIREBASE_* env vars and db initialization.');
-  }
+const ensureReady = () => {
+  if (!isFirebaseReady() || !db) throw new Error("Firebase not configured.");
 };
 
 const CONV = "conversations";

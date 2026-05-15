@@ -8,10 +8,8 @@
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, isFirebaseReady } from "@/lib/firebase";
 
-const ensureReady = (): void => {
-  if (!isFirebaseReady() || !storage) {
-    throw new Error('[Storage] Not ready — check Firebase config and storage initialization');
-  }
+const ensureReady = () => {
+  if (!isFirebaseReady() || !storage) throw new Error("Firebase not configured.");
 };
 
 const localUriToBlob = async (uri: string): Promise<Blob> => {
@@ -46,9 +44,7 @@ export async function uploadIdImage(userId: string, side: "front" | "back" | "se
 }
 
 export async function uploadAvatar(userId: string, uri: string): Promise<string> {
-  // Store as avatars/{userId}/profile.{ext} so the Storage rule can match
-  // on the {userId} segment independently of the file extension.
-  const path = `avatars/${userId}/profile.${guessExt(uri)}`;
+  const path = `avatars/${userId}.${guessExt(uri)}`;
   return uploadAt(uri, path);
 }
 
