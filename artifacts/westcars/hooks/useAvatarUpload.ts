@@ -136,9 +136,21 @@ export function useAvatarUpload({
       setProgress(0)
 
       try {
-        const response = await fetch(uri)
-        const blob = await response.blob()
-        const downloadURL = await uploadBlob(blob)
+        let blob: Blob;
+        if (Platform.OS === 'web') {
+          const response = await fetch(uri);
+          blob = await response.blob();
+        } else {
+          blob = await new Promise<Blob>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onload = () => resolve(xhr.response);
+            xhr.onerror = () => reject(new Error('Failed to load image'));
+            xhr.responseType = 'blob';
+            xhr.open('GET', uri, true);
+            xhr.send(null);
+          });
+        }
+        const downloadURL = await uploadBlob(blob);
 
         if (!db) throw new Error('Firestore not initialised')
 

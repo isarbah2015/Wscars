@@ -264,10 +264,10 @@ function FilterModal({
   const visibleCities = showAllCities ? GHANA_CITIES : GHANA_CITIES.slice(0, 8);
 
   const PRESETS = [
-    { label: "Under 30k",   min: 0,       max: 30_000  },
-    { label: "30k – 100k",  min: 30_000,  max: 100_000 },
-    { label: "100k – 300k", min: 100_000, max: 300_000 },
-    { label: "300k+",       min: 300_000, max: 500_000 },
+    { label: "GHS 0–30k",     min: 0,       max: 30_000  },
+    { label: "GHS 30k–100k",  min: 30_000,  max: 100_000 },
+    { label: "GHS 100k–300k", min: 100_000, max: 300_000 },
+    { label: "GHS 300k+",     min: 300_000, max: 500_000 },
   ];
 
   return (
@@ -288,39 +288,102 @@ function FilterModal({
             {/* ── Price range ── */}
             <View style={fS.section}>
               <Text style={fS.secLabel}>Price range (GHS)</Text>
-              <View style={fS.priceInputRow}>
-                <View style={fS.priceInputBox}>
-                  <Text style={fS.priceCaption}>Min price</Text>
-                  <TextInput
-                    style={fS.priceInput}
-                    value={priceMin === 0 ? "" : String(priceMin)}
-                    onChangeText={(t) => {
-                      const cleaned = t.replace(/[^0-9]/g, '');
-                      setPriceMin(cleaned === '' ? 0 : Number(cleaned));
-                    }}
-                    placeholder="0"
-                    placeholderTextColor="#94A3B8"
-                    keyboardType="number-pad"
-                    returnKeyType="done"
-                  />
+
+              {/* Price Range Slider */}
+              <View style={{ marginBottom: 16 }}>
+                <View style={{
+                  flexDirection: 'row', justifyContent: 'space-between',
+                  alignItems: 'center', marginBottom: 12,
+                }}>
+                  <Text style={{ fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#1C1C1E' }}>
+                    Price Range
+                  </Text>
+                  <Text style={{ fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#0EB5CA' }}>
+                    GHS {priceMin.toLocaleString()} – {priceMax >= PRICE_MAX
+                      ? 'Any' : 'GHS ' + priceMax.toLocaleString()}
+                  </Text>
                 </View>
-                <Text style={fS.priceDash}>—</Text>
-                <View style={fS.priceInputBox}>
-                  <Text style={fS.priceCaption}>Max price</Text>
-                  <TextInput
-                    style={fS.priceInput}
-                    value={priceMax >= PRICE_MAX ? "" : String(priceMax)}
-                    onChangeText={(t) => {
-                      const cleaned = t.replace(/[^0-9]/g, '');
-                      setPriceMax(cleaned === '' ? PRICE_MAX : Number(cleaned));
-                    }}
-                    placeholder="Any"
-                    placeholderTextColor="#94A3B8"
-                    keyboardType="number-pad"
-                    returnKeyType="done"
-                  />
-                </View>
+
+                {(() => {
+                  try {
+                    const SliderComponent = require('@react-native-community/slider').default;
+                    return (
+                      <View style={{ gap: 16 }}>
+                        <View>
+                          <Text style={{ fontSize: 11, color: '#8E8E93',
+                            fontFamily: 'Inter_500Medium', marginBottom: 4 }}>
+                            Min: GHS {priceMin.toLocaleString()}
+                          </Text>
+                          <SliderComponent
+                            style={{ width: '100%', height: 40 }}
+                            minimumValue={0}
+                            maximumValue={PRICE_MAX}
+                            step={1000}
+                            value={priceMin}
+                            onValueChange={(val: number) => {
+                              if (val < priceMax) setPriceMin(Math.round(val));
+                            }}
+                            minimumTrackTintColor="#0EB5CA"
+                            maximumTrackTintColor="#E2E8F0"
+                            thumbTintColor="#0EB5CA"
+                          />
+                        </View>
+                        <View>
+                          <Text style={{ fontSize: 11, color: '#8E8E93',
+                            fontFamily: 'Inter_500Medium', marginBottom: 4 }}>
+                            Max: {priceMax >= PRICE_MAX
+                              ? 'Any' : 'GHS ' + priceMax.toLocaleString()}
+                          </Text>
+                          <SliderComponent
+                            style={{ width: '100%', height: 40 }}
+                            minimumValue={0}
+                            maximumValue={PRICE_MAX}
+                            step={1000}
+                            value={priceMax}
+                            onValueChange={(val: number) => {
+                              if (val > priceMin) setPriceMax(Math.round(val));
+                            }}
+                            minimumTrackTintColor="#0EB5CA"
+                            maximumTrackTintColor="#E2E8F0"
+                            thumbTintColor="#0EB5CA"
+                          />
+                        </View>
+                      </View>
+                    );
+                  } catch {
+                    return (
+                      <View style={{ gap: 12 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                          <Text style={{ fontSize: 12, color: '#8E8E93',
+                            fontFamily: 'Inter_500Medium', width: 32 }}>Min</Text>
+                          <View style={{ flex: 1, backgroundColor: '#F5FBFC',
+                            borderRadius: 12, borderWidth: 1.5, borderColor: '#E2E8F0',
+                            paddingHorizontal: 12, height: 44, justifyContent: 'center' }}>
+                            <Text style={{ fontSize: 13, color: '#0F172A',
+                              fontFamily: 'Inter_400Regular' }}>
+                              GHS {priceMin.toLocaleString()}
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                          <Text style={{ fontSize: 12, color: '#8E8E93',
+                            fontFamily: 'Inter_500Medium', width: 32 }}>Max</Text>
+                          <View style={{ flex: 1, backgroundColor: '#F5FBFC',
+                            borderRadius: 12, borderWidth: 1.5, borderColor: '#E2E8F0',
+                            paddingHorizontal: 12, height: 44, justifyContent: 'center' }}>
+                            <Text style={{ fontSize: 13, color: '#0F172A',
+                              fontFamily: 'Inter_400Regular' }}>
+                              {priceMax >= PRICE_MAX ? 'Any'
+                                : 'GHS ' + priceMax.toLocaleString()}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    );
+                  }
+                })()}
               </View>
+
               <View style={fS.presetsRow}>
                 {PRESETS.map(p => {
                   const active = priceMin === p.min && priceMax === p.max;
@@ -574,9 +637,9 @@ export default function SearchScreen() {
     if (cities.length === 1)             chips.push({ key: "cities",        label: cities[0] });
     else if (cities.length > 1)          chips.push({ key: "cities",        label: `${cities.length} cities` });
     if (priceMin !== PRICE_MIN || priceMax !== PRICE_MAX) {
-      const lo = `${(priceMin / 1000).toFixed(0)}k`;
-      const hi = priceMax >= PRICE_MAX ? "max" : `${(priceMax / 1000).toFixed(0)}k`;
-      chips.push({ key: "price", label: `₵${lo} – ₵${hi}` });
+      const lo = `GHS ${priceMin.toLocaleString()}`;
+      const hi = priceMax >= PRICE_MAX ? "Any" : `GHS ${priceMax.toLocaleString()}`;
+      chips.push({ key: "price", label: `${lo} – ${hi}` });
     }
     return chips;
   }, [activeFilters]);
