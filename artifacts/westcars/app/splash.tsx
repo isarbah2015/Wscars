@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { auth } from "@/lib/firebase-persistence";
 import { Animated, Easing, Image, StyleSheet, View } from "react-native";
 
@@ -44,38 +43,19 @@ export default function SplashScreen() {
       ]).start();
     });
 
-    const navTimer = setTimeout(async () => {
+    const navTimer = setTimeout(() => {
       if (!auth) {
         router.replace("/welcome");
         return;
       }
-      // Check if this is the very first launch (no welcome seen yet).
-      const hasSeenWelcome = await AsyncStorage.getItem("hasSeenWelcome").catch(() => "true");
-
-      // Check Firebase auth state — resolves from local cache in < 200 ms.
       const unsub = onAuthStateChanged(auth, (user) => {
         unsub();
         setTimeout(() => {
           try {
-            // Signed-in → always go to tabs.
-            // Guest + first launch → show welcome/onboarding.
-            // Guest + returning → go straight to tabs (skip welcome).
-            const dest = user
-              ? "/(tabs)"
-              : hasSeenWelcome === "true"
-                ? "/(tabs)"
-                : "/welcome";
-            router.replace(dest);
+            router.replace(user ? "/(tabs)" : "/welcome");
           } catch {
             setTimeout(() => {
-              try {
-                const dest = user
-                  ? "/(tabs)"
-                  : hasSeenWelcome === "true"
-                    ? "/(tabs)"
-                    : "/welcome";
-                router.replace(dest);
-              } catch {}
+              try { router.replace(user ? "/(tabs)" : "/welcome"); } catch {}
             }, 400);
           }
         }, 100);
