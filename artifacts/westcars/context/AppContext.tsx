@@ -9,8 +9,26 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Car, Conversation, Message, Report, Review, Transaction, User } from "@/types";
 import { ADMIN_USER, MOCK_CARS, MOCK_CONVERSATIONS, MOCK_MESSAGES, MOCK_USERS } from "@/utils/mockData";
-import { isFirebaseReady } from "@/lib/firebase";
+import { isFirebaseReady, db } from "@/lib/firebase";
 import * as fb from "@/services/firebase";
+import {
+  collection, query, where, orderBy, onSnapshot,
+  addDoc, updateDoc, doc, writeBatch, serverTimestamp,
+} from 'firebase/firestore';
+
+export interface AppNotification {
+  id: string;
+  userId: string;
+  type: 'message' | 'saved' | 'listing_view' | 'listing_expiry' | 'listing_approved' | 'price_drop';
+  title: string;
+  body: string;
+  carId?: string;
+  carName?: string;
+  fromUserId?: string;
+  fromUserName?: string;
+  read: boolean;
+  createdAt: string;
+}
 
 interface AppContextType {
   currentUser: User | null;
@@ -55,6 +73,12 @@ interface AppContextType {
   resolveReport: (reportId: string, action: "dismiss" | "remove") => void;
   toggleCarVisibility: (carId: string) => void;
   deleteCar: (carId: string) => void;
+
+  notifications: AppNotification[];
+  unreadNotificationsCount: number;
+  markNotificationRead: (notifId: string) => Promise<void>;
+  markAllNotificationsRead: () => Promise<void>;
+  createNotification: (data: Omit<AppNotification, 'id' | 'createdAt' | 'read'>) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -132,6 +156,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [reports,        setReports]        = useState<Report[]>([]);
   const [transactions,   setTransactions]   = useState<Transaction[]>([]);
   const [blockedUsers,   setBlockedUsers]   = useState<string[]>([]);
+  const [notifications,  setNotifications]  = useState<AppNotification[]>([]);
 
   // Track per-conversation message subscriptions so we can clean up.
   const messageSubsRef = useRef<Record<string, () => void>>({});
@@ -234,6 +259,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     for (const off of Object.values(messageSubsRef.current)) off();
     messageSubsRef.current = {};
   }, []);
+
+  useEffect(() => {
+    if (!currentUser?.id || !db) return;
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', currentUser.id),
+      orderBy('createdAt', 'desc')
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      setNotifications(
+        snap.docs.map((d) => ({ id: d.id, ...d.data() } as AppNotification))
+      );
+    });
+    return unsub;
+  }, [currentUser?.id]);
 
   // ── Auth ─────────────────────────────────────────────────────────────────
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
@@ -354,8 +394,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.removeItem(STORAGE_KEYS.USER);
   }, [useFirebase]);
 
+  // ── Notifications ────────────────────────────────────────────────────────
+  const createNotification = useCallback(async (data: Omit<AppNotification, 'id' | 'createdAt' | 'read'>) => {
+    if (!db) return;
+    await addDoc(collection(db, 'notifications'), {
+      ...data,
+      read: false,
+      createdAt: new Date().toISOString(),
+    });
+  }, []);
+
+  const markNotificationRead = useCallback(async (notifId: string) => {
+    if (!db) return;
+    await updateDoc(doc(db, 'notifications', notifId), { read: true });
+  }, []);
+
+  const markAllNotificationsRead = useCallback(async () => {
+    if (!db || !currentUser?.id) return;
+    const batch = writeBatch(db);
+    notifications
+      .filter((n) => !n.read)
+      .forEach((n) => batch.update(doc(db, 'notifications', n.id), { read: true }));
+    await batch.commit();
+  }, [currentUser?.id, notifications]);
+
   // ── Favorites ────────────────────────────────────────────────────────────
   const toggleFavorite = useCallback((carId: string) => {
+    const isAdding = !favorites.includes(carId);
     setFavorites((prev) => {
       const next = prev.includes(carId) ? prev.filter((id) => id !== carId) : [...prev, carId];
       AsyncStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(next));
@@ -365,7 +430,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return next;
     });
-  }, [useFirebase, currentUser?.id]);
+    if (isAdding && currentUser?.id) {
+      const car = cars.find((c) => c.id === carId);
+      if (car && car.sellerId !== currentUser.id) {
+        createNotification({
+          userId: car.sellerId,
+          type: 'saved',
+          title: 'Someone saved your listing',
+          body: `${currentUser.displayName ?? currentUser.name ?? 'A buyer'} saved your ${(car as any).title ?? `${(car as any).make} ${(car as any).model}`}`,
+          carId: car.id,
+          carName: (car as any).title ?? `${(car as any).make} ${(car as any).model}`,
+          fromUserId: currentUser.id,
+          fromUserName: currentUser.displayName ?? currentUser.name ?? 'A buyer',
+        }).catch(() => {});
+      }
+    }
+  }, [useFirebase, currentUser, favorites, cars, createNotification]);
 
   const isFavorite = useCallback((carId: string) => favorites.includes(carId), [favorites]);
 
@@ -449,6 +529,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const sendMessage = useCallback((conversationId: string, text: string, mediaUrl?: string, mediaType?: "image" | "video" | "audio") => {
     if (useFirebase && currentUser?.id) {
       fb.sendMessage(conversationId, currentUser.id, text, mediaUrl, mediaType)
+        .then(() => {
+          const conv = conversations.find((c) => c.id === conversationId);
+          const otherUserId = (conv as any)?.participantId ?? (conv as any)?.participantIds?.find((id: string) => id !== currentUser?.id);
+          if (otherUserId) {
+            createNotification({
+              userId: otherUserId,
+              type: 'message',
+              title: 'New message',
+              body: `${(currentUser as any).displayName ?? currentUser.name ?? 'Someone'} sent you a message`,
+              fromUserId: currentUser.id,
+              fromUserName: (currentUser as any).displayName ?? currentUser.name ?? 'Someone',
+            }).catch(() => {});
+          }
+        })
         .catch((e) => console.warn("[sendMessage]", e));
       return;
     }
@@ -475,7 +569,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         c.id === conversationId ? { ...c, unreadCount: c.unreadCount + 1 } : c,
       ));
     }, 1500);
-  }, [currentUser, useFirebase]);
+  }, [currentUser, useFirebase, conversations, createNotification]);
 
   const deleteMessage = useCallback((conversationId: string, messageId: string) => {
     if (useFirebase) {
@@ -707,6 +801,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     reportItem, blockUser, unblockUser, isBlocked, verifyPhone, verifyId,
     toggleAnonymous, getUserReviews, getSellerTrustScore, deleteMessage, markMessagesRead,
     dismissReport, resolveReport, toggleCarVisibility, deleteCar,
+    notifications,
+    unreadNotificationsCount: notifications.filter((n) => !n.read).length,
+    markNotificationRead,
+    markAllNotificationsRead,
+    createNotification,
   }), [
     currentUser, isAuthenticated, favorites, cars, conversations, messages, isLoading,
     reviews, reports, transactions, blockedUsers,
@@ -715,6 +814,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     reportItem, blockUser, unblockUser, isBlocked, verifyPhone, verifyId,
     toggleAnonymous, getUserReviews, getSellerTrustScore, deleteMessage, markMessagesRead,
     dismissReport, resolveReport, toggleCarVisibility, deleteCar,
+    notifications, markNotificationRead, markAllNotificationsRead, createNotification,
   ]);
 
   return <AppContext.Provider value={ctxValue}>{children}</AppContext.Provider>;

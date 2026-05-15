@@ -8,6 +8,7 @@ import {
   Alert,
   FlatList,
   Image,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -44,13 +45,15 @@ export default function ProfileScreen() {
   const { currentUser, isAuthenticated, logout, cars, favorites,
           getUserReviews, getSellerTrustScore, toggleAnonymous,
           blockUser, blockedUsers, unblockUser, verifyPhone, verifyId,
-          updateUserProfile } = useApp();
+          updateUserProfile, notifications, markNotificationRead,
+          markAllNotificationsRead, unreadNotificationsCount } = useApp();
   const { isDark, colors, toggleTheme } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);
 
   const [activeTab, setActiveTab] = useState<ProfileTab>("listings");
-  const [notifications, setNotifications] = useState(true);
+  const [pushNotifEnabled, setPushNotifEnabled] = useState(true);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [verifyingPhone, setVerifyingPhone] = useState(false);
   const [verifyingId, setVerifyingId] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
@@ -210,6 +213,28 @@ export default function ProfileScreen() {
       >
         {/* ── Teal Header ── */}
         <View style={[styles.tealHeader, { paddingTop: topPad + 16 }]}>
+          {/* Bell icon top-right */}
+          <View style={{ alignSelf: 'stretch', alignItems: 'flex-end', paddingHorizontal: 16, marginBottom: 4 }}>
+            <Pressable
+              onPress={() => setShowNotifications(true)}
+              style={{ padding: 4, position: 'relative' }}
+            >
+              <Feather name="bell" size={22} color="#fff" />
+              {unreadNotificationsCount > 0 && (
+                <View style={{
+                  position: 'absolute', top: 0, right: 0,
+                  width: 16, height: 16, borderRadius: 8,
+                  backgroundColor: '#E8192C',
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Text style={{ color: '#fff', fontSize: 9, fontFamily: 'Inter_700Bold' }}>
+                    {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
+
           <View style={styles.avatarArea}>
             {avatarUri ? (
               <Image source={{ uri: avatarUri }} style={styles.avatar} />
@@ -539,7 +564,7 @@ export default function ProfileScreen() {
                     <Text style={[styles.settingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Notifications</Text>
                     <Text style={[styles.settingSubtitle, { color: colors.textTertiary }]}>Push alerts for messages & offers</Text>
                   </View>
-                  <Switch value={notifications} onValueChange={setNotifications}
+                  <Switch value={pushNotifEnabled} onValueChange={setPushNotifEnabled}
                     trackColor={{ false: colors.border, true: "#0EB5CA" }} thumbColor="#fff" />
                 </View>
 
@@ -724,6 +749,138 @@ export default function ProfileScreen() {
         onRemove={() => { setAvatarSheetOpen(false); removePhoto(); }}
         onClose={() => setAvatarSheetOpen(false)}
       />
+
+      {/* ── Notifications Modal ── */}
+      <Modal
+        visible={showNotifications}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowNotifications(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
+          <View style={{
+            flexDirection: 'row', alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 20, paddingTop: insets.top + 16, paddingBottom: 16,
+            backgroundColor: '#0EB5CA',
+          }}>
+            <Text style={{ fontSize: 20, fontFamily: 'Manrope_800ExtraBold', color: '#fff' }}>
+              Notifications
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+              {unreadNotificationsCount > 0 && (
+                <Pressable onPress={markAllNotificationsRead}>
+                  <Text style={{ color: '#fff', fontSize: 12, fontFamily: 'Inter_500Medium' }}>
+                    Mark all read
+                  </Text>
+                </Pressable>
+              )}
+              <Pressable onPress={() => setShowNotifications(false)}>
+                <Feather name="x" size={22} color="#fff" />
+              </Pressable>
+            </View>
+          </View>
+
+          {notifications.length === 0 ? (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+              <Feather name="bell-off" size={48} color="#CBD5E1" />
+              <Text style={{ fontSize: 16, fontFamily: 'Inter_500Medium', color: '#94A3B8' }}>
+                No notifications yet
+              </Text>
+              <Text style={{ fontSize: 13, fontFamily: 'Inter_400Regular', color: '#CBD5E1',
+                textAlign: 'center', paddingHorizontal: 40 }}>
+                You'll see messages, saves, and listing activity here
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={notifications}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{ paddingVertical: 8 }}
+              renderItem={({ item }) => {
+                const iconMap: Record<string, string> = {
+                  message: 'message-square',
+                  saved: 'heart',
+                  listing_view: 'eye',
+                  listing_expiry: 'alert-circle',
+                  listing_approved: 'check-circle',
+                  price_drop: 'trending-down',
+                };
+                const colorMap: Record<string, string> = {
+                  message: '#7C3AED',
+                  saved: '#E8192C',
+                  listing_view: '#0EB5CA',
+                  listing_expiry: '#F59E0B',
+                  listing_approved: '#10B981',
+                  price_drop: '#0EB5CA',
+                };
+                const bgMap: Record<string, string> = {
+                  message: '#F3EEFF',
+                  saved: '#FFEDEE',
+                  listing_view: '#E8F7FA',
+                  listing_expiry: '#FFFBEB',
+                  listing_approved: '#ECFDF5',
+                  price_drop: '#E8F7FA',
+                };
+                return (
+                  <Pressable
+                    onPress={() => markNotificationRead(item.id)}
+                    style={{
+                      flexDirection: 'row', alignItems: 'flex-start', gap: 12,
+                      paddingHorizontal: 20, paddingVertical: 14,
+                      backgroundColor: item.read ? 'transparent' :
+                        (isDark ? 'rgba(14,181,202,0.08)' : '#F0FBFD'),
+                      borderBottomWidth: 0.5,
+                      borderBottomColor: isDark ? '#1E2D40' : '#F1F5F9',
+                    }}
+                  >
+                    <View style={{
+                      width: 42, height: 42, borderRadius: 21,
+                      backgroundColor: bgMap[item.type] ?? '#E8F7FA',
+                      alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    }}>
+                      <Feather
+                        name={iconMap[item.type] as any ?? 'bell'}
+                        size={18}
+                        color={colorMap[item.type] ?? '#0EB5CA'}
+                      />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row',
+                        justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={{
+                          fontSize: 14, fontFamily: 'Inter_600SemiBold',
+                          color: isDark ? '#F1F5F9' : '#0F172A', flex: 1,
+                        }}>{item.title}</Text>
+                        {!item.read && (
+                          <View style={{
+                            width: 8, height: 8, borderRadius: 4,
+                            backgroundColor: '#0EB5CA', marginLeft: 8,
+                          }} />
+                        )}
+                      </View>
+                      <Text style={{
+                        fontSize: 13, fontFamily: 'Inter_400Regular',
+                        color: isDark ? '#94A3B8' : '#64748B', marginTop: 2,
+                        lineHeight: 18,
+                      }}>{item.body}</Text>
+                      <Text style={{
+                        fontSize: 11, fontFamily: 'Inter_400Regular',
+                        color: '#94A3B8', marginTop: 4,
+                      }}>
+                        {new Date(item.createdAt).toLocaleDateString('en-GB', {
+                          day: 'numeric', month: 'short',
+                          hour: '2-digit', minute: '2-digit',
+                        })}
+                      </Text>
+                    </View>
+                  </Pressable>
+                );
+              }}
+            />
+          )}
+        </View>
+      </Modal>
     </View>
   );
 }

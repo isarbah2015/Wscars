@@ -1,0 +1,341 @@
+⚠️ CRITICAL: Only touch the files explicitly listed below. Do not refactor,
+rename, reorganize, or "improve" anything else. No new dependencies.
+
+═══════════════════════════════════════════════════════
+CHANGE 1 — artifacts/westcars/firestore.rules
+Add notifications collection rule before the closing brace
+═══════════════════════════════════════════════════════
+
+Add this block inside the existing match /databases/{database}/documents { }
+just before the final closing brace:
+
+    // ── Notifications ─────────────────────────────────────────────────────
+    match /notifications/{notifId} {
+      allow read, update: if request.auth != null
+                          && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null;
+      allow delete: if request.auth != null
+                    && resource.data.userId == request.auth.uid;
+    }
+
+═══════════════════════════════════════════════════════
+CHANGE 2 — artifacts/westcars/firestore.indexes.json
+Add notifications index
+═══════════════════════════════════════════════════════
+
+Add this object to the "indexes" array:
+
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+
+═══════════════════════════════════════════════════════
+CHANGE 3 — artifacts/westcars/context/AppContext.tsx
+Add full notifications system
+═══════════════════════════════════════════════════════
+
+At the top of the file, add these imports if not already present:
+import {
+  collection, query, where, orderBy, onSnapshot,
+  addDoc, updateDoc, doc, writeBatch, serverTimestamp
+} from 'firebase/firestore';
+
+Add this TypeScript interface near the other interfaces at the top:
+
+export interface AppNotification {
+  id: string;
+  userId: string;
+  type: 'message' | 'saved' | 'listing_view' | 'listing_expiry' | 'listing_approved' | 'price_drop';
+  title: string;
+  body: string;
+  carId?: string;
+  carName?: string;
+  fromUserId?: string;
+  fromUserName?: string;
+  read: boolean;
+  createdAt: string;
+}
+
+Inside the AppProvider component, add this state near the other useState calls:
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+
+Add this useEffect inside AppProvider, after the existing auth useEffect:
+
+  useEffect(() => {
+    if (!currentUser?.id || !db) return;
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', currentUser.id),
+      orderBy('createdAt', 'desc')
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      setNotifications(
+        snap.docs.map((d) => ({ id: d.id, ...d.data() } as AppNotification))
+      );
+    });
+    return unsub;
+  }, [currentUser?.id]);
+
+Add these functions inside AppProvider before the return statement:
+
+  const markNotificationRead = async (notifId: string) => {
+    if (!db) return;
+    await updateDoc(doc(db, 'notifications', notifId), { read: true });
+  };
+
+  const markAllNotificationsRead = async () => {
+    if (!db || !currentUser?.id) return;
+    const batch = writeBatch(db);
+    notifications
+      .filter((n) => !n.read)
+      .forEach((n) => batch.update(doc(db, 'notifications', n.id), { read: true }));
+    await batch.commit();
+  };
+
+  const createNotification = async (data: Omit<AppNotification, 'id' | 'createdAt' | 'read'>) => {
+    if (!db) return;
+    await addDoc(collection(db, 'notifications'), {
+      ...data,
+      read: false,
+      createdAt: new Date().toISOString(),
+    });
+  };
+
+In the existing sendMessage function, after the message is successfully sent,
+add this call to notify the recipient:
+
+    const otherUserId = conversation.participantIds.find(
+      (id: string) => id !== currentUser?.id
+    );
+    if (otherUserId) {
+      await createNotification({
+        userId: otherUserId,
+        type: 'message',
+        title: 'New message',
+        body: `${currentUser?.displayName ?? 'Someone'} sent you a message`,
+        fromUserId: currentUser?.id,
+        fromUserName: currentUser?.displayName ?? 'Someone',
+      });
+    }
+
+In the existing toggleFavorite (or equivalent save/unsave function), when a car
+is being ADDED to favorites, add:
+
+    await createNotification({
+      userId: car.sellerId,
+      type: 'saved',
+      title: 'Someone saved your listing',
+      body: `${currentUser?.displayName ?? 'A buyer'} saved your ${car.title ?? car.make + ' ' + car.model}`,
+      carId: car.id,
+      carName: car.title ?? `${car.make} ${car.model}`,
+      fromUserId: currentUser?.id,
+      fromUserName: currentUser?.displayName ?? 'A buyer',
+    });
+
+Add notifications, markNotificationRead, markAllNotificationsRead, 
+and createNotification to the context value object and to the 
+AppContextType interface.
+
+Also add unreadNotificationsCount to the context value:
+  unreadNotificationsCount: notifications.filter((n) => !n.read).length,
+
+═══════════════════════════════════════════════════════
+CHANGE 4 — artifacts/westcars/app/(tabs)/profile.tsx
+Add bell icon to header + notification panel
+═══════════════════════════════════════════════════════
+
+At the top of ProfileScreen, destructure from useApp:
+  const { notifications, markNotificationRead, markAllNotificationsRead,
+          unreadNotificationsCount } = useApp();
+
+Add this state near the other useState calls:
+  const [showNotifications, setShowNotifications] = useState(false);
+
+In the profile header (the teal section at the top), find the header row
+that contains the "My Profile" title. Add a bell icon button on the right side:
+
+  <Pressable
+    onPress={() => setShowNotifications(true)}
+    style={{ padding: 4, position: 'relative' }}
+  >
+    <Feather name="bell" size={22} color="#fff" />
+    {unreadNotificationsCount > 0 && (
+      <View style={{
+        position: 'absolute', top: 0, right: 0,
+        width: 16, height: 16, borderRadius: 8,
+        backgroundColor: '#E8192C',
+        alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Text style={{ color: '#fff', fontSize: 9, fontFamily: 'Inter_700Bold' }}>
+          {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+        </Text>
+      </View>
+    )}
+  </Pressable>
+
+Add this notification panel Modal just before the closing return tag,
+after all other JSX:
+
+  <Modal
+    visible={showNotifications}
+    animationType="slide"
+    presentationStyle="pageSheet"
+    onRequestClose={() => setShowNotifications(false)}
+  >
+    <View style={{
+      flex: 1,
+      backgroundColor: colors.background,
+    }}>
+      <View style={{
+        flexDirection: 'row', alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20, paddingTop: insets.top + 16, paddingBottom: 16,
+        backgroundColor: '#0EB5CA',
+      }}>
+        <Text style={{
+          fontSize: 20, fontFamily: 'Manrope_700Bold', color: '#fff'
+        }}>Notifications</Text>
+        <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+          {unreadNotificationsCount > 0 && (
+            <Pressable onPress={markAllNotificationsRead}>
+              <Text style={{ color: '#fff', fontSize: 12,
+                fontFamily: 'Inter_500Medium' }}>Mark all read</Text>
+            </Pressable>
+          )}
+          <Pressable onPress={() => setShowNotifications(false)}>
+            <Feather name="x" size={22} color="#fff" />
+          </Pressable>
+        </View>
+      </View>
+
+      {notifications.length === 0 ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+          <Feather name="bell-off" size={48} color="#CBD5E1" />
+          <Text style={{ fontSize: 16, fontFamily: 'Inter_500Medium',
+            color: '#94A3B8' }}>No notifications yet</Text>
+          <Text style={{ fontSize: 13, fontFamily: 'Inter_400Regular',
+            color: '#CBD5E1', textAlign: 'center', paddingHorizontal: 40 }}>
+            You'll see messages, saves, and listing activity here
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={notifications}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingVertical: 8 }}
+          renderItem={({ item }) => {
+            const iconMap: Record<string, string> = {
+              message: 'message-square',
+              saved: 'heart',
+              listing_view: 'eye',
+              listing_expiry: 'alert-circle',
+              listing_approved: 'check-circle',
+              price_drop: 'trending-down',
+            };
+            const colorMap: Record<string, string> = {
+              message: '#7C3AED',
+              saved: '#E8192C',
+              listing_view: '#0EB5CA',
+              listing_expiry: '#F59E0B',
+              listing_approved: '#10B981',
+              price_drop: '#0EB5CA',
+            };
+            const bgMap: Record<string, string> = {
+              message: '#F3EEFF',
+              saved: '#FFEDEE',
+              listing_view: '#E8F7FA',
+              listing_expiry: '#FFFBEB',
+              listing_approved: '#ECFDF5',
+              price_drop: '#E8F7FA',
+            };
+            return (
+              <Pressable
+                onPress={() => markNotificationRead(item.id)}
+                style={{
+                  flexDirection: 'row', alignItems: 'flex-start', gap: 12,
+                  paddingHorizontal: 20, paddingVertical: 14,
+                  backgroundColor: item.read ? 'transparent' : 
+                    (isDark ? 'rgba(14,181,202,0.08)' : '#F0FBFD'),
+                  borderBottomWidth: 0.5,
+                  borderBottomColor: isDark ? '#1E2D40' : '#F1F5F9',
+                }}
+              >
+                <View style={{
+                  width: 42, height: 42, borderRadius: 21,
+                  backgroundColor: bgMap[item.type] ?? '#E8F7FA',
+                  alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                }}>
+                  <Feather
+                    name={iconMap[item.type] as any ?? 'bell'}
+                    size={18}
+                    color={colorMap[item.type] ?? '#0EB5CA'}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row',
+                    justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{
+                      fontSize: 14, fontFamily: 'Inter_600SemiBold',
+                      color: isDark ? '#F1F5F9' : '#0F172A', flex: 1,
+                    }}>{item.title}</Text>
+                    {!item.read && (
+                      <View style={{
+                        width: 8, height: 8, borderRadius: 4,
+                        backgroundColor: '#0EB5CA', marginLeft: 8,
+                      }} />
+                    )}
+                  </View>
+                  <Text style={{
+                    fontSize: 13, fontFamily: 'Inter_400Regular',
+                    color: isDark ? '#94A3B8' : '#64748B', marginTop: 2,
+                    lineHeight: 18,
+                  }}>{item.body}</Text>
+                  <Text style={{
+                    fontSize: 11, fontFamily: 'Inter_400Regular',
+                    color: '#94A3B8', marginTop: 4,
+                  }}>
+                    {new Date(item.createdAt).toLocaleDateString('en-GB', {
+                      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                    })}
+                  </Text>
+                </View>
+              </Pressable>
+            );
+          }}
+        />
+      )}
+    </View>
+  </Modal>
+
+Make sure Modal is imported from 'react-native' at the top of the file.
+
+═══════════════════════════════════════════════════════
+CHANGE 5 — artifacts/westcars/app/(tabs)/_layout.tsx
+Add notification badge to profile tab
+═══════════════════════════════════════════════════════
+
+At the top of TabLayout, add to the useApp destructure:
+  const { unreadNotificationsCount } = useApp();
+
+Find the profile Tabs.Screen and update tabBarBadge:
+  tabBarBadge: (unreadNotificationsCount > 0)
+    ? unreadNotificationsCount
+    : (!isAuthenticated ? 1 : undefined),
+
+═══════════════════════════════════════════════════════
+DO NOT TOUCH:
+- lib/firebase.ts
+- lib/firebase-persistence.ts
+- hooks/useAvatarUpload.ts
+- Any (tabs) screen not listed above
+- Any car listing or search screens
+- package.json, eas.json, app.json
+═══════════════════════════════════════════════════════
+
+After all changes run: ./deploy.sh
+Commit message: "feat: full notification system with bell icon and activity feed"
