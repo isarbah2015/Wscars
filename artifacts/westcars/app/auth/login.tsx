@@ -112,29 +112,33 @@ export default function LoginScreen() {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <TouchableOpacity
-            style={[styles.googleBtn, (googleLoading || !request) && styles.btnDisabled]}
-            onPress={handleGoogle}
-            disabled={googleLoading || !request}
-            activeOpacity={0.85}
-          >
-            {googleLoading ? (
-              <ActivityIndicator color="#0EB5CA" size="small" />
-            ) : (
-              <>
-                <View style={styles.googleIcon}>
-                  <Text style={styles.googleIconText}>G</Text>
-                </View>
-                <Text style={styles.googleBtnText}>Continue with Google</Text>
-              </>
-            )}
-          </TouchableOpacity>
+          {false && (
+            <>
+              <TouchableOpacity
+                style={[styles.googleBtn, styles.btnDisabled]}
+                onPress={handleGoogle}
+                disabled={true}
+                activeOpacity={0.85}
+              >
+                {googleLoading ? (
+                  <ActivityIndicator color="#0EB5CA" size="small" />
+                ) : (
+                  <>
+                    <View style={styles.googleIcon}>
+                      <Text style={styles.googleIconText}>G</Text>
+                    </View>
+                    <Text style={styles.googleBtnText}>Continue with Google</Text>
+                  </>
+                )}
+              </TouchableOpacity>
 
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or</Text>
+                <View style={styles.dividerLine} />
+              </View>
+            </>
+          )}
 
           <Text style={styles.label}>Email</Text>
           <TextInput
