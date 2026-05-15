@@ -1,8 +1,3 @@
-/**
- * Car brand logo URLs.
- * Source: filippofilip95/car-logos-dataset on GitHub — stable raw PNG files,
- * no auth, no CORS restrictions, works on both React Native native and web.
- */
 const BASE = "https://raw.githubusercontent.com/filippofilip95/car-logos-dataset/master/logos/optimized";
 
 export const BRAND_LOGOS: Record<string, string> = {
@@ -68,14 +63,14 @@ export const BRAND_LOGOS: Record<string, string> = {
   "MG":              `${BASE}/mg.png`,
   "Foton":           `${BASE}/foton.png`,
   "Lifan":           `${BASE}/lifan.png`,
-  "SAIC":            `${BASE}/saic.png`,
-  "GAC":             `${BASE}/gac.png`,
+  "SAIC":            "https://www.carlogos.org/car-logos/saic-logo.png",
+  "GAC":             "https://www.carlogos.org/car-logos/gac-logo.png",
   "Great Wall":      `${BASE}/great-wall.png`,
   "Dongfeng":        `${BASE}/dongfeng.png`,
   "FAW":             `${BASE}/faw.png`,
   "Zotye":           `${BASE}/zotye.png`,
   // ── Chinese buses & trucks ──────────────────────────────────────────────────
-  "BAIC":            `${BASE}/baic.png`,
+  "BAIC":            "https://www.carlogos.org/car-logos/baic-logo.png",
   "King Long":       `${BASE}/king-long.png`,
   "Yutong":          `${BASE}/yutong.png`,
   "Higer":           `${BASE}/higer.png`,
@@ -90,4 +85,13 @@ export const BRAND_LOGOS: Record<string, string> = {
 
 export function getBrandLogo(brand: string): string | null {
   return BRAND_LOGOS[brand] ?? null;
+}
+
+export function getBrandInitials(brand: string): string {
+  return brand
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }

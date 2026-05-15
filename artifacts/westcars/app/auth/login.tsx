@@ -20,6 +20,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
+    if (!auth) { setError('Authentication not available. Please restart the app.'); return; }
     setError('');
     if (!email.trim() || !password.trim()) {
       setError('Please fill in all fields');
@@ -27,7 +28,7 @@ export default function LoginScreen() {
     }
     try {
       setLoading(true);
-      await signInWithEmailAndPassword(auth!, email.trim(), password);
+      await signInWithEmailAndPassword(auth, email.trim(), password);
     } catch (e: any) {
       const msg =
         e.code === 'auth/invalid-credential'  ? 'Incorrect email or password' :

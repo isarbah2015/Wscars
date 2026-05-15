@@ -36,23 +36,29 @@ const queryClient = new QueryClient();
 // When signed out, any protected tab shows its own inline auth wall (existing behaviour).
 
 function useAuthRedirect() {
-  const segments = useSegments();
   const router = useRouter();
+  const segments = useSegments();
+  const prevAuthRef = useRef<boolean>(false);
 
   useEffect(() => {
+    if (!auth) return;
     const unsub = onAuthStateChanged(auth, (user) => {
       const isAuthed = !!user;
-      const onAuthScreen =
-        segments.includes("login") ||
-        segments.includes("signup") ||
-        segments.includes("welcome") ||
-        segments.length === 0; // splash / initial load
-
-      if (isAuthed && onAuthScreen) {
-        router.replace("/(tabs)");
-      } else if (!isAuthed && !onAuthScreen) {
-        router.replace("/welcome");
+      const onAuthOrWelcomeScreen =
+        segments.includes('login') ||
+        segments.includes('signup') ||
+        segments.includes('welcome') ||
+        segments[0] === 'welcome' ||
+        segments.length === 0;
+      if (isAuthed && onAuthOrWelcomeScreen) {
+        router.replace('/(tabs)');
       }
+      if (!isAuthed && !segments.includes('login') && !segments.includes('signup') &&
+          !segments.includes('forgot-password') && !segments.includes('welcome') &&
+          segments[0] !== undefined && segments[0] !== 'splash') {
+        router.replace('/welcome');
+      }
+      prevAuthRef.current = isAuthed;
     });
     return unsub;
   }, [segments]);

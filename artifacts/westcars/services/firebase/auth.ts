@@ -21,11 +21,9 @@ import { db, isFirebaseReady } from "@/lib/firebase";
 import { auth } from "@/lib/firebase-persistence";
 import { User } from "@/types";
 
-const ensureReady = (): void => {
-  if (!isFirebaseReady() || !auth) {
-    throw new Error(
-      '[Firebase] Not ready — check EXPO_PUBLIC_FIREBASE_* env vars and auth initialization.'
-    );
+const ensureReady = () => {
+  if (!isFirebaseReady() || !auth || !db) {
+    throw new Error("Firebase is not configured. Add EXPO_PUBLIC_FIREBASE_* secrets.");
   }
 };
 
@@ -131,7 +129,10 @@ export async function sendPasswordResetEmail(email: string): Promise<void> {
 
 /** Subscribe to auth state changes; resolves the user-doc on each login. */
 export function subscribeAuth(cb: (user: User | null) => void): Unsubscribe {
-  if (!isFirebaseReady()) { cb(null); return () => {}; }
+  if (!isFirebaseReady() || !auth) {
+    cb(null);
+    return () => {};
+  }
   return onAuthStateChanged(auth, async (fbUser) => {
     if (!fbUser) { cb(null); return; }
     try {

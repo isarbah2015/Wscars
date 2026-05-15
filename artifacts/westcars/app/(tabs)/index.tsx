@@ -20,7 +20,7 @@ import { CarCard, VideoAdCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { CAR_BRANDS, formatPrice } from "@/utils/ghanaData";
-import { BRAND_LOGOS } from "@/utils/brandLogos";
+import { BRAND_LOGOS, getBrandInitials } from "@/utils/brandLogos";
 
 const WC_LOGO      = require("@/assets/images/wc-logo.png");
 const WC_LOGO_FULL = require("@/assets/images/wc-logo-full.png");
@@ -413,9 +413,9 @@ export default function HomeScreen() {
                       />
                     </View>
                   ) : (
-                    <View style={[styles.brandPillLogoPlaceholder, { backgroundColor: isDark ? "#2D3A4F" : "#E2E8F0" }]}>
-                      <Text style={[styles.brandPillLogoInitial, { color: isDark ? "#94A3B8" : "#475569" }]}>
-                        {brand.charAt(0)}
+                    <View style={[styles.brandPillLogoPlaceholder, { backgroundColor: '#E8F7FA' }]}>
+                      <Text style={[styles.brandPillLogoInitial, { color: '#0EB5CA', fontFamily: 'Inter_700Bold', fontSize: 13 }]}>
+                        {getBrandInitials(brand)}
                       </Text>
                     </View>
                   )}

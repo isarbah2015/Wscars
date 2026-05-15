@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import {
+  Alert,
   Text,
   TextInput,
   TouchableOpacity,
@@ -42,6 +43,12 @@ export default function SignupScreen() {
     try {
       setLoading(true);
       await signup(name.trim(), email.trim(), '', password);
+      Alert.alert(
+        'Account Created!',
+        'Welcome to Westcars! Your account has been created successfully.',
+        [{ text: "Let's Go", onPress: () => router.replace('/(tabs)') }]
+      );
+      return;
     } catch (e: any) {
       setError(authErrorMessage(e));
     } finally { setLoading(false); }
