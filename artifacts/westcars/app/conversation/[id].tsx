@@ -233,7 +233,7 @@ function MessageBubble({
 export default function ConversationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { conversations, messages, sendMessage, deleteMessage, markMessagesRead,
-          currentUser, blockUser, isBlocked, reportItem, isAuthenticated } = useApp();
+          currentUser, blockUser, isBlocked, reportItem, isAuthenticated, cars } = useApp();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -409,27 +409,27 @@ export default function ConversationScreen() {
           style={styles.headerInfo}
           onPress={() => setProfileExpanded((v) => !v)}
         >
-          {/* Avatar with online dot */}
-          <View style={{ position: "relative" }}>
-            {conv?.participant.avatar ? (
-              <Image source={{ uri: conv.participant.avatar }} style={styles.headerAvatar} />
-            ) : (
-              <View style={[styles.headerAvatarPlaceholder, { backgroundColor: isDark ? "#1E2940" : "#EFF6FF" }]}>
-                <Feather name="user" size={18} color={BRAND} />
-              </View>
-            )}
-            {/* Online indicator */}
-            <View style={styles.headerOnlineDot} />
-          </View>
-          <View>
-            <Text style={[styles.headerName, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>
-              {conv?.participant.name || "Seller"}
-            </Text>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-              <View style={styles.headerOnlineDotSmall} />
-              <Text style={[styles.headerOnlineText, { color: "#22C55E" }]}>Online</Text>
+          {conv?.participant.avatar ? (
+            <Image source={{ uri: conv.participant.avatar }} style={styles.headerAvatar} />
+          ) : (
+            <View style={[styles.headerAvatarPlaceholder, { backgroundColor: isDark ? "#1E2940" : "#EFF6FF" }]}>
+              <Feather name="user" size={16} color={BRAND} />
             </View>
-          </View>
+          )}
+          <Text style={[styles.headerName, { color: isDark ? "#F1F5F9" : "#0F172A" }]} numberOfLines={1}>
+            {conv?.participant.name || "Seller"}
+          </Text>
+          {conv?.participant.isVerified && (
+            <View style={styles.headerVerifiedDot}>
+              <Feather name="check" size={8} color="#fff" />
+            </View>
+          )}
+          <Feather
+            name={profileExpanded ? "chevron-up" : "chevron-down"}
+            size={15}
+            color={isDark ? "#94A3B8" : "#64748B"}
+            style={{ marginLeft: "auto" }}
+          />
         </Pressable>
 
         {/* Right actions: phone, video, more */}
@@ -491,101 +491,112 @@ export default function ConversationScreen() {
 
       {/* Client Profile Card (expandable) */}
       {profileExpanded && conv && (
-        <View style={[styles.profileCard, { backgroundColor: isDark ? "#111827" : "#FFFFFF", borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "#E2E8F0" }]}>
-          <View style={styles.profileCardInner}>
-            <View style={styles.profileLeft}>
-              <View style={{ position: "relative" }}>
-                {conv.participant.avatar ? (
-                  <Image source={{ uri: conv.participant.avatar }} style={styles.profileAvatar} />
-                ) : (
-                  <View style={[styles.profileAvatarPlaceholder, { backgroundColor: colors.accentLight }]}>
-                    <Feather name="user" size={28} color={colors.accent} />
-                  </View>
-                )}
-                {conv.participant.isVerified && (
-                  <View style={[styles.profileVerifiedBadge, { backgroundColor: "#22C55E" }]}>
-                    <Feather name="check" size={9} color="#fff" />
-                  </View>
-                )}
-              </View>
-              <View style={styles.profileInfo}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                  <Text style={[styles.profileName, { color: colors.text }]}>
-                    {conv.participant.name}
-                  </Text>
-                  {conv.participant.isVerified && (
-                    <View style={[styles.verifiedTag, { backgroundColor: "rgba(34,197,94,0.12)" }]}>
-                      <Text style={styles.verifiedTagText}>Verified</Text>
-                    </View>
-                  )}
+        <View style={styles.profileCard}>
+          {/* Row 1: Avatar + name + verified + rating */}
+          <View style={styles.profileRow1}>
+            <View style={{ position: "relative" }}>
+              {conv.participant.avatar ? (
+                <Image source={{ uri: conv.participant.avatar }} style={styles.profileAvatar} />
+              ) : (
+                <View style={styles.profileAvatarPlaceholder}>
+                  <Feather name="user" size={22} color={BRAND} />
                 </View>
-                {participantFull && (
-                  <>
-                    <View style={styles.profileMetaRow}>
-                      <Feather name="map-pin" size={11} color={colors.textTertiary} />
-                      <Text style={[styles.profileMeta, { color: colors.textSecondary }]}>
-                        {participantFull.location}
-                      </Text>
-                    </View>
-                    <View style={styles.profileMetaRow}>
-                      <Feather name="calendar" size={11} color={colors.textTertiary} />
-                      <Text style={[styles.profileMeta, { color: colors.textSecondary }]}>
-                        Member since {participantFull.memberSince?.slice(0, 7) || "2023"}
-                      </Text>
-                    </View>
-                    <View style={styles.ratingRow}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Feather
-                          key={star}
-                          name={star <= Math.round(participantFull.rating) ? "star" : "star"}
-                          size={12}
-                          color={star <= Math.round(participantFull.rating) ? "#F59E0B" : colors.border}
-                        />
-                      ))}
-                      <Text style={[styles.profileMeta, { color: colors.textSecondary }]}>
-                        {participantFull.rating.toFixed(1)} · {participantFull.totalReviews} reviews
-                      </Text>
-                    </View>
-                  </>
+              )}
+              {conv.participant.isVerified && (
+                <View style={styles.profileVerifiedBadge}>
+                  <Feather name="check" size={8} color="#fff" />
+                </View>
+              )}
+            </View>
+            <View style={{ flex: 1, gap: 3 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Text style={styles.profileName} numberOfLines={1}>{conv.participant.name}</Text>
+                {conv.participant.isVerified && (
+                  <View style={styles.profileVerifiedPill}>
+                    <Text style={styles.profileVerifiedPillText}>Verified</Text>
+                  </View>
                 )}
               </View>
-            </View>
-
-            <View style={styles.profileActions}>
-              {conv.participant.phone && (
-                <Pressable
-                  style={[styles.profileActionBtn, { backgroundColor: colors.accentLight }]}
-                  onPress={() => {
-                    if (Platform.OS !== "web") {
-                      Linking.openURL(`tel:${conv.participant.phone}`);
-                    }
-                  }}
-                >
-                  <Feather name="phone" size={16} color={colors.accent} />
-                </Pressable>
+              {participantFull && (
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Feather key={s} name="star" size={11}
+                      color={s <= Math.round(participantFull.rating) ? "#F59E0B" : "rgba(255,255,255,0.3)"} />
+                  ))}
+                  <Text style={styles.profileRatingText}>
+                    {participantFull.rating.toFixed(1)} · {participantFull.totalReviews} reviews
+                  </Text>
+                </View>
               )}
-              <Pressable
-                style={[styles.profileActionBtn, { backgroundColor: colors.backgroundSecondary }]}
-                onPress={() => {
-                  setProfileExpanded(false);
-                  router.push({ pathname: "/user/[id]", params: { id: participantId } });
-                }}
-              >
-                <Feather name="external-link" size={16} color={colors.text} />
-              </Pressable>
             </View>
           </View>
 
+          {/* Row 2: Stat pills */}
+          <View style={styles.profileStatRow}>
+            {[
+              { label: "Listings",   value: String(cars.filter((c) => c.sellerId === participantId && !c.isSold).length) },
+              { label: "Response",   value: "~2h" },
+              { label: "Joined",     value: participantFull?.memberSince?.slice(0, 7) || "2024" },
+            ].map((pill) => (
+              <View key={pill.label} style={styles.profileStatPill}>
+                <Text style={styles.profileStatValue}>{pill.value}</Text>
+                <Text style={styles.profileStatLabel}>{pill.label}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Row 3: Active listings horizontal scroll */}
+          {(() => {
+            const sellerCars = cars.filter((c) => c.sellerId === participantId && !c.isSold && c.id !== conv.carId);
+            if (sellerCars.length === 0) return null;
+            return (
+              <>
+                <Text style={styles.profileActiveLabel}>Active listings</Text>
+                <FlatList
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  data={sellerCars}
+                  keyExtractor={(c) => c.id}
+                  contentContainerStyle={{ gap: 10, paddingBottom: 4 }}
+                  renderItem={({ item: c }) => {
+                    const img = (c as any).images?.[0];
+                    const title = [(c as any).year, (c as any).make, (c as any).model].filter(Boolean).join(" ") || (c as any).title || "Car";
+                    const price = (c as any).price;
+                    return (
+                      <Pressable
+                        style={styles.profileMiniCard}
+                        onPress={() => { setProfileExpanded(false); router.push({ pathname: "/car/[id]", params: { id: c.id } }); }}
+                      >
+                        {img ? (
+                          <Image source={{ uri: img }} style={styles.profileMiniImg} resizeMode="cover" />
+                        ) : (
+                          <View style={[styles.profileMiniImg, styles.profileMiniImgPlaceholder]}>
+                            <Feather name="truck" size={18} color={BRAND} />
+                          </View>
+                        )}
+                        <Text style={styles.profileMiniTitle} numberOfLines={1}>{title}</Text>
+                        {price !== undefined && (
+                          <Text style={styles.profileMiniPrice}>GHS {Number(price).toLocaleString()}</Text>
+                        )}
+                      </Pressable>
+                    );
+                  }}
+                />
+              </>
+            );
+          })()}
+
+          {/* View full profile button */}
           <Pressable
-            style={[styles.viewFullProfileBtn, { backgroundColor: BRAND }]}
+            style={styles.viewFullProfileBtn}
             onPress={() => {
               setProfileExpanded(false);
               router.push({ pathname: "/user/[id]", params: { id: participantId } });
             }}
           >
-            <Feather name="user" size={14} color="#fff" />
-            <Text style={styles.viewFullProfileText}>View Full Profile & Listings</Text>
-            <Feather name="chevron-right" size={14} color="#fff" />
+            <Feather name="user" size={14} color={BRAND} />
+            <Text style={styles.viewFullProfileText}>View Full Profile</Text>
+            <Feather name="chevron-right" size={14} color={BRAND} />
           </Pressable>
         </View>
       )}
@@ -780,33 +791,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
-  headerAvatar: { width: 42, height: 42, borderRadius: 21 },
+  headerAvatar: { width: 32, height: 32, borderRadius: 16 },
   headerAvatarPlaceholder: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },
-  headerOnlineDot: {
-    position: "absolute",
-    bottom: 1,
-    right: 1,
-    width: 11,
-    height: 11,
-    borderRadius: 6,
+  headerVerifiedDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     backgroundColor: "#22C55E",
-    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
     borderColor: "#fff",
   },
-  headerName: { fontSize: 15, fontFamily: "Inter_700Bold" },
-  headerOnlineDotSmall: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: "#22C55E",
-  },
-  headerOnlineText: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  headerName: { fontSize: 15, fontFamily: "Inter_700Bold", flex: 1 },
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
@@ -845,25 +848,25 @@ const styles = StyleSheet.create({
   },
   dropText: { fontSize: 14, fontFamily: "Inter_500Medium" },
 
-  /* Profile card */
+  /* Profile card — teal expanded panel */
   profileCard: {
-    borderBottomWidth: 1,
+    backgroundColor: "#0EB5CA",
     paddingHorizontal: 16,
     paddingTop: 14,
-    paddingBottom: 4,
+    paddingBottom: 14,
+    gap: 14,
   },
-  profileCardInner: {
+  profileRow1: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    marginBottom: 12,
+    alignItems: "center",
+    gap: 12,
   },
-  profileLeft: { flexDirection: "row", alignItems: "flex-start", gap: 12, flex: 1 },
-  profileAvatar: { width: 58, height: 58, borderRadius: 29 },
+  profileAvatar: { width: 48, height: 48, borderRadius: 24 },
   profileAvatarPlaceholder: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.25)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -871,39 +874,59 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#22C55E",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
     borderColor: "#fff",
   },
-  profileInfo: { flex: 1, gap: 3 },
-  profileName: { fontSize: 16, fontFamily: "Inter_700Bold" },
-  verifiedTag: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 },
-  verifiedTagText: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: "#16A34A" },
-  profileMetaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  profileMeta: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  ratingRow: { flexDirection: "row", alignItems: "center", gap: 3, marginTop: 1 },
-  profileActions: { flexDirection: "row", gap: 8, marginLeft: 8 },
-  profileActionBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
+  profileName: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#FFFFFF" },
+  profileVerifiedPill: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 7, paddingVertical: 2, borderRadius: 20,
+  },
+  profileVerifiedPillText: { fontSize: 10, fontFamily: "Inter_600SemiBold", color: "#FFFFFF" },
+  profileRatingText: { fontSize: 11, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.85)", marginLeft: 2 },
+  profileStatRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  profileStatPill: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 8,
+    paddingVertical: 8,
+    alignItems: "center",
+    gap: 2,
+  },
+  profileStatValue: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#FFFFFF" },
+  profileStatLabel: { fontSize: 10, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.8)" },
+  profileActiveLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.9)" },
+  profileMiniCard: {
+    width: 90,
+    gap: 4,
+  },
+  profileMiniImg: { width: 90, height: 70, borderRadius: 8 },
+  profileMiniImgPlaceholder: {
+    backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
   },
+  profileMiniTitle: { fontSize: 11, fontFamily: "Inter_500Medium", color: "#FFFFFF" },
+  profileMiniPrice: { fontSize: 11, fontFamily: "Inter_700Bold", color: "rgba(255,255,255,0.9)" },
   viewFullProfileBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    paddingVertical: 10,
-    borderRadius: 12,
-    marginBottom: 12,
+    paddingVertical: 11,
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
   },
-  viewFullProfileText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#fff" },
+  viewFullProfileText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#0EB5CA" },
 
   /* Car banner */
   carBanner: {

@@ -1,0 +1,118 @@
+⚠️ CRITICAL: Only touch the files explicitly listed below. Do not refactor, 
+rename, reorganize, or "improve" anything else. No new dependencies.
+
+═══════════════════════════════════════════════════════
+CHANGE 1 — app/(tabs)/profile.tsx
+FULL REDESIGN — replace the entire file content
+═══════════════════════════════════════════════════════
+
+Keep ALL existing logic, hooks, functions, and data connections exactly as-is.
+Only change the JSX/styles. Here is what the new design must look like:
+
+HEADER SECTION (replaces current header):
+- Full teal (#0EB5CA) background covering top ~220px
+- Avatar centered with camera button (existing useAvatarUpload hook — keep as-is)
+- User displayName below avatar, white, fontSize 20, fontFamily Manrope_700Bold
+- Location row: ti-map-pin icon + user.city, white, fontSize 12
+- "Member since [join date]" below, white opacity 0.75, fontSize 11
+- Verified badge pill: white background 20% opacity, shield-check icon, "Verified Seller" 
+  text — only show if user.isVerified === true
+- Slide the white content sheet up with borderRadius 24 top corners overlapping 
+  the teal header by 20px (use negative marginTop: -20)
+
+STATS ROW (keep existing data, restyle):
+- 3 cards in a row: Listings count | Rating (trust score) | Saved count
+- Each card: background var secondary, borderRadius 12, padding 12, centered
+- Number: fontSize 20, Manrope_700Bold, color #0F172A
+- Label: fontSize 10, color #64748B, marginTop 2
+
+PROFILE COMPLETION CARD (new — add below stats):
+- Calculate completion % from these fields existing on user object:
+  photoURL (or avatar) → "Photo"
+  email → "Email"  
+  city → "Location"
+  phone → "Phone"
+  isVerified → "ID Verified"
+- Show progress bar (teal fill, gray background, height 6, borderRadius 99)
+- Show pill badges below bar for each item: 
+  completed = teal check icon + label
+  incomplete = gray plus icon + label
+- Background: var secondary, borderRadius 12, padding 14, border 0.5px
+
+TABS (keep existing 4 tabs — Listings, Saved, Reviews, Settings):
+- Active tab: color #0EB5CA, borderBottom 2px solid #0EB5CA
+- Inactive: color #64748B
+- fontSize 12, flex 1, centered
+
+LISTINGS TAB (keep all existing logic, restyle cards):
+- Each listing card: flex row, background var secondary, borderRadius 12, 
+  padding 10, border 0.5px, marginBottom 8
+- Left: 72x60 image (or teal placeholder with ti-car icon if no image)
+- Right: car name (fontSize 13, bold), price (fontSize 14, teal), 
+  views + chats row (fontSize 10, gray icons ti-eye ti-message)
+- Active/Sold badge top right of card: 
+  Active = background #eafbf4 color #0a7a4a
+  Sold = background #f0f0f0 color #888
+- Keep existing markAsSold, renewListing, deleteCar actions
+
+SAVED TAB — keep exactly as-is, just apply same card restyle as listings
+
+REVIEWS TAB (keep existing ReviewCard, restyle):
+- Reviewer avatar circle 32px, teal background, initials white
+- Name fontSize 12 bold, stars row using ti-star icons color #F59E0B
+- Review text fontSize 12, color secondary
+- Date fontSize 10, color secondary
+
+SETTINGS TAB (keep all existing toggles and actions, restyle):
+- Each setting row: flex row, alignItems center, gap 10, padding 12 0, 
+  borderBottom 0.5px
+- Left icon: 36x36 rounded square, background var secondary, teal icon inside
+- Middle: title fontSize 13 bold + subtitle fontSize 11 gray
+- Right: chevron or toggle switch (keep existing toggle logic)
+- Sign out button at bottom: full width, background #fff0f0, border #fca5a5, 
+  color #dc2626, borderRadius 12, height 48, flex row center with ti-logout icon
+
+AUTH WALL (keep existing, just ensure it still shows when not logged in)
+
+═══════════════════════════════════════════════════════
+CHANGE 2 — app/conversation/[id].tsx  
+Only change the seller profile card in the header
+═══════════════════════════════════════════════════════
+
+Find the expandable seller profile card section in the header.
+Replace its content (keep the expand/collapse toggle logic) with:
+
+When collapsed:
+- Teal header bar showing: seller avatar (32px circle) + seller name + 
+  verified badge icon (if verified) + chevron-down icon right side
+
+When expanded (keep existing expand state):
+- Teal background panel below header
+- Row 1: 48px avatar circle + name (white, 15px bold) + 
+  verified pill (white 20% opacity bg) + rating top right (white)
+- Row 2: 3 stat pills in a row:
+    [listings count] Listings | [~Xh] Response | [join month year] Joined
+  Each pill: white 15% opacity background, white text, borderRadius 8
+- Row 3: "Active listings" label (white, 12px)
+- Horizontal scroll of seller's OTHER active car listings 
+  (filter from cars array where car.sellerId === otherUserId && !car.sold):
+  Each mini card: 90x70 teal image placeholder + car name + price below
+  Tapping a car navigates to car/[id]
+- "View full profile" button at bottom of expanded panel:
+  white background, teal text, borderRadius 10, navigates to user/[otherUserId]
+
+Keep ALL existing chat functionality — messages, audio, video, blocking, 
+reporting, safety tips, phone detection — completely untouched.
+
+═══════════════════════════════════════════════════════
+DO NOT TOUCH:
+- context/AppContext.tsx
+- hooks/useAvatarUpload.ts  
+- lib/firebase.ts
+- lib/firebase-persistence.ts
+- Any other file not listed above
+- package.json, eas.json, app.json
+═══════════════════════════════════════════════════════
+
+After changes are done, run: ./deploy.sh
+Commit message: "redesign: premium profile page + seller card in chat"
