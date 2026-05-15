@@ -226,6 +226,11 @@ export default function ProfileScreen() {
                 )}
               </View>
             )}
+            {currentUser.isVerified && (
+              <View style={styles.avatarVerifiedBadge}>
+                <Feather name="check" size={10} color="#fff" />
+              </View>
+            )}
             <Pressable
               style={styles.editAvatarBtn}
               onPress={() => {
@@ -281,40 +286,61 @@ export default function ProfileScreen() {
 
           {/* Profile Completion */}
           <View style={[styles.completionCard, {
-            backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
+            backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
             borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
           }]}>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <Text style={[styles.completionTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Profile Completion</Text>
-              <Text style={styles.completionPct}>{completionPct}%</Text>
+            {/* Header row */}
+            <View style={styles.completionHeader}>
+              <View>
+                <Text style={[styles.completionTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Profile Strength</Text>
+                <Text style={[styles.completionSub, { color: isDark ? "#64748B" : "#94A3B8" }]}>
+                  {completionPct < 60 ? "Keep going — almost there" : completionPct < 100 ? "Looking good!" : "All complete!"}
+                </Text>
+              </View>
+              <View style={styles.completionCircle}>
+                <Text style={styles.completionPct}>{completionPct}%</Text>
+              </View>
             </View>
-            <View style={[styles.progressTrack, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" }]}>
+
+            {/* Progress bar */}
+            <View style={[styles.progressTrack, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "#F1F5F9" }]}>
               <View style={[styles.progressFill, { width: `${completionPct}%` as any }]} />
             </View>
-            <View style={styles.pillsRow}>
-              {completionItems.map((item) => (
+
+            {/* Items grid */}
+            <View style={styles.completionGrid}>
+              {[
+                { label: "Photo",       done: completionItems[0].done, icon: "camera",    iconBg: "#E0F7FA", iconColor: "#0EB5CA" },
+                { label: "Email",       done: completionItems[1].done, icon: "mail",      iconBg: "#EFF6FF", iconColor: "#3B82F6" },
+                { label: "Location",    done: completionItems[2].done, icon: "map-pin",   iconBg: "#FFF7ED", iconColor: "#F97316" },
+                { label: "Phone",       done: completionItems[3].done, icon: "phone",     iconBg: "#F0FDF4", iconColor: "#22C55E" },
+                { label: "ID Verified", done: completionItems[4].done, icon: "shield",    iconBg: "#F5F3FF", iconColor: "#8B5CF6" },
+              ].map((item) => (
                 <View
                   key={item.label}
                   style={[
-                    styles.completionPill,
+                    styles.completionItem,
                     {
                       backgroundColor: item.done
-                        ? "rgba(14,181,202,0.1)"
-                        : (isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"),
+                        ? (isDark ? "rgba(14,181,202,0.08)" : "rgba(14,181,202,0.05)")
+                        : (isDark ? "rgba(255,255,255,0.04)" : "#F8FAFC"),
                       borderColor: item.done
-                        ? "rgba(14,181,202,0.25)"
-                        : (isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"),
+                        ? (isDark ? "rgba(14,181,202,0.2)" : "rgba(14,181,202,0.18)")
+                        : (isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)"),
                     },
                   ]}
                 >
-                  <Feather
-                    name={item.done ? "check-circle" : "plus-circle"}
-                    size={11}
-                    color={item.done ? "#0EB5CA" : "#94A3B8"}
-                  />
-                  <Text style={[styles.completionPillText, { color: item.done ? "#0EB5CA" : "#94A3B8" }]}>
+                  <View style={[styles.completionItemIcon, { backgroundColor: item.done ? item.iconBg : (isDark ? "rgba(255,255,255,0.08)" : "#F1F5F9") }]}>
+                    <Feather name={item.icon as any} size={13} color={item.done ? item.iconColor : "#94A3B8"} />
+                  </View>
+                  <Text style={[styles.completionItemLabel, { color: isDark ? (item.done ? "#F1F5F9" : "#64748B") : (item.done ? "#0F172A" : "#94A3B8") }]}>
                     {item.label}
                   </Text>
+                  <View style={[styles.completionItemStatus, {
+                    backgroundColor: item.done ? "#0EB5CA" : (isDark ? "rgba(255,255,255,0.12)" : "#E2E8F0"),
+                  }]}>
+                    <Feather name={item.done ? "check" : "plus"} size={9} color={item.done ? "#fff" : "#94A3B8"} />
+                  </View>
                 </View>
               ))}
             </View>
@@ -368,62 +394,56 @@ export default function ProfileScreen() {
                   </Pressable>
                 </View>
               ) : (
-                myListings.map((car) => {
-                  const img = (car as any).images?.[0];
-                  const title = [(car as any).year, (car as any).make, (car as any).model]
-                    .filter(Boolean).join(" ") || (car as any).title || "Car";
-                  const price = (car as any).price;
-                  return (
-                    <Pressable
-                      key={car.id}
-                      style={[styles.listingCard, {
-                        backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
-                        borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
-                      }]}
-                      onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
-                    >
-                      {img ? (
-                        <Image source={{ uri: img }} style={styles.listingImg} resizeMode="cover" />
-                      ) : (
-                        <View style={[styles.listingImgPlaceholder, { backgroundColor: "rgba(14,181,202,0.12)" }]}>
-                          <Feather name="truck" size={22} color="#0EB5CA" />
-                        </View>
-                      )}
-                      <View style={styles.listingInfo}>
-                        <View style={styles.listingBadgeRow}>
+                <View style={styles.listingsGrid}>
+                  {myListings.map((car) => {
+                    const img = (car as any).images?.[0];
+                    const title = [(car as any).year, (car as any).make, (car as any).model]
+                      .filter(Boolean).join(" ") || (car as any).title || "Car";
+                    const price = (car as any).price;
+                    return (
+                      <Pressable
+                        key={car.id}
+                        style={[styles.listingCard, {
+                          backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
+                          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
+                        }]}
+                        onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
+                      >
+                        {/* Badge overlay */}
+                        <View style={styles.listingBadgeOverlay}>
                           <View style={[styles.listingBadge,
-                            car.isSold
-                              ? { backgroundColor: "#f0f0f0" }
-                              : { backgroundColor: "#eafbf4" },
+                            car.isSold ? { backgroundColor: "rgba(0,0,0,0.55)" } : { backgroundColor: "rgba(10,122,74,0.85)" },
                           ]}>
-                            <Text style={[styles.listingBadgeText, { color: car.isSold ? "#888" : "#0a7a4a" }]}>
+                            <Text style={[styles.listingBadgeText, { color: "#fff" }]}>
                               {car.isSold ? "Sold" : "Active"}
                             </Text>
                           </View>
-                          {car.expiresAt && !car.isSold && (
-                            <View style={[styles.listingBadge, { backgroundColor: "#FEF3C7", marginLeft: 4 }]}>
-                              <Text style={[styles.listingBadgeText, { color: "#D97706" }]}>
-                                Exp {new Date(car.expiresAt).toLocaleDateString("en-GH", { day: "numeric", month: "short" })}
-                              </Text>
-                            </View>
-                          )}
                         </View>
-                        <Text style={[styles.listingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]} numberOfLines={1}>
-                          {title}
-                        </Text>
-                        {price !== undefined && (
-                          <Text style={styles.listingPrice}>GHS {Number(price).toLocaleString()}</Text>
+                        {img ? (
+                          <Image source={{ uri: img }} style={styles.listingImg} resizeMode="cover" />
+                        ) : (
+                          <View style={[styles.listingImgPlaceholder, { backgroundColor: "rgba(14,181,202,0.12)" }]}>
+                            <Feather name="truck" size={26} color="#0EB5CA" />
+                          </View>
                         )}
-                        <View style={styles.listingMeta}>
-                          <Feather name="eye" size={11} color="#94A3B8" />
-                          <Text style={styles.listingMetaText}>{(car as any).views ?? 0} views</Text>
-                          <Feather name="message-circle" size={11} color="#94A3B8" />
-                          <Text style={styles.listingMetaText}>{(car as any).chats ?? 0} chats</Text>
+                        <View style={styles.listingInfo}>
+                          <Text style={[styles.listingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]} numberOfLines={2}>
+                            {title}
+                          </Text>
+                          {price !== undefined && (
+                            <Text style={styles.listingPrice}>GHS {Number(price).toLocaleString()}</Text>
+                          )}
+                          <View style={styles.listingMeta}>
+                            <Feather name="eye" size={10} color="#94A3B8" />
+                            <Text style={styles.listingMetaText}>{(car as any).views ?? 0}</Text>
+                            <Feather name="message-circle" size={10} color="#94A3B8" />
+                            <Text style={styles.listingMetaText}>{(car as any).chats ?? 0}</Text>
+                          </View>
                         </View>
-                      </View>
-                    </Pressable>
-                  );
-                })
+                      </Pressable>
+                    );
+                  })}
+                </View>
               )}
             </View>
           )}
@@ -440,38 +460,40 @@ export default function ProfileScreen() {
                   </Text>
                 </View>
               ) : (
-                savedCars.map((car) => {
-                  const img = (car as any).images?.[0];
-                  const title = [(car as any).year, (car as any).make, (car as any).model]
-                    .filter(Boolean).join(" ") || (car as any).title || "Car";
-                  const price = (car as any).price;
-                  return (
-                    <Pressable
-                      key={car.id}
-                      style={[styles.listingCard, {
-                        backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
-                        borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
-                      }]}
-                      onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
-                    >
-                      {img ? (
-                        <Image source={{ uri: img }} style={styles.listingImg} resizeMode="cover" />
-                      ) : (
-                        <View style={[styles.listingImgPlaceholder, { backgroundColor: "rgba(14,181,202,0.12)" }]}>
-                          <Feather name="truck" size={22} color="#0EB5CA" />
-                        </View>
-                      )}
-                      <View style={styles.listingInfo}>
-                        <Text style={[styles.listingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]} numberOfLines={1}>
-                          {title}
-                        </Text>
-                        {price !== undefined && (
-                          <Text style={styles.listingPrice}>GHS {Number(price).toLocaleString()}</Text>
+                <View style={styles.listingsGrid}>
+                  {savedCars.map((car) => {
+                    const img = (car as any).images?.[0];
+                    const title = [(car as any).year, (car as any).make, (car as any).model]
+                      .filter(Boolean).join(" ") || (car as any).title || "Car";
+                    const price = (car as any).price;
+                    return (
+                      <Pressable
+                        key={car.id}
+                        style={[styles.listingCard, {
+                          backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
+                          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
+                        }]}
+                        onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
+                      >
+                        {img ? (
+                          <Image source={{ uri: img }} style={styles.listingImg} resizeMode="cover" />
+                        ) : (
+                          <View style={[styles.listingImgPlaceholder, { backgroundColor: "rgba(14,181,202,0.12)" }]}>
+                            <Feather name="truck" size={26} color="#0EB5CA" />
+                          </View>
                         )}
-                      </View>
-                    </Pressable>
-                  );
-                })
+                        <View style={styles.listingInfo}>
+                          <Text style={[styles.listingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]} numberOfLines={2}>
+                            {title}
+                          </Text>
+                          {price !== undefined && (
+                            <Text style={styles.listingPrice}>GHS {Number(price).toLocaleString()}</Text>
+                          )}
+                        </View>
+                      </Pressable>
+                    );
+                  })}
+                </View>
               )}
             </View>
           )}
@@ -762,6 +784,13 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     borderWidth: 3, borderColor: "rgba(255,255,255,0.4)",
   },
+  avatarVerifiedBadge: {
+    position: "absolute", top: 2, right: 2,
+    width: 22, height: 22, borderRadius: 11,
+    backgroundColor: "#22C55E",
+    borderWidth: 2, borderColor: "#0EB5CA",
+    alignItems: "center", justifyContent: "center",
+  },
   editAvatarBtn: {
     position: "absolute", bottom: 2, right: 2,
     width: 28, height: 28, borderRadius: 14,
@@ -812,19 +841,41 @@ const styles = StyleSheet.create({
   // ── Completion card ──
   completionCard: {
     marginHorizontal: 16, marginBottom: 12,
-    borderRadius: 12, padding: 14, borderWidth: 0.5,
+    borderRadius: 16, padding: 16, borderWidth: 0.5,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
   },
-  completionTitle: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  completionHeader: {
+    flexDirection: "row", alignItems: "center",
+    justifyContent: "space-between", marginBottom: 12,
+  },
+  completionTitle: { fontSize: 14, fontFamily: "Inter_700Bold" },
+  completionSub: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 1 },
+  completionCircle: {
+    width: 48, height: 48, borderRadius: 24,
+    backgroundColor: "rgba(14,181,202,0.1)",
+    borderWidth: 2, borderColor: "#0EB5CA",
+    alignItems: "center", justifyContent: "center",
+  },
   completionPct: { fontSize: 13, fontFamily: "Manrope_800ExtraBold", color: "#0EB5CA" },
-  progressTrack: { height: 6, borderRadius: 99, marginBottom: 12, overflow: "hidden" },
+  progressTrack: { height: 5, borderRadius: 99, marginBottom: 14, overflow: "hidden" },
   progressFill: { height: "100%", borderRadius: 99, backgroundColor: "#0EB5CA" },
-  pillsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  completionPill: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    paddingHorizontal: 9, paddingVertical: 4,
-    borderRadius: 20, borderWidth: 0.5,
+  completionGrid: {
+    flexDirection: "row", flexWrap: "wrap", gap: 8,
   },
-  completionPillText: { fontSize: 11, fontFamily: "Inter_500Medium" },
+  completionItem: {
+    width: "47%", flexDirection: "row", alignItems: "center",
+    gap: 8, padding: 10, borderRadius: 10, borderWidth: 0.5,
+  },
+  completionItemIcon: {
+    width: 30, height: 30, borderRadius: 8,
+    alignItems: "center", justifyContent: "center",
+  },
+  completionItemLabel: { flex: 1, fontSize: 11, fontFamily: "Inter_500Medium" },
+  completionItemStatus: {
+    width: 18, height: 18, borderRadius: 9,
+    alignItems: "center", justifyContent: "center",
+  },
 
   // ── Tabs ──
   tabs: { flexDirection: "row", borderBottomWidth: 1 },
@@ -839,24 +890,28 @@ const styles = StyleSheet.create({
   // ── Tab content ──
   tabContent: { padding: 14, gap: 10 },
 
-  // ── Listing card (row) ──
-  listingCard: {
-    flexDirection: "row", borderRadius: 12,
-    padding: 10, borderWidth: 0.5, gap: 12,
-    alignItems: "center",
+  // ── Listings 2×2 grid ──
+  listingsGrid: {
+    flexDirection: "row", flexWrap: "wrap", gap: 10,
   },
-  listingImg: { width: 72, height: 60, borderRadius: 8 },
+  listingCard: {
+    width: "47%", borderRadius: 12,
+    borderWidth: 0.5, overflow: "hidden",
+  },
+  listingBadgeOverlay: {
+    position: "absolute", top: 6, left: 6, zIndex: 1,
+  },
+  listingImg: { width: "100%", height: 100 },
   listingImgPlaceholder: {
-    width: 72, height: 60, borderRadius: 8,
+    width: "100%", height: 100,
     alignItems: "center", justifyContent: "center",
   },
-  listingInfo: { flex: 1, gap: 3 },
-  listingBadgeRow: { flexDirection: "row" },
-  listingBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
-  listingBadgeText: { fontSize: 10, fontFamily: "Inter_600SemiBold" },
-  listingTitle: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  listingPrice: { fontSize: 14, fontFamily: "Manrope_800ExtraBold", color: "#0EB5CA" },
-  listingMeta: { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 2 },
+  listingInfo: { padding: 8, gap: 3 },
+  listingBadge: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: 20 },
+  listingBadgeText: { fontSize: 9, fontFamily: "Inter_600SemiBold" },
+  listingTitle: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  listingPrice: { fontSize: 13, fontFamily: "Manrope_800ExtraBold", color: "#0EB5CA" },
+  listingMeta: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
   listingMetaText: { fontSize: 10, color: "#94A3B8", fontFamily: "Inter_400Regular" },
 
   // ── Ad boost ──
