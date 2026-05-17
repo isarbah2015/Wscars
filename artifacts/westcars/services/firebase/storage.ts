@@ -93,7 +93,7 @@ export async function uploadCarImage(userId: string, carId: string, uri: string,
 }
 
 /** Upload an ID-verification document (private — rules forbid public read). */
-export async function uploadIdImage(userId: string, side: "front" | "back" | "selfie", uri: string): Promise<string> {
+export async function uploadIdImage(userId: string, side: string, uri: string): Promise<string> {
   const path = `id-verification/${userId}/${side}_${Date.now()}.${guessExt(uri)}`;
   return uploadAt(uri, path);
 }

@@ -37,7 +37,7 @@ const queryClient = new QueryClient();
 
 function useAuthRedirect() {
   const router = useRouter();
-  const segments = useSegments();
+  const segments = useSegments() as string[];
   const prevAuthRef = useRef<boolean>(false);
 
   useEffect(() => {

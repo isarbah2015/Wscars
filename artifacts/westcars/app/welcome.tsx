@@ -124,11 +124,7 @@ export default function WelcomeScreen() {
     <View style={styles.root}>
 
       {/* ── Background gradient: white → teal ── */}
-      <LinearGradient
-        colors={["#FFFFFF", "#E8F9FC", "#0EB5CA", TEAL_DEEP]}
-        locations={[0, 0.30, 0.70, 1]}
-        style={StyleSheet.absoluteFill}
-      />
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: "#0EB5CA" }]} />
 
       {/* ── Car image ── */}
       <Image

@@ -18,10 +18,10 @@ import {
   signInWithCredential,
 } from 'firebase/auth'
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { auth } from '@/lib/firebase-persistence'
-import { db, storage } from '@/lib/firebase'
+import { db } from '@/lib/firebase'
 import { useApp } from '@/context/AppContext'
+import { uploadIdImage } from '@/services/firebase/storage'
 
 const TEAL       = '#008080'
 const TEAL_LIGHT = '#e0f2f2'
@@ -171,10 +171,7 @@ export default function VerificationCentreScreen() {
     if (!idImageUri || !currentUser) return
     setIdUploading(true)
     try {
-      const blob = await (await fetch(idImageUri)).blob()
-      const storageRef = ref(storage!, `verifications/${currentUser.id}/${idType}.jpg`)
-      await uploadBytes(storageRef, blob, { contentType: 'image/jpeg' })
-      const url = await getDownloadURL(storageRef)
+      const url = await uploadIdImage(currentUser.id, idType, idImageUri)
 
       await updateDoc(doc(db!, 'users', currentUser.id), {
         idVerificationPending: true,

@@ -221,6 +221,29 @@ const DEFAULT_FILTERS: FilterState = {
   brands: [], models: [], transmissions: [], conditions: [], cities: [],
 };
 
+function parseStoredFilters(raw: string | null): FilterState | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as Partial<FilterState>;
+    const next: FilterState = {
+      priceMin: typeof parsed.priceMin === "number" ? parsed.priceMin : PRICE_MIN,
+      priceMax: typeof parsed.priceMax === "number" ? parsed.priceMax : PRICE_MAX,
+      brands: Array.isArray(parsed.brands) ? parsed.brands.filter((v): v is string => typeof v === "string") : [],
+      models: Array.isArray(parsed.models) ? parsed.models.filter((v): v is string => typeof v === "string") : [],
+      transmissions: Array.isArray(parsed.transmissions) ? parsed.transmissions.filter((v): v is string => typeof v === "string") : [],
+      conditions: Array.isArray(parsed.conditions) ? parsed.conditions.filter((v): v is string => typeof v === "string") : [],
+      cities: Array.isArray(parsed.cities) ? parsed.cities.filter((v): v is string => typeof v === "string") : [],
+    };
+    const active =
+      next.brands.length > 0 || next.models.length > 0 ||
+      next.transmissions.length > 0 || next.conditions.length > 0 ||
+      next.cities.length > 0 || next.priceMin !== PRICE_MIN || next.priceMax !== PRICE_MAX;
+    return active ? next : null;
+  } catch {
+    return null;
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // FILTER MODAL
 // ─────────────────────────────────────────────────────────────────────────────
@@ -435,13 +458,48 @@ export default function SearchScreen() {
   const chipScrollRef = useRef<ScrollView>(null);
   const chipLayouts   = useRef<Partial<Record<QuickFilterKey, { x: number; width: number }>>>({});
   const hasHydrated   = useRef(false);
-  const STORAGE_KEY   = "westcars:quickFilter";
+  const QUICK_FILTER_STORAGE_KEY = "westcars:quickFilter";
+  const MODAL_FILTER_STORAGE_KEY = "westcars:modalFilters";
 
   useEffect(() => {
-    if (category || brandParam) { hasHydrated.current = true; return; }
-    AsyncStorage.getItem(STORAGE_KEY).then((saved) => {
-      if (saved && QUICK_FILTERS.some((f) => f.key === saved)) setQuickFilter(saved as QuickFilterKey);
-    }).catch(() => {}).finally(() => { hasHydrated.current = true; });
+    let cancelled = false;
+    Promise.all([
+      AsyncStorage.getItem(QUICK_FILTER_STORAGE_KEY),
+      AsyncStorage.getItem(MODAL_FILTER_STORAGE_KEY),
+    ]).then(([savedQuickFilter, savedModalFilters]) => {
+      if (cancelled) return;
+
+      let nextQuickFilter: QuickFilterKey = "All";
+      if (savedQuickFilter && QUICK_FILTERS.some((f) => f.key === savedQuickFilter)) {
+        nextQuickFilter = savedQuickFilter as QuickFilterKey;
+      }
+
+      let nextQuery = "";
+      let nextActiveFilters = parseStoredFilters(savedModalFilters);
+
+      if (category) {
+        const { quickFilter: qf, query: q } = mapCategoryToFilter(category as string);
+        nextQuickFilter = qf;
+        nextQuery = q;
+      }
+
+      if (brandParam) {
+        nextQuickFilter = "All";
+        nextQuery = "";
+        nextActiveFilters = {
+          ...(nextActiveFilters ?? DEFAULT_FILTERS),
+          brands: [brandParam],
+        };
+      }
+
+      setQuickFilter(nextQuickFilter);
+      setQuery(nextQuery);
+      setActiveFilters(nextActiveFilters);
+    }).catch(() => {}).finally(() => {
+      if (!cancelled) hasHydrated.current = true;
+    });
+
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -450,21 +508,30 @@ export default function SearchScreen() {
 
   useEffect(() => {
     if (!hasHydrated.current) return;
-    AsyncStorage.setItem(STORAGE_KEY, quickFilter).catch(() => {});
+    AsyncStorage.setItem(QUICK_FILTER_STORAGE_KEY, quickFilter).catch(() => {});
   }, [quickFilter]);
 
   useEffect(() => {
-    if (brandParam) {
-      setActiveFilters((prev) => ({ ...(prev ?? DEFAULT_FILTERS), brands: [brandParam] }));
-      setQuickFilter("All"); setQuery("");
+    if (!hasHydrated.current) return;
+    if (activeFilters) {
+      AsyncStorage.setItem(MODAL_FILTER_STORAGE_KEY, JSON.stringify(activeFilters)).catch(() => {});
+    } else {
+      AsyncStorage.removeItem(MODAL_FILTER_STORAGE_KEY).catch(() => {});
     }
+  }, [activeFilters]);
+
+  useEffect(() => {
+    if (!hasHydrated.current || !brandParam) return;
+    setActiveFilters((prev) => ({ ...(prev ?? DEFAULT_FILTERS), brands: [brandParam] }));
+    setQuickFilter("All");
+    setQuery("");
   }, [brandParam]);
 
   useEffect(() => {
-    if (category) {
-      const { quickFilter: qf, query: q } = mapCategoryToFilter(category as string);
-      setQuickFilter(qf); setQuery(q); setActiveFilters(null);
-    }
+    if (!hasHydrated.current || !category) return;
+    const { quickFilter: qf, query: q } = mapCategoryToFilter(category as string);
+    setQuickFilter(qf);
+    setQuery(q);
   }, [category]);
 
   const matchesQuery = React.useCallback((car: Car) => {
@@ -531,7 +598,8 @@ export default function SearchScreen() {
   }, [filtered]);
 
   const hasFilters = !!activeFilters && (
-    activeFilters.brands.length > 0 || activeFilters.transmissions.length > 0 ||
+    activeFilters.brands.length > 0 || activeFilters.models.length > 0 ||
+    activeFilters.transmissions.length > 0 ||
     activeFilters.conditions.length > 0 || activeFilters.cities.length > 0 ||
     activeFilters.priceMin !== PRICE_MIN || activeFilters.priceMax !== PRICE_MAX
   );
@@ -539,9 +607,11 @@ export default function SearchScreen() {
   const activeFilterChips = React.useMemo(() => {
     if (!activeFilters) return [];
     const chips: { key: string; label: string }[] = [];
-    const { brands, transmissions, conditions, cities, priceMin, priceMax } = activeFilters;
+    const { brands, models, transmissions, conditions, cities, priceMin, priceMax } = activeFilters;
     if (brands.length === 1)             chips.push({ key: "brands",        label: brands[0] });
     else if (brands.length > 1)          chips.push({ key: "brands",        label: `${brands.length} brands` });
+    if (models.length === 1)             chips.push({ key: "models",        label: models[0] });
+    else if (models.length > 1)          chips.push({ key: "models",        label: `${models.length} models` });
     if (transmissions.length === 1)      chips.push({ key: "transmissions", label: transmissions[0] });
     else if (transmissions.length > 1)   chips.push({ key: "transmissions", label: `${transmissions.length} transmissions` });
     if (conditions.length === 1)         chips.push({ key: "conditions",    label: conditions[0] });
@@ -560,13 +630,14 @@ export default function SearchScreen() {
     setActiveFilters((prev) => {
       if (!prev) return prev;
       let next: FilterState;
-      if (key === "brands")             next = { ...prev, brands: [] };
+      if (key === "brands")             next = { ...prev, brands: [], models: [] };
+      else if (key === "models")        next = { ...prev, models: [] };
       else if (key === "transmissions") next = { ...prev, transmissions: [] };
       else if (key === "conditions")    next = { ...prev, conditions: [] };
       else if (key === "cities")        next = { ...prev, cities: [] };
       else                              next = { ...prev, priceMin: PRICE_MIN, priceMax: PRICE_MAX };
       const stillActive =
-        next.brands.length > 0 || next.transmissions.length > 0 ||
+        next.brands.length > 0 || next.models.length > 0 || next.transmissions.length > 0 ||
         next.conditions.length > 0 || next.cities.length > 0 ||
         next.priceMin !== PRICE_MIN || next.priceMax !== PRICE_MAX;
       return stillActive ? next : null;

@@ -13,36 +13,49 @@
  *   without crashing on the AsyncStorage import
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   initializeAuth,
   getAuth,
-  getReactNativePersistence,
   type Auth,
 } from 'firebase/auth';
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { app } from '@/lib/firebase';
 
 let auth: Auth | null = null;
 
+const reactNativeAsyncStoragePersistence = {
+  type: 'LOCAL',
+  async _isAvailable() {
+    try {
+      const key = '@westcars/firebase-auth-test';
+      await ReactNativeAsyncStorage.setItem(key, '1');
+      await ReactNativeAsyncStorage.removeItem(key);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  _set(key: string, value: string) {
+    return ReactNativeAsyncStorage.setItem(key, value);
+  },
+  _get(key: string) {
+    return ReactNativeAsyncStorage.getItem(key);
+  },
+  _remove(key: string) {
+    return ReactNativeAsyncStorage.removeItem(key);
+  },
+  _addListener() {},
+  _removeListener() {},
+} as any;
+
 if (app) {
   try {
-    // getAuth() throws if auth was already initialised with different options,
-    // so we try to get the existing instance first.
-    try {
-      auth = getAuth(app);
-      // If auth exists but has no persistence set (default in-memory),
-      // we can't change it after the fact — but initializeAuth below
-      // will be skipped since getAuth() succeeded, meaning the first
-      // call to this file already set persistence correctly.
-    } catch {
-      // Auth not yet initialised — set it up with AsyncStorage persistence
-      auth = initializeAuth(app, {
-        persistence: getReactNativePersistence(AsyncStorage),
-      });
-    }
+    // Initialise first so native sessions persist through AsyncStorage.
+    auth = initializeAuth(app, {
+      persistence: reactNativeAsyncStoragePersistence,
+    });
   } catch (err) {
-    console.warn('[firebase-persistence] Auth init failed:', err);
-    // Fallback: try plain getAuth so the app doesn't hard-crash
+    // Auth may already be initialised by another import path; reuse it.
     try { auth = getAuth(app); } catch {}
   }
 } else {

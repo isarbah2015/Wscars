@@ -411,10 +411,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const markAllNotificationsRead = useCallback(async () => {
     if (!db || !currentUser?.id) return;
-    const batch = writeBatch(db);
+    const firestore = db;
+    const batch = writeBatch(firestore);
     notifications
       .filter((n) => !n.read)
-      .forEach((n) => batch.update(doc(db, 'notifications', n.id), { read: true }));
+      .forEach((n) => batch.update(doc(firestore, 'notifications', n.id), { read: true }));
     await batch.commit();
   }, [currentUser?.id, notifications]);
 
@@ -437,11 +438,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           userId: car.sellerId,
           type: 'saved',
           title: 'Someone saved your listing',
-          body: `${currentUser.displayName ?? currentUser.name ?? 'A buyer'} saved your ${(car as any).title ?? `${(car as any).make} ${(car as any).model}`}`,
+          body: `${currentUser.name ?? 'A buyer'} saved your ${(car as any).title ?? `${(car as any).make} ${(car as any).model}`}`,
           carId: car.id,
           carName: (car as any).title ?? `${(car as any).make} ${(car as any).model}`,
           fromUserId: currentUser.id,
-          fromUserName: currentUser.displayName ?? currentUser.name ?? 'A buyer',
+          fromUserName: currentUser.name ?? 'A buyer',
         }).catch(() => {});
       }
     }
