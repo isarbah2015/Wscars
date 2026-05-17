@@ -14,17 +14,18 @@ import {
 } from "react-native";
 import { PanGestureHandler, GestureHandlerStateChangeEvent } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "@/context/ThemeContext";
 
 const CAR  = require("@/assets/images/welcome-car-porsche.png");
 const LOGO = require("@/assets/images/wc-logo.png");
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
-const TEAL_DEEP = "#006F80";
-
 export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
 
   const BTN_H      = 64;
   const THUMB      = BTN_H - 8;
@@ -124,7 +125,7 @@ export default function WelcomeScreen() {
     <View style={styles.root}>
 
       {/* ── Background gradient: white → teal ── */}
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: "#0EB5CA" }]} />
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.accent }]} />
 
       {/* ── Car image ── */}
       <Image
@@ -142,7 +143,7 @@ export default function WelcomeScreen() {
           "transparent",
           "rgba(0,111,128,0.30)",
           "rgba(0,111,128,0.82)",
-          TEAL_DEEP,
+          colors.accentText,
         ]}
         locations={[0, 0.38, 0.55, 0.72, 1]}
         style={StyleSheet.absoluteFill}
@@ -212,7 +213,7 @@ export default function WelcomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useTheme>["colors"]) => StyleSheet.create({
   root: { flex: 1 },
 
   carFull: {
@@ -309,11 +310,11 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#0EB5CA",      // teal — arrow stays white, fully visible
+    backgroundColor: colors.accent,      // teal — arrow stays white, fully visible
     alignItems: "center",
     justifyContent: "center",
     zIndex: 10,
-    shadowColor: "#0EB5CA",
+    shadowColor: colors.accent,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.70,
     shadowRadius: 14,

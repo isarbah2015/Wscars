@@ -9,6 +9,7 @@ import { auth } from '../../lib/firebase-persistence';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { useApp } from '@/context/AppContext';
+import { useTheme } from '@/context/ThemeContext';
 import { isFirebaseReady } from '@/lib/firebase';
 import { authErrorMessage } from '@/services/firebase/auth';
 
@@ -22,6 +23,8 @@ const GOOGLE_CONFIGURED = !!(GOOGLE_ANDROID_ID || GOOGLE_WEB_ID);
 export default function LoginScreen() {
   const router = useRouter();
   const { login, loginWithGoogle, isLoading } = useApp();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   const passwordRef = useRef<TextInput>(null);
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
@@ -110,39 +113,35 @@ export default function LoginScreen() {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          {false && (
-            <>
-              <TouchableOpacity
-                style={[styles.googleBtn, styles.btnDisabled]}
-                onPress={handleGoogle}
-                disabled={true}
-                activeOpacity={0.85}
-              >
-                {googleLoading ? (
-                  <ActivityIndicator color="#0EB5CA" size="small" />
-                ) : (
-                  <>
-                    <View style={styles.googleIcon}>
-                      <Text style={styles.googleIconText}>G</Text>
-                    </View>
-                    <Text style={styles.googleBtnText}>Continue with Google</Text>
-                  </>
-                )}
-              </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.googleBtn, (!request || googleLoading) && styles.btnDisabled]}
+            onPress={handleGoogle}
+            disabled={!request || googleLoading}
+            activeOpacity={0.85}
+          >
+            {googleLoading ? (
+              <ActivityIndicator color={colors.accent} size="small" />
+            ) : (
+              <>
+                <View style={styles.googleIcon}>
+                  <Text style={styles.googleIconText}>G</Text>
+                </View>
+                <Text style={styles.googleBtnText}>Continue with Google</Text>
+              </>
+            )}
+          </TouchableOpacity>
 
-              <View style={styles.dividerRow}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or</Text>
-                <View style={styles.dividerLine} />
-              </View>
-            </>
-          )}
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </View>
 
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
             placeholder="your@email.com"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={colors.textTertiary}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -160,7 +159,7 @@ export default function LoginScreen() {
               ref={passwordRef}
               style={[styles.input, { marginBottom: 0, flex: 1, borderWidth: 0 }]}
               placeholder="••••••••••"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={colors.textTertiary}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -201,14 +200,12 @@ export default function LoginScreen() {
   );
 }
 
-const TEAL = '#0EB5CA';
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#EDF4F7' },
+const makeStyles = (colors: ReturnType<typeof useTheme>["colors"]) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   scroll: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20, paddingVertical: 32 },
 
   card: {
-    backgroundColor: '#FFFFFF', borderRadius: 28,
+    backgroundColor: colors.card, borderRadius: 28,
     paddingHorizontal: 24, paddingTop: 28, paddingBottom: 28,
     shadowColor: '#0A1628', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.10, shadowRadius: 20, elevation: 6,
@@ -216,60 +213,60 @@ const styles = StyleSheet.create({
 
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
   logo:   { width: 100, height: 40 },
-  navBtn: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, borderWidth: 1.5, borderColor: TEAL },
-  navBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: TEAL },
+  navBtn: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, borderWidth: 1.5, borderColor: colors.accent },
+  navBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: colors.accent },
 
-  title:    { fontSize: 32, fontFamily: 'Manrope_800ExtraBold', color: '#0F172A', letterSpacing: -0.8, marginBottom: 4 },
-  subtitle: { fontSize: 14, fontFamily: 'Inter_400Regular', color: '#64748B', marginBottom: 20 },
+  title:    { fontSize: 32, fontFamily: 'Manrope_800ExtraBold', color: colors.text, letterSpacing: -0.8, marginBottom: 4 },
+  subtitle: { fontSize: 14, fontFamily: 'Inter_400Regular', color: colors.textSecondary, marginBottom: 20 },
 
-  error: { color: '#EF4444', fontSize: 13, textAlign: 'center', marginBottom: 12, fontFamily: 'Inter_500Medium' },
+  error: { color: colors.danger, fontSize: 13, textAlign: 'center', marginBottom: 12, fontFamily: 'Inter_500Medium' },
 
   googleBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-    width: '100%', height: 52, backgroundColor: '#fff',
-    borderRadius: 16, borderWidth: 1.5, borderColor: '#E2E8F0',
+    width: '100%', height: 52, backgroundColor: colors.card,
+    borderRadius: 16, borderWidth: 1.5, borderColor: colors.skeleton,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06, shadowRadius: 6, elevation: 2, marginBottom: 16,
   },
   googleIcon: {
     width: 24, height: 24, borderRadius: 12,
-    backgroundColor: '#fff', borderWidth: 1, borderColor: '#E2E8F0',
+    backgroundColor: colors.card, borderWidth: 1, borderColor: colors.skeleton,
     alignItems: 'center', justifyContent: 'center',
   },
   googleIconText: { fontSize: 14, fontFamily: 'Inter_700Bold', color: '#4285F4' },
-  googleBtnText:  { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: '#0F172A' },
+  googleBtnText:  { fontSize: 15, fontFamily: 'Inter_600SemiBold', color: colors.text },
   dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#E2E8F0' },
-  dividerText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: '#94A3B8' },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.skeleton },
+  dividerText: { fontSize: 12, fontFamily: 'Inter_500Medium', color: colors.textTertiary },
 
   label: {
     alignSelf: 'flex-start', fontSize: 11, fontFamily: 'Inter_600SemiBold',
-    color: '#475569', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 7, marginTop: 4,
+    color: colors.textSecondary, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 7, marginTop: 4,
   },
   input: {
-    width: '100%', height: 52, backgroundColor: '#F5FBFC',
-    borderRadius: 16, paddingHorizontal: 18, fontSize: 15, color: '#0F172A',
-    marginBottom: 14, borderWidth: 1.5, borderColor: '#E2E8F0', fontFamily: 'Inter_400Regular',
+    width: '100%', height: 52, backgroundColor: colors.inputBg,
+    borderRadius: 16, paddingHorizontal: 18, fontSize: 15, color: colors.text,
+    marginBottom: 14, borderWidth: 1.5, borderColor: colors.skeleton, fontFamily: 'Inter_400Regular',
   },
 
   primaryBtn: {
-    width: '100%', height: 52, backgroundColor: TEAL, borderRadius: 16,
+    width: '100%', height: 52, backgroundColor: colors.accent, borderRadius: 16,
     alignItems: 'center', justifyContent: 'center', marginTop: 8,
-    shadowColor: TEAL, shadowOffset: { width: 0, height: 6 },
+    shadowColor: colors.accent, shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35, shadowRadius: 12, elevation: 8,
   },
   btnDisabled:    { opacity: 0.55 },
   primaryBtnText: { color: '#fff', fontSize: 16, fontFamily: 'Inter_700Bold', letterSpacing: 0.3 },
 
   guestBtn: { alignItems: 'center', marginTop: 22, paddingVertical: 6 },
-  guestText:{ color: '#94A3B8', fontSize: 13, fontFamily: 'Inter_500Medium' },
+  guestText:{ color: colors.textTertiary, fontSize: 13, fontFamily: 'Inter_500Medium' },
 
   passwordRow: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#F5FBFC', borderRadius: 16,
-    borderWidth: 1.5, borderColor: '#E2E8F0',
+    backgroundColor: colors.inputBg, borderRadius: 16,
+    borderWidth: 1.5, borderColor: colors.skeleton,
     marginBottom: 14, paddingRight: 12, overflow: 'hidden',
   },
   eyeBtn: { paddingHorizontal: 8 },
-  eyeText:{ color: TEAL, fontSize: 13, fontFamily: 'Inter_600SemiBold' },
+  eyeText:{ color: colors.accent, fontSize: 13, fontFamily: 'Inter_600SemiBold' },
 });

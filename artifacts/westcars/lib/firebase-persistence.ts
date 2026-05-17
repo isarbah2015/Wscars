@@ -16,43 +16,18 @@
 import {
   initializeAuth,
   getAuth,
+  browserLocalPersistence,
   type Auth,
 } from 'firebase/auth';
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { app } from '@/lib/firebase';
 
 let auth: Auth | null = null;
 
-const reactNativeAsyncStoragePersistence = {
-  type: 'LOCAL',
-  async _isAvailable() {
-    try {
-      const key = '@westcars/firebase-auth-test';
-      await ReactNativeAsyncStorage.setItem(key, '1');
-      await ReactNativeAsyncStorage.removeItem(key);
-      return true;
-    } catch {
-      return false;
-    }
-  },
-  _set(key: string, value: string) {
-    return ReactNativeAsyncStorage.setItem(key, value);
-  },
-  _get(key: string) {
-    return ReactNativeAsyncStorage.getItem(key);
-  },
-  _remove(key: string) {
-    return ReactNativeAsyncStorage.removeItem(key);
-  },
-  _addListener() {},
-  _removeListener() {},
-} as any;
-
 if (app) {
   try {
-    // Initialise first so native sessions persist through AsyncStorage.
+    // Web uses browser local persistence. Native resolves firebase-persistence.native.ts.
     auth = initializeAuth(app, {
-      persistence: reactNativeAsyncStoragePersistence,
+      persistence: browserLocalPersistence,
     });
   } catch (err) {
     // Auth may already be initialised by another import path; reuse it.

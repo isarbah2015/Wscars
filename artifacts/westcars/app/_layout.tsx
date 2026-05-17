@@ -13,8 +13,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import * as Updates from "expo-updates";
 import React, { useEffect, useRef, useState } from "react";
-import { Platform } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { onAuthStateChanged } from "firebase/auth";
@@ -22,6 +23,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { isFirebaseReady } from "@/lib/firebase";
 import { auth } from "@/lib/firebase-persistence";
 
 const FEATHER_TTF = require("../assets/fonts/Feather.ttf");
@@ -41,6 +43,7 @@ function useAuthRedirect() {
   const prevAuthRef = useRef<boolean>(false);
 
   useEffect(() => {
+    if (segments[0] === 'splash') return;
     if (!auth) return;
     const unsub = onAuthStateChanged(auth, (user) => {
       const isAuthed = !!user;
@@ -82,6 +85,33 @@ function RootLayoutNav() {
       <Stack.Screen name="full-specs/[id]"   options={{ presentation: "card" }} />
       <Stack.Screen name="advertise-book"    options={{ presentation: "card" }} />
     </Stack>
+  );
+}
+
+function FirebaseUnavailableScreen() {
+  const [retrying, setRetrying] = useState(false);
+  const retry = async () => {
+    setRetrying(true);
+    try {
+      await Updates.reloadAsync();
+    } catch {
+      setRetrying(false);
+    }
+  };
+
+  return (
+    <View style={styles.unavailableRoot}>
+      <View style={styles.unavailableCard}>
+        <Feather name="wifi-off" size={34} color="#0EB5CA" />
+        <Text style={styles.unavailableTitle}>We could not connect securely</Text>
+        <Text style={styles.unavailableText}>
+          Westcars could not start Firebase services. Check your connection and try again.
+        </Text>
+        <Pressable style={styles.unavailableButton} onPress={retry} disabled={retrying}>
+          <Text style={styles.unavailableButtonText}>{retrying ? "Retrying..." : "Try Again"}</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
@@ -135,9 +165,13 @@ export default function RootLayout() {
         <ErrorBoundary>
           <ThemeProvider>
             <QueryClientProvider client={queryClient}>
-              <AppProvider>
-                <RootLayoutNav />
-              </AppProvider>
+              {!__DEV__ && !isFirebaseReady() ? (
+                <FirebaseUnavailableScreen />
+              ) : (
+                <AppProvider>
+                  <RootLayoutNav />
+                </AppProvider>
+              )}
             </QueryClientProvider>
           </ThemeProvider>
         </ErrorBoundary>
@@ -145,3 +179,57 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  unavailableRoot: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EDF4F7",
+    padding: 24,
+  },
+  unavailableCard: {
+    width: "100%",
+    maxWidth: 420,
+    borderRadius: 28,
+    backgroundColor: "#FFFFFF",
+    padding: 26,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(14,181,202,0.14)",
+    shadowColor: "#0A1628",
+    shadowOpacity: 0.1,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
+  },
+  unavailableTitle: {
+    marginTop: 14,
+    fontSize: 22,
+    fontFamily: "Manrope_800ExtraBold",
+    color: "#0F172A",
+    textAlign: "center",
+  },
+  unavailableText: {
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 21,
+    fontFamily: "Inter_400Regular",
+    color: "#64748B",
+    textAlign: "center",
+  },
+  unavailableButton: {
+    marginTop: 22,
+    height: 50,
+    alignSelf: "stretch",
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#0EB5CA",
+  },
+  unavailableButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontFamily: "Inter_700Bold",
+  },
+});

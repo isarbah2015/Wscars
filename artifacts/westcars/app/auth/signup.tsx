@@ -17,12 +17,15 @@ import { useApp } from '../../context/AppContext';
 import { authErrorMessage } from '../../services/firebase/auth';
 import { isFirebaseReady } from '@/lib/firebase';
 import { auth } from '@/lib/firebase-persistence';
+import { useTheme } from '@/context/ThemeContext';
 
 const WC_LOGO = require('../../assets/images/wc-logo.png');
 
 export default function SignupScreen() {
   const router = useRouter();
   const { signup, isLoading } = useApp();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   const emailRef    = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const confirmRef  = useRef<TextInput>(null);
@@ -88,7 +91,7 @@ export default function SignupScreen() {
           <TextInput
             style={styles.input}
             placeholder="John Mensah"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={colors.textTertiary}
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
@@ -105,7 +108,7 @@ export default function SignupScreen() {
             ref={emailRef}
             style={styles.input}
             placeholder="your@email.com"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={colors.textTertiary}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -124,7 +127,7 @@ export default function SignupScreen() {
               ref={passwordRef}
               style={[styles.input, { marginBottom: 0, flex: 1, borderWidth: 0 }]}
               placeholder="Min. 8 characters"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={colors.textTertiary}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -147,7 +150,7 @@ export default function SignupScreen() {
               ref={confirmRef}
               style={[styles.input, { marginBottom: 0, flex: 1, borderWidth: 0 }]}
               placeholder="••••••••••"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={colors.textTertiary}
               value={confirm}
               onChangeText={setConfirm}
               secureTextEntry={!showConfirm}
@@ -187,10 +190,8 @@ export default function SignupScreen() {
   );
 }
 
-const TEAL = '#0EB5CA';
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#EDF4F7' },
+const makeStyles = (colors: ReturnType<typeof useTheme>["colors"]) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   scroll: {
     flexGrow: 1,
     justifyContent: 'center',
@@ -199,7 +200,7 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.card,
     borderRadius: 28,
     paddingHorizontal: 24,
     paddingTop: 28,
@@ -223,21 +224,21 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: TEAL,
+    borderColor: colors.accent,
   },
-  navBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: TEAL },
+  navBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: colors.accent },
 
   title: {
     fontSize: 32,
     fontFamily: 'Manrope_800ExtraBold',
-    color: '#0F172A',
+    color: colors.text,
     letterSpacing: -0.8,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: '#64748B',
+    color: colors.textSecondary,
     marginBottom: 24,
   },
 
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    color: '#475569',
+    color: colors.textSecondary,
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 7,
@@ -254,18 +255,18 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 52,
-    backgroundColor: '#F5FBFC',
+    backgroundColor: colors.inputBg,
     borderRadius: 16,
     paddingHorizontal: 18,
     fontSize: 15,
-    color: '#0F172A',
+    color: colors.text,
     marginBottom: 14,
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: colors.skeleton,
     fontFamily: 'Inter_400Regular',
   },
   error: {
-    color: '#EF4444',
+    color: colors.danger,
     fontSize: 13,
     textAlign: 'center',
     marginBottom: 12,
@@ -275,14 +276,14 @@ const styles = StyleSheet.create({
   primaryBtn: {
     width: '100%',
     height: 52,
-    backgroundColor: TEAL,
+    backgroundColor: colors.accent,
     borderRadius: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
     gap: 12,
-    shadowColor: TEAL,
+    shadowColor: colors.accent,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
     shadowRadius: 12,
@@ -292,18 +293,18 @@ const styles = StyleSheet.create({
   primaryBtnText: { color: '#fff', fontSize: 16, fontFamily: 'Inter_700Bold', letterSpacing: 0.3 },
 
   guestBtn: { alignItems: 'center', marginTop: 22, paddingVertical: 6 },
-  guestText: { color: '#94A3B8', fontSize: 13, fontFamily: 'Inter_500Medium' },
+  guestText: { color: colors.textTertiary, fontSize: 13, fontFamily: 'Inter_500Medium' },
   passwordRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5FBFC',
+    backgroundColor: colors.inputBg,
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: colors.skeleton,
     marginBottom: 14,
     paddingRight: 12,
     overflow: 'hidden',
   },
   eyeBtn: { paddingHorizontal: 8 },
-  eyeText: { color: TEAL, fontSize: 13, fontFamily: 'Inter_600SemiBold' },
+  eyeText: { color: colors.accent, fontSize: 13, fontFamily: 'Inter_600SemiBold' },
 });

@@ -1,6 +1,6 @@
-const PRIMARY = "#0066CC";
-const PRIMARY_DARK = "#0052A3";
-const PRIMARY_LIGHT = "#3385D6";
+const PRIMARY = "#0EB5CA";
+const PRIMARY_DARK = "#004D5A";
+const PRIMARY_LIGHT = "#5DDFEF";
 
 export const Colors = {
   primary: PRIMARY,
@@ -23,7 +23,7 @@ export const Colors = {
     shadow: "rgba(0,0,0,0.08)",
   },
 
-  verified: "#0066CC",
+  verified: PRIMARY,
   star: "#F5A623",
   danger: "#E53935",
   success: "#43A047",

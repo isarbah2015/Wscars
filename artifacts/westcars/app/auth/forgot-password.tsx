@@ -12,9 +12,12 @@ import {
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
 import { authErrorMessage, sendPasswordResetEmail } from '../../services/firebase/auth';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -67,7 +70,7 @@ export default function ForgotPasswordScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="your@email.com"
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor={colors.textTertiary}
                 value={email}
                 onChangeText={(t) => { setEmail(t); setError(''); }}
                 keyboardType="email-address"
@@ -106,10 +109,8 @@ export default function ForgotPasswordScreen() {
   );
 }
 
-const TEAL = '#0EB5CA';
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#EDF4F7' },
+const makeStyles = (colors: ReturnType<typeof useTheme>["colors"]) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   scroll: {
     flexGrow: 1,
     justifyContent: 'center',
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.card,
     borderRadius: 28,
     paddingHorizontal: 24,
     paddingTop: 36,
@@ -133,20 +134,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontFamily: 'Manrope_800ExtraBold',
-    color: '#0F172A',
+    color: colors.text,
     letterSpacing: -0.8,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: '#64748B',
+    color: colors.textSecondary,
     marginBottom: 28,
     lineHeight: 22,
   },
 
   error: {
-    color: '#EF4444',
+    color: colors.danger,
     fontSize: 13,
     textAlign: 'center',
     marginBottom: 12,
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    color: '#475569',
+    color: colors.textSecondary,
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 7,
@@ -165,26 +166,26 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 52,
-    backgroundColor: '#F5FBFC',
+    backgroundColor: colors.inputBg,
     borderRadius: 16,
     paddingHorizontal: 18,
     fontSize: 15,
-    color: '#0F172A',
+    color: colors.text,
     marginBottom: 14,
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: colors.skeleton,
     fontFamily: 'Inter_400Regular',
   },
 
   primaryBtn: {
     width: '100%',
     height: 52,
-    backgroundColor: TEAL,
+    backgroundColor: colors.accent,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 4,
-    shadowColor: TEAL,
+    shadowColor: colors.accent,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
     shadowRadius: 12,
@@ -194,5 +195,5 @@ const styles = StyleSheet.create({
   primaryBtnText: { color: '#fff', fontSize: 16, fontFamily: 'Inter_700Bold', letterSpacing: 0.3 },
 
   backBtn: { alignItems: 'center', marginTop: 24, paddingVertical: 6 },
-  backText: { color: TEAL, fontSize: 14, fontFamily: 'Inter_600SemiBold' },
+  backText: { color: colors.accent, fontSize: 14, fontFamily: 'Inter_600SemiBold' },
 });

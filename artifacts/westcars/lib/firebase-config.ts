@@ -48,6 +48,21 @@ function envOrExtra(envKey: string, extraKey: keyof FirebaseWebConfig, fallback 
 
 export function resolveFirebaseConfig(): FirebaseWebConfig | null {
   const fallback = configFromGoogleServices();
+  const envKeys = [
+    "EXPO_PUBLIC_FIREBASE_API_KEY",
+    "EXPO_PUBLIC_FIREBASE_PROJECT_ID",
+    "EXPO_PUBLIC_FIREBASE_APP_ID",
+    "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN",
+    "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET",
+    "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
+  ];
+  const missingEnvKeys = envKeys.filter((key) => !process.env[key]);
+  if (__DEV__ && missingEnvKeys.length > 0) {
+    console.info(
+      `[firebase-config] Missing local env vars: ${missingEnvKeys.join(", ")}. ` +
+      "Using app.config extra or google-services.json fallback when available.",
+    );
+  }
 
   const config = {
     apiKey:
