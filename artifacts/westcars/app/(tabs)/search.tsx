@@ -567,7 +567,6 @@ export default function SearchScreen() {
         const { quickFilter: qf, query: q } = mapCategoryToFilter(category as string);
         nextQuickFilter = qf;
         nextQuery = q;
-        nextActiveFilters = null;
       }
 
       if (brandParam) {
@@ -619,7 +618,6 @@ export default function SearchScreen() {
     const { quickFilter: qf, query: q } = mapCategoryToFilter(category as string);
     setQuickFilter(qf);
     setQuery(q);
-    setActiveFilters(null);
   }, [category]);
 
   const matchesQuery = React.useCallback((car: Car) => {
