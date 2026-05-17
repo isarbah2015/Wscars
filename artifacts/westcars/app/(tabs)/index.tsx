@@ -20,7 +20,7 @@ import { CarCard, VideoAdCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { CAR_BRANDS, formatPrice } from "@/utils/ghanaData";
-import { BRAND_LOGOS, getBrandInitials } from "@/utils/brandLogos";
+import { getBrandInitials, getBrandLogo } from "@/utils/brandLogos";
 
 const WC_LOGO      = require("@/assets/images/wc-logo.png");
 const WC_LOGO_FULL = require("@/assets/images/wc-logo-full.png");
@@ -394,9 +394,9 @@ export default function HomeScreen() {
             <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" />
             <Text style={[styles.brandSectionTitle, { color: isDark ? "#CBD5E1" : "#334155" }]}>Car Brands</Text>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.brandRow}>
+          <View style={styles.brandGrid}>
             {CAR_BRANDS.map((brand) => {
-              const logoUrl = BRAND_LOGOS[brand];
+              const logoUrl = getBrandLogo(brand);
               return (
                 <Pressable
                   key={brand}
@@ -425,7 +425,7 @@ export default function HomeScreen() {
                 </Pressable>
               );
             })}
-          </ScrollView>
+          </View>
         </View>
 
         {/* ── Video Ad slot ── */}
@@ -1098,54 +1098,59 @@ const styles = StyleSheet.create({
   },
 
   brandSection: {
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     marginTop: 6,
   },
   brandSectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    paddingHorizontal: 14,
     marginBottom: 8,
   },
   brandSectionTitle: {
     fontSize: 15,
     fontFamily: "Inter_600SemiBold",
   },
-  brandRow: {
+  brandGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
-    paddingLeft: 14,
-    paddingRight: 14,
-    alignItems: "center",
+    alignItems: "stretch",
   },
   brandPill: {
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    width: 80,
-    gap: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    width: "23%",
+    minHeight: 92,
+    gap: 7,
+    shadowColor: "#0EB5CA",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
   brandPillLogoWrap: {
-    width: 56,
-    height: 38,
-    borderRadius: 8,
+    width: 54,
+    height: 44,
+    borderRadius: 12,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-    padding: 4,
+    padding: 7,
   },
   brandPillLogo: {
-    width: 48,
+    width: 42,
     height: 30,
   },
   brandPillLogoPlaceholder: {
-    width: 56,
-    height: 38,
-    borderRadius: 8,
+    width: 54,
+    height: 44,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1154,7 +1159,7 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_800ExtraBold",
   },
   brandPillLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: "Inter_600SemiBold",
     textAlign: "center",
   },

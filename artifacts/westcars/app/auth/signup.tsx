@@ -15,12 +15,14 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
 import { useApp } from '../../context/AppContext';
 import { authErrorMessage } from '../../services/firebase/auth';
+import { isFirebaseReady } from '@/lib/firebase';
+import { auth } from '@/lib/firebase-persistence';
 
 const WC_LOGO = require('../../assets/images/wc-logo.png');
 
 export default function SignupScreen() {
   const router = useRouter();
-  const { signup } = useApp();
+  const { signup, isLoading } = useApp();
   const emailRef    = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const confirmRef  = useRef<TextInput>(null);
@@ -35,6 +37,10 @@ export default function SignupScreen() {
 
   const handleSignup = async () => {
     setError('');
+    if (isLoading || !auth || !isFirebaseReady()) {
+      setError('Secure account setup is still starting. Please try again in a moment.');
+      return;
+    }
     if (!name.trim() || !email.trim() || !password || !confirm) {
       setError('Please fill in all fields'); return;
     }

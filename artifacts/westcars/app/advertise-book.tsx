@@ -15,6 +15,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -24,13 +25,16 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { ResizeMode, Video } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // ─── Brand ───────────────────────────────────────────────────────────────────
 const TEAL      = "#0EB5CA";
-const DARK_CARD = "#1C1C1E";
-const DARK_CELL = "#2C2C2E";
-const DARK_SEP  = "#2A2A2C";
+const DARK_CARD = "#FFFFFF";
+const DARK_CELL = "#F5FBFC";
+const DARK_SEP  = "#E2E8F0";
+const INK       = "#0F172A";
+const MUTED     = "#64748B";
 
 // ─── Spec data — keyed by packageId from advertise.tsx ───────────────────────
 type SpecItem = { key: string; value: string };
@@ -194,9 +198,23 @@ function getSpecInfo(packageId: string, adType: string): SpecInfo {
 
 // ─── Regions ─────────────────────────────────────────────────────────────────
 const REGIONS = [
-  "All Regions", "Greater Accra", "Ashanti", "Western", "Eastern",
-  "Central", "Northern", "Upper East", "Upper West",
-  "Volta", "Brong-Ahafo",
+  "All Regions",
+  "Ahafo",
+  "Ashanti",
+  "Bono",
+  "Bono East",
+  "Central",
+  "Eastern",
+  "Greater Accra",
+  "North East",
+  "Northern",
+  "Oti",
+  "Savannah",
+  "Upper East",
+  "Upper West",
+  "Volta",
+  "Western",
+  "Western North",
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -421,11 +439,23 @@ export default function AdvertiseBookScreen() {
             >
               {creativeFile ? (
                 <>
-                  <View style={styles.uploadDoneIcon}>
-                    <Feather name="check" size={26} color="#27AE60" />
-                  </View>
+                  {info.isVideo ? (
+                    <Video
+                      source={{ uri: creativeFile.uri }}
+                      style={styles.previewMedia}
+                      useNativeControls
+                      resizeMode={ResizeMode.CONTAIN}
+                      shouldPlay={false}
+                    />
+                  ) : (
+                    <Image
+                      source={{ uri: creativeFile.uri }}
+                      style={styles.previewMedia}
+                      resizeMode="cover"
+                    />
+                  )}
                   <Text style={styles.uploadDoneLabel}>
-                    {info.isVideo ? "Video" : "Image"} selected ✓
+                    {info.isVideo ? "Video preview ready" : "Flyer preview ready"}
                   </Text>
                   <Text style={styles.uploadDoneFilename} numberOfLines={1}>
                     {creativeFile.name}
@@ -510,7 +540,7 @@ export default function AdvertiseBookScreen() {
               <Feather
                 name={specsOpen ? "chevron-up" : "chevron-down"}
                 size={14}
-                color="rgba(255,255,255,0.4)"
+                color="#94A3B8"
               />
             </Pressable>
 
@@ -559,14 +589,14 @@ export default function AdvertiseBookScreen() {
                 <Feather
                   name={f.icon as any}
                   size={15}
-                  color={focusedField === f.key ? TEAL : "rgba(255,255,255,0.35)"}
+                  color={focusedField === f.key ? TEAL : "#94A3B8"}
                 />
                 <TextInput
                   style={styles.input}
                   value={f.val}
                   onChangeText={f.set}
                   placeholder={f.ph}
-                  placeholderTextColor="rgba(255,255,255,0.25)"
+                  placeholderTextColor="#94A3B8"
                   onFocus={() => setFocusedField(f.key)}
                   onBlur={() => setFocusedField(null)}
                   keyboardType={f.key === "phone" ? "phone-pad" : f.key === "email" ? "email-address" : "default"}
@@ -607,7 +637,7 @@ export default function AdvertiseBookScreen() {
                 value={notes}
                 onChangeText={setNotes}
                 placeholder="Any instructions or special requirements…"
-                placeholderTextColor="rgba(255,255,255,0.25)"
+                placeholderTextColor="#94A3B8"
                 multiline
                 onFocus={() => setFocusedField("notes")}
                 onBlur={() => setFocusedField(null)}
@@ -639,7 +669,7 @@ export default function AdvertiseBookScreen() {
                 <Feather
                   name={p.icon as any}
                   size={18}
-                  color={payMethod === p.id ? TEAL : "rgba(255,255,255,0.5)"}
+                  color={payMethod === p.id ? TEAL : "#94A3B8"}
                 />
               </View>
               <View style={{ flex: 1 }}>
@@ -651,7 +681,7 @@ export default function AdvertiseBookScreen() {
               <Feather
                 name={payMethod === p.id ? "check-circle" : "circle"}
                 size={18}
-                color={payMethod === p.id ? TEAL : "rgba(255,255,255,0.25)"}
+                color={payMethod === p.id ? TEAL : "#CBD5E1"}
               />
             </Pressable>
           ))}
@@ -723,7 +753,7 @@ export default function AdvertiseBookScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#121212" },
+  root: { flex: 1, backgroundColor: "#EDF4F7" },
 
   // Header
   header: { paddingHorizontal: 20, paddingBottom: 20, gap: 4 },
@@ -747,7 +777,19 @@ const styles = StyleSheet.create({
   priceTagText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
 
   // Dark card
-  darkCard: { backgroundColor: DARK_CARD, borderRadius: 16, padding: 16, overflow: "hidden" },
+  darkCard: {
+    backgroundColor: DARK_CARD,
+    borderRadius: 18,
+    padding: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(14,181,202,0.10)",
+    shadowColor: "#0A1628",
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
+  },
 
   // Auto-gen
   autoIconCircle: {
@@ -755,19 +797,19 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(14,181,202,0.15)",
     alignItems: "center", justifyContent: "center",
   },
-  autoTitle: { fontSize: 18, fontFamily: "Manrope_800ExtraBold", color: "#fff" },
+  autoTitle: { fontSize: 18, fontFamily: "Manrope_800ExtraBold", color: INK },
   autoSub: {
     fontSize: 13, fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.55)", textAlign: "center", lineHeight: 20,
+    color: MUTED, textAlign: "center", lineHeight: 20,
   },
 
   // Upload
   uploadHeroHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
-  uploadHeroTitle:  { fontSize: 14, fontFamily: "Inter_700Bold", color: "#fff", flex: 1 },
+  uploadHeroTitle:  { fontSize: 14, fontFamily: "Inter_700Bold", color: INK, flex: 1 },
 
   uploadZone: {
     borderWidth: 1.5, borderColor: "rgba(14,181,202,0.4)", borderStyle: "dashed",
-    borderRadius: 14, padding: 26, alignItems: "center", gap: 10,
+    borderRadius: 14, padding: 18, alignItems: "center", gap: 10,
     backgroundColor: "rgba(14,181,202,0.05)",
   },
   uploadZoneDone: { borderColor: "#27AE60", backgroundColor: "rgba(39,174,96,0.07)" },
@@ -776,7 +818,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(14,181,202,0.12)",
     alignItems: "center", justifyContent: "center",
   },
-  uploadZoneLabel:   { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#fff" },
+  uploadZoneLabel:   { fontSize: 14, fontFamily: "Inter_600SemiBold", color: INK },
   uploadSpecPills:   { flexDirection: "row", gap: 6, flexWrap: "wrap", justifyContent: "center" },
   pill: {
     backgroundColor: "rgba(14,181,202,0.15)", borderRadius: 20,
@@ -784,13 +826,15 @@ const styles = StyleSheet.create({
   },
   pillText: { fontSize: 11, fontFamily: "Inter_500Medium", color: TEAL },
 
-  uploadDoneIcon: {
-    width: 60, height: 60, borderRadius: 30,
-    backgroundColor: "rgba(39,174,96,0.12)", alignItems: "center", justifyContent: "center",
+  previewMedia: {
+    width: "100%",
+    height: 190,
+    borderRadius: 14,
+    backgroundColor: "#E8F7FA",
   },
   uploadDoneLabel:    { fontSize: 15, fontFamily: "Inter_700Bold", color: "#27AE60" },
-  uploadDoneFilename: { fontSize: 11, color: "rgba(255,255,255,0.5)", fontFamily: "Inter_400Regular", maxWidth: "90%" },
-  uploadDoneHint:     { fontSize: 12, color: "rgba(255,255,255,0.4)", fontFamily: "Inter_400Regular" },
+  uploadDoneFilename: { fontSize: 11, color: MUTED, fontFamily: "Inter_400Regular", maxWidth: "90%" },
+  uploadDoneHint:     { fontSize: 12, color: TEAL, fontFamily: "Inter_600SemiBold" },
 
   captionZone: {
     flexDirection: "row", alignItems: "center", gap: 12,
@@ -798,8 +842,8 @@ const styles = StyleSheet.create({
     padding: 14, backgroundColor: "rgba(14,181,202,0.04)",
   },
   captionZoneDone: { borderColor: "#27AE60" },
-  captionLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#fff" },
-  captionHint:  { fontSize: 11, color: "rgba(255,255,255,0.4)", fontFamily: "Inter_400Regular", marginTop: 2 },
+  captionLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: INK },
+  captionHint:  { fontSize: 11, color: MUTED, fontFamily: "Inter_400Regular", marginTop: 2 },
 
   specsToggle: {
     flexDirection: "row", alignItems: "center", gap: 6,
@@ -808,13 +852,13 @@ const styles = StyleSheet.create({
   specsToggleText: { flex: 1, fontSize: 13, fontFamily: "Inter_500Medium", color: TEAL },
   specsBody:  { backgroundColor: DARK_CELL, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 4 },
   specRow:    { flexDirection: "row", justifyContent: "space-between", paddingVertical: 9 },
-  specKey:    { fontSize: 12, fontFamily: "Inter_500Medium", color: "rgba(255,255,255,0.5)", flex: 1 },
-  specVal:    { fontSize: 12, fontFamily: "Inter_400Regular", color: "#fff", flex: 2, textAlign: "right" },
+  specKey:    { fontSize: 12, fontFamily: "Inter_500Medium", color: MUTED, flex: 1 },
+  specVal:    { fontSize: 12, fontFamily: "Inter_400Regular", color: INK, flex: 2, textAlign: "right" },
 
   // Form
-  cardTitle:  { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff", marginBottom: 4 },
+  cardTitle:  { fontSize: 15, fontFamily: "Inter_700Bold", color: INK, marginBottom: 4 },
   fieldWrap:  { gap: 6 },
-  fieldLabel: { fontSize: 12, fontFamily: "Inter_500Medium", color: "rgba(255,255,255,0.55)" },
+  fieldLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: MUTED },
   field: {
     flexDirection: "row", alignItems: "center", gap: 10,
     height: 48, backgroundColor: DARK_CELL, borderRadius: 10,
@@ -826,17 +870,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 12,
     borderWidth: 1.5, borderColor: "transparent", minHeight: 90,
   },
-  input:    { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular", color: "#fff" },
-  textArea: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#fff", minHeight: 70 },
+  input:    { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular", color: INK },
+  textArea: { fontSize: 14, fontFamily: "Inter_400Regular", color: INK, minHeight: 70 },
 
   regionRow:        { flexDirection: "row", gap: 8, paddingVertical: 4 },
   regionChip: {
     paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 20, borderWidth: 1.5, borderColor: "rgba(255,255,255,0.2)",
+    borderRadius: 20, borderWidth: 1.5, borderColor: "#DCEAF0",
     backgroundColor: DARK_CELL,
   },
   regionChipActive: { backgroundColor: TEAL, borderColor: TEAL },
-  regionText:       { fontSize: 12, fontFamily: "Inter_500Medium", color: "rgba(255,255,255,0.6)" },
+  regionText:       { fontSize: 12, fontFamily: "Inter_500Medium", color: MUTED },
   regionTextActive: { color: "#fff", fontFamily: "Inter_700Bold" },
 
   // Payment
@@ -850,26 +894,26 @@ const styles = StyleSheet.create({
     width: 40, height: 40, borderRadius: 10,
     backgroundColor: DARK_CARD, alignItems: "center", justifyContent: "center",
   },
-  payLabel: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#fff" },
-  paySub:   { fontSize: 11, color: "rgba(255,255,255,0.4)", fontFamily: "Inter_400Regular", marginTop: 2 },
+  payLabel: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: INK },
+  paySub:   { fontSize: 11, color: MUTED, fontFamily: "Inter_400Regular", marginTop: 2 },
 
   // Summary
   sumRow:      { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10 },
-  sumKey:      { fontSize: 13, color: "rgba(255,255,255,0.5)", fontFamily: "Inter_400Regular" },
-  sumVal:      { fontSize: 13, color: "#fff", fontFamily: "Inter_500Medium", textAlign: "right", flex: 1, paddingLeft: 16 },
+  sumKey:      { fontSize: 13, color: MUTED, fontFamily: "Inter_400Regular" },
+  sumVal:      { fontSize: 13, color: INK, fontFamily: "Inter_500Medium", textAlign: "right", flex: 1, paddingLeft: 16 },
   sumTotal:    { marginTop: 2 },
-  sumTotalKey: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
+  sumTotalKey: { fontSize: 15, fontFamily: "Inter_700Bold", color: INK },
   sumTotalVal: { fontSize: 18, fontFamily: "Inter_700Bold", color: TEAL, textAlign: "right", flex: 1, paddingLeft: 16 },
 
   // Sticky bar
   submitBar: {
     flexDirection: "row", alignItems: "center",
-    backgroundColor: "#111",
+    backgroundColor: "#FFFFFF",
     paddingTop: 14, paddingHorizontal: 20, gap: 16,
-    borderTopWidth: 1, borderTopColor: "#2A2A2A",
+    borderTopWidth: 1, borderTopColor: "#E2E8F0",
   },
-  submitLbl:     { fontSize: 12, color: "rgba(255,255,255,0.5)", fontFamily: "Inter_400Regular" },
-  submitPrice:   { fontSize: 20, fontFamily: "Inter_700Bold", color: "#fff", marginTop: 2 },
+  submitLbl:     { fontSize: 12, color: MUTED, fontFamily: "Inter_400Regular" },
+  submitPrice:   { fontSize: 20, fontFamily: "Inter_700Bold", color: INK, marginTop: 2 },
   submitBtn: {
     flexDirection: "row", alignItems: "center", gap: 8,
     backgroundColor: TEAL, borderRadius: 12,

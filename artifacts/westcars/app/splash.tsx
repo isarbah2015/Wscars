@@ -43,28 +43,23 @@ export default function SplashScreen() {
       ]).start();
     });
 
-    const navTimer = setTimeout(() => {
-      if (!auth) {
-        router.replace("/welcome");
-        return;
-      }
-      // Check Firebase auth state — resolves from local cache in < 200 ms.
-      // Signed-in users go straight to tabs; guests see the welcome screen.
-      const unsub = onAuthStateChanged(auth, (user) => {
-        unsub();
+    if (!auth) {
+      router.replace("/welcome");
+      return;
+    }
+    // Resolve cached Firebase auth immediately so signed-in users never see welcome.
+    const unsub = onAuthStateChanged(auth, (user) => {
+      unsub();
+      try {
+        router.replace(user ? "/(tabs)" : "/welcome");
+      } catch {
         setTimeout(() => {
-          try {
-            router.replace(user ? "/(tabs)" : "/welcome");
-          } catch {
-            setTimeout(() => {
-              try { router.replace(user ? "/(tabs)" : "/welcome"); } catch {}
-            }, 400);
-          }
-        }, 100);
-      });
-    }, 2600);
+          try { router.replace(user ? "/(tabs)" : "/welcome"); } catch {}
+        }, 250);
+      }
+    });
 
-    return () => clearTimeout(navTimer);
+    return () => unsub();
   }, [router]);
 
   return (

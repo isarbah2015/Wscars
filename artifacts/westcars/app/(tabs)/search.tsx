@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Slider from "@react-native-community/slider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
@@ -166,6 +167,83 @@ function AnimatedCount({
   }, [value]);
 
   return <Animated.Text style={[style, { opacity }]}>{shown}</Animated.Text>;
+}
+
+function PriceRangeSelector({
+  min,
+  max,
+  onMinChange,
+  onMaxChange,
+  format,
+}: {
+  min: number;
+  max: number;
+  onMinChange: (value: number) => void;
+  onMaxChange: (value: number) => void;
+  format: (value: number) => string;
+}) {
+  const minPct = ((min - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
+  const maxPct = ((max - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
+
+  const clampMin = (value: number) => {
+    const next = Math.min(value, max - PRICE_STEP);
+    onMinChange(Math.max(PRICE_MIN, next));
+  };
+
+  const clampMax = (value: number) => {
+    const next = Math.max(value, min + PRICE_STEP);
+    onMaxChange(Math.min(PRICE_MAX, next));
+  };
+
+  return (
+    <View style={fS.rangeWrap}>
+      <View style={fS.rangeLabels}>
+        <View style={fS.rangeValuePill}>
+          <Text style={fS.rangeValueLabel}>Min</Text>
+          <Text style={fS.rangeValueText}>{format(min)}</Text>
+        </View>
+        <View style={fS.rangeValuePill}>
+          <Text style={fS.rangeValueLabel}>Max</Text>
+          <Text style={fS.rangeValueText}>{max >= PRICE_MAX ? "Any" : format(max)}</Text>
+        </View>
+      </View>
+      <View style={fS.trackShell}>
+        <View style={fS.trackBase} />
+        <View
+          style={[
+            fS.trackActive,
+            { left: `${minPct}%`, right: `${100 - maxPct}%` },
+          ]}
+        />
+        <Slider
+          style={fS.rangeSlider}
+          minimumValue={PRICE_MIN}
+          maximumValue={PRICE_MAX}
+          step={PRICE_STEP}
+          value={min}
+          onValueChange={clampMin}
+          minimumTrackTintColor="transparent"
+          maximumTrackTintColor="transparent"
+          thumbTintColor={TEAL}
+        />
+        <Slider
+          style={fS.rangeSlider}
+          minimumValue={PRICE_MIN}
+          maximumValue={PRICE_MAX}
+          step={PRICE_STEP}
+          value={max}
+          onValueChange={clampMax}
+          minimumTrackTintColor="transparent"
+          maximumTrackTintColor="transparent"
+          thumbTintColor="#004D5A"
+        />
+      </View>
+      <View style={fS.rangeEnds}>
+        <Text style={fS.rangeEndText}>{format(PRICE_MIN)}</Text>
+        <Text style={fS.rangeEndText}>{format(PRICE_MAX)}</Text>
+      </View>
+    </View>
+  );
 }
 
 function mapCategoryToFilter(cat: string): { quickFilter: QuickFilterKey; query: string } {
@@ -318,6 +396,14 @@ function FilterModal({
                   {fmt(priceMin)} – {priceMax >= PRICE_MAX ? "Any" : fmt(priceMax)}
                 </Text>
               </View>
+
+              <PriceRangeSelector
+                min={priceMin}
+                max={priceMax}
+                onMinChange={setPriceMin}
+                onMaxChange={setPriceMax}
+                format={fmt}
+              />
 
               <View style={fS.presetsRow}>
                 {PRESETS.map(p => {
@@ -838,6 +924,54 @@ const fS = StyleSheet.create({
   priceSummary:      { marginBottom: 12, padding: 12, borderRadius: 12, backgroundColor: "#F5FBFC", borderWidth: 1, borderColor: "#E2E8F0" },
   priceSummaryLabel: { fontSize: 11, fontFamily: "Inter_500Medium", color: "#8E8E93", marginBottom: 4 },
   priceSummaryValue: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#0EB5CA" },
+
+  rangeWrap: {
+    padding: 14,
+    borderRadius: 18,
+    backgroundColor: "#F8FDFF",
+    borderWidth: 1,
+    borderColor: "rgba(14,181,202,0.16)",
+    marginBottom: 12,
+  },
+  rangeLabels: { flexDirection: "row", gap: 10, marginBottom: 18 },
+  rangeValuePill: {
+    flex: 1,
+    borderRadius: 14,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "rgba(14,181,202,0.18)",
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+  },
+  rangeValueLabel: { fontSize: 10, fontFamily: "Inter_700Bold", color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.5 },
+  rangeValueText: { fontSize: 15, fontFamily: "Manrope_800ExtraBold", color: "#004D5A", marginTop: 2 },
+  trackShell: { height: 42, justifyContent: "center", position: "relative" },
+  trackBase: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 7,
+    borderRadius: 99,
+    backgroundColor: "#D9EEF3",
+  },
+  trackActive: {
+    position: "absolute",
+    height: 7,
+    borderRadius: 99,
+    backgroundColor: "#0EB5CA",
+    shadowColor: "#0EB5CA",
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  rangeSlider: {
+    position: "absolute",
+    left: -12,
+    right: -12,
+    height: 42,
+  },
+  rangeEnds: { flexDirection: "row", justifyContent: "space-between", marginTop: 2 },
+  rangeEndText: { fontSize: 11, fontFamily: "Inter_500Medium", color: "#94A3B8" },
 
   presetsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   presetChip: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F2F2F7" },

@@ -5,11 +5,12 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase-persistence';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { useApp } from '@/context/AppContext';
+import { isFirebaseReady } from '@/lib/firebase';
+import { authErrorMessage } from '@/services/firebase/auth';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -20,7 +21,7 @@ const GOOGLE_CONFIGURED = !!(GOOGLE_ANDROID_ID || GOOGLE_WEB_ID);
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { loginWithGoogle } = useApp();
+  const { login, loginWithGoogle, isLoading } = useApp();
   const passwordRef = useRef<TextInput>(null);
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
@@ -65,23 +66,20 @@ export default function LoginScreen() {
   };
 
   const handleLogin = async () => {
-    if (!auth) { setError('Authentication not available. Please restart the app.'); return; }
     setError('');
+    if (isLoading || !auth || !isFirebaseReady()) {
+      setError('Secure sign-in is still starting. Please try again in a moment.');
+      return;
+    }
     if (!email.trim() || !password.trim()) {
       setError('Please fill in all fields');
       return;
     }
     try {
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email.trim(), password);
+      await login(email.trim(), password);
     } catch (e: any) {
-      const msg =
-        e.code === 'auth/invalid-credential'  ? 'Incorrect email or password' :
-        e.code === 'auth/too-many-requests'   ? 'Too many attempts. Please try again later' :
-        e.code === 'auth/user-not-found'      ? 'No account found with this email' :
-        e.code === 'auth/wrong-password'      ? 'Incorrect password' :
-                                                'Login failed. Please try again';
-      setError(msg);
+      setError(authErrorMessage(e));
     } finally {
       setLoading(false);
     }
