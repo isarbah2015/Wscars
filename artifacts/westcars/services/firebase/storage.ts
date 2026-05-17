@@ -5,16 +5,35 @@
  * fetch() before uploading because uploadBytesResumable cannot read RN paths
  * directly.
  */
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Platform } from "react-native";
+import {
+  ref,
+  uploadBytes,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
 import { storage, isFirebaseReady } from "@/lib/firebase";
+
+export type UploadProgressCallback = (fraction: number) => void;
 
 const ensureReady = () => {
   if (!isFirebaseReady() || !storage) throw new Error("Firebase not configured.");
 };
 
+/** file:// URIs on Android need XHR — fetch() often fails. */
 const localUriToBlob = async (uri: string): Promise<Blob> => {
-  const res = await fetch(uri);
-  return await res.blob();
+  if (Platform.OS === "web") {
+    const res = await fetch(uri);
+    return await res.blob();
+  }
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = () => resolve(xhr.response);
+    xhr.onerror = () => reject(new Error("Failed to load image"));
+    xhr.responseType = "blob";
+    xhr.open("GET", uri, true);
+    xhr.send(null);
+  });
 };
 
 const guessExt = (uri: string): string => {
@@ -22,12 +41,48 @@ const guessExt = (uri: string): string => {
   return m ? m[1].toLowerCase() : "jpg";
 };
 
-async function uploadAt(uri: string, path: string): Promise<string> {
+async function uploadAt(
+  uri: string,
+  path: string,
+  onProgress?: UploadProgressCallback,
+): Promise<string> {
   ensureReady();
+  onProgress?.(0);
   const blob = await localUriToBlob(uri);
   const r = ref(storage!, path);
-  await uploadBytes(r, blob, { contentType: blob.type || "image/jpeg" });
-  return await getDownloadURL(r);
+  const metadata = { contentType: blob.type || "image/jpeg" };
+
+  if (!onProgress) {
+    await uploadBytes(r, blob, metadata);
+    return await getDownloadURL(r);
+  }
+
+  // Reserve 10% for local blob prep; map upload bytes to 10–95%.
+  const reportUpload = (bytesTransferred: number, totalBytes: number) => {
+    if (totalBytes <= 0) return;
+    onProgress(0.1 + (bytesTransferred / totalBytes) * 0.85);
+  };
+
+  onProgress(0.1);
+
+  return new Promise((resolve, reject) => {
+    const task = uploadBytesResumable(r, blob, metadata);
+    task.on(
+      "state_changed",
+      (snapshot) => {
+        reportUpload(snapshot.bytesTransferred, snapshot.totalBytes);
+      },
+      reject,
+      async () => {
+        try {
+          onProgress(0.95);
+          resolve(await getDownloadURL(task.snapshot.ref));
+        } catch (err) {
+          reject(err);
+        }
+      },
+    );
+  });
 }
 
 /** Upload a car listing photo. Returns the public download URL. */
@@ -43,9 +98,13 @@ export async function uploadIdImage(userId: string, side: "front" | "back" | "se
   return uploadAt(uri, path);
 }
 
-export async function uploadAvatar(userId: string, uri: string): Promise<string> {
+export async function uploadAvatar(
+  userId: string,
+  uri: string,
+  onProgress?: UploadProgressCallback,
+): Promise<string> {
   const path = `avatars/${userId}.${guessExt(uri)}`;
-  return uploadAt(uri, path);
+  return uploadAt(uri, path, onProgress);
 }
 
 /** Upload a chat attachment (image or voice). */

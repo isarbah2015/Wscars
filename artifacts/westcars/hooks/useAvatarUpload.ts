@@ -1,14 +1,10 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Alert, Platform, Linking } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
-import {
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage'
+import { ref, deleteObject } from 'firebase/storage'
 import { doc, updateDoc } from 'firebase/firestore'
-import { storage, db } from '@/lib/firebase'
+import { storage, db, isFirebaseReady } from '@/lib/firebase'
+import { uploadAvatar } from '@/services/firebase/storage'
 
 export type UploadSource = 'camera' | 'library'
 
@@ -80,36 +76,20 @@ export function useAvatarUpload({
     []
   )
 
-  // ── Core upload ───────────────────────────────────────────────────────────────
-
-  const uploadBlob = useCallback(
-    (blob: Blob): Promise<string> => {
-      return new Promise((resolve, reject) => {
-        if (!storage) {
-          reject(new Error('Firebase Storage not initialised'))
-          return
-        }
-        const storageRef = ref(storage, `avatars/${userId}.jpg`)
-        const task = uploadBytesResumable(storageRef, blob, {
-          contentType: 'image/jpeg',
-          customMetadata: { uploadedBy: userId },
-        })
-        task.on(
-          'state_changed',
-          (snapshot) => setProgress(snapshot.bytesTransferred / snapshot.totalBytes),
-          reject,
-          async () => resolve(await getDownloadURL(task.snapshot.ref))
-        )
-      })
-    },
-    [userId]
-  )
-
   // ── Pick & Upload ─────────────────────────────────────────────────────────────
 
   const pickAndUpload = useCallback(
     async (source: UploadSource): Promise<void> => {
       setError(null)
+
+      if (!userId) {
+        Alert.alert('Error', 'You must be logged in to upload a photo')
+        return
+      }
+      if (!isFirebaseReady()) {
+        Alert.alert('Error', 'Firebase is not configured. Please update the app.')
+        return
+      }
 
       const hasPermission = await requestPermission(source)
       if (!hasPermission) return
@@ -136,21 +116,7 @@ export function useAvatarUpload({
       setProgress(0)
 
       try {
-        let blob: Blob;
-        if (Platform.OS === 'web') {
-          const response = await fetch(uri);
-          blob = await response.blob();
-        } else {
-          blob = await new Promise<Blob>((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.onload = () => resolve(xhr.response);
-            xhr.onerror = () => reject(new Error('Failed to load image'));
-            xhr.responseType = 'blob';
-            xhr.open('GET', uri, true);
-            xhr.send(null);
-          });
-        }
-        const downloadURL = await uploadBlob(blob);
+        const downloadURL = await uploadAvatar(userId, uri, setProgress)
 
         if (!db) throw new Error('Firestore not initialised')
 
@@ -171,7 +137,7 @@ export function useAvatarUpload({
         setProgress(null)
       }
     },
-    [userId, requestPermission, uploadBlob, onSuccess]
+    [userId, requestPermission, onSuccess]
   )
 
   // ── Remove Photo ──────────────────────────────────────────────────────────────
@@ -181,10 +147,12 @@ export function useAvatarUpload({
     setIsUploading(true)
     try {
       if (storage) {
-        try {
-          await deleteObject(ref(storage, `avatars/${userId}.jpg`))
-        } catch {
-          // File may not exist — ignore
+        for (const ext of ["jpg", "jpeg", "png", "webp"]) {
+          try {
+            await deleteObject(ref(storage, `avatars/${userId}.${ext}`))
+          } catch {
+            // File may not exist — ignore
+          }
         }
       }
       if (!db) throw new Error('Firestore not initialised')

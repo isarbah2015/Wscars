@@ -2,16 +2,26 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
+    // Exact path match — never interpolate UID into regex (metachar bypass risk).
+    function ownsAvatarFile(file) {
+      return request.auth != null && (
+        file == request.auth.uid + '.jpg' ||
+        file == request.auth.uid + '.jpeg' ||
+        file == request.auth.uid + '.png' ||
+        file == request.auth.uid + '.webp'
+      );
+    }
+
     // ── Car images — public read, uploader must own the path ─────────────
     match /cars/{carId}/{userId}/{filename} {
       allow read: if true;
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // ── User avatars — public read ────────────────────────────────────────
-    match /avatars/{userId} {
+    // ── User avatars — public read (path: avatars/{uid}.{ext}) ─────────────
+    match /avatars/{file} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow write: if ownsAvatarFile(file);
     }
 
     // ── Chat media — participants only ────────────────────────────────────

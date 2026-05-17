@@ -289,99 +289,11 @@ function FilterModal({
             <View style={fS.section}>
               <Text style={fS.secLabel}>Price range (GHS)</Text>
 
-              {/* Price Range Slider */}
-              <View style={{ marginBottom: 16 }}>
-                <View style={{
-                  flexDirection: 'row', justifyContent: 'space-between',
-                  alignItems: 'center', marginBottom: 12,
-                }}>
-                  <Text style={{ fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#1C1C1E' }}>
-                    Price Range
-                  </Text>
-                  <Text style={{ fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#0EB5CA' }}>
-                    GHS {priceMin.toLocaleString()} – {priceMax >= PRICE_MAX
-                      ? 'Any' : 'GHS ' + priceMax.toLocaleString()}
-                  </Text>
-                </View>
-
-                {(() => {
-                  try {
-                    const SliderComponent = require('@react-native-community/slider').default;
-                    return (
-                      <View style={{ gap: 16 }}>
-                        <View>
-                          <Text style={{ fontSize: 11, color: '#8E8E93',
-                            fontFamily: 'Inter_500Medium', marginBottom: 4 }}>
-                            Min: GHS {priceMin.toLocaleString()}
-                          </Text>
-                          <SliderComponent
-                            style={{ width: '100%', height: 40 }}
-                            minimumValue={0}
-                            maximumValue={PRICE_MAX}
-                            step={1000}
-                            value={priceMin}
-                            onValueChange={(val: number) => {
-                              if (val < priceMax) setPriceMin(Math.round(val));
-                            }}
-                            minimumTrackTintColor="#0EB5CA"
-                            maximumTrackTintColor="#E2E8F0"
-                            thumbTintColor="#0EB5CA"
-                          />
-                        </View>
-                        <View>
-                          <Text style={{ fontSize: 11, color: '#8E8E93',
-                            fontFamily: 'Inter_500Medium', marginBottom: 4 }}>
-                            Max: {priceMax >= PRICE_MAX
-                              ? 'Any' : 'GHS ' + priceMax.toLocaleString()}
-                          </Text>
-                          <SliderComponent
-                            style={{ width: '100%', height: 40 }}
-                            minimumValue={0}
-                            maximumValue={PRICE_MAX}
-                            step={1000}
-                            value={priceMax}
-                            onValueChange={(val: number) => {
-                              if (val > priceMin) setPriceMax(Math.round(val));
-                            }}
-                            minimumTrackTintColor="#0EB5CA"
-                            maximumTrackTintColor="#E2E8F0"
-                            thumbTintColor="#0EB5CA"
-                          />
-                        </View>
-                      </View>
-                    );
-                  } catch {
-                    return (
-                      <View style={{ gap: 12 }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                          <Text style={{ fontSize: 12, color: '#8E8E93',
-                            fontFamily: 'Inter_500Medium', width: 32 }}>Min</Text>
-                          <View style={{ flex: 1, backgroundColor: '#F5FBFC',
-                            borderRadius: 12, borderWidth: 1.5, borderColor: '#E2E8F0',
-                            paddingHorizontal: 12, height: 44, justifyContent: 'center' }}>
-                            <Text style={{ fontSize: 13, color: '#0F172A',
-                              fontFamily: 'Inter_400Regular' }}>
-                              GHS {priceMin.toLocaleString()}
-                            </Text>
-                          </View>
-                        </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                          <Text style={{ fontSize: 12, color: '#8E8E93',
-                            fontFamily: 'Inter_500Medium', width: 32 }}>Max</Text>
-                          <View style={{ flex: 1, backgroundColor: '#F5FBFC',
-                            borderRadius: 12, borderWidth: 1.5, borderColor: '#E2E8F0',
-                            paddingHorizontal: 12, height: 44, justifyContent: 'center' }}>
-                            <Text style={{ fontSize: 13, color: '#0F172A',
-                              fontFamily: 'Inter_400Regular' }}>
-                              {priceMax >= PRICE_MAX ? 'Any'
-                                : 'GHS ' + priceMax.toLocaleString()}
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                    );
-                  }
-                })()}
+              <View style={fS.priceSummary}>
+                <Text style={fS.priceSummaryLabel}>Selected range</Text>
+                <Text style={fS.priceSummaryValue}>
+                  {fmt(priceMin)} – {priceMax >= PRICE_MAX ? "Any" : fmt(priceMax)}
+                </Text>
               </View>
 
               <View style={fS.presetsRow}>
@@ -849,6 +761,10 @@ const fS = StyleSheet.create({
   priceCaption:   { fontSize: 11, color: "#8E8E93", fontFamily: "Inter_400Regular", marginBottom: 4 },
   priceDash:      { fontSize: 18, color: "#8E8E93", marginBottom: 10, alignSelf: "flex-end" },
   priceInput:     { height: 44, borderWidth: 1, borderColor: "#E5E5EA", borderRadius: 10, paddingHorizontal: 12, fontSize: 15, fontFamily: "Inter_500Medium", color: "#1C1C1E", backgroundColor: "#F9F9F9" },
+
+  priceSummary:      { marginBottom: 12, padding: 12, borderRadius: 12, backgroundColor: "#F5FBFC", borderWidth: 1, borderColor: "#E2E8F0" },
+  priceSummaryLabel: { fontSize: 11, fontFamily: "Inter_500Medium", color: "#8E8E93", marginBottom: 4 },
+  priceSummaryValue: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#0EB5CA" },
 
   presetsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   presetChip: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F2F2F7" },

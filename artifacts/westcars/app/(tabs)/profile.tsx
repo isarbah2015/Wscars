@@ -246,7 +246,7 @@ export default function ProfileScreen() {
             {avatarUploading && (
               <View style={styles.avatarUploadingOverlay}>
                 <ActivityIndicator color="#fff" size="small" />
-                {uploadProgress !== null && uploadProgress > 0 && (
+                {uploadProgress !== null && (
                   <Text style={styles.avatarUploadPct}>{Math.round(uploadProgress * 100)}%</Text>
                 )}
               </View>

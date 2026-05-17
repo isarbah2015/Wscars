@@ -11,6 +11,15 @@ service firebase.storage {
       return isSignedIn()
         && firestore.get(/databases/westcar-5c1e6/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
+    // Exact path match — never interpolate UID into regex (metachar bypass risk).
+    function ownsAvatarFile(file) {
+      return isSignedIn() && (
+        file == request.auth.uid + '.jpg' ||
+        file == request.auth.uid + '.jpeg' ||
+        file == request.auth.uid + '.png' ||
+        file == request.auth.uid + '.webp'
+      );
+    }
 
     // ── Car listing photos ─────────────────────────────────────────
     // Path: cars/{carId}/{userId}/{file}
@@ -22,12 +31,10 @@ service firebase.storage {
     }
 
     // ── Avatars ────────────────────────────────────────────────────
-    // Path: avatars/{userId}{.ext}
+    // Path: avatars/{uid}.{ext}
     match /avatars/{file} {
       allow read:  if true;
-      allow write: if isSignedIn()
-                   && file.matches(request.auth.uid + '\\..*')
-                   && isImage() && isUnder10MB();
+      allow write: if ownsAvatarFile(file) && isImage() && isUnder10MB();
     }
 
     // ── ID verification (PRIVATE — owner + admin only) ─────────────

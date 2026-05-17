@@ -53,3 +53,4 @@ firebase/serviceAccount*.json
 firebase/.firebase/
 firebase/functions/node_modules/
 firebase/functions/lib/
+.pnpm-store
