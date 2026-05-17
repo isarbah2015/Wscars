@@ -1,0 +1,22 @@
+---
+description: Post-fix commit, push, and EAS build workflow for Westcars
+alwaysApply: true
+---
+
+# Post-Fix Build Workflow
+
+After any fix in this project:
+
+- Commit the fix.
+- Push the commit to `main`.
+- Trigger the Android production EAS build with clear cache.
+- Move on immediately after the build is queued. Do not wait for the build to complete.
+
+Use this build command exactly:
+
+```bash
+cd "/Users/apple/Desktop/FUTURE APPS/Wscars/artifacts/westcars" && npx eas build --platform android --profile production --clear-cache
+```
+
+The developer monitors builds independently at:
+https://expo.dev/accounts/davidsarb/projects/westcars/builds
