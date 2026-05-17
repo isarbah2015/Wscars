@@ -19,15 +19,15 @@ import {
   type Unsubscribe,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db, isFirebaseReady } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { auth } from "@/lib/firebase-persistence";
 import { User } from "@/types";
 
 export { auth };
 
 const ensureReady = () => {
-  if (!isFirebaseReady() || !auth || !db) {
-    throw new Error("Firebase is not configured. Add EXPO_PUBLIC_FIREBASE_* secrets.");
+  if (!auth) {
+    throw new Error("Authentication service unavailable. Please try again.");
   }
 };
 
@@ -57,8 +57,11 @@ const buildDefaultUserDoc = (fbUser: FirebaseUser, overrides: Partial<User> = {}
  *  (e.g. rules not yet deployed) so login still succeeds. */
 export async function loadOrCreateUserDoc(fbUser: FirebaseUser, overrides: Partial<User> = {}): Promise<User> {
   ensureReady();
+  if (!db) {
+    return buildDefaultUserDoc(fbUser, overrides);
+  }
   try {
-    const ref = doc(db!, "users", fbUser.uid);
+    const ref = doc(db, "users", fbUser.uid);
     const snap = await getDoc(ref);
     if (snap.exists()) {
       return { id: fbUser.uid, ...(snap.data() as Omit<User, "id">) };
@@ -152,7 +155,7 @@ export async function sendPasswordResetEmail(email: string): Promise<void> {
 
 /** Subscribe to auth state changes; resolves the user-doc on each login. */
 export function subscribeAuth(cb: (user: User | null) => void): Unsubscribe {
-  if (!isFirebaseReady() || !auth) {
+  if (!auth) {
     cb(null);
     return () => {};
   }
