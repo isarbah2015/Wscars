@@ -57,6 +57,12 @@ export function resolveFirebaseConfig(): FirebaseWebConfig | null {
     "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
   ];
   const missingEnvKeys = envKeys.filter((key) => !process.env[key]);
+  if (__DEV__) {
+    console.info(
+      "[firebase-config] EXPO_PUBLIC_FIREBASE_* env:",
+      Object.fromEntries(envKeys.map((key) => [key, process.env[key] ? "set" : "missing"])),
+    );
+  }
   if (__DEV__ && missingEnvKeys.length > 0) {
     console.info(
       `[firebase-config] Missing local env vars: ${missingEnvKeys.join(", ")}. ` +
@@ -80,7 +86,15 @@ export function resolveFirebaseConfig(): FirebaseWebConfig | null {
   };
 
   const required = ["apiKey", "projectId", "appId"] as const;
-  if (required.some((k) => !config[k])) return null;
+  const missingRequired = required.filter((k) => !config[k]);
+  if (missingRequired.length > 0) {
+    if (__DEV__) {
+      console.warn(
+        `[firebase-config] Missing required Firebase config after env/extra/fallback resolution: ${missingRequired.join(", ")}.`,
+      );
+    }
+    return null;
+  }
 
   return config;
 }

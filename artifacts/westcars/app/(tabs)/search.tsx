@@ -112,7 +112,11 @@ const EXTENDED_BRANDS: string[] = [
 const PRICE_MIN  = 0;
 const PRICE_MAX  = 500_000;
 const PRICE_STEP = 5_000;
+const YEAR_MIN = 1990;
+const YEAR_MAX = new Date().getFullYear() + 1;
+const YEAR_STEP = 1;
 const ALL_BRANDS = EXTENDED_BRANDS;
+const BODY_TYPES = ["SUV", "Sedan", "Pickup", "Truck", "Bus", "Heavy", "Moto"];
 
 // ─── Quick filters ─────────────────────────────────────────
 type QuickFilterKey = "All"|"SUV"|"Sedan"|"Tokunbo"|"Budget"|"Luxury"|"Pickup"|"Truck"|"Bus"|"Heavy"|"Moto"|"New";
@@ -246,6 +250,76 @@ function PriceRangeSelector({
   );
 }
 
+function YearRangeSelector({
+  min,
+  max,
+  onMinChange,
+  onMaxChange,
+}: {
+  min: number;
+  max: number;
+  onMinChange: (value: number) => void;
+  onMaxChange: (value: number) => void;
+}) {
+  const minPct = ((min - YEAR_MIN) / (YEAR_MAX - YEAR_MIN)) * 100;
+  const maxPct = ((max - YEAR_MIN) / (YEAR_MAX - YEAR_MIN)) * 100;
+
+  const clampMin = (value: number) => {
+    const next = Math.min(value, max - YEAR_STEP);
+    onMinChange(Math.max(YEAR_MIN, Math.round(next)));
+  };
+
+  const clampMax = (value: number) => {
+    const next = Math.max(value, min + YEAR_STEP);
+    onMaxChange(Math.min(YEAR_MAX, Math.round(next)));
+  };
+
+  return (
+    <View style={fS.rangeWrap}>
+      <View style={fS.rangeLabels}>
+        <View style={fS.rangeValuePill}>
+          <Text style={fS.rangeValueLabel}>From</Text>
+          <Text style={fS.rangeValueText}>{min}</Text>
+        </View>
+        <View style={fS.rangeValuePill}>
+          <Text style={fS.rangeValueLabel}>To</Text>
+          <Text style={fS.rangeValueText}>{max >= YEAR_MAX ? "Any" : max}</Text>
+        </View>
+      </View>
+      <View style={fS.trackShell}>
+        <View style={fS.trackBase} />
+        <View style={[fS.trackActive, { left: `${minPct}%`, right: `${100 - maxPct}%` }]} />
+        <Slider
+          style={fS.rangeSlider}
+          minimumValue={YEAR_MIN}
+          maximumValue={YEAR_MAX}
+          step={YEAR_STEP}
+          value={min}
+          onValueChange={clampMin}
+          minimumTrackTintColor="transparent"
+          maximumTrackTintColor="transparent"
+          thumbTintColor={TEAL}
+        />
+        <Slider
+          style={fS.rangeSlider}
+          minimumValue={YEAR_MIN}
+          maximumValue={YEAR_MAX}
+          step={YEAR_STEP}
+          value={max}
+          onValueChange={clampMax}
+          minimumTrackTintColor="transparent"
+          maximumTrackTintColor="transparent"
+          thumbTintColor="#004D5A"
+        />
+      </View>
+      <View style={fS.rangeEnds}>
+        <Text style={fS.rangeEndText}>{YEAR_MIN}</Text>
+        <Text style={fS.rangeEndText}>{YEAR_MAX}</Text>
+      </View>
+    </View>
+  );
+}
+
 function mapCategoryToFilter(cat: string): { quickFilter: QuickFilterKey; query: string } {
   const l = cat.toLowerCase();
   if (l.includes("suv") || l.includes("4x4") || l.includes("4×4"))             return { quickFilter: "SUV",    query: "" };
@@ -287,6 +361,9 @@ function matchesQuickFilter(car: Car, key: QuickFilterKey): boolean {
 interface FilterState {
   priceMin:      number;
   priceMax:      number;
+  yearMin:       number;
+  yearMax:       number;
+  bodyTypes:     string[];
   brands:        string[];
   models:        string[];
   transmissions: string[];
@@ -296,7 +373,8 @@ interface FilterState {
 
 const DEFAULT_FILTERS: FilterState = {
   priceMin: PRICE_MIN, priceMax: PRICE_MAX,
-  brands: [], models: [], transmissions: [], conditions: [], cities: [],
+  yearMin: YEAR_MIN, yearMax: YEAR_MAX,
+  bodyTypes: [], brands: [], models: [], transmissions: [], conditions: [], cities: [],
 };
 
 function parseStoredFilters(raw: string | null): FilterState | null {
@@ -306,6 +384,9 @@ function parseStoredFilters(raw: string | null): FilterState | null {
     const next: FilterState = {
       priceMin: typeof parsed.priceMin === "number" ? parsed.priceMin : PRICE_MIN,
       priceMax: typeof parsed.priceMax === "number" ? parsed.priceMax : PRICE_MAX,
+      yearMin: typeof parsed.yearMin === "number" ? parsed.yearMin : YEAR_MIN,
+      yearMax: typeof parsed.yearMax === "number" ? parsed.yearMax : YEAR_MAX,
+      bodyTypes: Array.isArray(parsed.bodyTypes) ? parsed.bodyTypes.filter((v): v is string => typeof v === "string") : [],
       brands: Array.isArray(parsed.brands) ? parsed.brands.filter((v): v is string => typeof v === "string") : [],
       models: Array.isArray(parsed.models) ? parsed.models.filter((v): v is string => typeof v === "string") : [],
       transmissions: Array.isArray(parsed.transmissions) ? parsed.transmissions.filter((v): v is string => typeof v === "string") : [],
@@ -314,8 +395,11 @@ function parseStoredFilters(raw: string | null): FilterState | null {
     };
     const active =
       next.brands.length > 0 || next.models.length > 0 ||
+      next.bodyTypes.length > 0 ||
       next.transmissions.length > 0 || next.conditions.length > 0 ||
-      next.cities.length > 0 || next.priceMin !== PRICE_MIN || next.priceMax !== PRICE_MAX;
+      next.cities.length > 0 ||
+      next.priceMin !== PRICE_MIN || next.priceMax !== PRICE_MAX ||
+      next.yearMin !== YEAR_MIN || next.yearMax !== YEAR_MAX;
     return active ? next : null;
   } catch {
     return null;
@@ -332,20 +416,25 @@ function FilterModal({
 }) {
   const [priceMin,      setPriceMin]      = React.useState(initial.priceMin);
   const [priceMax,      setPriceMax]      = React.useState(initial.priceMax);
+  const [yearMin,       setYearMin]       = React.useState(initial.yearMin);
+  const [yearMax,       setYearMax]       = React.useState(initial.yearMax);
+  const [bodyTypes,     setBodyTypes]     = React.useState<string[]>(initial.bodyTypes);
   const [brands,        setBrands]        = React.useState<string[]>(initial.brands);
   const [models,        setModels]        = React.useState<string[]>(initial.models);
   const [transmissions, setTransmissions] = React.useState<string[]>(initial.transmissions);
   const [conditions,    setConditions]    = React.useState<string[]>(initial.conditions);
   const [cities,        setCities]        = React.useState<string[]>(initial.cities);
   const [showAllBrands, setShowAllBrands] = React.useState(false);
-  const [showAllCities, setShowAllCities] = React.useState(false);
+  const [citySearch,    setCitySearch]    = React.useState("");
 
   React.useEffect(() => {
     if (visible) {
       setPriceMin(initial.priceMin); setPriceMax(initial.priceMax);
+      setYearMin(initial.yearMin); setYearMax(initial.yearMax);
+      setBodyTypes(initial.bodyTypes);
       setBrands(initial.brands); setTransmissions(initial.transmissions);
       setConditions(initial.conditions); setCities(initial.cities);
-      setModels(initial.models); setShowAllBrands(false); setShowAllCities(false);
+      setModels(initial.models); setShowAllBrands(false); setCitySearch("");
     }
   }, [visible]);
 
@@ -354,15 +443,23 @@ function FilterModal({
     set(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
   const reset = () => {
     setPriceMin(PRICE_MIN); setPriceMax(PRICE_MAX);
+    setYearMin(YEAR_MIN); setYearMax(YEAR_MAX); setBodyTypes([]);
     setBrands([]); setTransmissions([]); setConditions([]); setCities([]); setModels([]);
   };
   const apply = () => {
-    onApply({ priceMin, priceMax, brands, models, transmissions, conditions, cities });
+    onApply({ priceMin, priceMax, yearMin, yearMax, bodyTypes, brands, models, transmissions, conditions, cities });
     onClose();
   };
 
   const visibleBrands = showAllBrands ? ALL_BRANDS : ALL_BRANDS.slice(0, 15);
-  const visibleCities = showAllCities ? GHANA_CITIES : GHANA_CITIES.slice(0, 8);
+  const visibleCities = GHANA_CITIES.filter((city) =>
+    city.toLowerCase().includes(citySearch.trim().toLowerCase())
+  );
+  const activeCount =
+    bodyTypes.length + brands.length + models.length + transmissions.length +
+    conditions.length + cities.length +
+    (priceMin !== PRICE_MIN || priceMax !== PRICE_MAX ? 1 : 0) +
+    (yearMin !== YEAR_MIN || yearMax !== YEAR_MAX ? 1 : 0);
 
   const PRESETS = [
     { label: "GHS 0–30k",     min: 0,       max: 30_000  },
@@ -378,9 +475,10 @@ function FilterModal({
         <View style={fS.sheet}>
           <View style={fS.handle} />
           <View style={fS.header}>
-            <Text style={fS.title}>Filter listings</Text>
+            <View style={fS.headerSpacer} />
+            <Text style={fS.title}>Filters</Text>
             <TouchableOpacity onPress={reset} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-              <Text style={fS.resetTxt}>Reset all</Text>
+              <Text style={fS.resetTxt}>Reset</Text>
             </TouchableOpacity>
           </View>
 
@@ -416,6 +514,33 @@ function FilterModal({
                   );
                 })}
               </View>
+            </View>
+            <View style={fS.divider} />
+
+            <View style={fS.section}>
+              <Text style={fS.secLabel}>Year Range</Text>
+              <YearRangeSelector
+                min={yearMin}
+                max={yearMax}
+                onMinChange={setYearMin}
+                onMaxChange={setYearMax}
+              />
+            </View>
+            <View style={fS.divider} />
+
+            <View style={fS.section}>
+              <Text style={fS.secLabel}>Body Type</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={fS.horizontalChipsRow}>
+                {BODY_TYPES.map(type => {
+                  const active = bodyTypes.includes(type);
+                  return (
+                    <TouchableOpacity key={type} style={[fS.chip, active && fS.chipActive]}
+                      onPress={() => toggle(bodyTypes, setBodyTypes, type)}>
+                      <Text style={[fS.chipTxt, active && fS.chipTxtActive]}>{type}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
             </View>
             <View style={fS.divider} />
 
@@ -466,47 +591,53 @@ function FilterModal({
             {/* ── Transmission ── */}
             <View style={fS.section}>
               <Text style={fS.secLabel}>Transmission</Text>
-              <View style={fS.chipsRow}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={fS.horizontalChipsRow}>
                 {TRANSMISSIONS.map(t => (
                   <TouchableOpacity key={t} style={[fS.chip, transmissions.includes(t) && fS.chipActive]}
                     onPress={() => toggle(transmissions, setTransmissions, t)}>
                     <Text style={[fS.chipTxt, transmissions.includes(t) && fS.chipTxtActive]}>{t}</Text>
                   </TouchableOpacity>
                 ))}
-              </View>
+              </ScrollView>
             </View>
             <View style={fS.divider} />
 
             {/* ── Condition ── */}
             <View style={fS.section}>
               <Text style={fS.secLabel}>Condition</Text>
-              <View style={fS.chipsRow}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={fS.horizontalChipsRow}>
                 {CONDITIONS.map(c => (
                   <TouchableOpacity key={c} style={[fS.chip, conditions.includes(c) && fS.chipActive]}
                     onPress={() => toggle(conditions, setConditions, c)}>
                     <Text style={[fS.chipTxt, conditions.includes(c) && fS.chipTxtActive]}>{c}</Text>
                   </TouchableOpacity>
                 ))}
-              </View>
+              </ScrollView>
             </View>
             <View style={fS.divider} />
 
             {/* ── Location ── */}
             <View style={fS.section}>
-              <Text style={fS.secLabel}>Location</Text>
-              <View style={fS.chipsRow}>
+              <Text style={fS.secLabel}>City / Region</Text>
+              <View style={fS.citySearchBox}>
+                <Feather name="search" size={15} color="#94A3B8" />
+                <TextInput
+                  style={fS.citySearchInput}
+                  placeholder="Search all regions"
+                  placeholderTextColor="#94A3B8"
+                  value={citySearch}
+                  onChangeText={setCitySearch}
+                />
+              </View>
+              <View style={fS.cityList}>
                 {visibleCities.map(city => (
-                  <TouchableOpacity key={city} style={[fS.chip, cities.includes(city) && fS.chipActive]}
+                  <TouchableOpacity key={city} style={[fS.cityItem, cities.includes(city) && fS.cityItemActive]}
                     onPress={() => toggle(cities, setCities, city)}>
-                    <Text style={[fS.chipTxt, cities.includes(city) && fS.chipTxtActive]}>{city}</Text>
+                    <Text style={[fS.cityTxt, cities.includes(city) && fS.cityTxtActive]}>{city}</Text>
+                    {cities.includes(city) && <Feather name="check" size={15} color={TEAL} />}
                   </TouchableOpacity>
                 ))}
               </View>
-              {!showAllCities && GHANA_CITIES.length > 8 && (
-                <TouchableOpacity style={fS.showMore} onPress={() => setShowAllCities(true)}>
-                  <Text style={fS.showMoreTxt}>+ {GHANA_CITIES.length - 8} more cities</Text>
-                </TouchableOpacity>
-              )}
             </View>
 
           </ScrollView>
@@ -516,7 +647,7 @@ function FilterModal({
               <Text style={fS.closeTxt}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity style={fS.applyBtn} onPress={apply}>
-              <Text style={fS.applyTxt}>Apply filters</Text>
+              <Text style={fS.applyTxt}>{activeCount > 0 ? `Apply ${activeCount} Filters` : "Apply Filters"}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -632,14 +763,19 @@ export default function SearchScreen() {
 
   const matchesModalFilters = React.useCallback((car: Car) => {
     if (!activeFilters) return true;
-    const { brands, models, transmissions, conditions, cities, priceMin, priceMax } = activeFilters;
+    const { brands, models, transmissions, conditions, cities, bodyTypes, priceMin, priceMax, yearMin, yearMax } = activeFilters;
+    const matchesBodyTypes = bodyTypes.length === 0 || bodyTypes.some((type) =>
+      matchesQuickFilter(car, type as QuickFilterKey)
+    );
     return (
+      matchesBodyTypes &&
       (brands.length        === 0 || brands.includes(car.brand)) &&
       (models.length        === 0 || models.includes(car.model)) &&
       (transmissions.length === 0 || transmissions.includes(car.transmission ?? "")) &&
       (conditions.length    === 0 || conditions.includes(car.condition)) &&
       (cities.length        === 0 || cities.includes(car.location)) &&
-      car.price >= priceMin && car.price <= priceMax
+      car.price >= priceMin && car.price <= priceMax &&
+      car.year >= yearMin && car.year <= yearMax
     );
   }, [activeFilters]);
 
@@ -685,15 +821,19 @@ export default function SearchScreen() {
 
   const hasFilters = !!activeFilters && (
     activeFilters.brands.length > 0 || activeFilters.models.length > 0 ||
+    activeFilters.bodyTypes.length > 0 ||
     activeFilters.transmissions.length > 0 ||
     activeFilters.conditions.length > 0 || activeFilters.cities.length > 0 ||
-    activeFilters.priceMin !== PRICE_MIN || activeFilters.priceMax !== PRICE_MAX
+    activeFilters.priceMin !== PRICE_MIN || activeFilters.priceMax !== PRICE_MAX ||
+    activeFilters.yearMin !== YEAR_MIN || activeFilters.yearMax !== YEAR_MAX
   );
 
   const activeFilterChips = React.useMemo(() => {
     if (!activeFilters) return [];
     const chips: { key: string; label: string }[] = [];
-    const { brands, models, transmissions, conditions, cities, priceMin, priceMax } = activeFilters;
+    const { brands, models, transmissions, conditions, cities, bodyTypes, priceMin, priceMax, yearMin, yearMax } = activeFilters;
+    if (bodyTypes.length === 1)          chips.push({ key: "bodyTypes",     label: bodyTypes[0] });
+    else if (bodyTypes.length > 1)       chips.push({ key: "bodyTypes",     label: `${bodyTypes.length} body types` });
     if (brands.length === 1)             chips.push({ key: "brands",        label: brands[0] });
     else if (brands.length > 1)          chips.push({ key: "brands",        label: `${brands.length} brands` });
     if (models.length === 1)             chips.push({ key: "models",        label: models[0] });
@@ -709,6 +849,9 @@ export default function SearchScreen() {
       const hi = priceMax >= PRICE_MAX ? "Any" : `GHS ${priceMax.toLocaleString()}`;
       chips.push({ key: "price", label: `${lo} – ${hi}` });
     }
+    if (yearMin !== YEAR_MIN || yearMax !== YEAR_MAX) {
+      chips.push({ key: "year", label: `${yearMin} – ${yearMax >= YEAR_MAX ? "Any" : yearMax}` });
+    }
     return chips;
   }, [activeFilters]);
 
@@ -718,23 +861,26 @@ export default function SearchScreen() {
       let next: FilterState;
       if (key === "brands")             next = { ...prev, brands: [], models: [] };
       else if (key === "models")        next = { ...prev, models: [] };
+      else if (key === "bodyTypes")     next = { ...prev, bodyTypes: [] };
       else if (key === "transmissions") next = { ...prev, transmissions: [] };
       else if (key === "conditions")    next = { ...prev, conditions: [] };
       else if (key === "cities")        next = { ...prev, cities: [] };
+      else if (key === "year")          next = { ...prev, yearMin: YEAR_MIN, yearMax: YEAR_MAX };
       else                              next = { ...prev, priceMin: PRICE_MIN, priceMax: PRICE_MAX };
       const stillActive =
-        next.brands.length > 0 || next.models.length > 0 || next.transmissions.length > 0 ||
+        next.brands.length > 0 || next.models.length > 0 || next.bodyTypes.length > 0 || next.transmissions.length > 0 ||
         next.conditions.length > 0 || next.cities.length > 0 ||
-        next.priceMin !== PRICE_MIN || next.priceMax !== PRICE_MAX;
+        next.priceMin !== PRICE_MIN || next.priceMax !== PRICE_MAX ||
+        next.yearMin !== YEAR_MIN || next.yearMax !== YEAR_MAX;
       return stillActive ? next : null;
     });
   }, []);
 
   return (
-    <View style={[S.root, { backgroundColor: colors.background }]}>
+    <View style={[S.root, { backgroundColor: "#EDF4F7" }]}>
 
       {/* ── Header ── */}
-      <View style={[S.header, { paddingTop: topPad + 10, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+      <View style={[S.header, { paddingTop: topPad + 10, backgroundColor: "#FFFFFF", borderBottomColor: "#E2E8F0" }]}>
         <View style={S.titleRow}>
           <View>
             <Text style={S.eyebrow}>WESTCARS</Text>
@@ -747,7 +893,7 @@ export default function SearchScreen() {
         </View>
 
         <View style={S.searchRow}>
-          <View style={[S.searchInput, { backgroundColor: colors.inputBg, borderColor: colors.border }]}>
+          <View style={[S.searchInput, { backgroundColor: "#F5FBFC", borderColor: "#E2E8F0" }]}>
             <Feather name="search" size={17} color={colors.textTertiary} />
             <TextInput
               style={[S.input, { color: colors.text }]}
@@ -795,7 +941,7 @@ export default function SearchScreen() {
                   S.chip,
                   active
                     ? { backgroundColor: color }
-                    : { backgroundColor: colors.inputBg, borderColor: colors.border, borderWidth: 1 },
+                    : { backgroundColor: "#FFFFFF", borderColor: "#E2E8F0", borderWidth: 1 },
                   isEmpty && !active && S.chipDimmed,
                 ]}
                 onPress={() => setQuickFilter(key)}
@@ -871,8 +1017,8 @@ const S = StyleSheet.create({
   searchInput: { flex: 1, flexDirection: "row", alignItems: "center", borderRadius: 12, borderWidth: 1, paddingHorizontal: 14, height: 46, minHeight: 46, gap: 10 },
   input:       { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular" },
 
-  filterBtn: { width: 46, height: 46, borderRadius: 12, backgroundColor: ORANGE, alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  filterDot: { position: "absolute", top: 8, right: 8, width: 7, height: 7, borderRadius: 4, backgroundColor: "#fff", borderWidth: 1.5, borderColor: ORANGE },
+  filterBtn: { width: 46, height: 46, borderRadius: 12, backgroundColor: TEAL, alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  filterDot: { position: "absolute", top: 8, right: 8, width: 7, height: 7, borderRadius: 4, backgroundColor: "#fff", borderWidth: 1.5, borderColor: TEAL },
 
   activeChipRow: { flexDirection: "row", gap: 8, paddingHorizontal: 14, paddingBottom: 8 },
   activeChip:    { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, borderWidth: 1.5 },
@@ -902,16 +1048,17 @@ const S = StyleSheet.create({
 // ─── Filter modal styles ──────────────────────────────────────────────────────
 const fS = StyleSheet.create({
   overlay:  { flex: 1, justifyContent: "flex-end" },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.5)" },
-  sheet:    { backgroundColor: "#fff", borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "92%", overflow: "hidden" },
-  handle:   { width: 36, height: 4, borderRadius: 2, backgroundColor: "#E5E5EA", alignSelf: "center", marginTop: 12 },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(15,23,42,0.36)" },
+  sheet:    { backgroundColor: "#EDF4F7", borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "92%", overflow: "hidden" },
+  handle:   { width: 36, height: 4, borderRadius: 2, backgroundColor: "#CBD5E1", alignSelf: "center", marginTop: 12 },
   header:   { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingVertical: 16 },
-  title:    { fontSize: 17, fontFamily: "Manrope_800ExtraBold", color: "#1C1C1E" },
-  resetTxt: { fontSize: 14, color: "#FF6B00", fontFamily: "Inter_600SemiBold" },
+  headerSpacer: { width: 48 },
+  title:    { flex: 1, textAlign: "center", fontSize: 18, fontFamily: "Manrope_800ExtraBold", color: "#0F172A" },
+  resetTxt: { width: 48, textAlign: "right", fontSize: 14, color: TEAL, fontFamily: "Inter_600SemiBold" },
   scroll:   { paddingBottom: 8 },
   section:  { paddingHorizontal: 20, paddingVertical: 16 },
-  secLabel: { fontSize: 11, fontFamily: "Inter_700Bold", color: "#8E8E93", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 },
-  divider:  { height: 0.5, backgroundColor: "#E5E5EA", marginHorizontal: 20 },
+  secLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 12 },
+  divider:  { height: 1, backgroundColor: "#E2E8F0", marginHorizontal: 20 },
 
   priceInputRow:  { flexDirection: "row", alignItems: "flex-end", gap: 10, marginBottom: 12 },
   priceInputBox:  { flex: 1 },
@@ -972,26 +1119,54 @@ const fS = StyleSheet.create({
   rangeEndText: { fontSize: 11, fontFamily: "Inter_500Medium", color: "#94A3B8" },
 
   presetsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  presetChip: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F2F2F7" },
+  presetChip: { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#FFFFFF" },
 
   brandGrid:      { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  brandItem:      { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F9F9F9" },
-  brandActive:    { backgroundColor: "#FF6B00", borderColor: "#FF6B00" },
-  brandTxt:       { fontSize: 12, fontFamily: "Inter_500Medium", color: "#3C3C43" },
+  brandItem:      { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#FFFFFF" },
+  brandActive:    { backgroundColor: TEAL, borderColor: TEAL },
+  brandTxt:       { fontSize: 12, fontFamily: "Inter_500Medium", color: "#334155" },
   brandTxtActive: { color: "#fff" },
 
   showMore:    { marginTop: 10, alignItems: "center", paddingVertical: 6 },
-  showMoreTxt: { fontSize: 13, color: "#FF6B00", fontFamily: "Inter_600SemiBold" },
+  showMoreTxt: { fontSize: 13, color: TEAL, fontFamily: "Inter_600SemiBold" },
 
   chipsRow:     { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  chip:         { paddingVertical: 7, paddingHorizontal: 14, borderRadius: 20, borderWidth: 0.5, borderColor: "#E5E5EA", backgroundColor: "#F2F2F7" },
-  chipActive:   { backgroundColor: "#FF6B00", borderColor: "#FF6B00" },
-  chipTxt:      { fontSize: 13, fontFamily: "Inter_500Medium", color: "#3C3C43" },
+  horizontalChipsRow: { flexDirection: "row", gap: 8, paddingRight: 20 },
+  chip:         { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20, borderWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#FFFFFF" },
+  chipActive:   { backgroundColor: TEAL, borderColor: TEAL },
+  chipTxt:      { fontSize: 13, fontFamily: "Inter_500Medium", color: "#334155" },
   chipTxtActive:{ color: "#fff" },
 
-  bottom:   { flexDirection: "row", gap: 10, padding: 16, paddingBottom: 32, borderTopWidth: 0.5, borderTopColor: "#E5E5EA" },
-  closeBtn: { flex: 1, padding: 14, borderRadius: 14, backgroundColor: "#F2F2F7", alignItems: "center" },
-  closeTxt: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#3C3C43" },
-  applyBtn: { flex: 2, padding: 14, borderRadius: 14, backgroundColor: "#FF6B00", alignItems: "center" },
+  citySearchBox: {
+    height: 46,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    backgroundColor: "#FFFFFF",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+  },
+  citySearchInput: { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular", color: "#0F172A" },
+  cityList: { borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#FFFFFF" },
+  cityItem: {
+    minHeight: 44,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEF2F7",
+  },
+  cityItemActive: { backgroundColor: "#F0FCFE" },
+  cityTxt: { fontSize: 14, fontFamily: "Inter_500Medium", color: "#334155" },
+  cityTxtActive: { color: "#004D5A", fontFamily: "Inter_700Bold" },
+
+  bottom:   { flexDirection: "row", gap: 10, padding: 16, paddingBottom: 32, borderTopWidth: 1, borderTopColor: "#E2E8F0", backgroundColor: "#FFFFFF" },
+  closeBtn: { flex: 1, height: 54, borderRadius: 14, backgroundColor: "#F8FAFC", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E2E8F0" },
+  closeTxt: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#334155" },
+  applyBtn: { flex: 2, height: 54, borderRadius: 14, backgroundColor: TEAL, alignItems: "center", justifyContent: "center", shadowColor: TEAL, shadowOpacity: 0.25, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 5 },
   applyTxt: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" },
 });

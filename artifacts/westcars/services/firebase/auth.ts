@@ -10,9 +10,11 @@ import {
   onAuthStateChanged,
   updateProfile,
   sendPasswordResetEmail as fbSendPasswordResetEmail,
+  signInWithPhoneNumber,
   GoogleAuthProvider,
   signInWithCredential,
   signInWithPopup,
+  type ConfirmationResult,
   type User as FirebaseUser,
   type Unsubscribe,
 } from "firebase/auth";
@@ -95,6 +97,25 @@ export async function signUpEmail(
   return loadOrCreateUserDoc(cred.user, { name, phone });
 }
 
+export async function sendPhoneOtp(phoneNumber: string): Promise<ConfirmationResult> {
+  ensureReady();
+  // IMPORTANT: Enable Phone auth in Firebase Console -> Authentication -> Sign-in methods
+  return (signInWithPhoneNumber as any)(auth!, phoneNumber.trim());
+}
+
+export async function confirmPhoneOtp(
+  confirmation: ConfirmationResult,
+  code: string,
+  overrides: Partial<User> = {},
+): Promise<User> {
+  ensureReady();
+  const result = await confirmation.confirm(code.trim());
+  return loadOrCreateUserDoc(result.user, {
+    phone: result.user.phoneNumber ?? overrides.phone ?? "",
+    ...overrides,
+  });
+}
+
 /** Exchange a Google id_token (from expo-auth-session) for a Firebase session. */
 export async function signInWithGoogleIdToken(idToken: string, accessToken?: string): Promise<User> {
   ensureReady();
@@ -167,6 +188,16 @@ export function authErrorMessage(err: unknown): string {
       return "This account has been disabled. Contact support.";
     case "auth/operation-not-allowed":
       return "This sign-in method is not enabled. Contact support.";
+    case "auth/invalid-verification-code":
+      return "That verification code is incorrect.";
+    case "auth/missing-verification-code":
+      return "Enter the 6-digit verification code.";
+    case "auth/quota-exceeded":
+      return "SMS limit reached. Please try again later.";
+    case "auth/missing-app-credential":
+    case "auth/invalid-app-credential":
+    case "auth/captcha-check-failed":
+      return "Phone sign-in needs Firebase Phone auth and app verification configured.";
     case "auth/account-exists-with-different-credential":
       return "An account already exists with the same email but a different sign-in method.";
     case "auth/credential-already-in-use":

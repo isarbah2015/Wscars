@@ -6,6 +6,7 @@ import React, { useRef, useState } from "react";
 import {
   Animated,
   Easing,
+  FlatList,
   Image,
   Platform,
   Pressable,
@@ -394,13 +395,24 @@ export default function HomeScreen() {
             <Image source={WC_LOGO} style={styles.brandStripBadge} resizeMode="contain" />
             <Text style={[styles.brandSectionTitle, { color: isDark ? "#CBD5E1" : "#334155" }]}>Car Brands</Text>
           </View>
-          <View style={styles.brandGrid}>
-            {CAR_BRANDS.map((brand) => {
+          <FlatList
+            data={CAR_BRANDS}
+            keyExtractor={(brand) => brand}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.brandList}
+            renderItem={({ item: brand }) => {
               const logoUrl = getBrandLogo(brand);
               return (
                 <Pressable
                   key={brand}
-                  style={[styles.brandPill, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA", borderColor: isDark ? "#2D3A4F" : "#E4E8EF" }]}
+                  style={[
+                    styles.brandPill,
+                    {
+                      backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+                      borderColor: isDark ? "#2D3A4F" : "#E2E8F0",
+                    },
+                  ]}
                   onPress={() => router.push({ pathname: "/(tabs)/search", params: { brand } })}
                 >
                   {(logoUrl && !logoErrors[brand]) ? (
@@ -424,8 +436,8 @@ export default function HomeScreen() {
                   </Text>
                 </Pressable>
               );
-            })}
-          </View>
+            }}
+          />
         </View>
 
         {/* ── Video Ad slot ── */}
@@ -1112,31 +1124,28 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "Inter_600SemiBold",
   },
-  brandGrid: {
+  brandList: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    alignItems: "stretch",
+    gap: 10,
+    paddingRight: 14,
   },
   brandPill: {
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 16,
-    borderWidth: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    width: "23%",
-    minHeight: 92,
+    borderWidth: 1.2,
+    width: 90,
+    height: 100,
     gap: 7,
     shadowColor: "#0EB5CA",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    shadowOpacity: 0.10,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 3,
   },
   brandPillLogoWrap: {
-    width: 54,
-    height: 44,
+    width: 58,
+    height: 48,
     borderRadius: 12,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
@@ -1144,12 +1153,12 @@ const styles = StyleSheet.create({
     padding: 7,
   },
   brandPillLogo: {
-    width: 42,
-    height: 30,
+    width: 46,
+    height: 34,
   },
   brandPillLogoPlaceholder: {
-    width: 54,
-    height: 44,
+    width: 58,
+    height: 48,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
@@ -1162,5 +1171,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: "Inter_600SemiBold",
     textAlign: "center",
+    paddingHorizontal: 4,
   },
 });

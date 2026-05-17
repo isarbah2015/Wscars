@@ -1,6 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  Alert,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,55 +12,145 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
+import type { ConfirmationResult } from 'firebase/auth';
 import { useApp } from '../../context/AppContext';
-import { authErrorMessage } from '../../services/firebase/auth';
+import { authErrorMessage, confirmPhoneOtp, sendPhoneOtp } from '../../services/firebase/auth';
 import { isFirebaseReady } from '@/lib/firebase';
 import { auth } from '@/lib/firebase-persistence';
 import { useTheme } from '@/context/ThemeContext';
 
 const WC_LOGO = require('../../assets/images/wc-logo.png');
 
+function formatPhone(input: string) {
+  const trimmed = input.trim();
+  if (!trimmed) return '';
+  if (trimmed.startsWith('+')) return trimmed.replace(/\s+/g, '');
+  const digits = trimmed.replace(/\D/g, '');
+  if (digits.startsWith('0')) return `+233${digits.slice(1)}`;
+  if (digits.startsWith('233')) return `+${digits}`;
+  return `+233${digits}`;
+}
+
+function passwordStrength(password: string) {
+  let score = 0;
+  if (password.length >= 6) score += 1;
+  if (password.length >= 10) score += 1;
+  if (/[A-Z]/.test(password) && /\d/.test(password)) score += 1;
+  if (score <= 1) return { width: '33%', color: '#EF4444', label: 'Weak' } as const;
+  if (score === 2) return { width: '66%', color: '#F97316', label: 'Good' } as const;
+  return { width: '100%', color: '#22C55E', label: 'Strong' } as const;
+}
+
 export default function SignupScreen() {
   const router = useRouter();
   const { signup, isLoading } = useApp();
   const { colors } = useTheme();
   const styles = makeStyles(colors);
-  const emailRef    = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
-  const confirmRef  = useRef<TextInput>(null);
-  const [name,     setName]     = useState('');
-  const [email,    setEmail]    = useState('');
+  const confirmRef = useRef<TextInput>(null);
+  const codeRef = useRef<TextInput>(null);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [confirm,  setConfirm]  = useState('');
-  const [loading,  setLoading]  = useState(false);
-  const [error,    setError]    = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [otp, setOtp] = useState('');
+  const [confirmation, setConfirmation] = useState<ConfirmationResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [attempted, setAttempted] = useState(false);
+  const [firebaseReady, setFirebaseReady] = useState(() => isFirebaseReady() && !!auth);
+  const [readyTimedOut, setReadyTimedOut] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm,  setShowConfirm]  = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  useEffect(() => {
+    if (firebaseReady) return;
+    const startedAt = Date.now();
+    const id = setInterval(() => {
+      if (isFirebaseReady() && auth) {
+        setFirebaseReady(true);
+        setReadyTimedOut(false);
+        clearInterval(id);
+      } else if (Date.now() - startedAt >= 8000) {
+        setReadyTimedOut(true);
+        clearInterval(id);
+      }
+    }, 250);
+    return () => clearInterval(id);
+  }, [firebaseReady]);
+
+  const ensureReadyForAttempt = () => {
+    setAttempted(true);
+    if (isLoading || !firebaseReady || !auth || !isFirebaseReady()) {
+      setError(readyTimedOut
+        ? 'Secure account setup could not start. Check your connection and try again.'
+        : 'Secure account setup is still starting. Please try again in a moment.');
+      return false;
+    }
+    return true;
+  };
 
   const handleSignup = async () => {
     setError('');
-    if (isLoading || !auth || !isFirebaseReady()) {
-      setError('Secure account setup is still starting. Please try again in a moment.');
-      return;
-    }
+    if (!ensureReadyForAttempt()) return;
     if (!name.trim() || !email.trim() || !password || !confirm) {
-      setError('Please fill in all fields'); return;
+      setError('Please fill in all required fields'); return;
     }
-    if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
+    if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
     if (password !== confirm) { setError('Passwords do not match'); return; }
     try {
       setLoading(true);
-      await signup(name.trim(), email.trim(), '', password);
-      Alert.alert(
-        'Account Created!',
-        'Welcome to Westcars! Your account has been created successfully.',
-        [{ text: "Let's Go", onPress: () => router.replace('/(tabs)') }]
-      );
-      return;
+      await signup(name.trim(), email.trim(), phone.trim(), password);
+      router.replace('/(tabs)');
     } catch (e: any) {
       setError(authErrorMessage(e));
     } finally { setLoading(false); }
   };
+
+  const handleSendOtp = async () => {
+    setError('');
+    if (!ensureReadyForAttempt()) return;
+    const formatted = formatPhone(phone);
+    if (formatted.length < 10) {
+      setError('Enter a valid phone number.');
+      return;
+    }
+    try {
+      setPhoneLoading(true);
+      const result = await sendPhoneOtp(formatted);
+      setConfirmation(result);
+      setTimeout(() => codeRef.current?.focus(), 100);
+    } catch (e: any) {
+      setError(authErrorMessage(e));
+    } finally {
+      setPhoneLoading(false);
+    }
+  };
+
+  const handleConfirmOtp = async () => {
+    setError('');
+    if (!ensureReadyForAttempt()) return;
+    if (!confirmation || otp.trim().length !== 6) {
+      setError('Enter the 6-digit verification code.');
+      return;
+    }
+    try {
+      setPhoneLoading(true);
+      await confirmPhoneOtp(confirmation, otp, { name: name.trim() || undefined, phone: formatPhone(phone) });
+      router.replace('/(tabs)');
+    } catch (e: any) {
+      setError(authErrorMessage(e));
+    } finally {
+      setPhoneLoading(false);
+    }
+  };
+
+  const strength = passwordStrength(password);
+  const showStartupSpinner = !firebaseReady && !readyTimedOut;
 
   return (
     <KeyboardAvoidingView
@@ -74,7 +163,6 @@ export default function SignupScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
-
           <View style={styles.topRow}>
             <Image source={WC_LOGO} style={styles.logo} resizeMode="contain" />
             <TouchableOpacity onPress={() => router.push('/auth/login')} activeOpacity={0.7} style={styles.navBtn}>
@@ -85,7 +173,46 @@ export default function SignupScreen() {
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Join Westcars today</Text>
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {showStartupSpinner ? (
+            <View style={styles.startingRow}>
+              <ActivityIndicator color="#0EB5CA" size="small" />
+              <Text style={styles.startingText}>Preparing secure account setup...</Text>
+            </View>
+          ) : null}
+
+          {attempted && error ? <Text style={styles.error}>{error}</Text> : null}
+
+          <View style={styles.phoneBox}>
+            <TouchableOpacity
+              style={[styles.phoneBtn, phoneLoading && styles.btnDisabled]}
+              onPress={confirmation ? handleConfirmOtp : handleSendOtp}
+              disabled={phoneLoading}
+              activeOpacity={0.85}
+            >
+              {phoneLoading
+                ? <ActivityIndicator color="#0EB5CA" />
+                : <Text style={styles.phoneBtnText}>{confirmation ? 'Verify Phone Code' : 'Continue with Phone'}</Text>
+              }
+            </TouchableOpacity>
+            {confirmation ? (
+              <>
+                <Text style={styles.label}>6-Digit Code</Text>
+                <TextInput
+                  ref={codeRef}
+                  style={styles.input}
+                  placeholder="123456"
+                  placeholderTextColor={colors.textTertiary}
+                  value={otp}
+                  onChangeText={(value) => setOtp(value.replace(/\D/g, '').slice(0, 6))}
+                  keyboardType="number-pad"
+                  maxLength={6}
+                  editable={!phoneLoading && !loading}
+                  returnKeyType="done"
+                  onSubmitEditing={handleConfirmOtp}
+                />
+              </>
+            ) : null}
+          </View>
 
           <Text style={styles.label}>Full Name</Text>
           <TextInput
@@ -93,13 +220,13 @@ export default function SignupScreen() {
             placeholder="John Mensah"
             placeholderTextColor={colors.textTertiary}
             value={name}
-            onChangeText={setName}
+            onChangeText={(value) => { setName(value); setError(''); }}
             autoCapitalize="words"
             autoCorrect={false}
             autoComplete="name"
             returnKeyType="next"
             blurOnSubmit={false}
-            editable={!loading}
+            editable={!loading && !phoneLoading}
             onSubmitEditing={() => emailRef.current?.focus()}
           />
 
@@ -110,14 +237,30 @@ export default function SignupScreen() {
             placeholder="your@email.com"
             placeholderTextColor={colors.textTertiary}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(value) => { setEmail(value); setError(''); }}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
             autoComplete="email"
             returnKeyType="next"
             blurOnSubmit={false}
-            editable={!loading}
+            editable={!loading && !phoneLoading}
+            onSubmitEditing={() => phoneRef.current?.focus()}
+          />
+
+          <Text style={styles.label}>Phone Number <Text style={styles.optional}>(optional)</Text></Text>
+          <TextInput
+            ref={phoneRef}
+            style={styles.input}
+            placeholder="024 123 4567"
+            placeholderTextColor={colors.textTertiary}
+            value={phone}
+            onChangeText={(value) => { setPhone(value); setError(''); }}
+            keyboardType="phone-pad"
+            autoComplete="tel"
+            returnKeyType="next"
+            blurOnSubmit={false}
+            editable={!loading && !phoneLoading}
             onSubmitEditing={() => passwordRef.current?.focus()}
           />
 
@@ -126,23 +269,31 @@ export default function SignupScreen() {
             <TextInput
               ref={passwordRef}
               style={[styles.input, { marginBottom: 0, flex: 1, borderWidth: 0 }]}
-              placeholder="Min. 8 characters"
+              placeholder="Min. 6 characters"
               placeholderTextColor={colors.textTertiary}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(value) => { setPassword(value); setError(''); }}
               secureTextEntry={!showPassword}
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="new-password"
               returnKeyType="next"
               blurOnSubmit={false}
-              editable={!loading}
+              editable={!loading && !phoneLoading}
               onSubmitEditing={() => confirmRef.current?.focus()}
             />
             <TouchableOpacity onPress={() => setShowPassword(v => !v)} hitSlop={8} style={styles.eyeBtn}>
               <Text style={styles.eyeText}>{showPassword ? 'Hide' : 'Show'}</Text>
             </TouchableOpacity>
           </View>
+          {password.length > 0 ? (
+            <View style={styles.strengthWrap}>
+              <View style={styles.strengthTrack}>
+                <View style={[styles.strengthFill, { width: strength.width, backgroundColor: strength.color }]} />
+              </View>
+              <Text style={[styles.strengthText, { color: strength.color }]}>{strength.label}</Text>
+            </View>
+          ) : null}
 
           <Text style={styles.label}>Confirm Password</Text>
           <View style={styles.passwordRow}>
@@ -152,13 +303,13 @@ export default function SignupScreen() {
               placeholder="••••••••••"
               placeholderTextColor={colors.textTertiary}
               value={confirm}
-              onChangeText={setConfirm}
+              onChangeText={(value) => { setConfirm(value); setError(''); }}
               secureTextEntry={!showConfirm}
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="new-password"
               returnKeyType="done"
-              editable={!loading}
+              editable={!loading && !phoneLoading}
               onSubmitEditing={handleSignup}
             />
             <TouchableOpacity onPress={() => setShowConfirm(v => !v)} hitSlop={8} style={styles.eyeBtn}>
@@ -191,120 +342,34 @@ export default function SignupScreen() {
 }
 
 const makeStyles = (colors: ReturnType<typeof useTheme>["colors"]) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  scroll: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 32,
-  },
-
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: 28,
-    paddingHorizontal: 24,
-    paddingTop: 28,
-    paddingBottom: 28,
-    shadowColor: '#0A1628',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.10,
-    shadowRadius: 20,
-    elevation: 6,
-  },
-
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-  },
+  container: { flex: 1, backgroundColor: '#EDF4F7' },
+  scroll: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20, paddingVertical: 32 },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 24, paddingHorizontal: 24, paddingTop: 28, paddingBottom: 28, shadowColor: '#0EB5CA', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.08, shadowRadius: 24, elevation: 8 },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
   logo: { width: 100, height: 40 },
-  navBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: colors.accent,
-  },
-  navBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: colors.accent },
-
-  title: {
-    fontSize: 32,
-    fontFamily: 'Manrope_800ExtraBold',
-    color: colors.text,
-    letterSpacing: -0.8,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    fontFamily: 'Inter_400Regular',
-    color: colors.textSecondary,
-    marginBottom: 24,
-  },
-
-  label: {
-    alignSelf: 'flex-start',
-    fontSize: 11,
-    fontFamily: 'Inter_600SemiBold',
-    color: colors.textSecondary,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: 7,
-    marginTop: 4,
-  },
-  input: {
-    width: '100%',
-    height: 52,
-    backgroundColor: colors.inputBg,
-    borderRadius: 16,
-    paddingHorizontal: 18,
-    fontSize: 15,
-    color: colors.text,
-    marginBottom: 14,
-    borderWidth: 1.5,
-    borderColor: colors.skeleton,
-    fontFamily: 'Inter_400Regular',
-  },
-  error: {
-    color: colors.danger,
-    fontSize: 13,
-    textAlign: 'center',
-    marginBottom: 12,
-    fontFamily: 'Inter_500Medium',
-  },
-
-  primaryBtn: {
-    width: '100%',
-    height: 52,
-    backgroundColor: colors.accent,
-    borderRadius: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-    gap: 12,
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
-  },
+  navBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, borderWidth: 1.5, borderColor: '#0EB5CA' },
+  navBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#0EB5CA' },
+  title: { fontSize: 32, fontFamily: 'Manrope_800ExtraBold', color: '#0F172A', letterSpacing: -0.5, marginBottom: 4 },
+  subtitle: { fontSize: 15, fontFamily: 'Inter_400Regular', color: '#64748B', marginBottom: 20 },
+  startingRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14, padding: 12, borderRadius: 14, backgroundColor: '#F5FBFC', borderWidth: 1, borderColor: '#D7F0F5' },
+  startingText: { fontSize: 13, fontFamily: 'Inter_500Medium', color: '#64748B' },
+  error: { color: '#EF4444', fontSize: 13, textAlign: 'center', marginBottom: 12, fontFamily: 'Inter_500Medium' },
+  phoneBox: { marginBottom: 12 },
+  phoneBtn: { width: '100%', height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#0EB5CA', backgroundColor: '#FFFFFF', marginBottom: 14 },
+  phoneBtnText: { color: '#0EB5CA', fontSize: 15, fontFamily: 'Inter_700Bold' },
+  label: { alignSelf: 'flex-start', fontSize: 11, fontFamily: 'Inter_600SemiBold', color: '#64748B', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 7, marginTop: 4 },
+  optional: { fontFamily: 'Inter_400Regular', color: '#94A3B8', letterSpacing: 0, textTransform: 'none' },
+  input: { width: '100%', height: 52, backgroundColor: '#F5FBFC', borderRadius: 12, paddingHorizontal: 18, fontSize: 15, color: '#0F172A', marginBottom: 14, borderWidth: 1.5, borderColor: '#E2E8F0', fontFamily: 'Inter_400Regular' },
+  primaryBtn: { width: '100%', height: 54, backgroundColor: '#0EB5CA', borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 8, gap: 12, shadowColor: '#0EB5CA', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 8 },
   btnDisabled: { opacity: 0.55 },
   primaryBtnText: { color: '#fff', fontSize: 16, fontFamily: 'Inter_700Bold', letterSpacing: 0.3 },
-
   guestBtn: { alignItems: 'center', marginTop: 22, paddingVertical: 6 },
-  guestText: { color: colors.textTertiary, fontSize: 13, fontFamily: 'Inter_500Medium' },
-  passwordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.inputBg,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: colors.skeleton,
-    marginBottom: 14,
-    paddingRight: 12,
-    overflow: 'hidden',
-  },
+  guestText: { color: '#94A3B8', fontSize: 13, fontFamily: 'Inter_400Regular' },
+  passwordRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F5FBFC', borderRadius: 12, borderWidth: 1.5, borderColor: '#E2E8F0', marginBottom: 8, paddingRight: 12, overflow: 'hidden' },
   eyeBtn: { paddingHorizontal: 8 },
-  eyeText: { color: colors.accent, fontSize: 13, fontFamily: 'Inter_600SemiBold' },
+  eyeText: { color: '#0EB5CA', fontSize: 13, fontFamily: 'Inter_600SemiBold' },
+  strengthWrap: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  strengthTrack: { flex: 1, height: 4, borderRadius: 999, backgroundColor: '#E2E8F0', overflow: 'hidden' },
+  strengthFill: { height: '100%', borderRadius: 999 },
+  strengthText: { fontSize: 11, fontFamily: 'Inter_600SemiBold' },
 });
