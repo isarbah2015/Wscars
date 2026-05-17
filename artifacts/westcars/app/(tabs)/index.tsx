@@ -1,5 +1,6 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { Image as ExpoImage } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
@@ -59,6 +60,7 @@ const CAT_COMBINE     = require("@/assets/images/cat-combine.png");
 const CAT_AMBULANCE   = require("@/assets/images/cat-ambulance.png");
 const CAT_FIRETRUCK   = require("@/assets/images/cat-firetruck.png");
 const BANNER_CAR      = require("@/assets/images/banner-car.png");
+const brandInitialPlaceholder = "L6Pj0^jE00ay-;j[ayfQ00fQ?bWB";
 
 type Condition = "new" | "used" | "moto";
 
@@ -417,10 +419,12 @@ export default function HomeScreen() {
                 >
                   {(logoUrl && !logoErrors[brand]) ? (
                     <View style={styles.brandPillLogoWrap}>
-                      <Image
+                      <ExpoImage
                         source={{ uri: logoUrl }}
                         style={styles.brandPillLogo}
-                        resizeMode="contain"
+                        contentFit="contain"
+                        transition={200}
+                        placeholder={brandInitialPlaceholder}
                         onError={() => setLogoErrors(prev => ({ ...prev, [brand]: true }))}
                       />
                     </View>

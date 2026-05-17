@@ -34,8 +34,13 @@ if (app) {
     auth = initializeAuth(app, {
       persistence: reactNativeAsyncStoragePersistence,
     });
-  } catch {
-    try { auth = getAuth(app); } catch {}
+  } catch (err) {
+    console.error('[firebase-persistence] initializeAuth failed, falling back to getAuth:', err);
+    try {
+      auth = getAuth(app);
+    } catch (fallbackErr) {
+      console.error('[firebase-persistence] getAuth fallback failed:', fallbackErr);
+    }
   }
 }
 

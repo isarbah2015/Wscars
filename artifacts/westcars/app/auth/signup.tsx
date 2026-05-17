@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Text,
   TextInput,
@@ -12,11 +12,9 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import type { ConfirmationResult } from 'firebase/auth';
-import { useApp } from '../../context/AppContext';
+import { createUserWithEmailAndPassword, getAuth, updateProfile, type ConfirmationResult } from 'firebase/auth';
 import { authErrorMessage, confirmPhoneOtp, sendPhoneOtp } from '../../services/firebase/auth';
-import { isFirebaseReady } from '@/lib/firebase';
-import { auth } from '@/lib/firebase-persistence';
+import app from '../../lib/firebase';
 import { useTheme } from '@/context/ThemeContext';
 
 const WC_LOGO = require('../../assets/images/wc-logo.png');
@@ -41,9 +39,22 @@ function passwordStrength(password: string) {
   return { width: '100%', color: '#22C55E', label: 'Strong' } as const;
 }
 
+const mapFirebaseError = (code: string): string => {
+  switch (code) {
+    case 'auth/invalid-email': return 'Invalid email address';
+    case 'auth/user-not-found': return 'No account found with this email';
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential': return 'Incorrect password';
+    case 'auth/email-already-in-use': return 'An account with this email already exists';
+    case 'auth/weak-password': return 'Password must be at least 6 characters';
+    case 'auth/too-many-requests': return 'Too many attempts. Please try again later';
+    case 'auth/network-request-failed': return 'Check your internet connection';
+    default: return 'Something went wrong. Please try again';
+  }
+};
+
 export default function SignupScreen() {
   const router = useRouter();
-  const { signup, isLoading } = useApp();
   const { colors } = useTheme();
   const styles = makeStyles(colors);
   const emailRef = useRef<TextInput>(null);
@@ -61,42 +72,11 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [error, setError] = useState('');
-  const [attempted, setAttempted] = useState(false);
-  const [firebaseReady, setFirebaseReady] = useState(() => isFirebaseReady() && !!auth);
-  const [readyTimedOut, setReadyTimedOut] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  useEffect(() => {
-    if (firebaseReady) return;
-    const startedAt = Date.now();
-    const id = setInterval(() => {
-      if (isFirebaseReady() && auth) {
-        setFirebaseReady(true);
-        setReadyTimedOut(false);
-        clearInterval(id);
-      } else if (Date.now() - startedAt >= 8000) {
-        setReadyTimedOut(true);
-        clearInterval(id);
-      }
-    }, 250);
-    return () => clearInterval(id);
-  }, [firebaseReady]);
-
-  const ensureReadyForAttempt = () => {
-    setAttempted(true);
-    if (isLoading || !firebaseReady || !auth || !isFirebaseReady()) {
-      setError(readyTimedOut
-        ? 'Secure account setup could not start. Check your connection and try again.'
-        : 'Secure account setup is still starting. Please try again in a moment.');
-      return false;
-    }
-    return true;
-  };
-
   const handleSignup = async () => {
     setError('');
-    if (!ensureReadyForAttempt()) return;
     if (!name.trim() || !email.trim() || !password || !confirm) {
       setError('Please fill in all required fields'); return;
     }
@@ -104,16 +84,17 @@ export default function SignupScreen() {
     if (password !== confirm) { setError('Passwords do not match'); return; }
     try {
       setLoading(true);
-      await signup(name.trim(), email.trim(), phone.trim(), password);
+      const auth = getAuth(app || undefined);
+      const { user } = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      await updateProfile(user, { displayName: name.trim() });
       router.replace('/(tabs)');
     } catch (e: any) {
-      setError(authErrorMessage(e));
+      setError(mapFirebaseError(e.code));
     } finally { setLoading(false); }
   };
 
   const handleSendOtp = async () => {
     setError('');
-    if (!ensureReadyForAttempt()) return;
     const formatted = formatPhone(phone);
     if (formatted.length < 10) {
       setError('Enter a valid phone number.');
@@ -133,7 +114,6 @@ export default function SignupScreen() {
 
   const handleConfirmOtp = async () => {
     setError('');
-    if (!ensureReadyForAttempt()) return;
     if (!confirmation || otp.trim().length !== 6) {
       setError('Enter the 6-digit verification code.');
       return;
@@ -150,8 +130,6 @@ export default function SignupScreen() {
   };
 
   const strength = passwordStrength(password);
-  const showStartupSpinner = !firebaseReady && !readyTimedOut;
-
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -173,14 +151,7 @@ export default function SignupScreen() {
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Join Westcars today</Text>
 
-          {showStartupSpinner ? (
-            <View style={styles.startingRow}>
-              <ActivityIndicator color="#0EB5CA" size="small" />
-              <Text style={styles.startingText}>Preparing secure account setup...</Text>
-            </View>
-          ) : null}
-
-          {attempted && error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <View style={styles.phoneBox}>
             <TouchableOpacity

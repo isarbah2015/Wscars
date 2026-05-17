@@ -1,15 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Text, TextInput, TouchableOpacity, ActivityIndicator,
   Platform, KeyboardAvoidingView, StyleSheet, View, Image,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import type { ConfirmationResult } from 'firebase/auth';
-import { useApp } from '@/context/AppContext';
+import { getAuth, signInWithEmailAndPassword, type ConfirmationResult } from 'firebase/auth';
 import { useTheme } from '@/context/ThemeContext';
-import { isFirebaseReady } from '@/lib/firebase';
-import { auth } from '@/lib/firebase-persistence';
+import app from '../../lib/firebase';
 import { authErrorMessage, confirmPhoneOtp, sendPhoneOtp } from '@/services/firebase/auth';
 
 const WC_LOGO = require('../../assets/images/wc-logo.png');
@@ -24,9 +22,20 @@ function formatPhone(input: string) {
   return `+233${digits}`;
 }
 
+const mapFirebaseError = (code: string): string => {
+  switch (code) {
+    case 'auth/invalid-email': return 'Invalid email address';
+    case 'auth/user-not-found': return 'No account found with this email';
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential': return 'Incorrect password';
+    case 'auth/too-many-requests': return 'Too many attempts. Please try again later';
+    case 'auth/network-request-failed': return 'Check your internet connection';
+    default: return 'Something went wrong. Please try again';
+  }
+};
+
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, isLoading } = useApp();
   const { colors } = useTheme();
   const styles = makeStyles(colors);
   const passwordRef = useRef<TextInput>(null);
@@ -39,51 +48,21 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [error, setError] = useState('');
-  const [attempted, setAttempted] = useState(false);
-  const [firebaseReady, setFirebaseReady] = useState(() => isFirebaseReady() && !!auth);
-  const [readyTimedOut, setReadyTimedOut] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    if (firebaseReady) return;
-    const startedAt = Date.now();
-    const id = setInterval(() => {
-      if (isFirebaseReady() && auth) {
-        setFirebaseReady(true);
-        setReadyTimedOut(false);
-        clearInterval(id);
-      } else if (Date.now() - startedAt >= 8000) {
-        setReadyTimedOut(true);
-        clearInterval(id);
-      }
-    }, 250);
-    return () => clearInterval(id);
-  }, [firebaseReady]);
-
-  const ensureReadyForAttempt = () => {
-    setAttempted(true);
-    if (isLoading || !firebaseReady || !auth || !isFirebaseReady()) {
-      setError(readyTimedOut
-        ? 'Secure sign-in could not start. Check your connection and try again.'
-        : 'Secure sign-in is still starting. Please try again in a moment.');
-      return false;
-    }
-    return true;
-  };
 
   const handleLogin = async () => {
     setError('');
-    if (!ensureReadyForAttempt()) return;
     if (!email.trim() || !password.trim()) {
       setError('Please fill in all fields');
       return;
     }
     try {
       setLoading(true);
-      await login(email.trim(), password);
+      const auth = getAuth(app || undefined);
+      await signInWithEmailAndPassword(auth, email.trim(), password);
       router.replace('/(tabs)');
     } catch (e: any) {
-      setError(authErrorMessage(e));
+      setError(mapFirebaseError(e.code));
     } finally {
       setLoading(false);
     }
@@ -91,7 +70,6 @@ export default function LoginScreen() {
 
   const handleSendOtp = async () => {
     setError('');
-    if (!ensureReadyForAttempt()) return;
     const formatted = formatPhone(phone);
     if (formatted.length < 10) {
       setError('Enter a valid phone number.');
@@ -111,7 +89,6 @@ export default function LoginScreen() {
 
   const handleConfirmOtp = async () => {
     setError('');
-    if (!ensureReadyForAttempt()) return;
     if (!confirmation || otp.trim().length !== 6) {
       setError('Enter the 6-digit verification code.');
       return;
@@ -126,8 +103,6 @@ export default function LoginScreen() {
       setPhoneLoading(false);
     }
   };
-
-  const showStartupSpinner = !firebaseReady && !readyTimedOut;
 
   return (
     <KeyboardAvoidingView
@@ -150,14 +125,7 @@ export default function LoginScreen() {
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to your Westcars account</Text>
 
-          {showStartupSpinner ? (
-            <View style={styles.startingRow}>
-              <ActivityIndicator color="#0EB5CA" size="small" />
-              <Text style={styles.startingText}>Preparing secure sign-in...</Text>
-            </View>
-          ) : null}
-
-          {attempted && error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <View style={styles.phoneBox}>
             <Text style={styles.label}>Phone Number</Text>
