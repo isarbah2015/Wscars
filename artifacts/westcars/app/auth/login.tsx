@@ -5,10 +5,10 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import { getAuth, signInWithEmailAndPassword, type ConfirmationResult } from 'firebase/auth';
+import { signInWithEmailAndPassword, type ConfirmationResult } from 'firebase/auth';
 import { useTheme } from '@/context/ThemeContext';
 import app from '../../lib/firebase';
-import { authErrorMessage, confirmPhoneOtp, sendPhoneOtp } from '@/services/firebase/auth';
+import { auth, authErrorMessage, confirmPhoneOtp, sendPhoneOtp } from '@/services/firebase/auth';
 
 const WC_LOGO = require('../../assets/images/wc-logo.png');
 
@@ -56,9 +56,16 @@ export default function LoginScreen() {
       setError('Please fill in all fields');
       return;
     }
+    if (!app) {
+      setError('Firebase is not configured. Please restart the app.');
+      return;
+    }
+    if (!auth) {
+      setError('Authentication service unavailable. Please try again.');
+      return;
+    }
     try {
       setLoading(true);
-      const auth = getAuth(app || undefined);
       await signInWithEmailAndPassword(auth, email.trim(), password);
       router.replace('/(tabs)');
     } catch (e: any) {

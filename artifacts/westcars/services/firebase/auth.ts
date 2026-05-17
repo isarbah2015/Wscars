@@ -23,6 +23,8 @@ import { db, isFirebaseReady } from "@/lib/firebase";
 import { auth } from "@/lib/firebase-persistence";
 import { User } from "@/types";
 
+export { auth };
+
 const ensureReady = () => {
   if (!isFirebaseReady() || !auth || !db) {
     throw new Error("Firebase is not configured. Add EXPO_PUBLIC_FIREBASE_* secrets.");
