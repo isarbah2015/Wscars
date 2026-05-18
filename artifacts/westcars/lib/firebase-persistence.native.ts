@@ -4,7 +4,13 @@ import app from './firebase';
 
 let auth: Auth | null = null;
 
-console.log('[firebase-persistence] native load, app ready:', !!app);
+console.log('[firebase-persistence] native loaded');
+console.log('[firebase-persistence] app is:', app ? 'READY' : 'NULL');
+console.log('[firebase-persistence] firebase config:', JSON.stringify({
+  hasApiKey: !!process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  hasProjectId: !!process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  hasAppId: !!process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+}));
 
 const reactNativeAsyncStoragePersistence = {
   type: 'LOCAL',

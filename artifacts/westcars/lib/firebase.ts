@@ -14,6 +14,7 @@ import { getStorage, type FirebaseStorage } from "firebase/storage";
 import { resolveFirebaseConfig } from "@/lib/firebase-config";
 
 const firebaseConfig = resolveFirebaseConfig();
+console.log('[firebase] config resolved:', firebaseConfig ? 'OK' : 'NULL');
 const missing = firebaseConfig
   ? []
   : (["apiKey", "projectId", "appId"] as const);
