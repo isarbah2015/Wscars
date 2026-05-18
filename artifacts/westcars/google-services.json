@@ -18,6 +18,14 @@
           "client_type": 1,
           "android_info": {
             "package_name": "gh.westcars.app",
+            "certificate_hash": "9056b810a743732ee95ff0022f44dce88a04a751"
+          }
+        },
+        {
+          "client_id": "778261594022-n9aflhucrsvhao2lbbj9b4ebekt00vcv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "gh.westcars.app",
             "certificate_hash": "2c03693027f7a2a6542f612c910c371ae840dcfc"
           }
         },
@@ -37,6 +45,13 @@
             {
               "client_id": "778261594022-pcjs02bpm0hgu0ield7o0pmiaa4v5qta.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "778261594022-mn0nqerq73nktnl1il1878e9gk4vha9a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "gh.westcars.app"
+              }
             }
           ]
         }
