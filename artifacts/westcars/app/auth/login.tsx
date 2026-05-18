@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import { signInWithEmailAndPassword, type ConfirmationResult } from 'firebase/auth';
+import { signInWithEmailAndPassword, type ConfirmationResult } from '@firebase/auth';
 import { useTheme } from '@/context/ThemeContext';
 import { auth } from '@/lib/firebase-persistence';
 import { authErrorMessage, confirmPhoneOtp, sendPhoneOtp } from '@/services/firebase/auth';

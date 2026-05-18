@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword, updateProfile, type ConfirmationResult } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, type ConfirmationResult } from '@firebase/auth';
 import { authErrorMessage, confirmPhoneOtp, sendPhoneOtp } from '../../services/firebase/auth';
 import { auth } from '@/lib/firebase-persistence';
 import { useTheme } from '@/context/ThemeContext';

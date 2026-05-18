@@ -16,7 +16,7 @@ import { useRouter } from 'expo-router'
 import {
   PhoneAuthProvider,
   signInWithCredential,
-} from 'firebase/auth'
+} from '@firebase/auth'
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { auth } from '@/lib/firebase-persistence'
 import { db } from '@/lib/firebase'

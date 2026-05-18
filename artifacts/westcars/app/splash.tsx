@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "@firebase/auth";
 import { getAuthInstance } from "@/services/firebase/auth";
 import { Animated, Easing, Image, StyleSheet, View } from "react-native";
 
