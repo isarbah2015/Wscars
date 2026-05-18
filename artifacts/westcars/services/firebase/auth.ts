@@ -165,8 +165,11 @@ export function subscribeAuth(cb: (user: User | null) => void): Unsubscribe {
       const u = await loadOrCreateUserDoc(fbUser);
       cb(u);
     } catch (err) {
-      console.warn("[auth] failed to load user doc:", err);
-      cb(null);
+      console.warn("[auth] Firestore unavailable, using basic profile:", err);
+      cb(buildDefaultUserDoc(fbUser, {
+        favorites: [],
+        blockedUsers: [],
+      }));
     }
   });
 }
