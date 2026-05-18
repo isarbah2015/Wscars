@@ -5,10 +5,10 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import { type ConfirmationResult } from 'firebase/auth';
+import { signInWithEmailAndPassword, type ConfirmationResult } from 'firebase/auth';
 import { useTheme } from '@/context/ThemeContext';
-import app from '../../lib/firebase';
-import { authErrorMessage, confirmPhoneOtp, sendPhoneOtp, signInEmail } from '@/services/firebase/auth';
+import { auth } from '@/lib/firebase-persistence';
+import { authErrorMessage, confirmPhoneOtp, sendPhoneOtp } from '@/services/firebase/auth';
 
 const WC_LOGO = require('../../assets/images/wc-logo.png');
 
@@ -56,16 +56,24 @@ export default function LoginScreen() {
       setError('Please fill in all fields');
       return;
     }
-    if (!app) {
-      setError('Firebase is not configured. Please restart the app.');
+    if (!auth) {
+      setError('Authentication not available. Please restart the app.');
       return;
     }
     try {
       setLoading(true);
-      await signInEmail(email, password);
+      await signInWithEmailAndPassword(auth, email.trim(), password);
       router.replace('/(tabs)');
     } catch (e: any) {
-      setError(e?.code ? mapFirebaseError(e.code) : authErrorMessage(e));
+      const msg =
+        e.code === 'auth/invalid-credential'  ? 'Incorrect email or password' :
+        e.code === 'auth/too-many-requests'   ? 'Too many attempts. Please try again later' :
+        e.code === 'auth/user-not-found'      ? 'No account found with this email' :
+        e.code === 'auth/wrong-password'      ? 'Incorrect password' :
+        e.code === 'auth/invalid-email'       ? 'Invalid email address' :
+        e.code === 'auth/network-request-failed' ? 'Check your internet connection' :
+                                              'Login failed. Please try again';
+      setError(msg);
     } finally {
       setLoading(false);
     }

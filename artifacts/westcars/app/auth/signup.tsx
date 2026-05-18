@@ -12,9 +12,9 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import { type ConfirmationResult } from 'firebase/auth';
-import { authErrorMessage, confirmPhoneOtp, sendPhoneOtp, signUpEmail } from '../../services/firebase/auth';
-import app from '../../lib/firebase';
+import { createUserWithEmailAndPassword, updateProfile, type ConfirmationResult } from 'firebase/auth';
+import { authErrorMessage, confirmPhoneOtp, sendPhoneOtp } from '../../services/firebase/auth';
+import { auth } from '@/lib/firebase-persistence';
 import { useTheme } from '@/context/ThemeContext';
 
 const WC_LOGO = require('../../assets/images/wc-logo.png');
@@ -78,21 +78,37 @@ export default function SignupScreen() {
   const handleSignup = async () => {
     setError('');
     if (!name.trim() || !email.trim() || !password || !confirm) {
-      setError('Please fill in all required fields'); return;
+      setError('Please fill in all required fields');
+      return;
     }
-    if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
-    if (password !== confirm) { setError('Passwords do not match'); return; }
-    if (!app) {
-      setError('Firebase is not configured. Please restart the app.');
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+    if (password !== confirm) {
+      setError('Passwords do not match');
+      return;
+    }
+    if (!auth) {
+      setError('Authentication not available. Please restart the app.');
       return;
     }
     try {
       setLoading(true);
-      await signUpEmail(name.trim(), email, phone, password);
+      const { user } = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      await updateProfile(user, { displayName: name.trim() });
       router.replace('/(tabs)');
     } catch (e: any) {
-      setError(e?.code ? mapFirebaseError(e.code) : authErrorMessage(e));
-    } finally { setLoading(false); }
+      const msg =
+        e.code === 'auth/email-already-in-use' ? 'An account with this email already exists' :
+        e.code === 'auth/invalid-email'         ? 'Invalid email address' :
+        e.code === 'auth/weak-password'         ? 'Password must be at least 6 characters' :
+        e.code === 'auth/network-request-failed' ? 'Check your internet connection' :
+                                                'Registration failed. Please try again';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSendOtp = async () => {
