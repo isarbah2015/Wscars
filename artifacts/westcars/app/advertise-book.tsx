@@ -613,6 +613,7 @@ export default function AdvertiseBookScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.regionRow}
+              style={styles.horizontalScroll}
             >
               {REGIONS.map((r) => (
                 <Pressable
@@ -857,7 +858,7 @@ const styles = StyleSheet.create({
 
   // Form
   cardTitle:  { fontSize: 15, fontFamily: "Inter_700Bold", color: INK, marginBottom: 4 },
-  fieldWrap:  { gap: 6 },
+  fieldWrap:  { gap: 6, overflow: "visible" },
   fieldLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: MUTED },
   field: {
     flexDirection: "row", alignItems: "center", gap: 10,
@@ -873,7 +874,8 @@ const styles = StyleSheet.create({
   input:    { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular", color: INK },
   textArea: { fontSize: 14, fontFamily: "Inter_400Regular", color: INK, minHeight: 70 },
 
-  regionRow:        { flexDirection: "row", gap: 8, paddingVertical: 4 },
+  horizontalScroll: { overflow: "visible" },
+  regionRow:        { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingRight: 32, paddingVertical: 4 },
   regionChip: {
     paddingHorizontal: 14, paddingVertical: 8,
     borderRadius: 20, borderWidth: 1.5, borderColor: "#DCEAF0",

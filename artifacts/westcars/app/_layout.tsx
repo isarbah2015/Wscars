@@ -43,7 +43,7 @@ function useAuthRedirect() {
   const prevAuthRef = useRef<boolean>(false);
 
   useEffect(() => {
-    if (segments[0] === 'splash') return;
+    if (segments[0] === 'splash' || segments.length === 0) return;
     if (!auth) return;
     const unsub = onAuthStateChanged(auth, (user) => {
       const isAuthed = !!user;

@@ -350,6 +350,7 @@ export default function HomeScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.subCatsRow}
+              style={styles.horizontalScroll}
             >
               {(condition === "moto" ? MOTO_TYPES : ALL_VEHICLE_TYPES).map((cat) => (
                 <Pressable
@@ -403,6 +404,7 @@ export default function HomeScreen() {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.brandList}
+            style={styles.brandFlatList}
             renderItem={({ item: brand }) => {
               const logoUrl = getBrandLogo(brand);
               return (
@@ -796,13 +798,17 @@ const styles = StyleSheet.create({
 
   subCatsSection: {
     paddingVertical: 8,
+    overflow: "visible",
   },
   subCatsRow: {
     flexDirection: "row",
     gap: 8,
-    paddingLeft: 14,
-    paddingRight: 14,
+    paddingHorizontal: 16,
+    paddingRight: 32,
     alignItems: "center",
+  },
+  horizontalScroll: {
+    overflow: "visible",
   },
   subTab: {
     flexDirection: "row",
@@ -1117,6 +1123,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
     marginTop: 6,
+    overflow: "visible",
   },
   brandSectionHeader: {
     flexDirection: "row",
@@ -1131,7 +1138,13 @@ const styles = StyleSheet.create({
   brandList: {
     flexDirection: "row",
     gap: 10,
-    paddingRight: 14,
+    paddingHorizontal: 16,
+    paddingRight: 32,
+    alignItems: "center",
+  },
+  brandFlatList: {
+    width: "100%",
+    overflow: "visible",
   },
   brandPill: {
     alignItems: "center",

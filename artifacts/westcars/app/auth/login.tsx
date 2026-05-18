@@ -263,7 +263,7 @@ const makeStyles = (colors: ReturnType<typeof useTheme>["colors"]) => StyleSheet
     elevation: 8,
   },
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
-  logo: { width: 100, height: 40 },
+  logo: { width: 48, height: 48 },
   navBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, borderWidth: 1.5, borderColor: '#0EB5CA' },
   navBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#0EB5CA' },
   title: { fontSize: 32, fontFamily: 'Manrope_800ExtraBold', color: '#0F172A', letterSpacing: -0.5, marginBottom: 4 },

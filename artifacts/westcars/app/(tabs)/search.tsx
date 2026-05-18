@@ -18,7 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Slider from "@react-native-community/slider";
+import { Slider } from "@miblanchard/react-native-slider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
@@ -139,7 +139,7 @@ const QUICK_FILTERS: { key: QuickFilterKey; label: string; color: string }[] = [
 const TEAL   = "#0EB5CA";
 const ORANGE = "#F97316";
 
-const CHIP_ROW_PADDING_LEFT = 14;
+const CHIP_ROW_PADDING_LEFT = 16;
 const CHIP_ROW_GAP          = 8;
 
 // ─── Animated count badge ─────────────────────────────────
@@ -186,17 +186,12 @@ function PriceRangeSelector({
   onMaxChange: (value: number) => void;
   format: (value: number) => string;
 }) {
-  const minPct = ((min - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
-  const maxPct = ((max - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
-
-  const clampMin = (value: number) => {
-    const next = Math.min(value, max - PRICE_STEP);
-    onMinChange(Math.max(PRICE_MIN, next));
-  };
-
-  const clampMax = (value: number) => {
-    const next = Math.max(value, min + PRICE_STEP);
-    onMaxChange(Math.min(PRICE_MAX, next));
+  const handleChange = (nextValue: number | number[]) => {
+    const [rawMin, rawMax] = Array.isArray(nextValue) ? nextValue : [min, max];
+    const nextMin = Math.max(PRICE_MIN, Math.min(rawMin, rawMax - PRICE_STEP));
+    const nextMax = Math.min(PRICE_MAX, Math.max(rawMax, nextMin + PRICE_STEP));
+    onMinChange(nextMin);
+    onMaxChange(nextMax);
   };
 
   return (
@@ -211,35 +206,18 @@ function PriceRangeSelector({
           <Text style={fS.rangeValueText}>{max >= PRICE_MAX ? "Any" : format(max)}</Text>
         </View>
       </View>
-      <View style={fS.trackShell}>
-        <View style={fS.trackBase} />
-        <View
-          style={[
-            fS.trackActive,
-            { left: `${minPct}%`, right: `${100 - maxPct}%` },
-          ]}
-        />
+      <View style={fS.rangeSlider}>
         <Slider
-          style={fS.rangeSlider}
+          value={[min, max]}
           minimumValue={PRICE_MIN}
           maximumValue={PRICE_MAX}
           step={PRICE_STEP}
-          value={min}
-          onValueChange={clampMin}
-          minimumTrackTintColor="transparent"
-          maximumTrackTintColor="transparent"
+          onValueChange={handleChange}
+          minimumTrackTintColor={TEAL}
+          maximumTrackTintColor="#E2E8F0"
           thumbTintColor={TEAL}
-        />
-        <Slider
-          style={fS.rangeSlider}
-          minimumValue={PRICE_MIN}
-          maximumValue={PRICE_MAX}
-          step={PRICE_STEP}
-          value={max}
-          onValueChange={clampMax}
-          minimumTrackTintColor="transparent"
-          maximumTrackTintColor="transparent"
-          thumbTintColor="#004D5A"
+          trackStyle={fS.sliderTrack}
+          thumbStyle={fS.sliderThumb}
         />
       </View>
       <View style={fS.rangeEnds}>
@@ -261,17 +239,12 @@ function YearRangeSelector({
   onMinChange: (value: number) => void;
   onMaxChange: (value: number) => void;
 }) {
-  const minPct = ((min - YEAR_MIN) / (YEAR_MAX - YEAR_MIN)) * 100;
-  const maxPct = ((max - YEAR_MIN) / (YEAR_MAX - YEAR_MIN)) * 100;
-
-  const clampMin = (value: number) => {
-    const next = Math.min(value, max - YEAR_STEP);
-    onMinChange(Math.max(YEAR_MIN, Math.round(next)));
-  };
-
-  const clampMax = (value: number) => {
-    const next = Math.max(value, min + YEAR_STEP);
-    onMaxChange(Math.min(YEAR_MAX, Math.round(next)));
+  const handleChange = (nextValue: number | number[]) => {
+    const [rawMin, rawMax] = Array.isArray(nextValue) ? nextValue : [min, max];
+    const nextMin = Math.max(YEAR_MIN, Math.min(Math.round(rawMin), Math.round(rawMax) - YEAR_STEP));
+    const nextMax = Math.min(YEAR_MAX, Math.max(Math.round(rawMax), nextMin + YEAR_STEP));
+    onMinChange(nextMin);
+    onMaxChange(nextMax);
   };
 
   return (
@@ -286,30 +259,18 @@ function YearRangeSelector({
           <Text style={fS.rangeValueText}>{max >= YEAR_MAX ? "Any" : max}</Text>
         </View>
       </View>
-      <View style={fS.trackShell}>
-        <View style={fS.trackBase} />
-        <View style={[fS.trackActive, { left: `${minPct}%`, right: `${100 - maxPct}%` }]} />
+      <View style={fS.rangeSlider}>
         <Slider
-          style={fS.rangeSlider}
+          value={[min, max]}
           minimumValue={YEAR_MIN}
           maximumValue={YEAR_MAX}
           step={YEAR_STEP}
-          value={min}
-          onValueChange={clampMin}
-          minimumTrackTintColor="transparent"
-          maximumTrackTintColor="transparent"
+          onValueChange={handleChange}
+          minimumTrackTintColor={TEAL}
+          maximumTrackTintColor="#E2E8F0"
           thumbTintColor={TEAL}
-        />
-        <Slider
-          style={fS.rangeSlider}
-          minimumValue={YEAR_MIN}
-          maximumValue={YEAR_MAX}
-          step={YEAR_STEP}
-          value={max}
-          onValueChange={clampMax}
-          minimumTrackTintColor="transparent"
-          maximumTrackTintColor="transparent"
-          thumbTintColor="#004D5A"
+          trackStyle={fS.sliderTrack}
+          thumbStyle={fS.sliderThumb}
         />
       </View>
       <View style={fS.rangeEnds}>
@@ -530,7 +491,7 @@ function FilterModal({
 
             <View style={fS.section}>
               <Text style={fS.secLabel}>Body Type</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={fS.horizontalChipsRow}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={fS.horizontalChipsRow} style={fS.horizontalScroll}>
                 {BODY_TYPES.map(type => {
                   const active = bodyTypes.includes(type);
                   return (
@@ -591,7 +552,7 @@ function FilterModal({
             {/* ── Transmission ── */}
             <View style={fS.section}>
               <Text style={fS.secLabel}>Transmission</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={fS.horizontalChipsRow}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={fS.horizontalChipsRow} style={fS.horizontalScroll}>
                 {TRANSMISSIONS.map(t => (
                   <TouchableOpacity key={t} style={[fS.chip, transmissions.includes(t) && fS.chipActive]}
                     onPress={() => toggle(transmissions, setTransmissions, t)}>
@@ -605,7 +566,7 @@ function FilterModal({
             {/* ── Condition ── */}
             <View style={fS.section}>
               <Text style={fS.secLabel}>Condition</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={fS.horizontalChipsRow}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={fS.horizontalChipsRow} style={fS.horizontalScroll}>
                 {CONDITIONS.map(c => (
                   <TouchableOpacity key={c} style={[fS.chip, conditions.includes(c) && fS.chipActive]}
                     onPress={() => toggle(conditions, setConditions, c)}>
@@ -916,47 +877,51 @@ export default function SearchScreen() {
         </View>
 
         {activeFilterChips.length > 0 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={S.activeChipRow}>
-            {activeFilterChips.map(({ key, label }) => (
-              <View key={key} style={[S.activeChip, { backgroundColor: colors.accentLight, borderColor: TEAL }]}>
-                <Text style={[S.activeChipText, { color: TEAL }]}>{label}</Text>
-                <Pressable onPress={() => removeFilter(key)} hitSlop={8}>
-                  <Feather name="x" size={13} color={TEAL} />
-                </Pressable>
-              </View>
-            ))}
-          </ScrollView>
+          <View style={S.horizontalClipGuard}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={S.activeChipRow} style={S.horizontalScroll}>
+              {activeFilterChips.map(({ key, label }) => (
+                <View key={key} style={[S.activeChip, { backgroundColor: colors.accentLight, borderColor: TEAL }]}>
+                  <Text style={[S.activeChipText, { color: TEAL }]}>{label}</Text>
+                  <Pressable onPress={() => removeFilter(key)} hitSlop={8}>
+                    <Feather name="x" size={13} color={TEAL} />
+                  </Pressable>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
         )}
 
-        <ScrollView ref={chipScrollRef} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={S.chipRow}>
-          {sortedFilters.map(({ key, label, color }) => {
-            const active  = quickFilter === key;
-            const count   = chipCounts[key] ?? 0;
-            const isEmpty = count === 0 && key !== "All";
-            return (
-              <Pressable
-                key={key}
-                onLayout={(e) => { chipLayouts.current[key] = { x: e.nativeEvent.layout.x, width: e.nativeEvent.layout.width }; }}
-                style={[
-                  S.chip,
-                  active
-                    ? { backgroundColor: color }
-                    : { backgroundColor: "#FFFFFF", borderColor: "#E2E8F0", borderWidth: 1 },
-                  isEmpty && !active && S.chipDimmed,
-                ]}
-                onPress={() => setQuickFilter(key)}
-              >
-                <Text style={[S.chipText, { color: active ? "#fff" : colors.textSecondary }]}>{label}</Text>
-                <View style={[S.chipBadge, active ? S.chipBadgeActive : S.chipBadgeInactive]}>
-                  <AnimatedCount
-                    value={count >= 1000 ? `${Math.floor(count / 1000)}k` : count}
-                    style={[S.chipBadgeText, { color: active ? "#fff" : colors.textSecondary }]}
-                  />
-                </View>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        <View style={S.horizontalClipGuard}>
+          <ScrollView ref={chipScrollRef} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={S.chipRow} style={S.horizontalScroll}>
+            {sortedFilters.map(({ key, label, color }) => {
+              const active  = quickFilter === key;
+              const count   = chipCounts[key] ?? 0;
+              const isEmpty = count === 0 && key !== "All";
+              return (
+                <Pressable
+                  key={key}
+                  onLayout={(e) => { chipLayouts.current[key] = { x: e.nativeEvent.layout.x, width: e.nativeEvent.layout.width }; }}
+                  style={[
+                    S.chip,
+                    active
+                      ? { backgroundColor: color }
+                      : { backgroundColor: "#FFFFFF", borderColor: "#E2E8F0", borderWidth: 1 },
+                    isEmpty && !active && S.chipDimmed,
+                  ]}
+                  onPress={() => setQuickFilter(key)}
+                >
+                  <Text style={[S.chipText, { color: active ? "#fff" : colors.textSecondary }]}>{label}</Text>
+                  <View style={[S.chipBadge, active ? S.chipBadgeActive : S.chipBadgeInactive]}>
+                    <AnimatedCount
+                      value={count >= 1000 ? `${Math.floor(count / 1000)}k` : count}
+                      style={[S.chipBadgeText, { color: active ? "#fff" : colors.textSecondary }]}
+                    />
+                  </View>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
       </View>
 
       {/* ── Results ── */}
@@ -1020,11 +985,13 @@ const S = StyleSheet.create({
   filterBtn: { width: 46, height: 46, borderRadius: 12, backgroundColor: TEAL, alignItems: "center", justifyContent: "center", flexShrink: 0 },
   filterDot: { position: "absolute", top: 8, right: 8, width: 7, height: 7, borderRadius: 4, backgroundColor: "#fff", borderWidth: 1.5, borderColor: TEAL },
 
-  activeChipRow: { flexDirection: "row", gap: 8, paddingHorizontal: 14, paddingBottom: 8 },
+  horizontalClipGuard: { overflow: "visible" },
+  horizontalScroll: { overflow: "visible" },
+  activeChipRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingRight: 32, paddingBottom: 8 },
   activeChip:    { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, borderWidth: 1.5 },
   activeChipText:{ fontSize: 12, fontFamily: "Inter_600SemiBold" },
 
-  chipRow:      { flexDirection: "row", gap: CHIP_ROW_GAP, paddingLeft: CHIP_ROW_PADDING_LEFT, paddingRight: 60, paddingBottom: 2 },
+  chipRow:      { flexDirection: "row", gap: CHIP_ROW_GAP, paddingHorizontal: 16, paddingRight: 40, paddingBottom: 2 },
   chip:         { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, flexDirection: "row", alignItems: "center", gap: 6 },
   chipDimmed:   { opacity: 0.38 },
   chipText:     { fontSize: 13, fontFamily: "Inter_600SemiBold" },
@@ -1056,7 +1023,7 @@ const fS = StyleSheet.create({
   title:    { flex: 1, textAlign: "center", fontSize: 18, fontFamily: "Manrope_800ExtraBold", color: "#0F172A" },
   resetTxt: { width: 48, textAlign: "right", fontSize: 14, color: TEAL, fontFamily: "Inter_600SemiBold" },
   scroll:   { paddingBottom: 8 },
-  section:  { paddingHorizontal: 20, paddingVertical: 16 },
+  section:  { paddingHorizontal: 20, paddingVertical: 16, overflow: "visible" },
   secLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 12 },
   divider:  { height: 1, backgroundColor: "#E2E8F0", marginHorizontal: 20 },
 
@@ -1090,30 +1057,26 @@ const fS = StyleSheet.create({
   },
   rangeValueLabel: { fontSize: 10, fontFamily: "Inter_700Bold", color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.5 },
   rangeValueText: { fontSize: 15, fontFamily: "Manrope_800ExtraBold", color: "#004D5A", marginTop: 2 },
-  trackShell: { height: 42, justifyContent: "center", position: "relative" },
-  trackBase: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    height: 7,
-    borderRadius: 99,
-    backgroundColor: "#D9EEF3",
+  rangeSlider: {
+    height: 44,
+    marginHorizontal: 2,
   },
-  trackActive: {
-    position: "absolute",
+  sliderTrack: {
     height: 7,
     borderRadius: 99,
-    backgroundColor: "#0EB5CA",
+  },
+  sliderThumb: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: TEAL,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
     shadowColor: "#0EB5CA",
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.32,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
-  },
-  rangeSlider: {
-    position: "absolute",
-    left: -12,
-    right: -12,
-    height: 42,
+    elevation: 4,
   },
   rangeEnds: { flexDirection: "row", justifyContent: "space-between", marginTop: 2 },
   rangeEndText: { fontSize: 11, fontFamily: "Inter_500Medium", color: "#94A3B8" },
@@ -1131,7 +1094,8 @@ const fS = StyleSheet.create({
   showMoreTxt: { fontSize: 13, color: TEAL, fontFamily: "Inter_600SemiBold" },
 
   chipsRow:     { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  horizontalChipsRow: { flexDirection: "row", gap: 8, paddingRight: 20 },
+  horizontalScroll: { overflow: "visible" },
+  horizontalChipsRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingRight: 40 },
   chip:         { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20, borderWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#FFFFFF" },
   chipActive:   { backgroundColor: TEAL, borderColor: TEAL },
   chipTxt:      { fontSize: 13, fontFamily: "Inter_500Medium", color: "#334155" },

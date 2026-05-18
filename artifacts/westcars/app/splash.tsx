@@ -7,6 +7,7 @@ import { Animated, Easing, Image, StyleSheet, View } from "react-native";
 const LOGO   = require("@/assets/images/wc-logo.png");
 const LOGO_W = 260;
 const LOGO_H = 170;
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export default function SplashScreen() {
   const router    = useRouter();
@@ -17,49 +18,78 @@ export default function SplashScreen() {
   const shimmerOp = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.timing(opacity, {
-      toValue: 1, duration: 200, useNativeDriver: false,
-    }).start();
+    let cancelled = false;
+    let unsub: (() => void) | undefined;
+    const timers: ReturnType<typeof setTimeout>[] = [];
 
-    Animated.parallel([
-      Animated.timing(topY, {
-        toValue: 0, duration: 600,
-        easing: Easing.out(Easing.back(1.4)),
-        useNativeDriver: false,
-      }),
-      Animated.timing(botY, {
-        toValue: 0, duration: 600,
-        easing: Easing.out(Easing.back(1.4)),
-        useNativeDriver: false,
-      }),
-    ]).start(() => {
-      Animated.sequence([
-        Animated.timing(shimmerOp, { toValue: 1, duration: 80, useNativeDriver: false }),
-        Animated.timing(shimmerX, {
-          toValue: LOGO_W + 60, duration: 650,
-          easing: Easing.inOut(Easing.quad), useNativeDriver: false,
+    const sleep = (ms: number) => new Promise<void>((resolve) => {
+      const timer = setTimeout(resolve, ms);
+      timers.push(timer);
+    });
+
+    const runAnimation = () => new Promise<void>((resolve) => {
+      Animated.timing(opacity, {
+        toValue: 1, duration: 200, useNativeDriver: false,
+      }).start();
+
+      Animated.parallel([
+        Animated.timing(topY, {
+          toValue: 0, duration: 600,
+          easing: Easing.out(Easing.back(1.4)),
+          useNativeDriver: false,
         }),
-        Animated.timing(shimmerOp, { toValue: 0, duration: 180, useNativeDriver: false }),
-      ]).start();
+        Animated.timing(botY, {
+          toValue: 0, duration: 600,
+          easing: Easing.out(Easing.back(1.4)),
+          useNativeDriver: false,
+        }),
+      ]).start(() => {
+        Animated.sequence([
+          Animated.timing(shimmerOp, { toValue: 1, duration: 80, useNativeDriver: false }),
+          Animated.timing(shimmerX, {
+            toValue: LOGO_W + 60, duration: 650,
+            easing: Easing.inOut(Easing.quad), useNativeDriver: false,
+          }),
+          Animated.timing(shimmerOp, { toValue: 0, duration: 180, useNativeDriver: false }),
+        ]).start(() => resolve());
+      });
     });
 
-    if (!auth) {
-      router.replace("/welcome");
-      return;
-    }
-    // Resolve cached Firebase auth immediately so signed-in users never see welcome.
-    const unsub = onAuthStateChanged(auth, (user) => {
-      unsub();
+    const resolveAuthUser = async () => {
+      if (!auth) await sleep(300);
+      const resolvedAuth = auth;
+      if (!resolvedAuth) return null;
+
+      return new Promise((resolve) => {
+        unsub = onAuthStateChanged(resolvedAuth, (user) => {
+          unsub?.();
+          unsub = undefined;
+          sleep(500).then(() => resolve(user));
+        });
+      });
+    };
+
+    const routeWhenReady = async () => {
+      const [user] = await Promise.all([resolveAuthUser(), runAnimation()]);
+      if (cancelled) return;
+      const target = user ? "/(tabs)" : "/welcome";
       try {
-        router.replace(user ? "/(tabs)" : "/welcome");
+        router.replace(target);
       } catch {
-        setTimeout(() => {
-          try { router.replace(user ? "/(tabs)" : "/welcome"); } catch {}
-        }, 250);
+        await wait(250);
+        if (!cancelled) {
+          try { router.replace(target); } catch {}
+        }
       }
-    });
+    };
 
-    return () => unsub();
+    routeWhenReady();
+
+    return () => {
+      cancelled = true;
+      unsub?.();
+      timers.forEach(clearTimeout);
+    };
   }, [router]);
 
   return (
