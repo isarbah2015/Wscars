@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword, updateProfile, type ConfirmationResult } from 'firebase/auth';
-import { auth, authErrorMessage, confirmPhoneOtp, sendPhoneOtp } from '../../services/firebase/auth';
+import { type ConfirmationResult } from 'firebase/auth';
+import { authErrorMessage, confirmPhoneOtp, sendPhoneOtp, signUpEmail } from '../../services/firebase/auth';
 import app from '../../lib/firebase';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -86,17 +86,12 @@ export default function SignupScreen() {
       setError('Firebase is not configured. Please restart the app.');
       return;
     }
-    if (!auth) {
-      setError('Authentication service unavailable. Please try again.');
-      return;
-    }
     try {
       setLoading(true);
-      const { user } = await createUserWithEmailAndPassword(auth, email.trim(), password);
-      await updateProfile(user, { displayName: name.trim() });
+      await signUpEmail(name.trim(), email, phone, password);
       router.replace('/(tabs)');
     } catch (e: any) {
-      setError(mapFirebaseError(e.code));
+      setError(e?.code ? mapFirebaseError(e.code) : authErrorMessage(e));
     } finally { setLoading(false); }
   };
 

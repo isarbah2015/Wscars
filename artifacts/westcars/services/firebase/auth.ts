@@ -14,21 +14,38 @@ import {
   GoogleAuthProvider,
   signInWithCredential,
   signInWithPopup,
+  getAuth,
+  type Auth,
   type ConfirmationResult,
   type User as FirebaseUser,
   type Unsubscribe,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { auth } from "@/lib/firebase-persistence";
+import app, { db } from "@/lib/firebase";
+import { auth as persistedAuth } from "@/lib/firebase-persistence";
 import { User } from "@/types";
 
-export { auth };
+export let auth: Auth | null = persistedAuth;
 
-const ensureReady = () => {
-  if (!auth) {
+export const getAuthInstance = (): Auth | null => {
+  if (auth) return auth;
+  if (!app) return null;
+  try {
+    auth = getAuth(app);
+    console.warn("[auth] recovered Firebase Auth with lazy getAuth fallback");
+    return auth;
+  } catch (err) {
+    console.error("[auth] lazy getAuth fallback failed:", err);
+    return null;
+  }
+};
+
+const ensureReady = (): Auth => {
+  const currentAuth = getAuthInstance();
+  if (!currentAuth) {
     throw new Error("Authentication service unavailable. Please try again.");
   }
+  return currentAuth;
 };
 
 const todayIso = () => new Date().toISOString().split("T")[0];
@@ -56,7 +73,6 @@ const buildDefaultUserDoc = (fbUser: FirebaseUser, overrides: Partial<User> = {}
  *  Falls back to an auth-only profile if Firestore rules block the read/write
  *  (e.g. rules not yet deployed) so login still succeeds. */
 export async function loadOrCreateUserDoc(fbUser: FirebaseUser, overrides: Partial<User> = {}): Promise<User> {
-  ensureReady();
   if (!db) {
     return buildDefaultUserDoc(fbUser, overrides);
   }
@@ -82,8 +98,8 @@ export async function loadOrCreateUserDoc(fbUser: FirebaseUser, overrides: Parti
 
 /** Sign in with email + password, return the Firestore user profile. */
 export async function signInEmail(email: string, password: string): Promise<User> {
-  ensureReady();
-  const cred = await signInWithEmailAndPassword(auth!, email.trim(), password);
+  const currentAuth = ensureReady();
+  const cred = await signInWithEmailAndPassword(currentAuth, email.trim(), password);
   return loadOrCreateUserDoc(cred.user);
 }
 
@@ -94,8 +110,8 @@ export async function signUpEmail(
   phone: string,
   password: string,
 ): Promise<User> {
-  ensureReady();
-  const cred = await createUserWithEmailAndPassword(auth!, email.trim(), password);
+  const currentAuth = ensureReady();
+  const cred = await createUserWithEmailAndPassword(currentAuth, email.trim(), password);
   if (name) {
     try { await updateProfile(cred.user, { displayName: name }); } catch { /* ignore */ }
   }
@@ -103,9 +119,9 @@ export async function signUpEmail(
 }
 
 export async function sendPhoneOtp(phoneNumber: string): Promise<ConfirmationResult> {
-  ensureReady();
+  const currentAuth = ensureReady();
   // IMPORTANT: Enable Phone auth in Firebase Console -> Authentication -> Sign-in methods
-  return (signInWithPhoneNumber as any)(auth!, phoneNumber.trim());
+  return (signInWithPhoneNumber as any)(currentAuth, phoneNumber.trim());
 }
 
 export async function confirmPhoneOtp(
@@ -113,7 +129,6 @@ export async function confirmPhoneOtp(
   code: string,
   overrides: Partial<User> = {},
 ): Promise<User> {
-  ensureReady();
   const result = await confirmation.confirm(code.trim());
   return loadOrCreateUserDoc(result.user, {
     phone: result.user.phoneNumber ?? overrides.phone ?? "",
@@ -123,9 +138,9 @@ export async function confirmPhoneOtp(
 
 /** Exchange a Google id_token (from expo-auth-session) for a Firebase session. */
 export async function signInWithGoogleIdToken(idToken: string, accessToken?: string): Promise<User> {
-  ensureReady();
+  const currentAuth = ensureReady();
   const credential = GoogleAuthProvider.credential(idToken, accessToken);
-  const result = await signInWithCredential(auth!, credential);
+  const result = await signInWithCredential(currentAuth, credential);
   return loadOrCreateUserDoc(result.user);
 }
 
@@ -134,32 +149,33 @@ export async function signInWithGoogleIdToken(idToken: string, accessToken?: str
  * Works with just the Firebase config — no separate OAuth client ID needed.
  */
 export async function signInWithGooglePopup(): Promise<User> {
-  ensureReady();
+  const currentAuth = ensureReady();
   const provider = new GoogleAuthProvider();
   provider.addScope("email");
   provider.addScope("profile");
-  const result = await signInWithPopup(auth!, provider);
+  const result = await signInWithPopup(currentAuth, provider);
   return loadOrCreateUserDoc(result.user);
 }
 
 export async function signOut(): Promise<void> {
-  ensureReady();
-  await fbSignOut(auth!);
+  const currentAuth = ensureReady();
+  await fbSignOut(currentAuth);
 }
 
 /** Send a password-reset email to the given address. */
 export async function sendPasswordResetEmail(email: string): Promise<void> {
-  ensureReady();
-  await fbSendPasswordResetEmail(auth!, email.trim());
+  const currentAuth = ensureReady();
+  await fbSendPasswordResetEmail(currentAuth, email.trim());
 }
 
 /** Subscribe to auth state changes; resolves the user-doc on each login. */
 export function subscribeAuth(cb: (user: User | null) => void): Unsubscribe {
-  if (!auth) {
+  const currentAuth = getAuthInstance();
+  if (!currentAuth) {
     cb(null);
     return () => {};
   }
-  return onAuthStateChanged(auth, async (fbUser) => {
+  return onAuthStateChanged(currentAuth, async (fbUser) => {
     if (!fbUser) { cb(null); return; }
     try {
       const u = await loadOrCreateUserDoc(fbUser);

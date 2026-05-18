@@ -351,30 +351,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const loginWithGoogle = useCallback(async (idToken: string, accessToken?: string): Promise<boolean> => {
     if (!useFirebase) return false;
     try {
-      const { auth } = await import('@/lib/firebase-persistence');
-      const { GoogleAuthProvider, signInWithCredential } = await import('firebase/auth');
-      if (!auth) return false;
-      const credential = GoogleAuthProvider.credential(idToken, accessToken);
-      const result = await signInWithCredential(auth, credential);
-      const fbUser = result.user;
-      const { db } = await import('@/lib/firebase');
-      const { doc, setDoc, getDoc, serverTimestamp } = await import('firebase/firestore');
-      if (db) {
-        const ref = doc(db, 'users', fbUser.uid);
-        const snap = await getDoc(ref);
-        if (!snap.exists()) {
-          await setDoc(ref, {
-            id: fbUser.uid,
-            name: fbUser.displayName ?? 'User',
-            email: fbUser.email ?? '',
-            phone: '',
-            photoURL: fbUser.photoURL ?? '',
-            createdAt: serverTimestamp(),
-            favorites: [],
-            blockedUsers: [],
-          });
-        }
-      }
+      const user = await fb.signInWithGoogleIdToken(idToken, accessToken);
+      setCurrentUser(user);
+      setIsAuthenticated(true);
       return true;
     } catch (err) {
       console.error('[Google sign-in]', err);

@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/lib/firebase-persistence";
+import { getAuthInstance } from "@/services/firebase/auth";
 import { Animated, Easing, Image, StyleSheet, View } from "react-native";
 
 const LOGO   = require("@/assets/images/wc-logo.png");
@@ -56,8 +56,11 @@ export default function SplashScreen() {
     });
 
     const resolveAuthUser = async () => {
-      if (!auth) await sleep(300);
-      const resolvedAuth = auth;
+      let resolvedAuth = getAuthInstance();
+      if (!resolvedAuth) {
+        await sleep(300);
+        resolvedAuth = getAuthInstance();
+      }
       if (!resolvedAuth) return null;
 
       return new Promise((resolve) => {

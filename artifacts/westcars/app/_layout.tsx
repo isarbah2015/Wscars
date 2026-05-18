@@ -24,7 +24,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { isFirebaseReady } from "@/lib/firebase";
-import { auth } from "@/lib/firebase-persistence";
+import { getAuthInstance } from "@/services/firebase/auth";
 
 const FEATHER_TTF = require("../assets/fonts/Feather.ttf");
 const IONICONS_TTF = require("../assets/fonts/Ionicons.ttf");
@@ -44,8 +44,9 @@ function useAuthRedirect() {
 
   useEffect(() => {
     if (segments[0] === 'splash' || segments.length === 0) return;
-    if (!auth) return;
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const currentAuth = getAuthInstance();
+    if (!currentAuth) return;
+    const unsub = onAuthStateChanged(currentAuth, (user) => {
       const isAuthed = !!user;
       const onAuthOrWelcomeScreen =
         segments.includes('login') ||
