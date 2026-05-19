@@ -42,6 +42,7 @@ import { ReportModal } from "@/components/ReportModal";
 import { SafetyTipsModal } from "@/components/SafetyTipsModal";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
+import { uploadChatMedia } from "@/services/firebase/storage";
 import { Message } from "@/types";
 
 // Phone number pattern — detects GH formats (+233, 0xx)
@@ -244,6 +245,7 @@ export default function ConversationScreen() {
   const [showActions,   setShowActions]  = useState(false);
   const [showAttach,    setShowAttach]   = useState(false);
   const [isRecording,   setIsRecording]  = useState(false);
+  const [isUploading,   setIsUploading]  = useState(false);
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const flatListRef = useRef<FlatList>(null);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -293,7 +295,36 @@ export default function ConversationScreen() {
       allowsEditing: true,
     });
     if (!result.canceled && result.assets[0]) {
-      sendMessage(id, "", result.assets[0].uri, "image");
+      try {
+        setIsUploading(true);
+        const url = await uploadChatMedia(id, currentUser?.id ?? "", result.assets[0].uri, "image");
+        sendMessage(id, "", url, "image");
+      } catch {
+        Alert.alert("Upload failed", "Could not send image. Please try again.");
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    setShowAttach(false);
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert("Permission needed", "Allow camera access to take photos.");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.7, allowsEditing: true });
+    if (!result.canceled && result.assets[0]) {
+      try {
+        setIsUploading(true);
+        const url = await uploadChatMedia(id, currentUser?.id ?? "", result.assets[0].uri, "image");
+        sendMessage(id, "", url, "image");
+      } catch {
+        Alert.alert("Upload failed", "Could not send photo. Please try again.");
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -310,7 +341,15 @@ export default function ConversationScreen() {
       videoMaxDuration: 60,
     });
     if (!result.canceled && result.assets[0]) {
-      sendMessage(id, "", result.assets[0].uri, "video");
+      try {
+        setIsUploading(true);
+        const url = await uploadChatMedia(id, currentUser?.id ?? "", result.assets[0].uri, "image");
+        sendMessage(id, "", url, "video");
+      } catch {
+        Alert.alert("Upload failed", "Could not send video. Please try again.");
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -335,7 +374,15 @@ export default function ConversationScreen() {
       const uri = audioRecorder.uri;
       setIsRecording(false);
       if (uri) {
-        sendMessage(id, "", uri, "audio");
+        try {
+          setIsUploading(true);
+          const url = await uploadChatMedia(id, currentUser?.id ?? "", uri, "voice");
+          sendMessage(id, "", url, "audio");
+        } catch {
+          Alert.alert("Upload failed", "Could not send voice message. Please try again.");
+        } finally {
+          setIsUploading(false);
+        }
       }
     } catch {
       setIsRecording(false);
@@ -681,11 +728,17 @@ export default function ConversationScreen() {
       {/* Attachment picker tray */}
       {showAttach && !blocked && (
         <View style={[styles.attachTray, { backgroundColor: isDark ? "#111827" : "#FFFFFF", borderTopColor: isDark ? "rgba(255,255,255,0.06)" : "#E2E8F0" }]}>
+          <Pressable style={styles.attachOption} onPress={handleTakePhoto}>
+            <View style={[styles.attachIcon, { backgroundColor: "#F0FDF4" }]}>
+              <Feather name="camera" size={20} color="#16A34A" />
+            </View>
+            <Text style={[styles.attachLabel, { color: isDark ? "#94A3B8" : "#64748B" }]}>Camera</Text>
+          </Pressable>
           <Pressable style={styles.attachOption} onPress={handlePickImage}>
             <View style={[styles.attachIcon, { backgroundColor: "#EFF6FF" }]}>
               <Feather name="image" size={20} color="#2563EB" />
             </View>
-            <Text style={[styles.attachLabel, { color: isDark ? "#94A3B8" : "#64748B" }]}>Photo</Text>
+            <Text style={[styles.attachLabel, { color: isDark ? "#94A3B8" : "#64748B" }]}>Gallery</Text>
           </Pressable>
           <Pressable style={styles.attachOption} onPress={handlePickVideo}>
             <View style={[styles.attachIcon, { backgroundColor: "#FFF7ED" }]}>
@@ -697,8 +750,8 @@ export default function ConversationScreen() {
             style={styles.attachOption}
             onPress={isRecording ? handleStopRecording : handleStartRecording}
           >
-            <View style={[styles.attachIcon, { backgroundColor: isRecording ? "#FEF2F2" : "#F0FDF4" }]}>
-              <Feather name="mic" size={20} color={isRecording ? "#DC2626" : "#16A34A"} />
+            <View style={[styles.attachIcon, { backgroundColor: isRecording ? "#FEF2F2" : "#F5F3FF" }]}>
+              <Feather name="mic" size={20} color={isRecording ? "#DC2626" : "#7C3AED"} />
             </View>
             <Text style={[styles.attachLabel, { color: isRecording ? "#DC2626" : (isDark ? "#94A3B8" : "#64748B") }]}>
               {isRecording ? "Stop" : "Audio"}
@@ -715,6 +768,14 @@ export default function ConversationScreen() {
           <Pressable onPress={handleStopRecording}>
             <Feather name="stop-circle" size={20} color="#DC2626" />
           </Pressable>
+        </View>
+      )}
+
+      {/* Uploading indicator */}
+      {isUploading && (
+        <View style={[styles.uploadingBanner, { backgroundColor: isDark ? "#111827" : "#F0FDFA" }]}>
+          <Feather name="upload-cloud" size={14} color={BRAND} />
+          <Text style={[styles.uploadingText, { color: BRAND }]}>Uploading media…</Text>
         </View>
       )}
 
@@ -748,9 +809,9 @@ export default function ConversationScreen() {
         />
 
         <Pressable
-          style={[styles.sendBtn, (!text.trim() || blocked) && styles.sendBtnDisabled]}
+          style={[styles.sendBtn, (!text.trim() || blocked || isUploading) && styles.sendBtnDisabled]}
           onPress={handleSend}
-          disabled={!text.trim() || blocked}
+          disabled={!text.trim() || blocked || isUploading}
         >
           <Feather name="send" size={17} color="#fff" />
         </Pressable>
@@ -1098,6 +1159,16 @@ const styles = StyleSheet.create({
   },
   recordingDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#DC2626" },
   recordingText: { flex: 1, fontSize: 13, fontFamily: "Inter_500Medium", color: "#DC2626" },
+  uploadingBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(14,181,202,0.15)",
+  },
+  uploadingText: { fontSize: 12, fontFamily: "Inter_500Medium" },
 
   /* Actions (long-press) */
   actions: {
