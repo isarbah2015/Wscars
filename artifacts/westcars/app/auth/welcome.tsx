@@ -1,16 +1,17 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Dimensions,
   TouchableOpacity, StatusBar, Animated,
   PanResponder,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const TEAL = '#0EB5CA';
 const DARK = '#004D5A';
-const THUMB_SIZE = 56;
+const THUMB_SIZE = 60;
 const TRACK_WIDTH = width - 80;
 const MAX_SLIDE = TRACK_WIDTH - THUMB_SIZE - 4;
 
@@ -18,6 +19,34 @@ export default function WelcomeScreen() {
   const router = useRouter();
   const translateX = useRef(new Animated.Value(0)).current;
   const [unlocked, setUnlocked] = useState(false);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(40)).current;
+  const scaleAnim = useRef(new Animated.Value(0.92)).current;
+  const cardFade = useRef(new Animated.Value(0)).current;
+  const cardSlide = useRef(new Animated.Value(30)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
+        Animated.spring(scaleAnim, { toValue: 1, friction: 6, useNativeDriver: true }),
+      ]),
+      Animated.parallel([
+        Animated.timing(cardFade, { toValue: 1, duration: 500, useNativeDriver: true }),
+        Animated.timing(cardSlide, { toValue: 0, duration: 500, useNativeDriver: true }),
+      ]),
+    ]).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 0.5, duration: 900, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -40,97 +69,149 @@ export default function WelcomeScreen() {
   ).current;
 
   return (
-    <LinearGradient colors={['#0EB5CA', '#007A8C', DARK]} style={styles.container}>
+    <LinearGradient
+      colors={['#0A3D47', '#005F6E', '#0EB5CA']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
-      <View style={styles.brandContainer}>
+      {/* Glow orbs */}
+      <View style={styles.orb1} />
+      <View style={styles.orb2} />
+
+      {/* Brand */}
+      <Animated.View
+        style={[
+          styles.brandContainer,
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }, { scale: scaleAnim }] },
+        ]}
+      >
         <Text style={styles.brandText}>WestCars</Text>
-        <Text style={styles.brandSub}>Ghana's Car Marketplace</Text>
-      </View>
-
-      <View style={styles.carContainer}>
-        <View style={styles.carPlaceholder}>
-          <Text style={styles.carEmoji}>🚗</Text>
+        <View style={styles.badgeRow}>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>🇬🇭  Ghana's #1 Car Marketplace</Text>
+          </View>
         </View>
-      </View>
+      </Animated.View>
 
-      <View style={styles.taglineContainer}>
-        <Text style={styles.tagline}>Buy & Sell Cars</Text>
-        <Text style={styles.taglineSub}>Trusted listings across Ghana</Text>
-      </View>
+      {/* Glass card */}
+      <Animated.View
+        style={[
+          styles.cardWrapper,
+          { opacity: cardFade, transform: [{ translateY: cardSlide }] },
+        ]}
+      >
+        <BlurView intensity={18} tint="light" style={styles.glassCard}>
+          <View style={styles.cardInner}>
+            <View style={styles.cardAccent} />
+            <Text style={styles.carEmoji}>🚗</Text>
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Text style={styles.statNumber}>12K+</Text>
+                <Text style={styles.statLabel}>Listings</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statNumber}>98%</Text>
+                <Text style={styles.statLabel}>Verified</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statNumber}>4.9★</Text>
+                <Text style={styles.statLabel}>Rated</Text>
+              </View>
+            </View>
+          </View>
+        </BlurView>
+      </Animated.View>
 
-      <View style={styles.sliderWrapper}>
+      {/* Tagline */}
+      <Animated.View style={[styles.taglineContainer, { opacity: cardFade }]}>
+        <Text style={styles.tagline}>Find Your Perfect Car</Text>
+        <Text style={styles.taglineSub}>Trusted listings · Secure messaging · Fair prices</Text>
+      </Animated.View>
+
+      {/* Slider */}
+      <Animated.View style={[styles.sliderWrapper, { opacity: pulseAnim }]}>
         <View style={styles.track}>
-          <Text style={styles.trackLabel}>Slide to Get Started →</Text>
+          <Text style={styles.trackLabel}>Slide to Get Started  →</Text>
           <Animated.View
             style={[styles.thumb, { transform: [{ translateX }] }]}
             {...panResponder.panHandlers}
           >
-            <Text style={styles.thumbArrow}>›</Text>
+            <LinearGradient colors={['#0EB5CA', '#007A8C']} style={styles.thumbGradient}>
+              <Text style={styles.thumbArrow}>›</Text>
+            </LinearGradient>
           </Animated.View>
         </View>
-      </View>
+      </Animated.View>
 
+      {/* Sign up */}
       <TouchableOpacity onPress={() => router.push('/auth/signup')} style={styles.signupLink}>
-        <Text style={styles.signupText}>New here? <Text style={styles.signupBold}>Create Account</Text></Text>
+        <Text style={styles.signupText}>
+          New here?{'  '}
+          <Text style={styles.signupBold}>Create Account</Text>
+        </Text>
       </TouchableOpacity>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'space-between', paddingVertical: 60 },
-  brandContainer: { alignItems: 'center', marginTop: 20 },
-  brandText: { fontSize: 42, fontWeight: '800', color: '#FFFFFF', letterSpacing: 1.5 },
-  brandSub: { color: 'rgba(255,255,255,0.75)', fontSize: 15, marginTop: 6 },
-  carContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  carPlaceholder: {
-    width: width * 0.75,
-    height: width * 0.4,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
+  container: { flex: 1, alignItems: 'center', justifyContent: 'space-between', paddingVertical: 64, overflow: 'hidden' },
+  orb1: { position: 'absolute', width: 280, height: 280, borderRadius: 140, backgroundColor: 'rgba(14,181,202,0.18)', top: -60, right: -80 },
+  orb2: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(14,181,202,0.10)', bottom: 80, left: -60 },
+  brandContainer: { alignItems: 'center', marginTop: 12 },
+  brandText: {
+    fontSize: 46, fontWeight: '800', color: '#FFFFFF', letterSpacing: 2,
+    textShadowColor: 'rgba(14,181,202,0.6)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
   },
-  carEmoji: { fontSize: 80 },
-  taglineContainer: { alignItems: 'center', marginBottom: 32 },
-  tagline: { fontSize: 26, fontWeight: '700', color: '#FFFFFF' },
-  taglineSub: { color: 'rgba(255,255,255,0.65)', fontSize: 14, marginTop: 6 },
-  sliderWrapper: { width: '100%', paddingHorizontal: 40, marginBottom: 24 },
+  badgeRow: { marginTop: 10 },
+  badge: {
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderRadius: 20, borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+    paddingHorizontal: 16, paddingVertical: 6,
+  },
+  badgeText: { color: '#FFFFFF', fontSize: 13, fontWeight: '600' },
+  cardWrapper: { width: width - 48, borderRadius: 24, overflow: 'hidden' },
+  glassCard: { borderRadius: 24, overflow: 'hidden' },
+  cardInner: {
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderRadius: 24, borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.22)',
+    alignItems: 'center',
+    paddingVertical: 28, paddingHorizontal: 24,
+  },
+  cardAccent: { width: 48, height: 4, borderRadius: 2, backgroundColor: '#0EB5CA', marginBottom: 20 },
+  carEmoji: { fontSize: 90, marginBottom: 24 },
+  statsRow: { flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'center' },
+  statItem: { flex: 1, alignItems: 'center' },
+  statNumber: { fontSize: 20, fontWeight: '800', color: '#FFFFFF' },
+  statLabel: { fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 2 },
+  statDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.2)' },
+  taglineContainer: { alignItems: 'center', paddingHorizontal: 32 },
+  tagline: { fontSize: 22, fontWeight: '700', color: '#FFFFFF', textAlign: 'center' },
+  taglineSub: { color: 'rgba(255,255,255,0.60)', fontSize: 13, marginTop: 6, textAlign: 'center' },
+  sliderWrapper: { width: '100%', paddingHorizontal: 40 },
   track: {
-    height: THUMB_SIZE + 4,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderRadius: (THUMB_SIZE + 4) / 2,
+    height: THUMB_SIZE + 6,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderRadius: (THUMB_SIZE + 6) / 2,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.40)',
+    borderColor: 'rgba(255,255,255,0.35)',
     justifyContent: 'center',
-    paddingHorizontal: 2,
+    paddingHorizontal: 3,
   },
-  trackLabel: {
-    position: 'absolute',
-    width: '100%',
-    textAlign: 'center',
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  thumb: {
-    width: THUMB_SIZE,
-    height: THUMB_SIZE,
-    borderRadius: THUMB_SIZE / 2,
-    backgroundColor: TEAL,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-  },
-  thumbArrow: { color: '#FFFFFF', fontSize: 28, fontWeight: '700' },
-  signupLink: { marginBottom: 8 },
-  signupText: { color: 'rgba(255,255,255,0.65)', fontSize: 14 },
+  trackLabel: { position: 'absolute', width: '100%', textAlign: 'center', color: '#FFFFFF', fontSize: 14, fontWeight: '600', letterSpacing: 0.5 },
+  thumb: { width: THUMB_SIZE, height: THUMB_SIZE, borderRadius: THUMB_SIZE / 2, overflow: 'hidden', elevation: 8, shadowColor: '#0EB5CA', shadowOpacity: 0.6, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } },
+  thumbGradient: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  thumbArrow: { color: '#FFFFFF', fontSize: 30, fontWeight: '800' },
+  signupLink: { marginBottom: 4 },
+  signupText: { color: 'rgba(255,255,255,0.60)', fontSize: 14 },
   signupBold: { color: '#FFFFFF', fontWeight: '700' },
 });

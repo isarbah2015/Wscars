@@ -75,7 +75,7 @@ export default function SplashScreen() {
     const routeWhenReady = async () => {
       const [user] = await Promise.all([resolveAuthUser(), runAnimation()]);
       if (cancelled) return;
-      const target = user ? "/(tabs)" : "/welcome";
+      const target = user ? "/(tabs)" : "/auth/welcome";
       try {
         router.replace(target);
       } catch {
