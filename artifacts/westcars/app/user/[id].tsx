@@ -19,6 +19,7 @@ import { VerificationBadges } from "@/components/VerificationBadges";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { isFirebaseReady } from "@/lib/firebase";
 import { auth } from "@/lib/firebase-persistence";
 import { getUser } from "@/services/firebase";
@@ -29,6 +30,7 @@ import { User } from "@/types";
 export default function UserProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { cars } = useApp();
+  const { requireAuth } = useAuthGuard();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -86,19 +88,25 @@ export default function UserProfileScreen() {
     .slice(0, 6);
 
   const handleCall = () => {
-    if (user.phone) Linking.openURL(`tel:${user.phone}`);
+    requireAuth(() => {
+      if (user.phone) Linking.openURL(`tel:${user.phone}`);
+    }, 'Please sign in to contact this seller.');
   };
 
   const handleWhatsApp = () => {
-    const msg = encodeURIComponent(`Hi ${user.name.split(" ")[0]}, I found your profile on Westcars and I'm interested in your listings.`);
-    Linking.openURL(`https://wa.me/${(user.phone || "").replace(/\D/g, "")}?text=${msg}`);
+    requireAuth(() => {
+      const msg = encodeURIComponent(`Hi ${user.name.split(" ")[0]}, I found your profile on Westcars and I'm interested in your listings.`);
+      Linking.openURL(`https://wa.me/${(user.phone || "").replace(/\D/g, "")}?text=${msg}`);
+    }, 'Please sign in to contact this seller.');
   };
 
   const handleChat = () => {
-    if (userListings.length > 0) {
-      const convId = `conv_${user.id}`;
-      router.push({ pathname: "/conversation/[id]", params: { id: convId } });
-    }
+    requireAuth(() => {
+      if (userListings.length > 0) {
+        const convId = `conv_${user.id}`;
+        router.push({ pathname: "/conversation/[id]", params: { id: convId } });
+      }
+    }, 'Please sign in to message this seller.');
   };
 
   return (

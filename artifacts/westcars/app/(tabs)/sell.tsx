@@ -18,6 +18,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AuthGatePlaceholder } from "@/components/AuthGatePlaceholder";
 import { useApp } from "@/context/AppContext";
 import { isFirebaseReady } from "@/lib/firebase";
 import { updateCar, uploadCarImage } from "@/services/firebase";
@@ -311,16 +312,13 @@ export default function SellScreen() {
   // ── Auth wall ──────────────────────────────────────────────────────────
   if (!isAuthenticated) {
     return (
-      <View style={[styles.authWall, { paddingTop: topPad + 40 }]}>
-        <View style={styles.authIconWrap}>
-          <Feather name="lock" size={28} color={TEAL} />
-        </View>
-        <Text style={styles.authTitle}>Sign In Required</Text>
-        <Text style={styles.authSub}>You need to be logged in to list your car for sale.</Text>
-        <Pressable style={styles.authBtn} onPress={() => router.push("/auth/login")}>
-          <Text style={styles.authBtnText}>Sign In</Text>
-        </Pressable>
-      </View>
+      <AuthGatePlaceholder
+        icon="plus-circle"
+        title="Sign in to sell your car"
+        subtitle="List your vehicle and reach thousands of buyers across Ghana."
+        topPad={topPad}
+        backgroundColor={BG}
+      />
     );
   }
 

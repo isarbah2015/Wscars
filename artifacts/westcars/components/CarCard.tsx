@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { Car } from "@/types";
 import { formatPrice } from "@/utils/ghanaData";
 
@@ -24,7 +25,8 @@ interface CarCardProps {
 }
 
 export function CarCard({ car, style }: CarCardProps) {
-  const { toggleFavorite, isFavorite, isAuthenticated } = useApp();
+  const { toggleFavorite, isFavorite } = useApp();
+  const { requireAuth } = useAuthGuard();
   const { colors, isDark } = useTheme();
   const fav = isFavorite(car.id);
   const [imgError, setImgError] = useState(false);
@@ -110,7 +112,7 @@ export function CarCard({ car, style }: CarCardProps) {
               )}
 
               {/* Heart */}
-              <Pressable style={styles.heartBtn} onPress={() => { if (!isAuthenticated) { router.push("/auth/login"); return; } toggleFavorite(car.id); }} hitSlop={10}>
+              <Pressable style={styles.heartBtn} onPress={() => requireAuth(() => toggleFavorite(car.id), 'Please sign in to save favourites.')} hitSlop={10}>
                 <View style={[styles.heartBg, fav && styles.heartBgActive]}>
                   <Feather name="heart" size={15} color={fav ? "#fff" : "rgba(255,255,255,0.9)"} />
                 </View>
@@ -236,7 +238,7 @@ export function CarCard({ car, style }: CarCardProps) {
             </View>
           )}
 
-          <Pressable style={styles.heartBtn} onPress={() => { if (!isAuthenticated) { router.push("/auth/login"); return; } toggleFavorite(car.id); }} hitSlop={10}>
+          <Pressable style={styles.heartBtn} onPress={() => requireAuth(() => toggleFavorite(car.id), 'Please sign in to save favourites.')} hitSlop={10}>
             <View style={[styles.heartBg, fav && styles.heartBgActive]}>
               <Feather name="heart" size={15} color={fav ? "#fff" : "rgba(255,255,255,0.9)"} />
             </View>

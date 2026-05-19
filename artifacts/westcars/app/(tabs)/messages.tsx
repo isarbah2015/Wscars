@@ -14,6 +14,7 @@ import {
 import { Swipeable } from "react-native-gesture-handler";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AuthGatePlaceholder } from "@/components/AuthGatePlaceholder";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Conversation } from "@/types";
@@ -210,21 +211,12 @@ export default function MessagesScreen() {
 
       {/* ── Body ── */}
       {!isAuthenticated ? (
-        <View style={[styles.emptyState, { backgroundColor: isDark ? "#0F172A" : "#F8FAFC" }]}>
-          <View style={[styles.emptyIcon, { backgroundColor: colors.accentLight }]}>
-            <Feather name="message-circle" size={40} color={colors.accent} />
-          </View>
-          <Text style={[styles.emptyTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>No messages yet</Text>
-          <Text style={[styles.emptyText, { color: isDark ? "#94A3B8" : "#64748B" }]}>
-            Sign in to message sellers and manage conversations.
-          </Text>
-          <Pressable
-            style={[styles.signInBtn, { backgroundColor: colors.accent }]}
-            onPress={() => router.push("/auth/login")}
-          >
-            <Text style={styles.signInText}>Sign In</Text>
-          </Pressable>
-        </View>
+        <AuthGatePlaceholder
+          icon="message-circle"
+          title="Sign in to view messages"
+          subtitle="Message sellers and manage your conversations securely."
+          backgroundColor={isDark ? "#0F172A" : "#F8FAFC"}
+        />
       ) : filteredConversations.length === 0 ? (
         <View style={[styles.emptyState, { backgroundColor: isDark ? "#0F172A" : "#F8FAFC" }]}>
           <View style={[styles.emptyIcon, { backgroundColor: colors.accentLight }]}>

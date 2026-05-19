@@ -44,12 +44,12 @@ function Stars({ n }: { n: number }) {
 }
 
 export default function ProfileScreen() {
-  const { currentUser, isAuthenticated, logout, cars, favorites,
+  const { currentUser, isAuthenticated, logout, cars, favorites, conversations,
           getUserReviews, getSellerTrustScore, toggleAnonymous,
           blockUser, blockedUsers, unblockUser, verifyPhone, verifyId,
           updateUserProfile, notifications, markNotificationRead,
           markAllNotificationsRead, unreadNotificationsCount } = useApp();
-  const { chineseProfile, logOut, saveChineseProfile } = useAuth();
+  const { chineseProfile, sponsorship, logOut, saveChineseProfile } = useAuth();
   const { isDark, colors, toggleTheme } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);
@@ -113,6 +113,9 @@ export default function ProfileScreen() {
   }
 
   const myListings = cars.filter((c) => c.sellerId === currentUser.id);
+  const activeListings = myListings.filter((c) => !c.isSold);
+  const sponsorshipTier = sponsorship?.tier ?? (activeListings.some((c) => c.isSponsored) ? 'Premium Seller' : 'Standard Seller');
+  const adCredits = sponsorship?.adCredits ?? 0;
   const savedCars   = cars.filter((c) => favorites.includes(c.id));
   const myReviews   = getUserReviews(currentUser.id);
   const trustScore  = getSellerTrustScore(currentUser);
@@ -198,7 +201,7 @@ export default function ProfileScreen() {
     try {
       await logOut();
       logout();
-      router.replace("/auth/welcome");
+      router.replace("/welcome-westcars");
     } catch {
       Alert.alert("Error", "Failed to sign out. Please try again.");
     } finally {
@@ -417,6 +420,54 @@ export default function ProfileScreen() {
                   </TouchableOpacity>
                   {chineseSaved && <Text style={styles.chineseSavedText}>Profile saved!</Text>}
                 </>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.profileSection}>
+            <Text style={[styles.profileSectionTitle, { color: colors.text }]}>Sponsorship & Ads</Text>
+            <View style={[styles.detailCard, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA", borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }]}>
+              <View style={[styles.detailRow, { borderBottomWidth: activeListings.length > 0 ? 0.5 : 0, borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.detailValue, { color: colors.text }]}>Status: {sponsorshipTier}</Text>
+                  <Text style={[styles.detailLabel, { marginTop: 4 }]}>{adCredits} sponsored post credits remaining</Text>
+                </View>
+                {sponsorshipTier === 'Premium Seller' && (
+                  <View style={styles.premiumBadge}>
+                    <Text style={styles.premiumBadgeText}>Premium</Text>
+                  </View>
+                )}
+              </View>
+              {activeListings.length === 0 ? (
+                <Text style={[styles.sponsorEmpty, { color: colors.textSecondary }]}>No active listings yet. Post a car to promote it.</Text>
+              ) : (
+                activeListings.map((listing, idx) => {
+                  const msgCount = conversations.filter((c) => c.carId === listing.id).length;
+                  const startDate = listing.createdAt?.slice(0, 10) ?? '—';
+                  const endDate = listing.expiresAt?.slice(0, 10) ?? 'Active';
+                  return (
+                    <View
+                      key={listing.id}
+                      style={[
+                        styles.sponsorListing,
+                        idx < activeListings.length - 1 && { borderBottomWidth: 0.5, borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" },
+                      ]}
+                    >
+                      <Text style={[styles.sponsorTitle, { color: colors.text }]} numberOfLines={1}>
+                        {listing.brand} {listing.model}
+                      </Text>
+                      <Text style={[styles.detailLabel]}>GHS {listing.price.toLocaleString()} · {startDate} → {endDate}</Text>
+                      <View style={styles.sponsorMetrics}>
+                        <Text style={styles.sponsorMetric}>👁 {listing.views ?? 0} views</Text>
+                        <Text style={styles.sponsorMetric}>💬 {msgCount} messages</Text>
+                        {listing.isSponsored && <Text style={styles.sponsorMetric}>★ Sponsored</Text>}
+                      </View>
+                      <TouchableOpacity style={styles.boostBtn} onPress={() => router.push('/advertise')}>
+                        <Text style={styles.boostBtnText}>Boost this ad</Text>
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })
               )}
             </View>
           </View>
@@ -1296,6 +1347,15 @@ const styles = StyleSheet.create({
   },
   chineseSaveText: { color: "#004D5A", fontSize: 15, fontFamily: "Inter_700Bold" },
   chineseSavedText: { color: "#16A34A", fontSize: 13, fontFamily: "Inter_600SemiBold", textAlign: "center", marginTop: 10 },
+  premiumBadge: { backgroundColor: "#F59E0B", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  premiumBadgeText: { color: "#004D5A", fontSize: 11, fontFamily: "Inter_700Bold" },
+  sponsorEmpty: { fontSize: 13, fontFamily: "Inter_400Regular", paddingVertical: 12, textAlign: "center" },
+  sponsorListing: { paddingVertical: 14, gap: 6 },
+  sponsorTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  sponsorMetrics: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  sponsorMetric: { fontSize: 12, fontFamily: "Inter_500Medium", color: "#64748B" },
+  boostBtn: { marginTop: 4, alignSelf: "flex-start", backgroundColor: "#0EB5CA", borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8 },
+  boostBtnText: { color: "#004D5A", fontSize: 13, fontFamily: "Inter_700Bold" },
   logoutBtn: {
     marginHorizontal: 16, marginBottom: 16,
     height: 48, borderRadius: 12,

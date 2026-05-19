@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AuthGatePlaceholder } from "@/components/AuthGatePlaceholder";
 import { CarCard } from "@/components/CarCard";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -24,21 +25,13 @@ export default function FavouritesScreen() {
 
   if (!isAuthenticated) {
     return (
-      <View style={[styles.authWall, { paddingTop: topPad + 40, backgroundColor: colors.background }]}>
-        <View style={[styles.iconRing, { backgroundColor: colors.accentLight }]}>
-          <Feather name="heart" size={38} color={colors.accent} />
-        </View>
-        <Text style={[styles.authTitle, { color: colors.text }]}>Save Your Favourites</Text>
-        <Text style={[styles.authText, { color: colors.textSecondary }]}>
-          Sign in to keep track of cars you love.
-        </Text>
-        <Pressable
-          style={[styles.authBtn, { backgroundColor: "#0EB5CA" }]}
-          onPress={() => router.push("/auth/login")}
-        >
-          <Text style={[styles.authBtnText, { color: "#FFFFFF" }]}>Sign In</Text>
-        </Pressable>
-      </View>
+      <AuthGatePlaceholder
+        icon="heart"
+        title="Save Your Favourites"
+        subtitle="Sign in to keep track of cars you love."
+        topPad={topPad}
+        backgroundColor={colors.background}
+      />
     );
   }
 

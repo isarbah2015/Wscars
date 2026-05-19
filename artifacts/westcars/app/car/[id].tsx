@@ -26,6 +26,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 const { width } = Dimensions.get("window");
 const STAGE_IMG_W = width - 32;
@@ -84,6 +85,7 @@ export default function CarDetailScreen() {
     renewListing,
     reportItem,
   } = useApp();
+  const { requireAuth } = useAuthGuard();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -110,20 +112,12 @@ export default function CarDetailScreen() {
   }
 
   // ── Auth guard helper ──────────────────────────────────────
-  const requireAuth = (action: () => void) => {
-    if (!isAuthenticated) {
-      Alert.alert("Sign In Required", "Please sign in to contact the seller.", [
-        { text: "Sign In", onPress: () => router.push("/auth/login") },
-        { text: "Cancel", style: "cancel" },
-      ]);
-      return;
-    }
-    action();
+  const requireAuthAction = (action: () => void, message?: string) => {
+    requireAuth(action, message ?? 'Please sign in to contact the seller.');
   };
 
-  // ── Handlers ──────────────────────────────────────────────
   const handleCall = () =>
-    requireAuth(() => {
+    requireAuthAction(() => {
       const phone = car.seller?.phone || "+233000000000";
       Linking.openURL(`tel:${phone.replace(/\s/g, "")}`).catch(() =>
         Alert.alert("Cannot open phone dialler.")
@@ -131,7 +125,7 @@ export default function CarDetailScreen() {
     });
 
   const handleWhatsApp = () =>
-    requireAuth(() => {
+    requireAuthAction(() => {
       const raw   = car.seller?.phone?.replace(/[\s+\-()]/g, "") || "233000000000";
       const phone = raw.startsWith("0") ? "233" + raw.slice(1) : raw;
       const msg   = encodeURIComponent(
@@ -143,7 +137,7 @@ export default function CarDetailScreen() {
     });
 
   const handleChat = () =>
-    requireAuth(async () => {
+    requireAuthAction(async () => {
       const convId = await startConversation(car);
       router.push({ pathname: "/conversation/[id]", params: { id: convId } });
     });
@@ -200,7 +194,7 @@ export default function CarDetailScreen() {
           <View style={styles.topBarRight}>
             <TouchableOpacity
               style={[styles.iconBtn, { backgroundColor: card }]}
-              onPress={() => toggleFavorite(car.id)}
+              onPress={() => requireAuth(() => toggleFavorite(car.id), 'Please sign in to save favourites.')}
               accessibilityLabel={isSaved ? "Remove from saved" : "Save car"}
             >
               <Feather

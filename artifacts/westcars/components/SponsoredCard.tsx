@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { Car } from "@/types";
 import { formatPrice } from "@/utils/ghanaData";
 
@@ -25,6 +26,7 @@ interface SponsoredCardProps {
 
 export function SponsoredCard({ car, style }: SponsoredCardProps) {
   const { toggleFavorite, isFavorite } = useApp();
+  const { requireAuth } = useAuthGuard();
   const { colors, isDark } = useTheme();
   const fav = isFavorite(car.id);
   const [imgError, setImgError] = useState(false);
@@ -84,7 +86,7 @@ export function SponsoredCard({ car, style }: SponsoredCardProps) {
             </LinearGradient>
 
             {/* Favourite — top-right */}
-            <Pressable style={styles.heartBtn} onPress={() => toggleFavorite(car.id)} hitSlop={12}>
+            <Pressable style={styles.heartBtn} onPress={() => requireAuth(() => toggleFavorite(car.id), 'Please sign in to save favourites.')} hitSlop={12}>
               <View style={[styles.heartBg, fav && styles.heartBgActive]}>
                 <Feather name="heart" size={14} color={fav ? "#fff" : "rgba(255,255,255,0.92)"} />
               </View>
