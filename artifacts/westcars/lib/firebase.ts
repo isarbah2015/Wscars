@@ -1,57 +1,19 @@
-/**
- * Firebase initialization for the Westcars Expo app.
- *
- * Reads config from EXPO_PUBLIC_FIREBASE_* env vars (set as Replit secrets).
- * If any required value is missing, isFirebaseReady() returns false and
- * AppContext falls back to mock data.
- *
- * Auth is initialized in lib/firebase-persistence (platform-specific files)
- * so native builds use AsyncStorage persistence and web uses localStorage.
- */
-import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
-import { getFirestore, type Firestore } from "firebase/firestore";
-import { getStorage, type FirebaseStorage } from "firebase/storage";
-import { resolveFirebaseConfig } from "@/lib/firebase-config";
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
-const firebaseConfig = resolveFirebaseConfig();
-console.log('[firebase] config resolved:', firebaseConfig ? 'OK' : 'NULL');
-const missing = firebaseConfig
-  ? []
-  : (["apiKey", "projectId", "appId"] as const);
+const firebaseConfig = {
+  apiKey: 'AIzaSyAx63IHICZGjQ9Ee22RuiQ9Vp4Ff61-oP4',
+  authDomain: 'westcar-5c1e6.firebaseapp.com',
+  projectId: 'westcar-5c1e6',
+  storageBucket: 'westcar-5c1e6.firebasestorage.app',
+  messagingSenderId: '778261594022',
+  appId: '1:778261594022:android:b25d665d6a020597b91967',
+};
 
-let app:     FirebaseApp     | null = null;
-let db:      Firestore       | null = null;
-let storage: FirebaseStorage | null = null;
-
-if (firebaseConfig) {
-  try {
-    // ── App ──────────────────────────────────────────────────────────────
-    app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-
-    // ── Firestore ─────────────────────────────────────────────────────────
-    const databaseId =
-      process.env.EXPO_PUBLIC_FIREBASE_DATABASE_ID ?? "(default)";
-    db = getFirestore(app, databaseId);
-
-    // ── Storage ───────────────────────────────────────────────────────────
-    storage = getStorage(app);
-
-  } catch (err) {
-    console.warn("[firebase] init failed:", err);
-  }
-} else {
-  // Always warn — not just in dev — so production crash logs surface this.
-  const level = __DEV__ ? "warn" : "error";
-  console[level](
-    `[firebase] Missing required config keys: ${missing.join(", ")}. ` +
-    (__DEV__
-      ? "Set EXPO_PUBLIC_FIREBASE_* secrets to enable Firebase."
-      : "PRODUCTION BUILD has no Firebase config — check EAS secrets / env vars."),
-  );
-}
-
-export const isFirebaseReady = (): boolean =>
-  app !== null && db !== null;
-
-export { app, db, storage };
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+export { app };
+export const db = getFirestore(app);
+export const storage = getStorage(app);
+export const isFirebaseReady = (): boolean => !!app && !!db;
 export default app;

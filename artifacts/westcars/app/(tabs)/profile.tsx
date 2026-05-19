@@ -2,7 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -15,6 +15,8 @@ import {
   StyleSheet,
   Switch,
   Text,
+  TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -26,6 +28,7 @@ import { TrustScore } from "@/components/TrustScore";
 import { VerificationBadges } from "@/components/VerificationBadges";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 
 type ProfileTab = "listings" | "saved" | "reviews" | "settings";
@@ -46,6 +49,7 @@ export default function ProfileScreen() {
           blockUser, blockedUsers, unblockUser, verifyPhone, verifyId,
           updateUserProfile, notifications, markNotificationRead,
           markAllNotificationsRead, unreadNotificationsCount } = useApp();
+  const { chineseProfile, logOut, saveChineseProfile } = useAuth();
   const { isDark, colors, toggleTheme } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);
@@ -58,6 +62,13 @@ export default function ProfileScreen() {
   const [reviewRating, setReviewRating] = useState(0);
   const [locLoading, setLocLoading] = useState(false);
   const [avatarSheetOpen, setAvatarSheetOpen] = useState(false);
+  const [isChineseSeller, setIsChineseSeller] = useState(false);
+  const [wechatId, setWechatId] = useState("");
+  const [locationInChina, setLocationInChina] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [savingChinese, setSavingChinese] = useState(false);
+  const [chineseSaved, setChineseSaved] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const { photoURL: uploadedAvatar, progress: uploadProgress, isUploading: avatarUploading,
           pickAndUpload, removePhoto } =
     useAvatarUpload({
@@ -65,6 +76,15 @@ export default function ProfileScreen() {
       initialPhotoURL: currentUser?.avatar,
       onSuccess: (url) => updateUserProfile({ avatar: url || undefined }),
     });
+
+  useEffect(() => {
+    if (chineseProfile) {
+      setIsChineseSeller(chineseProfile.isChineseSeller);
+      setWechatId(chineseProfile.wechatId ?? "");
+      setLocationInChina(chineseProfile.locationInChina ?? "");
+      setBusinessName(chineseProfile.businessName ?? "");
+    }
+  }, [chineseProfile]);
 
   if (!isAuthenticated || !currentUser) {
     return (
@@ -173,16 +193,50 @@ export default function ProfileScreen() {
     setLocLoading(false);
   };
 
-  const handleLogout = () => {
-    if (Platform.OS === "web") {
+  const handleAuthSignOut = async () => {
+    setSigningOut(true);
+    try {
+      await logOut();
       logout();
-      setTimeout(() => { router.replace("/(tabs)"); }, 100);
-      return;
+      router.replace("/auth/welcome");
+    } catch {
+      Alert.alert("Error", "Failed to sign out. Please try again.");
+    } finally {
+      setSigningOut(false);
     }
-    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Sign Out", style: "destructive", onPress: () => { logout(); setTimeout(() => { router.replace("/(tabs)"); }, 100); } },
-    ]);
+  };
+
+  const handleChineseToggle = async (value: boolean) => {
+    setIsChineseSeller(value);
+    if (!value) {
+      try {
+        setSavingChinese(true);
+        await saveChineseProfile({ isChineseSeller: false });
+      } catch {
+        Alert.alert("Error", "Failed to update profile.");
+        setIsChineseSeller(true);
+      } finally {
+        setSavingChinese(false);
+      }
+    }
+  };
+
+  const handleSaveChineseProfile = async () => {
+    try {
+      setSavingChinese(true);
+      await saveChineseProfile({
+        isChineseSeller: true,
+        wechatId: wechatId.trim(),
+        locationInChina: locationInChina.trim(),
+        businessName: businessName.trim() || undefined,
+      });
+      setChineseSaved(true);
+      setTimeout(() => setChineseSaved(false), 2000);
+    } catch {
+      Alert.alert("Error", "Failed to save profile.");
+    } finally {
+      setSavingChinese(false);
+    }
   };
 
   return (
@@ -316,6 +370,54 @@ export default function ProfileScreen() {
                   </View>
                 </View>
               ))}
+            </View>
+          </View>
+
+          <View style={styles.profileSection}>
+            <Text style={[styles.profileSectionTitle, { color: colors.text }]}>Chinese Seller / Importer</Text>
+            <View style={[styles.detailCard, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA", borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }]}>
+              <View style={[styles.detailRow, { borderBottomWidth: isChineseSeller ? 0.5 : 0, borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.detailValue, { color: colors.text }]}>I am a Chinese Seller / Importer</Text>
+                </View>
+                <Switch
+                  value={isChineseSeller}
+                  onValueChange={handleChineseToggle}
+                  trackColor={{ false: "#CBD5E1", true: "#0EB5CA" }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
+              {isChineseSeller && (
+                <>
+                  <TextInput
+                    style={[styles.chineseInput, { color: colors.text, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}
+                    placeholder="WeChat ID"
+                    placeholderTextColor={colors.textTertiary}
+                    value={wechatId}
+                    onChangeText={setWechatId}
+                  />
+                  <TextInput
+                    style={[styles.chineseInput, { color: colors.text, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}
+                    placeholder="Location in China (city/province)"
+                    placeholderTextColor={colors.textTertiary}
+                    value={locationInChina}
+                    onChangeText={setLocationInChina}
+                  />
+                  <TextInput
+                    style={[styles.chineseInput, { color: colors.text, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}
+                    placeholder="Business Name in China (optional)"
+                    placeholderTextColor={colors.textTertiary}
+                    value={businessName}
+                    onChangeText={setBusinessName}
+                  />
+                  <TouchableOpacity style={styles.chineseSaveBtn} onPress={handleSaveChineseProfile} disabled={savingChinese}>
+                    {savingChinese
+                      ? <ActivityIndicator color="#004D5A" />
+                      : <Text style={styles.chineseSaveText}>Save</Text>}
+                  </TouchableOpacity>
+                  {chineseSaved && <Text style={styles.chineseSavedText}>Profile saved!</Text>}
+                </>
+              )}
             </View>
           </View>
 
@@ -741,10 +843,11 @@ export default function ProfileScreen() {
               </View>
 
               {/* Sign Out */}
-              <Pressable style={styles.logoutBtn} onPress={handleLogout}>
-                <Feather name="log-out" size={18} color="#dc2626" />
-                <Text style={styles.logoutText}>Sign Out</Text>
-              </Pressable>
+              <TouchableOpacity style={styles.authSignOutBtn} onPress={handleAuthSignOut} disabled={signingOut}>
+                {signingOut
+                  ? <ActivityIndicator color="#0EB5CA" />
+                  : <Text style={styles.authSignOutText}>Sign Out</Text>}
+              </TouchableOpacity>
 
             </View>
           )}
@@ -1165,6 +1268,34 @@ const styles = StyleSheet.create({
   veriBadgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
 
   // ── Logout ──
+  authSignOutBtn: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#004D5A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  authSignOutText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#0EB5CA" },
+  chineseInput: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    marginBottom: 12,
+  },
+  chineseSaveBtn: {
+    backgroundColor: "#0EB5CA",
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginTop: 4,
+  },
+  chineseSaveText: { color: "#004D5A", fontSize: 15, fontFamily: "Inter_700Bold" },
+  chineseSavedText: { color: "#16A34A", fontSize: 13, fontFamily: "Inter_600SemiBold", textAlign: "center", marginTop: 10 },
   logoutBtn: {
     marginHorizontal: 16, marginBottom: 16,
     height: 48, borderRadius: 12,

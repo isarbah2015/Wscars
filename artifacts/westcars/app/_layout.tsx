@@ -18,13 +18,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { onAuthStateChanged } from "@firebase/auth";
-
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { isFirebaseReady } from "@/lib/firebase";
-import { getAuthInstance } from "@/services/firebase/auth";
 
 const FEATHER_TTF = require("../assets/fonts/Feather.ttf");
 const IONICONS_TTF = require("../assets/fonts/Ionicons.ttf");
@@ -40,33 +38,25 @@ const queryClient = new QueryClient();
 function useAuthRedirect() {
   const router = useRouter();
   const segments = useSegments() as string[];
-  const prevAuthRef = useRef<boolean>(false);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
+    if (loading) return;
     if (segments[0] === 'splash' || segments.length === 0) return;
-    const currentAuth = getAuthInstance();
-    if (!currentAuth) return;
-    const unsub = onAuthStateChanged(currentAuth, (user) => {
-      const isAuthed = !!user;
-      const onAuthOrWelcomeScreen =
-        segments.includes('login') ||
-        segments.includes('signup') ||
-        segments.includes('welcome') ||
-        segments[0] === 'welcome' ||
-        segments.length === 0;
-      if (isAuthed && onAuthOrWelcomeScreen) {
-        router.replace('/(tabs)');
-      }
-      if (!isAuthed && !segments.includes('login') && !segments.includes('signup') &&
-          !segments.includes('forgot-password') && !segments.includes('welcome') &&
-          !segments.includes('onboarding') &&
-          segments[0] !== undefined && segments[0] !== 'splash') {
-        router.replace('/(tabs)');
-      }
-      prevAuthRef.current = isAuthed;
-    });
-    return unsub;
-  }, [segments]);
+
+    const isAuthed = !!user;
+    const onAuthScreen =
+      segments.includes('login') ||
+      segments.includes('signup') ||
+      segments.includes('forgot-password') ||
+      segments.includes('welcome') ||
+      segments[0] === 'welcome' ||
+      (segments[0] === 'auth' && segments[1] === 'welcome');
+
+    if (isAuthed && onAuthScreen) {
+      router.replace('/(tabs)');
+    }
+  }, [segments, user, loading]);
 }
 
 function RootLayoutNav() {
@@ -78,6 +68,7 @@ function RootLayoutNav() {
       <Stack.Screen name="onboarding" />
       <Stack.Screen name="splash" />
       <Stack.Screen name="welcome" />
+      <Stack.Screen name="auth/welcome" />
       <Stack.Screen name="auth/login" />
       <Stack.Screen name="auth/signup" />
       <Stack.Screen name="auth/forgot-password" />
@@ -172,9 +163,11 @@ export default function RootLayout() {
               {!__DEV__ && !isFirebaseReady() ? (
                 <FirebaseUnavailableScreen />
               ) : (
-                <AppProvider>
-                  <RootLayoutNav />
-                </AppProvider>
+                <AuthProvider>
+                  <AppProvider>
+                    <RootLayoutNav />
+                  </AppProvider>
+                </AuthProvider>
               )}
             </QueryClientProvider>
           </ThemeProvider>
