@@ -4,6 +4,7 @@ import {
   StyleSheet, KeyboardAvoidingView, Platform,
   ScrollView, ActivityIndicator,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 
@@ -14,6 +15,8 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -60,8 +63,18 @@ export default function SignUpScreen() {
 
         <TextInput style={styles.input} placeholder="Full name" placeholderTextColor="rgba(255,255,255,0.55)" value={name} onChangeText={setName} autoCapitalize="words" />
         <TextInput style={styles.input} placeholder="Email address" placeholderTextColor="rgba(255,255,255,0.55)" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
-        <TextInput style={styles.input} placeholder="Password (min 6 characters)" placeholderTextColor="rgba(255,255,255,0.55)" value={password} onChangeText={setPassword} secureTextEntry />
-        <TextInput style={styles.input} placeholder="Confirm password" placeholderTextColor="rgba(255,255,255,0.55)" value={confirm} onChangeText={setConfirm} secureTextEntry />
+        <View style={styles.inputRow}>
+          <TextInput style={styles.inputFlex} placeholder="Password (min 6 characters)" placeholderTextColor="rgba(255,255,255,0.55)" value={password} onChangeText={setPassword} secureTextEntry={!showPassword} />
+          <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={styles.eyeBtn}>
+            <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color="rgba(255,255,255,0.55)" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.inputRow}>
+          <TextInput style={styles.inputFlex} placeholder="Confirm password" placeholderTextColor="rgba(255,255,255,0.55)" value={confirm} onChangeText={setConfirm} secureTextEntry={!showConfirm} />
+          <TouchableOpacity onPress={() => setShowConfirm(v => !v)} style={styles.eyeBtn}>
+            <Feather name={showConfirm ? 'eye-off' : 'eye'} size={20} color="rgba(255,255,255,0.55)" />
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
           {loading
@@ -102,6 +115,26 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     marginBottom: 16,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  inputFlex: {
+    flex: 1,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
+  eyeBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 14,
   },
   button: {
     backgroundColor: '#0EB5CA',
