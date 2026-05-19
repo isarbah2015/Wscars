@@ -46,13 +46,8 @@ function useAuthRedirect() {
 
     const isAuthed = !!user;
     const onAuthScreen =
-      segments.includes('login') ||
-      segments.includes('signup') ||
-      segments.includes('forgot-password') ||
       segments[0] === 'welcome' ||
-      segments[0] === 'welcome-old' ||
-      segments[0] === 'welcome-westcars' ||
-      (segments[0] === 'auth' && segments[1] === 'welcome');
+      segments[0] === 'auth';
 
     if (isAuthed && onAuthScreen) {
       router.replace('/(tabs)');
@@ -71,12 +66,8 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
-      <Stack.Screen name="onboarding" />
       <Stack.Screen name="splash" />
       <Stack.Screen name="welcome" />
-      <Stack.Screen name="welcome-old" />
-      <Stack.Screen name="welcome-westcars" />
-      <Stack.Screen name="auth/welcome" />
       <Stack.Screen name="auth/login" />
       <Stack.Screen name="auth/signup" />
       <Stack.Screen name="auth/forgot-password" />
