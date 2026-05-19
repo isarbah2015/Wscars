@@ -50,19 +50,30 @@ export default function WelcomeScreen() {
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => false,
+      onStartShouldSetPanResponderCapture: () => false,
+      onMoveShouldSetPanResponder: (_, g) =>
+        Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy),
+      onMoveShouldSetPanResponderCapture: (_, g) =>
+        Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy),
       onPanResponderMove: (_, gs) => {
         const x = Math.max(0, Math.min(gs.dx, MAX_SLIDE));
         translateX.setValue(x);
       },
       onPanResponderRelease: (_, gs) => {
         if (gs.dx >= MAX_SLIDE * 0.85) {
-          Animated.spring(translateX, { toValue: MAX_SLIDE, useNativeDriver: true }).start(() => {
+          Animated.spring(translateX, {
+            toValue: MAX_SLIDE,
+            useNativeDriver: true,
+          }).start(() => {
             setUnlocked(true);
             router.replace('/auth/login');
           });
         } else {
-          Animated.spring(translateX, { toValue: 0, useNativeDriver: true }).start();
+          Animated.spring(translateX, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
         }
       },
     })

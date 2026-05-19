@@ -68,8 +68,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { user: newUser } = await createUserWithEmailAndPassword(auth!, email.trim(), password);
     await updateProfile(newUser, { displayName: name.trim() });
     await setDoc(doc(db, 'users', newUser.uid), {
+      id: newUser.uid,
       displayName: name.trim(),
+      name: name.trim(),
       email: email.trim(),
+      phone: '',
+      location: 'Accra',
+      avatar: null,
+      memberSince: new Date().toISOString().split('T')[0],
+      isVerified: false,
+      verification: { phone: false, id: false, dealer: false },
+      rating: 0,
+      totalReviews: 0,
+      totalListings: 0,
+      trustScore: 15,
+      totalSales: 0,
       createdAt: serverTimestamp(),
       chineseSellerProfile: { isChineseSeller: false },
     });

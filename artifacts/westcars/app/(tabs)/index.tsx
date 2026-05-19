@@ -1140,7 +1140,7 @@ const styles = StyleSheet.create({
   brandList: {
     flexDirection: "row",
     gap: 10,
-    paddingLeft: 0,
+    paddingLeft: 14,
     paddingRight: 32,
     alignItems: "center",
   },
