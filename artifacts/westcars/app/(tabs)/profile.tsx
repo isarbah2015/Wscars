@@ -201,7 +201,7 @@ export default function ProfileScreen() {
     try {
       await logOut();
       logout();
-      router.replace("/welcome-westcars");
+      router.replace("/welcome");
     } catch {
       Alert.alert("Error", "Failed to sign out. Please try again.");
     } finally {

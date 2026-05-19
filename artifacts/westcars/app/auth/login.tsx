@@ -8,9 +8,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Image,
+  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
+
+const { width } = Dimensions.get('window');
+const PORSCHE = require('@/assets/images/welcome-car-porsche.png');
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -56,6 +61,11 @@ export default function SignInScreen() {
     >
       <View style={styles.inner}>
         <Text style={styles.brand}>WestCars</Text>
+        <Image
+          source={PORSCHE}
+          style={{ width: width * 0.80, height: width * 0.42, alignSelf: 'center' }}
+          resizeMode="contain"
+        />
         <Text style={styles.subtitle}>Sign in to your account</Text>
 
         {error ? (
