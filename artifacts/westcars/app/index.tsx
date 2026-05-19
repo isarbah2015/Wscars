@@ -1,6 +1,19 @@
-import { Redirect } from "expo-router";
-import React from "react";
+import { useEffect } from 'react';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Index() {
-  return <Redirect href="/splash" />;
+  const router = useRouter();
+
+  useEffect(() => {
+    AsyncStorage.getItem('onboarding_complete').then((val) => {
+      if (val === 'true') {
+        router.replace('/(tabs)');
+      } else {
+        router.replace('/onboarding');
+      }
+    });
+  }, []);
+
+  return null;
 }

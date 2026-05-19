@@ -59,8 +59,9 @@ function useAuthRedirect() {
       }
       if (!isAuthed && !segments.includes('login') && !segments.includes('signup') &&
           !segments.includes('forgot-password') && !segments.includes('welcome') &&
+          !segments.includes('onboarding') &&
           segments[0] !== undefined && segments[0] !== 'splash') {
-        router.replace('/welcome');
+        router.replace('/(tabs)');
       }
       prevAuthRef.current = isAuthed;
     });
@@ -73,6 +74,8 @@ function RootLayoutNav() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="onboarding" />
       <Stack.Screen name="splash" />
       <Stack.Screen name="welcome" />
       <Stack.Screen name="auth/login" />
