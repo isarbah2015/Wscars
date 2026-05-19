@@ -29,16 +29,19 @@ export default function WelcomeScreen() {
 
   return (
     <Animated.View style={[styles.container, { transform: [{ translateX }] }]}>
+      {/* Full Porsche PNG — no cropping */}
       <View style={styles.imageWrap}>
         <Image source={PORSCHE} style={styles.image} resizeMode="contain" />
       </View>
 
+      {/* Bottom card */}
       <View style={styles.card}>
         <Text style={styles.title}>{"Ghana's Finest.\nEndless Choices!"}</Text>
         <Text style={styles.subtitle}>
           Verified listings, secure messaging, and fair prices — all in one place.
         </Text>
 
+        {/* Stats row */}
         <View style={styles.statsRow}>
           {[
             { value: '12K+', label: 'Listings' },
@@ -82,7 +85,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 28,
     paddingTop: 10,
-    paddingBottom: 40,
+    paddingBottom: 36,
     justifyContent: 'space-between',
   },
   title: {
@@ -127,6 +130,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
+    marginTop: 8,
     shadowColor: '#2ec4c4',
     shadowOpacity: 0.45,
     shadowRadius: 14,
