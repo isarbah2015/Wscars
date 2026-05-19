@@ -1,26 +1,19 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  updateProfile,
-  type User,
-} from 'firebase/auth';  // ← FIXED: was '@firebase/auth'
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth } from '@/lib/firebase-persistence';
 import { db } from '@/lib/firebase';
-
-export interface SponsorshipInfo {
-  tier?: string;
-  adCredits?: number;
-}
 
 export interface ChineseSellerProfile {
   isChineseSeller: boolean;
   wechatId?: string;
   locationInChina?: string;
   businessName?: string;
+}
+
+export interface SponsorshipInfo {
+  tier?: string;
+  adCredits?: number;
 }
 
 interface AuthContextType {
@@ -43,16 +36,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sponsorship, setSponsorship] = useState<SponsorshipInfo | null>(null);
 
   useEffect(() => {
-    if (!auth) {
-      setLoading(false);
-      return;
-    }
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth!, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
         try {
-          const ref = doc(db, 'users', firebaseUser.uid);
-          const snap = await getDoc(ref);
+          const snap = await getDoc(doc(db, 'users', firebaseUser.uid));
           if (snap.exists()) {
             const data = snap.data();
             setChineseProfile(data?.chineseSellerProfile ?? null);
@@ -71,13 +59,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    if (!auth) throw new Error('Auth not available');
-    await signInWithEmailAndPassword(auth, email.trim(), password);
+    const { signInWithEmailAndPassword } = await import('firebase/auth');
+    await signInWithEmailAndPassword(auth!, email.trim(), password);
   };
 
   const signUp = async (email: string, password: string, name: string) => {
-    if (!auth) throw new Error('Auth not available');
-    const { user: newUser } = await createUserWithEmailAndPassword(auth, email.trim(), password);
+    const { createUserWithEmailAndPassword, updateProfile } = await import('firebase/auth');
+    const { user: newUser } = await createUserWithEmailAndPassword(auth!, email.trim(), password);
     await updateProfile(newUser, { displayName: name.trim() });
     await setDoc(doc(db, 'users', newUser.uid), {
       displayName: name.trim(),
@@ -88,21 +76,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logOut = async () => {
-    if (!auth) throw new Error('Auth not available');
-    await signOut(auth);
+    const { signOut } = await import('firebase/auth');
+    await signOut(auth!);
   };
 
   const saveChineseProfile = async (profile: ChineseSellerProfile) => {
     if (!user) throw new Error('No user logged in');
-    const ref = doc(db, 'users', user.uid);
-    await updateDoc(ref, { chineseSellerProfile: profile });
+    await updateDoc(doc(db, 'users', user.uid), { chineseSellerProfile: profile });
     setChineseProfile(profile);
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, loading, chineseProfile, sponsorship, signIn, signUp, logOut, saveChineseProfile }}
-    >
+    <AuthContext.Provider value={{ user, loading, chineseProfile, sponsorship, signIn, signUp, logOut, saveChineseProfile }}>
       {children}
     </AuthContext.Provider>
   );

@@ -3,27 +3,24 @@ import {
   initializeAuth,
   getAuth,
   getReactNativePersistence,
-  type Auth,
-} from 'firebase/auth';  // ← FIXED: was '@firebase/auth' which caused "Component auth has not been registered yet"
+} from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import app from './firebase';
 
-let auth: Auth | null = null;
+let auth: ReturnType<typeof getAuth>;
 
 try {
   auth = initializeAuth(app, {
     persistence: getReactNativePersistence(ReactNativeAsyncStorage),
   });
+  console.log('[auth] initializeAuth success');
 } catch (e: any) {
   if (e.code === 'auth/already-initialized') {
     auth = getAuth(app);
+    console.log('[auth] already initialized — using getAuth');
   } else {
-    console.error('[firebase-persistence] initializeAuth failed:', e);
-    try {
-      auth = getAuth(app);
-    } catch (e2) {
-      console.error('[firebase-persistence] getAuth fallback failed:', e2);
-    }
+    console.error('[auth] initializeAuth failed:', e);
+    auth = getAuth(app);
   }
 }
 

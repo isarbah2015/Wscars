@@ -3,17 +3,18 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyAx63IHICZGjQ9Ee22RuiQ9Vp4Ff61-oP4',
-  authDomain: 'westcar-5c1e6.firebaseapp.com',
-  projectId: 'westcar-5c1e6',
-  storageBucket: 'westcar-5c1e6.firebasestorage.app',
-  messagingSenderId: '778261594022',
-  appId: '1:778261594022:android:b25d665d6a020597b91967',
+  apiKey: "AIzaSyAU4uGFnvQkATIOmG3b7h3SsHkSRBQVy1Q",
+  authDomain: "westcar-5c1e6.firebaseapp.com",
+  projectId: "westcar-5c1e6",
+  storageBucket: "westcar-5c1e6.appspot.com",
+  messagingSenderId: "765088365666",
+  appId: "1:765088365666:android:5a2a7ef1c9f6b123",
 };
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-export { app };
+
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const isFirebaseReady = (): boolean => !!app && !!db;
+export { app };
 export default app;
