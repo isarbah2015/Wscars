@@ -19,7 +19,7 @@ import {
   type ConfirmationResult,
   type User as FirebaseUser,
   type Unsubscribe,
-} from "@firebase/auth";
+} from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import app, { db } from "@/lib/firebase";
 import { auth as persistedAuth } from "@/lib/firebase-persistence";
