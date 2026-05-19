@@ -31,7 +31,10 @@ export default function WelcomeScreen() {
 
   const panResponder = useRef(
     PanResponder.create({
+      // Capture phase — intercept horizontal swipes before child views consume them
       onMoveShouldSetPanResponder: (_, g) =>
+        Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy),
+      onMoveShouldSetPanResponderCapture: (_, g) =>
         Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy),
       onPanResponderMove: (_, g) => {
         if (g.dx < 0) translateX.setValue(g.dx);

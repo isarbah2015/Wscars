@@ -50,12 +50,8 @@ export default function WelcomeScreen() {
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-      onStartShouldSetPanResponderCapture: () => false,
-      onMoveShouldSetPanResponder: (_, g) =>
-        Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy),
-      onMoveShouldSetPanResponderCapture: (_, g) =>
-        Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy),
+      // Thumb is the only interactive element — respond immediately on touch
+      onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (_, gs) => {
         const x = Math.max(0, Math.min(gs.dx, MAX_SLIDE));
         translateX.setValue(x);
