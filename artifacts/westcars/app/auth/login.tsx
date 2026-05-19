@@ -106,6 +106,19 @@ export default function SignInScreen() {
         <TouchableOpacity onPress={() => router.push('/auth/forgot-password')}>
           <Text style={styles.forgotText}>Forgot password?</Text>
         </TouchableOpacity>
+
+        <View style={styles.dividerRow}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        <TouchableOpacity
+          style={styles.guestButton}
+          onPress={() => router.replace('/(tabs)')}
+        >
+          <Text style={styles.guestText}>Browse as Guest</Text>
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
@@ -186,5 +199,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     marginTop: 4,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 10,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+  },
+  dividerText: {
+    color: '#7aafb8',
+    fontSize: 13,
+  },
+  guestButton: {
+    borderWidth: 1,
+    borderColor: 'rgba(46,196,196,0.4)',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  guestText: {
+    color: '#2ec4c4',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
