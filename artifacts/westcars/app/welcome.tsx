@@ -5,7 +5,6 @@ import {
   Animated,
   Dimensions,
   Image,
-  PanResponder,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,7 +13,6 @@ import {
 
 const { width, height } = Dimensions.get('window');
 const PORSCHE = require('@/assets/images/welcome-car-porsche.png');
-const SWIPE_THRESHOLD = width * 0.28;
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -24,40 +22,13 @@ export default function WelcomeScreen() {
     await AsyncStorage.setItem('hasSeenWelcome', 'true');
     Animated.timing(translateX, {
       toValue: -width,
-      duration: 320,
+      duration: 340,
       useNativeDriver: true,
     }).start(() => router.replace('/auth/login'));
   };
 
-  const panResponder = useRef(
-    PanResponder.create({
-      // Capture phase — intercept horizontal swipes before child views consume them
-      onMoveShouldSetPanResponder: (_, g) =>
-        Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy),
-      onMoveShouldSetPanResponderCapture: (_, g) =>
-        Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy),
-      onPanResponderMove: (_, g) => {
-        if (g.dx < 0) translateX.setValue(g.dx);
-      },
-      onPanResponderRelease: (_, g) => {
-        if (g.dx < -SWIPE_THRESHOLD || g.vx < -0.5) {
-          goToLogin();
-        } else {
-          Animated.spring(translateX, {
-            toValue: 0,
-            useNativeDriver: true,
-            bounciness: 6,
-          }).start();
-        }
-      },
-    })
-  ).current;
-
   return (
-    <Animated.View
-      style={[styles.container, { transform: [{ translateX }] }]}
-      {...panResponder.panHandlers}
-    >
+    <Animated.View style={[styles.container, { transform: [{ translateX }] }]}>
       {/* Full Porsche PNG — no cropping */}
       <View style={styles.imageWrap}>
         <Image source={PORSCHE} style={styles.image} resizeMode="contain" />
@@ -87,12 +58,12 @@ export default function WelcomeScreen() {
           ))}
         </View>
 
-        {/* Slide button */}
+        {/* Button — press slides screen left to login */}
         <TouchableOpacity style={styles.slideBtn} onPress={goToLogin} activeOpacity={0.85}>
           <View style={styles.slideCircle}>
             <Text style={styles.arrow}>→</Text>
           </View>
-          <Text style={styles.slideTxt}>Swipe to Get Started</Text>
+          <Text style={styles.slideTxt}>Get Started</Text>
           <Text style={styles.chevrons}>{'>>'}</Text>
         </TouchableOpacity>
       </View>
@@ -112,7 +83,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   image: {
-    width: width,
+    width,
     height: height * 0.52,
   },
   card: {

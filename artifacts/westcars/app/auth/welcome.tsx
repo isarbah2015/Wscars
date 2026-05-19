@@ -2,7 +2,6 @@ import React, { useRef, useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Dimensions,
   TouchableOpacity, StatusBar, Animated,
-  PanResponder,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -48,32 +47,17 @@ export default function WelcomeScreen() {
     ).start();
   }, []);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      // Thumb is the only interactive element — respond immediately on touch
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: (_, gs) => {
-        const x = Math.max(0, Math.min(gs.dx, MAX_SLIDE));
-        translateX.setValue(x);
-      },
-      onPanResponderRelease: (_, gs) => {
-        if (gs.dx >= MAX_SLIDE * 0.85) {
-          Animated.spring(translateX, {
-            toValue: MAX_SLIDE,
-            useNativeDriver: true,
-          }).start(() => {
-            setUnlocked(true);
-            router.replace('/auth/login');
-          });
-        } else {
-          Animated.spring(translateX, {
-            toValue: 0,
-            useNativeDriver: true,
-          }).start();
-        }
-      },
-    })
-  ).current;
+  const handleSlide = () => {
+    if (unlocked) return;
+    Animated.spring(translateX, {
+      toValue: MAX_SLIDE,
+      useNativeDriver: true,
+      bounciness: 4,
+    }).start(() => {
+      setUnlocked(true);
+      router.replace('/auth/login');
+    });
+  };
 
   return (
     <LinearGradient
@@ -140,19 +124,16 @@ export default function WelcomeScreen() {
         <Text style={styles.taglineSub}>Trusted listings · Secure messaging · Fair prices</Text>
       </Animated.View>
 
-      {/* Slider */}
+      {/* Slider — tap anywhere on track to animate and go */}
       <Animated.View style={[styles.sliderWrapper, { opacity: pulseAnim }]}>
-        <View style={styles.track}>
-          <Text style={styles.trackLabel}>Slide to Get Started  →</Text>
-          <Animated.View
-            style={[styles.thumb, { transform: [{ translateX }] }]}
-            {...panResponder.panHandlers}
-          >
+        <TouchableOpacity style={styles.track} onPress={handleSlide} activeOpacity={0.9}>
+          <Text style={styles.trackLabel}>Tap to Get Started  →</Text>
+          <Animated.View style={[styles.thumb, { transform: [{ translateX }] }]}>
             <LinearGradient colors={['#0EB5CA', '#007A8C']} style={styles.thumbGradient}>
               <Text style={styles.thumbArrow}>›</Text>
             </LinearGradient>
           </Animated.View>
-        </View>
+        </TouchableOpacity>
       </Animated.View>
 
       {/* Sign up */}
