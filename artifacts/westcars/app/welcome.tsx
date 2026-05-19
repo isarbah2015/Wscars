@@ -29,19 +29,16 @@ export default function WelcomeScreen() {
 
   return (
     <Animated.View style={[styles.container, { transform: [{ translateX }] }]}>
-      {/* Full Porsche PNG — no cropping */}
       <View style={styles.imageWrap}>
         <Image source={PORSCHE} style={styles.image} resizeMode="contain" />
       </View>
 
-      {/* Bottom card */}
       <View style={styles.card}>
         <Text style={styles.title}>{"Ghana's Finest.\nEndless Choices!"}</Text>
         <Text style={styles.subtitle}>
           Verified listings, secure messaging, and fair prices — all in one place.
         </Text>
 
-        {/* Stats row */}
         <View style={styles.statsRow}>
           {[
             { value: '12K+', label: 'Listings' },
@@ -58,13 +55,8 @@ export default function WelcomeScreen() {
           ))}
         </View>
 
-        {/* Button — press slides screen left to login */}
-        <TouchableOpacity style={styles.slideBtn} onPress={goToLogin} activeOpacity={0.85}>
-          <View style={styles.slideCircle}>
-            <Text style={styles.arrow}>→</Text>
-          </View>
-          <Text style={styles.slideTxt}>Get Started</Text>
-          <Text style={styles.chevrons}>{'>>'}</Text>
+        <TouchableOpacity style={styles.btn} onPress={goToLogin} activeOpacity={0.82}>
+          <Text style={styles.btnText}>Get Started</Text>
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -90,7 +82,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 28,
     paddingTop: 10,
-    paddingBottom: 36,
+    paddingBottom: 40,
     justifyContent: 'space-between',
   },
   title: {
@@ -130,40 +122,21 @@ const styles = StyleSheet.create({
     width: 1,
     backgroundColor: 'rgba(255,255,255,0.15)',
   },
-  slideBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderRadius: 50,
-    paddingRight: 20,
-    height: 60,
-    overflow: 'hidden',
-    marginTop: 8,
-  },
-  slideCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  btn: {
     backgroundColor: '#2ec4c4',
+    borderRadius: 16,
+    paddingVertical: 18,
     alignItems: 'center',
-    justifyContent: 'center',
+    shadowColor: '#2ec4c4',
+    shadowOpacity: 0.45,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
   },
-  arrow: {
-    fontSize: 22,
+  btnText: {
+    fontSize: 17,
+    fontWeight: '800',
     color: '#0d3d4a',
-    fontWeight: '700',
-  },
-  slideTxt: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#ffffff',
-    letterSpacing: 0.3,
-  },
-  chevrons: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.5)',
-    letterSpacing: 2,
+    letterSpacing: 0.4,
   },
 });

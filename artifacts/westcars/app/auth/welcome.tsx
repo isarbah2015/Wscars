@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Dimensions,
   TouchableOpacity, StatusBar, Animated,
@@ -7,57 +7,32 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 const TEAL = '#0EB5CA';
 const DARK = '#004D5A';
-const THUMB_SIZE = 60;
-const TRACK_WIDTH = width - 80;
-const MAX_SLIDE = TRACK_WIDTH - THUMB_SIZE - 4;
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const translateX = useRef(new Animated.Value(0)).current;
-  const [unlocked, setUnlocked] = useState(false);
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim  = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(40)).current;
   const scaleAnim = useRef(new Animated.Value(0.92)).current;
-  const cardFade = useRef(new Animated.Value(0)).current;
+  const cardFade  = useRef(new Animated.Value(0)).current;
   const cardSlide = useRef(new Animated.Value(30)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     Animated.sequence([
       Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.timing(fadeAnim,  { toValue: 1, duration: 600, useNativeDriver: true }),
         Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
-        Animated.spring(scaleAnim, { toValue: 1, friction: 6, useNativeDriver: true }),
+        Animated.spring(scaleAnim, { toValue: 1, friction: 6,   useNativeDriver: true }),
       ]),
       Animated.parallel([
-        Animated.timing(cardFade, { toValue: 1, duration: 500, useNativeDriver: true }),
+        Animated.timing(cardFade,  { toValue: 1, duration: 500, useNativeDriver: true }),
         Animated.timing(cardSlide, { toValue: 0, duration: 500, useNativeDriver: true }),
       ]),
     ]).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 0.5, duration: 900, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
-      ])
-    ).start();
   }, []);
-
-  const handleSlide = () => {
-    if (unlocked) return;
-    Animated.spring(translateX, {
-      toValue: MAX_SLIDE,
-      useNativeDriver: true,
-      bounciness: 4,
-    }).start(() => {
-      setUnlocked(true);
-      router.replace('/auth/login');
-    });
-  };
 
   return (
     <LinearGradient
@@ -67,8 +42,6 @@ export default function WelcomeScreen() {
       style={styles.container}
     >
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
-
-      {/* Glow orbs */}
       <View style={styles.orb1} />
       <View style={styles.orb2} />
 
@@ -89,30 +62,26 @@ export default function WelcomeScreen() {
 
       {/* Glass card */}
       <Animated.View
-        style={[
-          styles.cardWrapper,
-          { opacity: cardFade, transform: [{ translateY: cardSlide }] },
-        ]}
+        style={[styles.cardWrapper, { opacity: cardFade, transform: [{ translateY: cardSlide }] }]}
       >
         <BlurView intensity={18} tint="light" style={styles.glassCard}>
           <View style={styles.cardInner}>
             <View style={styles.cardAccent} />
             <Text style={styles.carEmoji}>🚗</Text>
             <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>12K+</Text>
-                <Text style={styles.statLabel}>Listings</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>98%</Text>
-                <Text style={styles.statLabel}>Verified</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>4.9★</Text>
-                <Text style={styles.statLabel}>Rated</Text>
-              </View>
+              {[
+                { n: '12K+', l: 'Listings' },
+                { n: '98%',  l: 'Verified' },
+                { n: '4.9★', l: 'Rated'    },
+              ].map((s, i, arr) => (
+                <React.Fragment key={s.l}>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statNumber}>{s.n}</Text>
+                    <Text style={styles.statLabel}>{s.l}</Text>
+                  </View>
+                  {i < arr.length - 1 && <View style={styles.statDivider} />}
+                </React.Fragment>
+              ))}
             </View>
           </View>
         </BlurView>
@@ -124,31 +93,42 @@ export default function WelcomeScreen() {
         <Text style={styles.taglineSub}>Trusted listings · Secure messaging · Fair prices</Text>
       </Animated.View>
 
-      {/* Slider — tap anywhere on track to animate and go */}
-      <Animated.View style={[styles.sliderWrapper, { opacity: pulseAnim }]}>
-        <TouchableOpacity style={styles.track} onPress={handleSlide} activeOpacity={0.9}>
-          <Text style={styles.trackLabel}>Tap to Get Started  →</Text>
-          <Animated.View style={[styles.thumb, { transform: [{ translateX }] }]}>
-            <LinearGradient colors={['#0EB5CA', '#007A8C']} style={styles.thumbGradient}>
-              <Text style={styles.thumbArrow}>›</Text>
-            </LinearGradient>
-          </Animated.View>
+      {/* Premium CTA button */}
+      <Animated.View style={[styles.btnWrapper, { opacity: cardFade }]}>
+        <TouchableOpacity
+          style={styles.btn}
+          onPress={() => router.replace('/auth/login')}
+          activeOpacity={0.82}
+        >
+          <LinearGradient
+            colors={['#0EB5CA', '#007A8C']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.btnGradient}
+          >
+            <Text style={styles.btnText}>Get Started</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push('/auth/signup')} style={styles.signupLink}>
+          <Text style={styles.signupText}>
+            New here?{'  '}
+            <Text style={styles.signupBold}>Create Account</Text>
+          </Text>
         </TouchableOpacity>
       </Animated.View>
-
-      {/* Sign up */}
-      <TouchableOpacity onPress={() => router.push('/auth/signup')} style={styles.signupLink}>
-        <Text style={styles.signupText}>
-          New here?{'  '}
-          <Text style={styles.signupBold}>Create Account</Text>
-        </Text>
-      </TouchableOpacity>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'space-between', paddingVertical: 64, overflow: 'hidden' },
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 64,
+    overflow: 'hidden',
+  },
   orb1: { position: 'absolute', width: 280, height: 280, borderRadius: 140, backgroundColor: 'rgba(14,181,202,0.18)', top: -60, right: -80 },
   orb2: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(14,181,202,0.10)', bottom: 80, left: -60 },
   brandContainer: { alignItems: 'center', marginTop: 12 },
@@ -185,21 +165,23 @@ const styles = StyleSheet.create({
   taglineContainer: { alignItems: 'center', paddingHorizontal: 32 },
   tagline: { fontSize: 22, fontWeight: '700', color: '#FFFFFF', textAlign: 'center' },
   taglineSub: { color: 'rgba(255,255,255,0.60)', fontSize: 13, marginTop: 6, textAlign: 'center' },
-  sliderWrapper: { width: '100%', paddingHorizontal: 40 },
-  track: {
-    height: THUMB_SIZE + 6,
-    backgroundColor: 'rgba(255,255,255,0.14)',
-    borderRadius: (THUMB_SIZE + 6) / 2,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
-    justifyContent: 'center',
-    paddingHorizontal: 3,
+  btnWrapper: { width: '100%', paddingHorizontal: 40, gap: 16, alignItems: 'center' },
+  btn: {
+    width: '100%',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#0EB5CA',
+    shadowOpacity: 0.5,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
   },
-  trackLabel: { position: 'absolute', width: '100%', textAlign: 'center', color: '#FFFFFF', fontSize: 14, fontWeight: '600', letterSpacing: 0.5 },
-  thumb: { width: THUMB_SIZE, height: THUMB_SIZE, borderRadius: THUMB_SIZE / 2, overflow: 'hidden', elevation: 8, shadowColor: '#0EB5CA', shadowOpacity: 0.6, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } },
-  thumbGradient: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  thumbArrow: { color: '#FFFFFF', fontSize: 30, fontWeight: '800' },
-  signupLink: { marginBottom: 4 },
+  btnGradient: {
+    paddingVertical: 18,
+    alignItems: 'center',
+  },
+  btnText: { fontSize: 17, fontWeight: '800', color: '#FFFFFF', letterSpacing: 0.4 },
+  signupLink: { marginTop: 4 },
   signupText: { color: 'rgba(255,255,255,0.60)', fontSize: 14 },
   signupBold: { color: '#FFFFFF', fontWeight: '700' },
 });
