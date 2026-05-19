@@ -14,13 +14,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
+const PORSCHE = require('@/assets/images/welcome-car-porsche.png');
+
 const SLIDES = [
   {
     id: 0,
     title: "Ghana's Finest.\nEndless Choices!",
     subtitle:
       'Experience the perfect blend of quality, trust, and affordability with thousands of verified car listings.',
-    image: require('@/assets/images/welcome-car-porsche.png'),
   },
   {
     id: 1,
@@ -72,41 +73,34 @@ export default function WelcomeScreen() {
       >
         {SLIDES.map((slide, i) => (
           <View key={slide.id} style={[styles.slide, { width }]}>
-            {i === 0 && (
-              <>
-                <View style={styles.imageContainer}>
-                  <Image
-                    source={slide.image!}
-                    style={styles.heroImage}
-                    resizeMode="contain"
-                  />
-                </View>
-                <View style={styles.textBlock}>
-                  <Text style={styles.title}>{slide.title}</Text>
-                  <Text style={styles.subtitle}>{slide.subtitle}</Text>
-                </View>
-              </>
-            )}
+            {/* Full-width Porsche PNG — same hero size on both slides */}
+            <View style={styles.imageContainer}>
+              <Image
+                source={PORSCHE}
+                style={styles.heroImage}
+                resizeMode="contain"
+              />
+            </View>
 
-            {i === 1 && (
-              <View style={styles.cardSlide}>
-                <View style={styles.statsCard}>
-                  <Text style={styles.cardTitle}>{slide.title}</Text>
-                  <Text style={styles.cardSubtitle}>{slide.subtitle}</Text>
-                  <View style={styles.statsRow}>
-                    {slide.stats?.map((s, idx) => (
-                      <React.Fragment key={s.label}>
-                        {idx > 0 && <View style={styles.statDivider} />}
-                        <View style={styles.stat}>
-                          <Text style={styles.statValue}>{s.value}</Text>
-                          <Text style={styles.statLabel}>{s.label}</Text>
-                        </View>
-                      </React.Fragment>
-                    ))}
-                  </View>
+            {/* Text + optional stats below the image */}
+            <View style={styles.textBlock}>
+              <Text style={styles.title}>{slide.title}</Text>
+              <Text style={styles.subtitle}>{slide.subtitle}</Text>
+
+              {i === 1 && slide.stats && (
+                <View style={styles.statsRow}>
+                  {slide.stats.map((s, idx) => (
+                    <React.Fragment key={s.label}>
+                      {idx > 0 && <View style={styles.statDivider} />}
+                      <View style={styles.stat}>
+                        <Text style={styles.statValue}>{s.value}</Text>
+                        <Text style={styles.statLabel}>{s.label}</Text>
+                      </View>
+                    </React.Fragment>
+                  ))}
                 </View>
-              </View>
-            )}
+              )}
+            </View>
           </View>
         ))}
       </Animated.ScrollView>
@@ -156,91 +150,68 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imageContainer: {
-    flex: 1,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    paddingBottom: 20,
   },
   heroImage: {
-    width: width,
-    height: height * 0.52,
+    width: width * 1.15,
+    height: height * 0.56,
+    marginLeft: -(width * 0.075),
   },
   textBlock: {
+    flex: 1,
     paddingHorizontal: 28,
-    paddingBottom: 24,
+    paddingTop: 12,
+    paddingBottom: 8,
     width: '100%',
+    justifyContent: 'flex-start',
   },
   title: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: '800',
     color: '#ffffff',
-    marginBottom: 12,
-    lineHeight: 40,
+    marginBottom: 10,
+    lineHeight: 38,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#aacdd3',
-    lineHeight: 22,
-  },
-  cardSlide: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
-  statsCard: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 20,
-    padding: 32,
-    alignItems: 'center',
-    width: '100%',
-  },
-  cardTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#ffffff',
-    textAlign: 'center',
-    marginBottom: 12,
-    lineHeight: 34,
-  },
-  cardSubtitle: {
-    fontSize: 15,
-    color: '#aacdd3',
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 28,
+    lineHeight: 21,
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    marginTop: 8,
+    marginTop: 18,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.12)',
   },
   stat: {
     alignItems: 'center',
     flex: 1,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
-    color: '#ffffff',
+    color: '#2ec4c4',
   },
   statLabel: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#aacdd3',
-    marginTop: 4,
+    marginTop: 3,
   },
   statDivider: {
     width: 1,
     height: '100%',
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   dots: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   dot: {
     width: 8,
