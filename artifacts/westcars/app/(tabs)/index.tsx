@@ -1121,7 +1121,8 @@ const styles = StyleSheet.create({
 
   brandSection: {
     paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingTop: 12,
+    paddingHorizontal: 0,
     marginTop: 6,
     overflow: "visible",
   },
@@ -1130,6 +1131,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     marginBottom: 8,
+    paddingHorizontal: 14,
   },
   brandSectionTitle: {
     fontSize: 15,
@@ -1138,7 +1140,7 @@ const styles = StyleSheet.create({
   brandList: {
     flexDirection: "row",
     gap: 10,
-    paddingHorizontal: 16,
+    paddingLeft: 0,
     paddingRight: 32,
     alignItems: "center",
   },

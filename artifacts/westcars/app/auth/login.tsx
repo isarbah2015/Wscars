@@ -1,127 +1,190 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
-  StyleSheet, KeyboardAvoidingView, Platform,
-  ScrollView, ActivityIndicator,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 
-export default function LoginScreen() {
+export default function SignInScreen() {
   const router = useRouter();
   const { signIn } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = async () => {
+  const handleSignIn = async () => {
     setError('');
-    if (!email.trim() || !password.trim()) {
-      setError('Please fill in all fields');
+    if (!email || !password) {
+      setError('Please enter your email and password.');
       return;
     }
+    setLoading(true);
     try {
-      setLoading(true);
       await signIn(email, password);
       router.replace('/(tabs)');
     } catch (e: any) {
-      const msg =
-        e.code === 'auth/invalid-credential'     ? 'Incorrect email or password' :
-        e.code === 'auth/user-not-found'         ? 'No account found with this email' :
-        e.code === 'auth/wrong-password'         ? 'Incorrect password' :
-        e.code === 'auth/invalid-email'          ? 'Invalid email address' :
-        e.code === 'auth/too-many-requests'      ? 'Too many attempts. Try again later' :
-        e.code === 'auth/network-request-failed' ? 'Check your internet connection' :
-        'Login failed. Please try again';
-      setError(msg);
+      console.error('[SignIn] error:', e);
+      if (
+        e.code === 'auth/invalid-credential' ||
+        e.code === 'auth/wrong-password' ||
+        e.code === 'auth/user-not-found'
+      ) {
+        setError('Invalid email or password. Please try again.');
+      } else if (e.code === 'auth/too-many-requests') {
+        setError('Too many attempts. Please wait a moment and try again.');
+      } else {
+        setError('Sign in failed. Please check your connection and try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <View style={styles.header}>
-          <Text style={styles.brand}>WestCars</Text>
-          <Text style={styles.tagline}>Sign in to your account</Text>
-        </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.inner}>
+        <Text style={styles.brand}>WestCars</Text>
+        <Text style={styles.subtitle}>Sign in to your account</Text>
 
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        {error ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : null}
 
         <TextInput
           style={styles.input}
-          placeholder="Email address"
-          placeholderTextColor="rgba(255,255,255,0.55)"
+          placeholder="Email"
+          placeholderTextColor="#7aafb8"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
         />
+
         <TextInput
           style={styles.input}
           placeholder="Password"
-          placeholderTextColor="rgba(255,255,255,0.55)"
+          placeholderTextColor="#7aafb8"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-          {loading
-            ? <ActivityIndicator color="#004D5A" />
-            : <Text style={styles.buttonText}>Sign In</Text>}
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleSignIn}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#0d3d4a" />
+          ) : (
+            <Text style={styles.buttonText}>Sign In</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push('/auth/signup')}>
-          <Text style={styles.linkText}>Don't have an account? <Text style={styles.linkBold}>Sign Up</Text></Text>
+          <Text style={styles.link}>
+            Don't have an account?{' '}
+            <Text style={styles.linkAccent}>Sign Up</Text>
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push('/auth/forgot-password')}>
-          <Text style={styles.linkText}>Forgot password?</Text>
+          <Text style={styles.forgotText}>Forgot password?</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#004D5A' },
-  scroll: { flexGrow: 1, padding: 28, justifyContent: 'center' },
-  header: { alignItems: 'center', marginBottom: 40 },
-  brand: { fontSize: 38, fontWeight: '800', color: '#0EB5CA', letterSpacing: 1 },
-  tagline: { color: 'rgba(255,255,255,0.7)', marginTop: 8, fontSize: 15 },
-  errorText: {
-    backgroundColor: 'rgba(255,80,80,0.15)',
-    color: '#FF6B6B',
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 16,
+  container: {
+    flex: 1,
+    backgroundColor: '#0d3d4a',
+  },
+  inner: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 28,
+    gap: 14,
+  },
+  brand: {
+    fontSize: 38,
+    fontWeight: '700',
+    color: '#2ec4c4',
     textAlign: 'center',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#aacdd3',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  errorBox: {
+    backgroundColor: '#1a4e5a',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  errorText: {
+    color: '#f87171',
     fontSize: 14,
+    textAlign: 'center',
   },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: '#154555',
     borderRadius: 12,
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
     paddingVertical: 14,
-    color: '#FFFFFF',
     fontSize: 16,
-    marginBottom: 16,
+    color: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#1e5f70',
   },
   button: {
-    backgroundColor: '#0EB5CA',
-    borderRadius: 14,
+    backgroundColor: '#2ec4c4',
+    borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 24,
+    marginTop: 6,
   },
-  buttonText: { color: '#004D5A', fontSize: 17, fontWeight: '700' },
-  linkText: { color: 'rgba(255,255,255,0.65)', textAlign: 'center', fontSize: 14, marginTop: 12 },
-  linkBold: { color: '#0EB5CA', fontWeight: '700' },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: '#0d3d4a',
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  link: {
+    color: '#aacdd3',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  linkAccent: {
+    color: '#2ec4c4',
+    fontWeight: '600',
+  },
+  forgotText: {
+    color: '#aacdd3',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 4,
+  },
 });

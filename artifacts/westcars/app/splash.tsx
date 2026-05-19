@@ -1,99 +1,68 @@
-import { useRouter } from "expo-router";
-import React, { useEffect, useRef } from "react";
-import { onAuthStateChanged } from "@firebase/auth";
-import { getAuthInstance } from "@/services/firebase/auth";
-import { Animated, Easing, Image, StyleSheet, View } from "react-native";
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef } from 'react';
+import { Animated, Easing, Image, StyleSheet, View } from 'react-native';
+import { useAuth } from '@/context/AuthContext';
 
-const LOGO   = require("@/assets/images/wc-logo.png");
+const LOGO   = require('@/assets/images/wc-logo.png');
 const LOGO_W = 260;
 const LOGO_H = 170;
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const SPLASH_MS = 2000;
 
 export default function SplashScreen() {
   const router    = useRouter();
+  const { user, loading } = useAuth();
   const topY      = useRef(new Animated.Value(-(LOGO_H / 2 + 40))).current;
   const botY      = useRef(new Animated.Value(LOGO_H / 2 + 40)).current;
   const opacity   = useRef(new Animated.Value(0)).current;
   const shimmerX  = useRef(new Animated.Value(-LOGO_W - 60)).current;
   const shimmerOp = useRef(new Animated.Value(0)).current;
+  const navigated = useRef(false);
 
   useEffect(() => {
-    let cancelled = false;
-    let unsub: (() => void) | undefined;
-    const timers: ReturnType<typeof setTimeout>[] = [];
+    Animated.timing(opacity, {
+      toValue: 1, duration: 200, useNativeDriver: false,
+    }).start();
 
-    const sleep = (ms: number) => new Promise<void>((resolve) => {
-      const timer = setTimeout(resolve, ms);
-      timers.push(timer);
-    });
-
-    const runAnimation = () => new Promise<void>((resolve) => {
-      Animated.timing(opacity, {
-        toValue: 1, duration: 200, useNativeDriver: false,
-      }).start();
-
-      Animated.parallel([
-        Animated.timing(topY, {
-          toValue: 0, duration: 600,
-          easing: Easing.out(Easing.back(1.4)),
-          useNativeDriver: false,
+    Animated.parallel([
+      Animated.timing(topY, {
+        toValue: 0, duration: 600,
+        easing: Easing.out(Easing.back(1.4)),
+        useNativeDriver: false,
+      }),
+      Animated.timing(botY, {
+        toValue: 0, duration: 600,
+        easing: Easing.out(Easing.back(1.4)),
+        useNativeDriver: false,
+      }),
+    ]).start(() => {
+      Animated.sequence([
+        Animated.timing(shimmerOp, { toValue: 1, duration: 80, useNativeDriver: false }),
+        Animated.timing(shimmerX, {
+          toValue: LOGO_W + 60, duration: 650,
+          easing: Easing.inOut(Easing.quad), useNativeDriver: false,
         }),
-        Animated.timing(botY, {
-          toValue: 0, duration: 600,
-          easing: Easing.out(Easing.back(1.4)),
-          useNativeDriver: false,
-        }),
-      ]).start(() => {
-        Animated.sequence([
-          Animated.timing(shimmerOp, { toValue: 1, duration: 80, useNativeDriver: false }),
-          Animated.timing(shimmerX, {
-            toValue: LOGO_W + 60, duration: 650,
-            easing: Easing.inOut(Easing.quad), useNativeDriver: false,
-          }),
-          Animated.timing(shimmerOp, { toValue: 0, duration: 180, useNativeDriver: false }),
-        ]).start(() => resolve());
-      });
+        Animated.timing(shimmerOp, { toValue: 0, duration: 180, useNativeDriver: false }),
+      ]).start();
     });
+  }, []);
 
-    const resolveAuthUser = async () => {
-      let resolvedAuth = getAuthInstance();
-      if (!resolvedAuth) {
-        await sleep(300);
-        resolvedAuth = getAuthInstance();
+  useEffect(() => {
+    if (loading || navigated.current) return;
+
+    const timer = setTimeout(() => {
+      if (navigated.current) return;
+      navigated.current = true;
+
+      if (user) {
+        router.replace('/(tabs)');
+      } else {
+        // Show the Porsche welcome screen, then user slides to sign-in
+        router.replace('/welcome');
       }
-      if (!resolvedAuth) return null;
+    }, SPLASH_MS);
 
-      return new Promise((resolve) => {
-        unsub = onAuthStateChanged(resolvedAuth, (user) => {
-          unsub?.();
-          unsub = undefined;
-          sleep(500).then(() => resolve(user));
-        });
-      });
-    };
-
-    const routeWhenReady = async () => {
-      const [user] = await Promise.all([resolveAuthUser(), runAnimation()]);
-      if (cancelled) return;
-      const target = user ? "/(tabs)" : "/auth/welcome";
-      try {
-        router.replace(target);
-      } catch {
-        await wait(250);
-        if (!cancelled) {
-          try { router.replace(target); } catch {}
-        }
-      }
-    };
-
-    routeWhenReady();
-
-    return () => {
-      cancelled = true;
-      unsub?.();
-      timers.forEach(clearTimeout);
-    };
-  }, [router]);
+    return () => clearTimeout(timer);
+  }, [user, loading]);
 
   return (
     <View style={styles.root}>

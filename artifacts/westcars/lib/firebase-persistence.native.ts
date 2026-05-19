@@ -4,7 +4,7 @@ import {
   getAuth,
   getReactNativePersistence,
   type Auth,
-} from '@firebase/auth';
+} from 'firebase/auth';  // ← FIXED: was '@firebase/auth' which caused "Component auth has not been registered yet"
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import app from './firebase';
 

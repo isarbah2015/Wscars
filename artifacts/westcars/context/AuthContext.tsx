@@ -6,10 +6,15 @@ import {
   signOut,
   updateProfile,
   type User,
-} from '@firebase/auth';
+} from 'firebase/auth';  // ← FIXED: was '@firebase/auth'
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth } from '@/lib/firebase-persistence';
 import { db } from '@/lib/firebase';
+
+export interface SponsorshipInfo {
+  tier?: string;
+  adCredits?: number;
+}
 
 export interface ChineseSellerProfile {
   isChineseSeller: boolean;
@@ -22,6 +27,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   chineseProfile: ChineseSellerProfile | null;
+  sponsorship: SponsorshipInfo | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   logOut: () => Promise<void>;
@@ -34,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [chineseProfile, setChineseProfile] = useState<ChineseSellerProfile | null>(null);
+  const [sponsorship, setSponsorship] = useState<SponsorshipInfo | null>(null);
 
   useEffect(() => {
     if (!auth) {
@@ -47,13 +54,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const ref = doc(db, 'users', firebaseUser.uid);
           const snap = await getDoc(ref);
           if (snap.exists()) {
-            setChineseProfile(snap.data()?.chineseSellerProfile ?? null);
+            const data = snap.data();
+            setChineseProfile(data?.chineseSellerProfile ?? null);
+            setSponsorship(data?.sponsorship ?? null);
           }
         } catch (e) {
           console.error('[AuthContext] Firestore fetch failed:', e);
         }
       } else {
         setChineseProfile(null);
+        setSponsorship(null);
       }
       setLoading(false);
     });
@@ -90,7 +100,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, chineseProfile, signIn, signUp, logOut, saveChineseProfile }}>
+    <AuthContext.Provider
+      value={{ user, loading, chineseProfile, sponsorship, signIn, signUp, logOut, saveChineseProfile }}
+    >
       {children}
     </AuthContext.Provider>
   );

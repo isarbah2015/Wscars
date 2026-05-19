@@ -49,12 +49,18 @@ function useAuthRedirect() {
       segments.includes('login') ||
       segments.includes('signup') ||
       segments.includes('forgot-password') ||
-      segments.includes('welcome') ||
       segments[0] === 'welcome' ||
+      segments[0] === 'welcome-old' ||
+      segments[0] === 'welcome-westcars' ||
       (segments[0] === 'auth' && segments[1] === 'welcome');
 
     if (isAuthed && onAuthScreen) {
       router.replace('/(tabs)');
+      return;
+    }
+
+    if (!isAuthed && segments[0] === 'conversation') {
+      router.replace('/welcome');
     }
   }, [segments, user, loading]);
 }
@@ -68,6 +74,8 @@ function RootLayoutNav() {
       <Stack.Screen name="onboarding" />
       <Stack.Screen name="splash" />
       <Stack.Screen name="welcome" />
+      <Stack.Screen name="welcome-old" />
+      <Stack.Screen name="welcome-westcars" />
       <Stack.Screen name="auth/welcome" />
       <Stack.Screen name="auth/login" />
       <Stack.Screen name="auth/signup" />
