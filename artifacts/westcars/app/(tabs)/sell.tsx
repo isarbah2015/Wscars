@@ -45,11 +45,11 @@ const PLACEHOLDER = "#94A3B8";
 const STEPS = ["Photos", "Details", "Specs", "Price"];
 
 // ── Section header ────────────────────────────────────────────────────────
-function SectionHeader({ title, right }: { title: string; right?: React.ReactNode }) {
+function SectionHeader({ title, right, icon = "square" }: { title: string; right?: React.ReactNode; icon?: React.ComponentProps<typeof Feather>["name"] }) {
   return (
     <View style={sh.row}>
       <View style={sh.icon}>
-        <Feather name="square" size={10} color={TEAL} />
+        <Feather name={icon} size={10} color={TEAL} />
       </View>
       <Text style={sh.title}>{title}</Text>
       {right && <View style={{ marginLeft: "auto" }}>{right}</View>}
@@ -576,7 +576,7 @@ export default function SellScreen() {
 
         {/* ── Description ── */}
         <View style={styles.card}>
-          <SectionHeader title="Description" />
+          <SectionHeader title="Description" icon="align-left" />
           <TextInput
             style={styles.descInput}
             value={description}
@@ -593,13 +593,13 @@ export default function SellScreen() {
         {/* ── Boost banner ── */}
         <Pressable style={styles.boostCard} onPress={() => router.push("/advertise")}>
           <View style={styles.boostIcon}>
-            <Feather name="square" size={10} color={TEAL} />
+            <Feather name="trending-up" size={18} color={TEAL} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.boostTitle}>Boost your listing</Text>
             <Text style={styles.boostSub}>Get 5× more views with a sponsored ad</Text>
           </View>
-          <Feather name="square" size={14} color={MUTED} />
+          <Feather name="chevron-right" size={16} color={MUTED} />
         </Pressable>
 
         {/* ── Footer note ── */}
