@@ -261,7 +261,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!currentUser?.id || !db) return;
+    if (!useFirebase || !currentUser?.id || !db) return;
     const q = query(
       collection(db, 'notifications'),
       where('userId', '==', currentUser.id),
@@ -273,7 +273,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
     });
     return unsub;
-  }, [currentUser?.id]);
+  }, [useFirebase, currentUser?.id]);
 
   // ── Auth ─────────────────────────────────────────────────────────────────
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
