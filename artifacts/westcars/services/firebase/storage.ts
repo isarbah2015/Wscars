@@ -36,10 +36,16 @@ const localUriToBlob = async (uri: string): Promise<Blob> => {
   });
 };
 
-const guessExt = (uri: string): string => {
-  const m = uri.match(/\.([a-zA-Z0-9]+)(?:\?|$)/);
-  return m ? m[1].toLowerCase() : "jpg";
-};
+function guessExt(uri: string): string {
+  const lower = uri.toLowerCase();
+  if (lower.includes('.heic')) return 'jpg';
+  if (lower.includes('.heif')) return 'jpg';
+  if (lower.includes('.jpg') || lower.includes('.jpeg')) return 'jpg';
+  if (lower.includes('.png')) return 'png';
+  if (lower.includes('.webp')) return 'webp';
+  if (lower.includes('.gif')) return 'gif';
+  return 'jpg';
+}
 
 async function uploadAt(
   uri: string,
