@@ -3,8 +3,9 @@ import { Alert, Platform, Linking } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { ref, deleteObject } from 'firebase/storage'
 import { doc, updateDoc } from 'firebase/firestore'
-import { storage, db, isFirebaseReady } from '@/lib/firebase'
+import { storage, db, isFirebaseReady, app } from '@/lib/firebase'
 import { uploadAvatar } from '@/services/firebase/storage'
+import { getAuth } from 'firebase/auth'
 
 export type UploadSource = 'camera' | 'library'
 
@@ -119,6 +120,12 @@ export function useAvatarUpload({
         const downloadURL = await uploadAvatar(userId, uri, setProgress)
 
         if (!db) throw new Error('Firestore not initialised')
+
+        const authUid = getAuth(app).currentUser?.uid ?? null
+        console.log('[avatar] auth uid:', authUid)
+        console.log('[avatar] writing to userId:', userId)
+        if (!authUid) throw new Error('Not authenticated — please sign in again.')
+        if (authUid !== userId) throw new Error(`UID mismatch: auth=${authUid} userId=${userId}`)
 
         await updateDoc(doc(db, 'users', userId), {
           avatar: downloadURL,
