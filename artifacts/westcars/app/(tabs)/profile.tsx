@@ -49,7 +49,7 @@ export default function ProfileScreen() {
           blockUser, blockedUsers, unblockUser, verifyPhone, verifyId,
           updateUserProfile, notifications, markNotificationRead,
           markAllNotificationsRead, unreadNotificationsCount } = useApp();
-  const { chineseProfile, sponsorship, logOut, saveChineseProfile } = useAuth();
+  const { user: firebaseUser, chineseProfile, sponsorship, logOut, saveChineseProfile } = useAuth();
   const { isDark, colors, toggleTheme } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);
@@ -72,7 +72,7 @@ export default function ProfileScreen() {
   const { photoURL: uploadedAvatar, progress: uploadProgress, isUploading: avatarUploading,
           pickAndUpload, removePhoto } =
     useAvatarUpload({
-      userId: currentUser?.id ?? "",
+      userId: firebaseUser?.uid ?? "",
       initialPhotoURL: currentUser?.avatar,
       onSuccess: (url) => updateUserProfile({ avatar: url || undefined }),
     });
