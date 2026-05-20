@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-export const db = getFirestore(app);
+export const db = getFirestore(app, 'westcar-5c1e6');
 export const storage = getStorage(app);
 export const isFirebaseReady = (): boolean => !!app && !!db;
 export { app };
