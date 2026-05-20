@@ -235,7 +235,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // For each visible conversation, subscribe to its messages (and clean up old ones).
   useEffect(() => {
-    if (!useFirebase) return;
+    if (!useFirebase || !currentUser?.id) return;
     const visibleIds = new Set(conversations.map((c) => c.id));
     // Tear down subs for convos no longer visible
     for (const id of Object.keys(messageSubsRef.current)) {
