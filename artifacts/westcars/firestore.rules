@@ -9,9 +9,16 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
-    function noProtectedFieldChange() {
-      return !(request.resource.data.diff(resource.data).affectedKeys()
-        .hasAny(['isAdmin', 'isVerified', 'trustScore', 'reportCount', 'totalSales']));
+    // Use .get() with defaults instead of .diff() to avoid edge-case failures
+    function protectedFieldsUnchanged() {
+      return request.resource.data.get('isAdmin',    resource.data.get('isAdmin',    false))
+               == resource.data.get('isAdmin',    false)
+          && request.resource.data.get('isVerified', resource.data.get('isVerified', false))
+               == resource.data.get('isVerified', false)
+          && request.resource.data.get('trustScore', resource.data.get('trustScore', 0))
+               == resource.data.get('trustScore', 0)
+          && request.resource.data.get('totalSales', resource.data.get('totalSales', 0))
+               == resource.data.get('totalSales', 0);
     }
 
     // ── Users ────────────────────────────────────────────────────────────────
@@ -19,9 +26,9 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if true;
       allow create: if isOwner(uid)
-                    && request.resource.data.isAdmin != true
-                    && request.resource.data.isVerified != true;
-      allow update: if (isOwner(uid) && noProtectedFieldChange()) || isAdmin();
+                    && request.resource.data.get('isAdmin',    false) == false
+                    && request.resource.data.get('isVerified', false) == false;
+      allow update: if (isOwner(uid) && protectedFieldsUnchanged()) || isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -32,8 +39,7 @@ service cloud.firestore {
                     && request.resource.data.sellerId == request.auth.uid;
       allow update: if isAdmin()
                     || (isSignedIn() && resource.data.sellerId == request.auth.uid
-                        && !(request.resource.data.diff(resource.data).affectedKeys()
-                             .hasAny(['reportCount', 'sellerId'])));
+                        && request.resource.data.get('sellerId', request.auth.uid) == request.auth.uid);
       allow delete: if isAdmin()
                     || (isSignedIn() && resource.data.sellerId == request.auth.uid);
     }
