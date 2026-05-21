@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,9 +11,15 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { useAuth } from '@/context/AuthContext';
+import { auth } from '@/lib/firebase-persistence';
+
+WebBrowser.maybeCompleteAuthSession();
 
 const { width } = Dimensions.get('window');
 const PORSCHE = require('@/assets/images/welcome-car-porsche.png');
@@ -26,7 +32,33 @@ export default function SignInScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const [, googleResponse, googlePrompt] = Google.useAuthRequest({
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  });
+
+  useEffect(() => {
+    if (googleResponse?.type === 'success') {
+      const idToken = googleResponse.params?.id_token;
+      if (!idToken || !auth) {
+        setError('Google sign-in failed. Please try again.');
+        setGoogleLoading(false);
+        return;
+      }
+      const credential = GoogleAuthProvider.credential(idToken);
+      signInWithCredential(auth, credential)
+        .then(() => router.replace('/(tabs)'))
+        .catch(() => {
+          setError('Google sign-in failed. Please try again.');
+          setGoogleLoading(false);
+        });
+    } else if (googleResponse?.type === 'error' || googleResponse?.type === 'dismiss') {
+      setGoogleLoading(false);
+    }
+  }, [googleResponse]);
 
   const handleSignIn = async () => {
     setError('');
@@ -113,6 +145,27 @@ export default function SignInScreen() {
           )}
         </TouchableOpacity>
 
+        <View style={styles.dividerRow}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        <TouchableOpacity
+          style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
+          onPress={() => { setGoogleLoading(true); setError(''); googlePrompt(); }}
+          disabled={googleLoading || loading}
+        >
+          {googleLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <Ionicons name="logo-google" size={20} color="#fff" />
+              <Text style={styles.googleText}>Continue with Google</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
         <TouchableOpacity onPress={() => router.push('/auth/signup')}>
           <Text style={styles.link}>
             Don't have an account?{' '}
@@ -123,12 +176,6 @@ export default function SignInScreen() {
         <TouchableOpacity onPress={() => router.push('/auth/forgot-password')}>
           <Text style={styles.forgotText}>Forgot password?</Text>
         </TouchableOpacity>
-
-        <View style={styles.dividerRow}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or</Text>
-          <View style={styles.dividerLine} />
-        </View>
 
         <TouchableOpacity
           style={styles.guestButton}
@@ -250,6 +297,20 @@ const styles = StyleSheet.create({
   dividerText: {
     color: '#7aafb8',
     fontSize: 13,
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: '#4285F4',
+    borderRadius: 12,
+    paddingVertical: 15,
+  },
+  googleText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
   },
   guestButton: {
     borderWidth: 1,
