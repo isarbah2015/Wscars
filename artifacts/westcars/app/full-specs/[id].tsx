@@ -3,7 +3,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import {
-  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -14,6 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
+import { CarDimensionDiagram } from "@/components/CarDimensionDiagram";
 import { getCarTechSpecs } from "@/utils/buildTechSpecs";
 
 function SpecRow({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
@@ -99,26 +99,14 @@ export default function FullSpecsScreen() {
       </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.heroCard}>
-          {car.images?.[0] ? (
-            <Image source={{ uri: car.images[0] }} style={styles.heroImg} resizeMode="cover" />
-          ) : (
-            <View style={[styles.heroImg, styles.imgFallback, { backgroundColor: isDark ? "#111827" : "#F8FAFC" }]}>
-              <Feather name="camera" size={32} color={isDark ? "#94A3B8" : "#64748B"} />
-            </View>
-          )}
-          <LinearGradient colors={["transparent", "rgba(10,30,50,0.65)"]} style={StyleSheet.absoluteFill} />
-          <View style={styles.heroDims}>
-            <View style={styles.dimChip}>
-              <Text style={styles.dimChipValue}>{s.length} mm</Text>
-              <Text style={styles.dimChipLabel}>Length</Text>
-            </View>
-            <View style={styles.dimChip}>
-              <Text style={styles.dimChipValue}>{s.height} mm</Text>
-              <Text style={styles.dimChipLabel}>Height</Text>
-            </View>
-          </View>
-        </View>
+        <CarDimensionDiagram
+          length={s.length}
+          width={s.width}
+          height={s.height}
+          wheelbase={s.wheelbase}
+          imageUri={car.images?.[0]}
+          title={`${car.brand} ${car.model} · ${car.year}`}
+        />
 
         <View style={[styles.quickGrid, { backgroundColor: colors.card, borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E8EDF2" }]}>
           {quickStats.map((item) => (
@@ -225,34 +213,6 @@ const styles = StyleSheet.create({
   },
   topTitle: { fontSize: 17, fontFamily: "Manrope_800ExtraBold" },
   topSub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
-
-  heroCard: {
-    height: 200,
-    position: "relative",
-    overflow: "hidden",
-    backgroundColor: "#0F172A",
-  },
-  heroImg: { width: "100%", height: "100%" },
-  imgFallback: { alignItems: "center", justifyContent: "center" },
-  heroDims: {
-    position: "absolute",
-    bottom: 12,
-    left: 12,
-    right: 12,
-    flexDirection: "row",
-    gap: 8,
-  },
-  dimChip: {
-    backgroundColor: "rgba(14,181,202,0.22)",
-    borderWidth: 1,
-    borderColor: "rgba(14,181,202,0.45)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    minWidth: 96,
-  },
-  dimChipValue: { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
-  dimChipLabel: { color: "rgba(255,255,255,0.75)", fontSize: 10, fontFamily: "Inter_400Regular", marginTop: 2 },
 
   quickGrid: {
     marginHorizontal: 12,
