@@ -2,7 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -26,6 +26,7 @@ import {
   CAR_BRANDS,
   CONDITIONS,
   FUEL_TYPES,
+  getLocationOptions,
   GHANA_CITIES,
   TRANSMISSIONS,
   VEHICLE_TYPES,
@@ -153,6 +154,35 @@ export default function SellScreen() {
   const [idInfo,     setIdInfo]     = useState("");
 
   const currentIdConfig = ID_TYPES.find(t => t.key === idType)!;
+
+  const locationOptions = useMemo(() => getLocationOptions(condition), [condition]);
+
+  useEffect(() => {
+    if (location && !locationOptions.includes(location)) {
+      setLocation("");
+    }
+  }, [location, locationOptions]);
+
+  const resetForm = () => {
+    setImages([]);
+    setBrand("");
+    setModel("");
+    setYear("");
+    setPrice("");
+    setMileage("");
+    setFuelType("");
+    setTransmission("");
+    setCondition("");
+    setLocation("");
+    setDescription("");
+    setVehicleType("");
+    setNegotiable(false);
+    setIdType("VIN");
+    setIdentifier("");
+    setIdDecoded(false);
+    setIdError("");
+    setIdInfo("");
+  };
 
   const handleIdTypeChange = (t: IdType) => {
     setIdType(t);
@@ -296,6 +326,7 @@ export default function SellScreen() {
         }
       }
 
+      resetForm();
       Alert.alert(
         "Listing Posted!",
         "Your car has been listed successfully.",
@@ -542,7 +573,7 @@ export default function SellScreen() {
               />
             </View>
             <View style={{ width: 12 }} />
-            <InlinePicker label="Location" value={location} options={GHANA_CITIES} onSelect={setLocation} required />
+            <InlinePicker label="Location" value={location} options={locationOptions} onSelect={setLocation} required />
           </View>
         </View>
 

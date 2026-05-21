@@ -7,9 +7,12 @@
  */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { AppState } from "react-native";
 import { Car, Conversation, Message, Report, Review, Transaction, User } from "@/types";
 import { ADMIN_USER, MOCK_CARS, MOCK_CONVERSATIONS, MOCK_MESSAGES, MOCK_USERS } from "@/utils/mockData";
+import { buildTechSpecs } from "@/utils/buildTechSpecs";
 import { isFirebaseReady, db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase-persistence";
 import * as fb from "@/services/firebase";
 import {
   collection, query, where, orderBy, onSnapshot,
@@ -443,6 +446,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       seller,
       sellerId: currentUser?.id || "currentUser",
       rating: { overall: 0, comfort: 0, ergonomics: 0, performance: 0, safety: 0, reliability: 0, totalRatings: 0 },
+      techSpecs: buildTechSpecs(carData),
       createdAt: now.toISOString().split("T")[0],
       expiresAt: expires.toISOString().split("T")[0],
       isSponsored: false,
@@ -764,18 +768,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // ── Trust Score ──────────────────────────────────────────────────────────
   const getSellerTrustScore = useCallback((user: User): number => {
-    if (user.trustScore !== undefined) return user.trustScore;
+    if (typeof user.trustScore === "number" && !Number.isNaN(user.trustScore)) {
+      return Math.min(100, Math.max(0, user.trustScore));
+    }
     let score = 0;
     const v = user.verification;
     if (v?.phone)  score += 20;
     if (v?.id)     score += 25;
     if (v?.dealer) score += 15;
-    if (user.rating > 0) score += Math.round(user.rating * 6);
-    const months = Math.floor((Date.now() - new Date(user.memberSince).getTime()) / (30 * 24 * 60 * 60 * 1000));
-    score += Math.min(10, months);
+    const rating = typeof user.rating === "number" ? user.rating : 0;
+    if (rating > 0) score += Math.round(rating * 6);
+    const joined = user.memberSince ? new Date(user.memberSince).getTime() : Date.now();
+    if (!Number.isNaN(joined)) {
+      const months = Math.floor((Date.now() - joined) / (30 * 24 * 60 * 60 * 1000));
+      score += Math.min(10, Math.max(0, months));
+    }
     score += Math.min(10, (user.totalSales || 0) * 2);
-    return Math.min(100, score);
+    return Math.min(100, Math.max(0, score));
   }, []);
+
+  useEffect(() => {
+    if (!useFirebase) return;
+    const authRef = auth;
+    if (!authRef) return;
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active" && authRef.currentUser) {
+        authRef.currentUser.getIdToken(true).catch(() => {});
+      }
+    });
+    return () => sub.remove();
+  }, [useFirebase]);
 
   const ctxValue = useMemo<AppContextType>(() => ({
     currentUser, isAuthenticated, favorites, cars, conversations, messages,

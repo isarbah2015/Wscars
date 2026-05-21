@@ -18,7 +18,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { CarCard, VideoAdCard } from "@/components/CarCard";
+import { ListingGrid2x2 } from "@/components/ListingGrid2x2";
+import { LISTING_GRID } from "@/constants/listingGrid";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { CAR_BRANDS, formatPrice } from "@/utils/ghanaData";
@@ -207,16 +208,13 @@ export default function HomeScreen() {
   );
   const totalCount   = cars.length;
 
-  // Featured = top cars by views + sponsored cars, mixed randomly (stable per render)
   const featuredCars = React.useMemo(() => {
-    const sponsoredOnes = cars.filter((c) => c.isSponsored);
+    const sponsoredOnes = cars.filter((c) => c.isSponsored || c.isFeatured);
     const topByViews = [...cars]
-      .filter((c) => !c.isSponsored)
+      .filter((c) => !c.isSponsored && !c.isFeatured)
       .sort((a, b) => (b.views || 0) - (a.views || 0))
       .slice(0, 4);
-    const sponsoredPick = sponsoredOnes.slice(0, 3);
-    const merged = [...topByViews, ...sponsoredPick];
-    // Stable Fisher-Yates shuffle by id hash so order doesn't jitter on re-render
+    const merged = [...sponsoredOnes, ...topByViews];
     const seeded = merged.map((c) => ({
       c,
       k: [...c.id].reduce((s, ch) => (s * 31 + ch.charCodeAt(0)) >>> 0, 7),
@@ -224,6 +222,11 @@ export default function HomeScreen() {
     seeded.sort((a, b) => a.k - b.k);
     return seeded.map((x) => x.c).slice(0, 6);
   }, [cars]);
+
+  const organicCars = React.useMemo(
+    () => displayCars.filter((c) => !c.isSponsored && !c.isFeatured),
+    [displayCars],
+  );
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -446,9 +449,6 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* ── Video Ad slot ── */}
-        <VideoAdCard style={{ marginHorizontal: 10, marginTop: 6 }} />
-
         {/* ── Sponsored Banner → leads to Advertise ── */}
         <Pressable onPress={() => router.push("/advertise")} style={styles.promoBannerWrap}>
           <LinearGradient
@@ -474,7 +474,7 @@ export default function HomeScreen() {
           </LinearGradient>
         </Pressable>
 
-        {/* ── Featured Listings (1×1 full-width grid) ── */}
+        {/* ── Featured Listings (full-width 1×1 hero cards) ── */}
         {featuredCars.length > 0 && (
           <View style={[styles.section, { backgroundColor: colors.card }]}>
             <View style={styles.sectionRow}>
@@ -493,7 +493,6 @@ export default function HomeScreen() {
                   style={[styles.featCard, { backgroundColor: colors.card, borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)" }]}
                   onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
                 >
-                  {/* Image with price overlay */}
                   <View style={styles.featImgWrap}>
                     {car.images?.[0] ? (
                       <Image source={{ uri: car.images[0] }} style={styles.featImg} resizeMode="cover" />
@@ -517,9 +516,9 @@ export default function HomeScreen() {
                         <Text style={styles.featSponsoredStar}>★</Text>
                         <Text style={styles.featSponsoredText}>SPONSORED</Text>
                       </LinearGradient>
-                    ) : (car.condition === "New" || car.condition === "Foreign Used") && (
-                      <View style={[styles.featCondBadge, { backgroundColor: car.condition === "New" ? "#0EB5CA" : "#1565C0" }]}>
-                        <Text style={styles.featCondText}>{car.condition === "New" ? "New" : "Foreign"}</Text>
+                    ) : (car.isFeatured || car.condition === "New" || car.condition === "Foreign Used") && (
+                      <View style={[styles.featCondBadge, { backgroundColor: car.isFeatured ? "#0EB5CA" : car.condition === "New" ? "#0EB5CA" : "#1565C0" }]}>
+                        <Text style={styles.featCondText}>{car.isFeatured ? "Featured" : car.condition === "New" ? "New" : "Foreign"}</Text>
                       </View>
                     )}
                     <View style={styles.featPriceBadge}>
@@ -534,12 +533,10 @@ export default function HomeScreen() {
                       </View>
                     )}
                   </View>
-                  {/* Info block */}
                   <View style={styles.featInfo}>
                     <Text style={[styles.featName, { color: colors.text }]} numberOfLines={1}>
                       {car.brand} {car.model}
                     </Text>
-                    {/* Year · Mileage · Location — all on one row */}
                     <View style={styles.featMetaRow}>
                       <View style={[styles.featChip, { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]}>
                         <Text style={[styles.featChipText, { color: colors.textSecondary }]}>{car.year}</Text>
@@ -561,7 +558,6 @@ export default function HomeScreen() {
                         </View>
                       )}
                     </View>
-                    {/* Seller name */}
                     {car.seller?.name && (
                       <View style={styles.featSellerRow}>
                         <Feather name="user" size={11} color={colors.textTertiary} />
@@ -590,28 +586,20 @@ export default function HomeScreen() {
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Just for you</Text>
             </View>
           </View>
-          {displayCars.length === 0 ? (
+          {organicCars.length === 0 ? (
             <View style={styles.emptyState}>
               <Feather name="truck" size={40} color={colors.textTertiary} />
               <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>No listings yet</Text>
               <Text style={[styles.emptyStateSub, { color: colors.textTertiary }]}>Be the first to list a car!</Text>
             </View>
           ) : (
-            <View style={styles.gridBreakout}>
-              {Array.from({ length: Math.ceil(displayCars.length / 2) }, (_, i) => {
-                const left = displayCars[i * 2];
-                const right = displayCars[i * 2 + 1];
-                return (
-                  <View key={i} style={styles.cardRow}>
-                    <CarCard car={left} style={styles.halfCard} />
-                    {right
-                      ? <CarCard car={right} style={styles.halfCard} />
-                      : <View style={styles.halfCard} />
-                    }
-                  </View>
-                );
-              })}
-            </View>
+            <ListingGrid2x2
+              cars={organicCars}
+              isDark={isDark}
+              variant="carcard"
+              injectPromotions
+              promotionPool={cars}
+            />
           )}
         </View>
 
@@ -631,7 +619,7 @@ export default function HomeScreen() {
               </View>
               <View>
                 <Text style={styles.adBannerTitle}>Advertise on Westcars</Text>
-                <Text style={styles.adBannerSub}>Reach 50,000+ buyers · From GHS 50</Text>
+                <Text style={styles.adBannerSub}>Reach 50,000+ buyers · From GHS 29</Text>
               </View>
             </View>
             <View style={styles.adBannerArrow}>
@@ -935,10 +923,10 @@ const styles = StyleSheet.create({
   },
 
   section: {
-    paddingHorizontal: 10,
+    paddingHorizontal: LISTING_GRID.paddingHorizontal,
     paddingTop: 12,
     paddingBottom: 4,
-    marginHorizontal: 6,
+    marginHorizontal: LISTING_GRID.paddingHorizontal,
     marginTop: 6,
     borderRadius: 16,
     shadowColor: "#0A1628",
@@ -969,19 +957,6 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   seeAll: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-
-  gridBreakout: {
-    marginHorizontal: -10,
-  },
-  cardRow: {
-    flexDirection: "row",
-    paddingHorizontal: 8,
-    gap: 8,
-  },
-  halfCard: {
-    flex: 1,
-    marginBottom: 10,
-  },
 
   emptyState: {
     alignItems: "center",

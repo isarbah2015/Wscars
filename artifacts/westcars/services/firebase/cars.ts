@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { db, isFirebaseReady } from "@/lib/firebase";
 import { Car } from "@/types";
+import { toDateString } from "@/utils/formatFirestoreDate";
 
 const COLL = "cars";
 
@@ -32,7 +33,15 @@ export function subscribeCars(cb: (cars: Car[]) => void): Unsubscribe {
   return onSnapshot(
     q,
     (snap) => {
-      const cars = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Car, "id">) }));
+      const today = new Date().toISOString().split("T")[0];
+      const cars = snap.docs.map((d) => {
+        const raw = { id: d.id, ...(d.data() as Omit<Car, "id">) };
+        return {
+          ...raw,
+          createdAt: toDateString(raw.createdAt, today),
+          expiresAt: raw.expiresAt ? toDateString(raw.expiresAt) : raw.expiresAt,
+        } as Car;
+      });
       cb(cars);
     },
     (err) => console.warn("[cars] subscribe error:", err),

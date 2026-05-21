@@ -27,9 +27,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { getCarTechSpecs } from "@/utils/buildTechSpecs";
 
 const { width } = Dimensions.get("window");
-const STAGE_IMG_W = width - 32;
+const HERO_H = 280;
 
 // ─── Equipment sections ──────────────────────────────────────
 const EQUIPMENT_SECTIONS = [
@@ -156,12 +157,14 @@ export default function CarDetailScreen() {
 
   const priceLabel = `GHS ${car.price.toLocaleString()}`;
 
+  const techSpecs = getCarTechSpecs(car);
+
   const specs = [
-    { icon: "box"        as const, label: "Body",     val: car.techSpecs?.bodyType ?? car.category },
-    { icon: "settings"   as const, label: "Gearbox",  val: car.techSpecs?.gearbox  ?? car.transmission },
-    { icon: "users"      as const, label: "Seats",    val: car.techSpecs?.seats    ? String(car.techSpecs.seats)  : "—" },
-    { icon: "navigation" as const, label: "Drive",    val: car.techSpecs?.drive    ?? "—" },
-    { icon: "user"       as const, label: "Owners",   val: car.techSpecs?.owners   ? String(car.techSpecs.owners) : "—" },
+    { icon: "box"        as const, label: "Body",     val: techSpecs.bodyType ?? car.category },
+    { icon: "settings"   as const, label: "Gearbox",  val: techSpecs.gearbox  ?? car.transmission },
+    { icon: "users"      as const, label: "Seats",    val: techSpecs.seats ? String(techSpecs.seats) : "—" },
+    { icon: "navigation" as const, label: "Drive",    val: techSpecs.drive ?? "—" },
+    { icon: "user"       as const, label: "Owners",   val: techSpecs.owners ? String(techSpecs.owners) : "—" },
     { icon: "map-pin"    as const, label: "Location", val: car.location },
   ];
 
@@ -174,15 +177,59 @@ export default function CarDetailScreen() {
 
   // ─── Render ───────────────────────────────────────────────
   return (
-    <View style={[styles.safe, { backgroundColor: bg, paddingTop: insets.top }]}>
+    <View style={[styles.safe, { backgroundColor: bg }]}>
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ── Top bar ── */}
-        <View style={styles.topBar}>
+      {/* ── Full-bleed image hero with overlay controls ── */}
+      <View style={styles.heroWrap}>
+        {images.length > 0 ? (
+          <>
+            <FlatList
+              horizontal
+              pagingEnabled
+              bounces={false}
+              decelerationRate="fast"
+              showsHorizontalScrollIndicator={false}
+              data={images}
+              keyExtractor={(_, i) => String(i)}
+              getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
+              snapToInterval={width}
+              snapToAlignment="start"
+              disableIntervalMomentum
+              scrollEventThrottle={16}
+              onMomentumScrollEnd={(e) =>
+                setActiveImg(Math.round(e.nativeEvent.contentOffset.x / width))
+              }
+              onScroll={(e) => {
+                const idx = Math.round(e.nativeEvent.contentOffset.x / width);
+                setActiveImg((prev) => (prev === idx ? prev : idx));
+              }}
+              renderItem={({ item }) => (
+                <Image
+                  source={{ uri: item }}
+                  style={{ width, height: HERO_H }}
+                  resizeMode="cover"
+                />
+              )}
+            />
+            {images.length > 1 && (
+              <View style={styles.dotRow}>
+                {images.map((_, i) => (
+                  <View key={i} style={[styles.dot, i === activeImg && styles.dotActive]} />
+                ))}
+              </View>
+            )}
+            <View style={styles.imgCount}>
+              <Text style={styles.imgCountText}>{activeImg + 1} / {images.length}</Text>
+            </View>
+          </>
+        ) : (
+          <View style={[styles.imgPlaceholder, { height: HERO_H }]}>
+            <Feather name="truck" size={64} color="#ccc" />
+            <Text style={styles.imgPlaceholderText}>No photos yet</Text>
+          </View>
+        )}
+
+        <View style={[styles.topBarOverlay, { paddingTop: insets.top + 8 }]}>
           <TouchableOpacity
             style={[styles.iconBtn, { backgroundColor: card }]}
             onPress={() => router.back()}
@@ -214,9 +261,8 @@ export default function CarDetailScreen() {
           </View>
         </View>
 
-        {/* ── More dropdown ── */}
         {showMore && (
-          <View style={[styles.moreDropdown, { backgroundColor: card, borderColor: isDark ? colors.border : "#EEEEEE" }]}>
+          <View style={[styles.moreDropdown, { top: insets.top + 52, backgroundColor: card, borderColor: isDark ? colors.border : "#EEEEEE" }]}>
             {isOwner && !car.isSold && (
               <TouchableOpacity style={[styles.moreItem, { borderBottomColor: isDark ? colors.border : "#F5F5F5", borderBottomWidth: 1 }]} onPress={() => {
                 setShowMore(false);
@@ -257,7 +303,13 @@ export default function CarDetailScreen() {
             </TouchableOpacity>
           </View>
         )}
+      </View>
 
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* ── Sold banner ── */}
         {car.isSold && (
           <View style={styles.soldBanner}>
@@ -265,46 +317,6 @@ export default function CarDetailScreen() {
             <Text style={styles.soldBannerText}>This car has been sold</Text>
           </View>
         )}
-
-        {/* ── Image gallery ── */}
-        <View style={[styles.carStage, { backgroundColor: card }]}>
-          {images.length > 0 ? (
-            <>
-              <FlatList
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                data={images}
-                keyExtractor={(_, i) => String(i)}
-                onMomentumScrollEnd={(e) =>
-                  setActiveImg(Math.round(e.nativeEvent.contentOffset.x / STAGE_IMG_W))
-                }
-                renderItem={({ item }) => (
-                  <Image
-                    source={{ uri: item }}
-                    style={[styles.carImg, { width: STAGE_IMG_W }]}
-                    resizeMode="cover"
-                  />
-                )}
-              />
-              {images.length > 1 && (
-                <View style={styles.dotRow}>
-                  {images.map((_, i) => (
-                    <View key={i} style={[styles.dot, i === activeImg && styles.dotActive]} />
-                  ))}
-                </View>
-              )}
-              <View style={styles.imgCount}>
-                <Text style={styles.imgCountText}>{activeImg + 1} / {images.length}</Text>
-              </View>
-            </>
-          ) : (
-            <View style={styles.imgPlaceholder}>
-              <Feather name="truck" size={64} color="#ccc" />
-              <Text style={styles.imgPlaceholderText}>No photos yet</Text>
-            </View>
-          )}
-        </View>
 
         {/* ── Badges ── */}
         <View style={styles.badgeRow}>
@@ -512,7 +524,25 @@ export default function CarDetailScreen() {
 const styles = StyleSheet.create({
   safe:          { flex: 1 },
   scroll:        { flex: 1 },
-  scrollContent: { paddingHorizontal: 16, paddingBottom: 32 },
+  scrollContent: { paddingHorizontal: 16, paddingBottom: 32, paddingTop: 12 },
+
+  heroWrap: {
+    position: "relative",
+    width: "100%",
+    backgroundColor: "#1A2340",
+  },
+  topBarOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    zIndex: 20,
+  },
 
   // Not-found state
   notFound: {
@@ -525,7 +555,7 @@ const styles = StyleSheet.create({
   },
   notFoundBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
 
-  // Top bar
+  // Top bar (legacy — overlay uses topBarOverlay)
   topBar: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -544,7 +574,7 @@ const styles = StyleSheet.create({
 
   // More dropdown
   moreDropdown: {
-    position: "absolute", top: 64, right: 16, zIndex: 100,
+    position: "absolute", right: 16, zIndex: 100,
     borderRadius: 14, borderWidth: 1,
     overflow: "hidden", minWidth: 180,
     shadowColor: "#000", shadowOpacity: 0.12,
@@ -577,7 +607,7 @@ const styles = StyleSheet.create({
   carImg:             { height: 220 },
   imgPlaceholder:     { height: 220, alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#f8f8f8" },
   imgPlaceholderText: { fontSize: 13, color: "#ccc" },
-  dotRow:             { flexDirection: "row", justifyContent: "center", gap: 5, paddingVertical: 10 },
+  dotRow:             { position: "absolute", bottom: 12, left: 0, right: 0, flexDirection: "row", justifyContent: "center", gap: 5 },
   dot:                { width: 5, height: 5, borderRadius: 3, backgroundColor: "#ddd" },
   dotActive:          { width: 14, backgroundColor: "#0EB5CA" },
   imgCount: {

@@ -14,29 +14,38 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
+import { getCarTechSpecs } from "@/utils/buildTechSpecs";
 
-function Row({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
-  const { colors } = useTheme();
+function SpecRow({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
+  const { colors, isDark } = useTheme();
+  const text = String(value);
   return (
-    <View style={[styles.specRow, { borderBottomColor: colors.border }]}>
+    <View style={[styles.specRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "#EEF2F6" }]}>
       <Text style={[styles.specLabel, { color: colors.textSecondary }]}>{label}</Text>
-      <Text style={[styles.specValue, { color: accent ? colors.accent : colors.text }]}>{value}</Text>
+      <View style={styles.specValueWrap}>
+        <Text
+          style={[styles.specValue, { color: accent ? "#0EB5CA" : colors.text }]}
+          selectable
+        >
+          {text}
+        </Text>
+      </View>
     </View>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, icon, children }: { title: string; icon: React.ComponentProps<typeof Feather>["name"]; children: React.ReactNode }) {
   const { colors, isDark } = useTheme();
   return (
-    <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <LinearGradient
-        colors={isDark ? ["rgba(14,181,202,0.08)", "rgba(14,181,202,0.02)"] : ["rgba(14,181,202,0.10)", "rgba(14,181,202,0.03)"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.sectionHeader}
-      >
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
-      </LinearGradient>
+    <View style={[styles.section, { backgroundColor: colors.card, borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E8EDF2" }]}>
+      <View style={[styles.sectionHeader, { borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "#EEF2F6" }]}>
+        <View style={styles.sectionTitleRow}>
+          <View style={styles.sectionIcon}>
+            <Feather name={icon} size={14} color="#0EB5CA" />
+          </View>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
+        </View>
+      </View>
       <View style={styles.sectionBody}>{children}</View>
     </View>
   );
@@ -59,39 +68,37 @@ export default function FullSpecsScreen() {
     );
   }
 
-  const s = car.techSpecs;
-  if (!s) {
-    return (
-      <View style={[styles.root, { backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }]}>
-        <Text style={{ color: colors.textSecondary }}>No specifications available</Text>
-      </View>
-    );
-  }
+  const s = getCarTechSpecs(car);
+
+  const quickStats = [
+    { label: "Body type", value: s.bodyType },
+    { label: "Trim", value: s.trim },
+    { label: "Power", value: `${s.horsepower} hp` },
+    { label: "Drive", value: s.drive },
+    { label: "0–100 km/h", value: s.acceleration },
+    { label: "Top speed", value: `${s.maxSpeed} km/h` },
+  ];
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
-      {/* Top bar with gradient */}
+    <View style={[styles.root, { backgroundColor: isDark ? colors.background : "#F4F7F9" }]}>
       <LinearGradient
-        colors={isDark
-          ? ["rgba(14,181,202,0.12)", colors.card as string]
-          : ["rgba(14,181,202,0.10)", "#FFFFFF"]}
+        colors={isDark ? ["rgba(14,181,202,0.12)", colors.card as string] : ["rgba(14,181,202,0.10)", "#FFFFFF"]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
-        style={[styles.topBar, { paddingTop: topPad + 8, borderBottomColor: colors.border }]}
+        style={[styles.topBar, { paddingTop: topPad + 8, borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "#E4E8EF" }]}
       >
-        <Pressable style={[styles.backBtn, { backgroundColor: colors.background }]} onPress={() => router.back()}>
+        <Pressable style={[styles.backBtn, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA" }]} onPress={() => router.back()}>
           <Feather name="arrow-left" size={20} color={colors.text} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.topTitle, { color: colors.text }]}>Specifications</Text>
+          <Text style={[styles.topTitle, { color: colors.text }]}>Full specifications</Text>
           <Text style={[styles.topSub, { color: colors.textSecondary }]} numberOfLines={1}>
             {car.brand} {car.model} · {car.year}
           </Text>
         </View>
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Car image with gradient overlay */}
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.heroCard}>
           {car.images?.[0] ? (
             <Image source={{ uri: car.images[0] }} style={styles.heroImg} resizeMode="cover" />
@@ -100,104 +107,94 @@ export default function FullSpecsScreen() {
               <Feather name="camera" size={32} color={isDark ? "#94A3B8" : "#64748B"} />
             </View>
           )}
-          <LinearGradient
-            colors={["transparent", "rgba(14,181,202,0.35)", "rgba(10,30,50,0.55)"]}
-            start={{ x: 0.5, y: 0.3 }}
-            end={{ x: 0.5, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
-          <View style={[styles.dimBadge, styles.dimBadgeLeft]}>
-            <Text style={styles.dimText}>{s.length} mm</Text>
-            <Text style={styles.dimSub}>Length</Text>
-          </View>
-          <View style={[styles.dimBadge, styles.dimBadgeRight]}>
-            <Text style={styles.dimText}>{s.height} mm</Text>
-            <Text style={styles.dimSub}>Height</Text>
+          <LinearGradient colors={["transparent", "rgba(10,30,50,0.65)"]} style={StyleSheet.absoluteFill} />
+          <View style={styles.heroDims}>
+            <View style={styles.dimChip}>
+              <Text style={styles.dimChipValue}>{s.length} mm</Text>
+              <Text style={styles.dimChipLabel}>Length</Text>
+            </View>
+            <View style={styles.dimChip}>
+              <Text style={styles.dimChipValue}>{s.height} mm</Text>
+              <Text style={styles.dimChipLabel}>Height</Text>
+            </View>
           </View>
         </View>
 
-        {/* Quick spec tiles */}
-        <View style={[styles.quickRow, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-          {[
-            { label: "Body",   value: s.bodyType.split(" ")[0] },
-            { label: "Trim",   value: s.trim?.split(" ")[0] || "Std" },
-            { label: "Power",  value: `${s.horsepower} hp` },
-            { label: "Drive",  value: s.drive.split(" ")[0] },
-            { label: "0–100",  value: s.acceleration },
-            { label: "Speed",  value: `${s.maxSpeed} km/h` },
-          ].map((q, i) => (
-            <View key={i} style={[styles.quickCell, { borderRightColor: colors.border }]}>
-              <Text style={[styles.quickVal, { color: colors.text }]}>{q.value}</Text>
-              <Text style={[styles.quickLbl, { color: colors.accent }]}>{q.label}</Text>
+        <View style={[styles.quickGrid, { backgroundColor: colors.card, borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E8EDF2" }]}>
+          {quickStats.map((item) => (
+            <View key={item.label} style={[styles.quickTile, { borderColor: isDark ? "rgba(255,255,255,0.06)" : "#EEF2F6" }]}>
+              <Text style={[styles.quickLabel, { color: colors.textSecondary }]}>{item.label}</Text>
+              <Text style={[styles.quickValue, { color: colors.text }]} numberOfLines={2}>
+                {item.value}
+              </Text>
             </View>
           ))}
         </View>
 
-        {/* Spec sections */}
         <View style={styles.sections}>
-          <Section title="General Information">
-            <Row label="Body type"            value={s.bodyType}   accent />
-            <Row label="Trim level"           value={s.trim} />
-            <Row label="Country of manufacture" value={s.country} />
-            <Row label="Car class"            value={s.carClass} />
-            <Row label="Number of doors"      value={s.doors} />
-            <Row label="Seating capacity"     value={s.seats} />
-            <Row label="Steering position"    value={s.steering} />
-            <Row label="Color"                value={s.color} />
-            <Row label="Previous owners"      value={s.owners} />
+          <Section title="General information" icon="info">
+            <SpecRow label="Body type" value={s.bodyType} accent />
+            <SpecRow label="Trim level" value={s.trim} />
+            <SpecRow label="Country of manufacture" value={s.country} />
+            <SpecRow label="Car class" value={s.carClass} />
+            <SpecRow label="Doors" value={s.doors} />
+            <SpecRow label="Seating capacity" value={s.seats} />
+            <SpecRow label="Steering position" value={s.steering} />
+            <SpecRow label="Colour" value={s.color} />
+            <SpecRow label="Previous owners" value={s.owners} />
           </Section>
 
-          <Section title="Dimensions">
-            <Row label="Length"             value={`${s.length} mm`} />
-            <Row label="Width"              value={`${s.width} mm`} />
-            <Row label="Height"             value={`${s.height} mm`} />
-            <Row label="Wheelbase"          value={`${s.wheelbase} mm`} />
-            <Row label="Ground clearance"   value={`${s.clearance} mm`} />
-            <Row label="Front track width"  value={`${s.frontTrack} mm`} />
-            <Row label="Rear track width"   value={`${s.rearTrack} mm`} />
-            <Row label="Wheel size"         value={s.wheelSize} />
+          <Section title="Dimensions" icon="maximize">
+            <SpecRow label="Length" value={`${s.length} mm`} />
+            <SpecRow label="Width" value={`${s.width} mm`} />
+            <SpecRow label="Height" value={`${s.height} mm`} />
+            <SpecRow label="Wheelbase" value={`${s.wheelbase} mm`} />
+            <SpecRow label="Ground clearance" value={`${s.clearance} mm`} />
+            <SpecRow label="Front track" value={`${s.frontTrack} mm`} />
+            <SpecRow label="Rear track" value={`${s.rearTrack} mm`} />
+            <SpecRow label="Wheels & tyres" value={s.wheelSize} />
           </Section>
 
-          <Section title="Weight & Capacity">
-            <Row label="Engine displacement"  value={s.engineDisplacement} />
-            <Row label="Fuel tank volume"     value={`${s.tankVolume} L`} />
-            <Row label="Curb weight"          value={`${s.curbWeight.toLocaleString()} kg`} />
-            <Row label="Maximum laden weight" value={`${s.maxWeight.toLocaleString()} kg`} />
+          <Section title="Weight & capacity" icon="package">
+            <SpecRow label="Engine displacement" value={s.engineDisplacement} />
+            <SpecRow label="Fuel tank" value={`${s.tankVolume} L`} />
+            <SpecRow label="Curb weight" value={`${s.curbWeight.toLocaleString()} kg`} />
+            <SpecRow label="Max laden weight" value={`${s.maxWeight.toLocaleString()} kg`} />
           </Section>
 
-          <Section title="Transmission">
-            <Row label="Gearbox type"   value={s.gearbox}   accent />
-            <Row label="Number of gears" value={s.gears} />
-            <Row label="Drive type"     value={s.drive} />
+          <Section title="Transmission" icon="settings">
+            <SpecRow label="Gearbox" value={s.gearbox} accent />
+            <SpecRow label="Number of gears" value={s.gears} />
+            <SpecRow label="Drive type" value={s.drive} />
           </Section>
 
-          <Section title="Suspension & Brakes">
-            <Row label="Front suspension" value={s.frontSuspension} />
-            <Row label="Rear suspension"  value={s.rearSuspension} />
-            <Row label="Front brakes"     value={s.frontBrakes} />
-            <Row label="Rear brakes"      value={s.rearBrakes} />
+          <Section title="Suspension & brakes" icon="disc">
+            <SpecRow label="Front suspension" value={s.frontSuspension} />
+            <SpecRow label="Rear suspension" value={s.rearSuspension} />
+            <SpecRow label="Front brakes" value={s.frontBrakes} />
+            <SpecRow label="Rear brakes" value={s.rearBrakes} />
           </Section>
 
-          <Section title="Performance">
-            <Row label="Maximum speed"              value={`${s.maxSpeed} km/h`}  accent />
-            <Row label="Acceleration 0–100 km/h"   value={s.acceleration} />
-            <Row label="Fuel consumption (city)"   value={s.fuelCity} />
-            <Row label="Fuel consumption (highway)" value={s.fuelHighway} />
-            <Row label="Fuel consumption (mixed)"   value={s.fuelMixed} />
-            <Row label="CO₂ emissions"              value={s.co2} />
-            <Row label="Emissions standard"         value={s.euroStandard} />
-            <Row label="Annual road tax"            value={`GHS ${s.annualTax.toLocaleString()}`} />
+          <Section title="Performance" icon="zap">
+            <SpecRow label="Maximum speed" value={`${s.maxSpeed} km/h`} accent />
+            <SpecRow label="Acceleration 0–100 km/h" value={s.acceleration} />
+            <SpecRow label="Fuel consumption (city)" value={s.fuelCity} />
+            <SpecRow label="Fuel consumption (highway)" value={s.fuelHighway} />
+            <SpecRow label="Fuel consumption (mixed)" value={s.fuelMixed} />
+            <SpecRow label="CO₂ emissions" value={s.co2} />
+            <SpecRow label="Emissions standard" value={s.euroStandard} />
+            <SpecRow label="Annual road tax" value={`GHS ${s.annualTax.toLocaleString()}`} />
           </Section>
 
-          <Section title="Engine">
-            <Row label="Engine type"          value={s.engineType}         accent />
-            <Row label="Engine layout"        value={s.engineLayout} />
-            <Row label="Engine code"          value={s.engineCode} />
-            <Row label="Displacement"         value={s.engineDisplacement} />
-            <Row label="Maximum power"        value={`${s.horsepower} hp (${Math.round(s.horsepower * 0.7457)} kW) @ ${s.horsepowerRpm}`} />
-            <Row label="Maximum torque"       value={`${s.torque} @ ${s.torqueRpm}`} />
-            <Row label="Cylinder configuration" value={s.cylinderConfig} />
-            <Row label="Fuel grade"           value={s.fuelGrade} />
+          <Section title="Engine" icon="cpu">
+            <SpecRow label="Engine type" value={s.engineType} accent />
+            <SpecRow label="Engine layout" value={s.engineLayout} />
+            <SpecRow label="Engine code" value={s.engineCode} />
+            <SpecRow label="Displacement" value={s.engineDisplacement} />
+            <SpecRow label="Maximum power" value={`${s.horsepower} hp (${Math.round(s.horsepower * 0.7457)} kW) @ ${s.horsepowerRpm}`} />
+            <SpecRow label="Maximum torque" value={`${s.torque} @ ${s.torqueRpm}`} />
+            <SpecRow label="Cylinder configuration" value={s.cylinderConfig} />
+            <SpecRow label="Fuel grade" value={s.fuelGrade} />
           </Section>
         </View>
 
@@ -209,95 +206,137 @@ export default function FullSpecsScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  scrollContent: { paddingBottom: 8 },
 
   topBar: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     paddingBottom: 14,
     borderBottomWidth: 1,
-    gap: 8,
+    gap: 10,
   },
   backBtn: {
-    width: 40, height: 40,
+    width: 40,
+    height: 40,
     borderRadius: 20,
-    alignItems: "center", justifyContent: "center",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  topTitle: { fontSize: 16, fontFamily: "Inter_700Bold" },
-  topSub:   { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 1 },
+  topTitle: { fontSize: 17, fontFamily: "Manrope_800ExtraBold" },
+  topSub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
 
   heroCard: {
-    height: 220,
+    height: 200,
     position: "relative",
     overflow: "hidden",
     backgroundColor: "#0F172A",
   },
-  heroImg: { width: "100%", height: "100%", opacity: 0.85 },
+  heroImg: { width: "100%", height: "100%" },
   imgFallback: { alignItems: "center", justifyContent: "center" },
-  dimBadge: {
+  heroDims: {
     position: "absolute",
-    backgroundColor: "rgba(14,181,202,0.25)",
-    borderWidth: 1,
-    borderColor: "rgba(14,181,202,0.55)",
-    paddingHorizontal: 10, paddingVertical: 6,
-    borderRadius: 8,
-  },
-  dimBadgeLeft:  { bottom: 10, left: 10 },
-  dimBadgeRight: { bottom: 10, right: 10 },
-  dimText: { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
-  dimSub:  { color: "rgba(255,255,255,0.7)", fontSize: 10, fontFamily: "Inter_400Regular" },
-
-  quickRow: {
+    bottom: 12,
+    left: 12,
+    right: 12,
     flexDirection: "row",
-    borderBottomWidth: 1,
+    gap: 8,
   },
-  quickCell: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 14,
-    borderRightWidth: 1,
+  dimChip: {
+    backgroundColor: "rgba(14,181,202,0.22)",
+    borderWidth: 1,
+    borderColor: "rgba(14,181,202,0.45)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    minWidth: 96,
   },
-  quickVal: { fontSize: 12, fontFamily: "Inter_700Bold" },
-  quickLbl: { fontSize: 10, fontFamily: "Inter_600SemiBold", marginTop: 2, letterSpacing: 0.3 },
+  dimChipValue: { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
+  dimChipLabel: { color: "rgba(255,255,255,0.75)", fontSize: 10, fontFamily: "Inter_400Regular", marginTop: 2 },
 
-  sections: { padding: 14, gap: 12 },
+  quickGrid: {
+    marginHorizontal: 12,
+    marginTop: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 10,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  quickTile: {
+    width: "31%",
+    flexGrow: 1,
+    minWidth: 100,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    gap: 4,
+    minHeight: 68,
+    justifyContent: "center",
+  },
+  quickLabel: {
+    fontSize: 10,
+    fontFamily: "Inter_600SemiBold",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  quickValue: {
+    fontSize: 13,
+    fontFamily: "Inter_700Bold",
+    lineHeight: 18,
+  },
+
+  sections: { paddingHorizontal: 12, paddingTop: 12, gap: 12 },
 
   section: {
-    borderRadius: 12,
+    borderRadius: 14,
     overflow: "hidden",
     borderWidth: 1,
   },
   sectionHeader: {
     paddingHorizontal: 14,
-    paddingVertical: 11,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(14,181,202,0.12)",
+  },
+  sectionTitleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  sectionIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: "rgba(14,181,202,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: "Inter_700Bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
   },
-  sectionBody: {},
+  sectionBody: { paddingBottom: 2 },
 
   specRow: {
     flexDirection: "row",
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    borderBottomWidth: 1,
     alignItems: "flex-start",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
     gap: 12,
   },
   specLabel: {
+    width: "42%",
     fontSize: 13,
     fontFamily: "Inter_400Regular",
+    lineHeight: 19,
+  },
+  specValueWrap: {
     flex: 1,
+    minWidth: 0,
   },
   specValue: {
     fontSize: 13,
     fontFamily: "Inter_600SemiBold",
-    flex: 1,
+    lineHeight: 19,
     textAlign: "right",
   },
 });

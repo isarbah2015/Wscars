@@ -20,7 +20,9 @@ import {
 } from "react-native";
 import { Slider } from "@miblanchard/react-native-slider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { CarCard } from "@/components/CarCard";
+import { ListingGridLayoutRow } from "@/components/ListingGrid2x2";
+import { listingGridContainerStyle } from "@/constants/listingGrid";
+import { buildGridLayout, buildListingGridItems } from "@/utils/buildListingGridItems";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Car } from "@/types";
@@ -622,7 +624,7 @@ function FilterModal({
 // ─────────────────────────────────────────────────────────────────────────────
 export default function SearchScreen() {
   const { cars } = useApp();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 10 : insets.top;
 
@@ -780,6 +782,14 @@ export default function SearchScreen() {
     return seeded.map((x) => ({ type: "car" as const, item: x.car }));
   }, [filtered]);
 
+  const gridRows = React.useMemo(() => {
+    const items = buildListingGridItems(
+      listData.map((entry) => entry.item),
+      { injectPromotions: true, promotionPool: cars },
+    );
+    return buildGridLayout(items);
+  }, [listData, cars]);
+
   const hasFilters = !!activeFilters && (
     activeFilters.brands.length > 0 || activeFilters.models.length > 0 ||
     activeFilters.bodyTypes.length > 0 ||
@@ -926,8 +936,8 @@ export default function SearchScreen() {
 
       {/* ── Results ── */}
       <FlatList
-        data={listData}
-        keyExtractor={(item) => item.item.id}
+        data={gridRows}
+        keyExtractor={(_, index) => `grid-row-${index}`}
         style={S.list}
         contentContainerStyle={S.listContent}
         showsVerticalScrollIndicator={false}
@@ -943,16 +953,9 @@ export default function SearchScreen() {
             )}
           </View>
         }
-        renderItem={({ item, index }) => {
-          if (index % 2 === 1) return null;
-          const next = listData[index + 1];
-          return (
-            <View style={S.row}>
-              <CarCard car={item.item} style={S.cardStyle} />
-              {next ? <CarCard car={next.item} style={S.cardStyle} /> : <View style={S.cardStyle} />}
-            </View>
-          );
-        }}
+        renderItem={({ item: row }) => (
+          <ListingGridLayoutRow row={row} variant="carcard" isDark={isDark} />
+        )}
       />
 
       <FilterModal
@@ -1001,9 +1004,7 @@ const S = StyleSheet.create({
   chipBadgeText:     { fontSize: 10, fontFamily: "Inter_700Bold" },
 
   list:        { flex: 1 },
-  listContent: { padding: 12, paddingBottom: 100 },
-  row:         { flexDirection: "row", paddingHorizontal: 8, gap: 8, marginBottom: 8 },
-  cardStyle:   { flex: 1 },
+  listContent: { ...listingGridContainerStyle, paddingTop: 8, paddingBottom: 100 },
 
   empty:      { flex: 1, alignItems: "center", justifyContent: "center", paddingTop: 80, gap: 10 },
   emptyTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },

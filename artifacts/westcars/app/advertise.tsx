@@ -11,6 +11,14 @@ import {
 import { Feather } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import {
+  AD_SLOT_LABELS,
+  FEATURED_HERO_H,
+  FEATURED_HERO_W,
+  GRID_CARD_W,
+  GRID_CARD_TOTAL_H,
+  LISTING_GRID,
+} from '@/constants/listingGrid'
 
 // ─── WestCars brand palette ───────────────────────────────────────────────────
 const TEAL       = '#0EB5CA'
@@ -31,29 +39,29 @@ const FLYER_PACKAGES = [
   {
     id: 'flyer_basic',
     name: 'Basic Flyer',
-    price: 'GHS 50',
+    price: 'GHS 29',
     duration: '7 days',
     highlight: false,
-    dimensions: { w: 320, h: 100, label: '320 × 100 px  —  Mobile Banner' },
+    dimensions: { w: GRID_CARD_W, h: GRID_CARD_TOTAL_H, label: AD_SLOT_LABELS.gridCard },
     features: [
-      'Mobile banner placement',
-      'Shown in search results',
+      'Single slot in the 2×2 browse grid',
+      'Same size as a listing card',
+      'Shown when your boost is active',
       'Up to 10 photos in listing',
-      'Standard rotation',
     ],
   },
   {
     id: 'flyer_featured',
     name: 'Featured Flyer',
-    price: 'GHS 120',
+    price: 'GHS 69',
     duration: '14 days',
     highlight: true,
     badge: 'Most Popular',
-    dimensions: { w: 300, h: 250, label: '300 × 250 px  —  Medium Rectangle' },
+    dimensions: { w: FEATURED_HERO_W, h: FEATURED_HERO_H, label: AD_SLOT_LABELS.featuredHero },
     features: [
-      'Medium rectangle — premium slot',
-      'Homepage + search results',
-      'Bold highlighted listing',
+      'Full-width featured hero in feed',
+      'Featured Listings section placement',
+      'Same size as homepage featured cards',
       'Up to 20 photos',
       'WhatsApp enquiry button',
       'View count analytics',
@@ -62,18 +70,17 @@ const FLYER_PACKAGES = [
   {
     id: 'flyer_premium',
     name: 'Premium Flyer',
-    price: 'GHS 250',
+    price: 'GHS 139',
     duration: '30 days',
     highlight: false,
-    dimensions: { w: 728, h: 90, label: '728 × 90 px  —  Leaderboard (desktop) / 320 × 50 px mobile' },
+    dimensions: { w: FEATURED_HERO_W, h: FEATURED_HERO_H, label: AD_SLOT_LABELS.featuredHero },
     features: [
-      'Leaderboard banner — top of page',
-      'Homepage hero slot',
-      'Priority rotation',
+      'Top priority featured hero rotation',
+      'Pinned in Featured Listings section',
+      'Full-width — matches featured card size',
       'Unlimited photos',
       'WhatsApp + Call buttons',
       'Full analytics dashboard',
-      'Social media boost',
     ],
   },
 ]
@@ -83,30 +90,30 @@ const VIDEO_PACKAGES = [
   {
     id: 'video_basic',
     name: 'Short Clip',
-    price: 'GHS 150',
+    price: 'GHS 79',
     duration: '7 days',
     highlight: false,
-    dimensions: { w: 320, h: 480, label: '320 × 480 px  —  Up to 15 sec · MP4 / MOV' },
+    dimensions: { w: GRID_CARD_W, h: GRID_CARD_TOTAL_H, label: `${AD_SLOT_LABELS.gridImage} · Up to 15 sec MP4` },
     features: [
-      'Vertical short-form video',
-      'Auto-plays in search feed',
-      'Sound-off default (captions recommended)',
+      'Fits the 2×2 grid card slot',
+      'Same dimensions as listing cards',
+      'Auto-plays muted in grid',
       'Up to 15 seconds',
     ],
   },
   {
     id: 'video_featured',
     name: 'Feature Reel',
-    price: 'GHS 280',
+    price: 'GHS 149',
     duration: '14 days',
     highlight: true,
     badge: 'Best Value',
-    dimensions: { w: 1280, h: 720, label: '1280 × 720 px  —  Up to 30 sec · HD MP4' },
+    dimensions: { w: FEATURED_HERO_W, h: FEATURED_HERO_H, label: `${AD_SLOT_LABELS.featuredImage} · Up to 30 sec HD MP4` },
     features: [
-      'HD horizontal video — homepage banner',
-      'Auto-plays on listing card hover',
+      'Full-width featured hero video',
+      'Matches Featured Listings card size',
       'Up to 30 seconds',
-      'Priority placement in search',
+      'Priority placement in browse feed',
       'WhatsApp enquiry button',
       'View + play analytics',
     ],
@@ -114,10 +121,10 @@ const VIDEO_PACKAGES = [
   {
     id: 'video_premium',
     name: 'Cinematic',
-    price: 'GHS 500',
+    price: 'GHS 249',
     duration: '30 days',
     highlight: false,
-    dimensions: { w: 1920, h: 1080, label: '1920 × 1080 px  —  Up to 60 sec · Full HD MP4' },
+    dimensions: { w: FEATURED_HERO_W, h: FEATURED_HERO_H, label: `${AD_SLOT_LABELS.featuredImage} · Up to 60 sec Full HD MP4` },
     features: [
       'Full HD — hero homepage autoplay',
       'Up to 60 seconds',
@@ -206,8 +213,8 @@ export default function AdvertisePage() {
           </Text>
           <Text style={s.heroSub}>
             {adType === 'flyer'
-              ? 'Static flyer banners shown across search results and the homepage. Exact pixel sizes shown on each plan.'
-              : 'Video ads auto-play in the feed — the most engaging format. Upload your clip or we can create one for you.'}
+              ? `Upload sizes match the app grid — 2×2 cards (${GRID_CARD_W}×${GRID_CARD_TOTAL_H}px) or featured heroes (${FEATURED_HERO_W}×${FEATURED_HERO_H}px). Slots only appear after you book.`
+              : `Video ads use the same grid sizes — grid slot ${GRID_CARD_W}×${LISTING_GRID.imageHeight}px or featured hero ${FEATURED_HERO_W}×${FEATURED_HERO_H}px.`}
           </Text>
         </View>
 

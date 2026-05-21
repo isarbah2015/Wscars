@@ -2,6 +2,25 @@ export const CURRENCY = "GHS";
 export const CURRENCY_SYMBOL = "₵";
 export const COUNTRY_CODE = "+233";
 
+export const FOREIGN_IMPORT_LOCATIONS = [
+  "Foreign — Japan",
+  "Foreign — USA",
+  "Foreign — UK",
+  "Foreign — Germany",
+  "Foreign — China",
+  "Foreign — UAE",
+  "Foreign — South Korea",
+  "Foreign — Belgium",
+  "Foreign — Other",
+];
+
+export function getLocationOptions(condition: string): string[] {
+  if (condition === "Foreign Used" || condition === "Tokunbo") {
+    return [...FOREIGN_IMPORT_LOCATIONS, ...GHANA_CITIES];
+  }
+  return GHANA_CITIES;
+}
+
 export const GHANA_CITIES = [
   "Accra", "Kumasi", "Takoradi", "Tamale", "Cape Coast",
   "Sunyani", "Koforidua", "Ho", "Wa", "Bolgatanga",
