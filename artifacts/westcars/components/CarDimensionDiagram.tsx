@@ -1,6 +1,6 @@
-import React, { useMemo } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
-import Svg, { Circle, Line, Path, Rect, Text as SvgText } from "react-native-svg";
 import { useTheme } from "@/context/ThemeContext";
 
 type Props = {
@@ -12,11 +12,45 @@ type Props = {
   title?: string;
 };
 
-const DIAGRAM_W = 320;
-const DIAGRAM_H = 168;
-const PAD = 28;
+function fmt(n: number) {
+  return n.toLocaleString();
+}
 
-/** Side-profile schematic with proportional L / H / wheelbase callouts. */
+function fmtM(n: number) {
+  return `${(n / 1000).toFixed(2)} m`;
+}
+
+function DimBadge({
+  label,
+  value,
+  sub,
+  isDark,
+  accent,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  isDark: boolean;
+  accent: string;
+}) {
+  return (
+    <View
+      style={[
+        styles.dimBadge,
+        {
+          backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#FFFFFF",
+          borderColor: isDark ? "rgba(255,255,255,0.10)" : "#E2E8F0",
+        },
+      ]}
+    >
+      <Text style={[styles.dimBadgeLabel, { color: isDark ? "#94A3B8" : "#64748B" }]}>{label}</Text>
+      <Text style={[styles.dimBadgeValue, { color: isDark ? "#F8FAFC" : "#0F172A" }]}>{value}</Text>
+      <Text style={[styles.dimBadgeSub, { color: accent }]}>{sub}</Text>
+    </View>
+  );
+}
+
+/** Listing photo with width/height callouts and dimension summary cards. */
 export function CarDimensionDiagram({
   length,
   width,
@@ -27,166 +61,66 @@ export function CarDimensionDiagram({
 }: Props) {
   const { isDark } = useTheme();
 
-  const layout = useMemo(() => {
-    const innerW = DIAGRAM_W - PAD * 2;
-    const innerH = DIAGRAM_H - PAD * 2 - 22;
-    const scale = Math.min(innerW / length, (innerH - 16) / height) * 0.82;
-    const carL = length * scale;
-    const carH = height * scale;
-    const wb = Math.min(wheelbase * scale, carL * 0.72);
-    const originX = PAD + (innerW - carL) / 2;
-    const groundY = PAD + innerH - 8;
-    const roofY = groundY - carH;
-    const cx = originX + carL / 2;
+  const accent = "#0EB5CA";
+  const cardBg = isDark ? "#111827" : "#FFFFFF";
+  const border = isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0";
+  const muted = isDark ? "#94A3B8" : "#64748B";
 
-    const bodyPath = [
-      `M ${originX} ${groundY}`,
-      `L ${originX + carL * 0.08} ${groundY}`,
-      `L ${originX + carL * 0.14} ${roofY + carH * 0.42}`,
-      `L ${originX + carL * 0.32} ${roofY + carH * 0.08}`,
-      `L ${originX + carL * 0.58} ${roofY}`,
-      `L ${originX + carL * 0.78} ${roofY + carH * 0.12}`,
-      `L ${originX + carL * 0.92} ${roofY + carH * 0.38}`,
-      `L ${originX + carL} ${groundY}`,
-      "Z",
-    ].join(" ");
-
-    return {
-      scale,
-      carL,
-      carH,
-      wb,
-      originX,
-      groundY,
-      roofY,
-      cx,
-      bodyPath,
-      lenY: groundY + 18,
-      hLineX: originX + carL + 10,
-    };
-  }, [length, height, wheelbase]);
-
-  const stroke = isDark ? "#38D1E5" : "#0A9BB0";
-  const dimStroke = isDark ? "#94A3B8" : "#64748B";
-  const fill = isDark ? "rgba(14,181,202,0.18)" : "rgba(14,181,202,0.14)";
-  const bg = isDark ? "#0F172A" : "#F0F9FB";
-  const grid = isDark ? "rgba(148,163,184,0.12)" : "rgba(100,116,139,0.10)";
+  const metrics = [
+    { label: "Length", value: length },
+    { label: "Width", value: width },
+    { label: "Height", value: height },
+    { label: "Wheelbase", value: wheelbase },
+  ];
 
   return (
-    <View style={[styles.wrap, { backgroundColor: bg, borderColor: isDark ? "rgba(255,255,255,0.08)" : "#D8EEF2" }]}>
+    <View style={[styles.card, { backgroundColor: cardBg, borderColor: border }]}>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: isDark ? "#E2E8F0" : "#0F172A" }]}>Dimension diagram</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Dimensions</Text>
         {title ? (
-          <Text style={[styles.headerSub, { color: isDark ? "#94A3B8" : "#64748B" }]} numberOfLines={1}>
+          <Text style={[styles.headerSub, { color: muted }]} numberOfLines={1}>
             {title}
           </Text>
         ) : null}
       </View>
 
-      <View style={styles.diagramCol}>
-        <Svg width="100%" height={DIAGRAM_H} viewBox={`0 0 ${DIAGRAM_W} ${DIAGRAM_H}`}>
-          {/* Grid */}
-          {[0, 1, 2, 3, 4].map((i) => (
-            <Line
-              key={`g-${i}`}
-              x1={PAD}
-              y1={PAD + i * ((DIAGRAM_H - PAD * 2) / 4)}
-              x2={DIAGRAM_W - PAD}
-              y2={PAD + i * ((DIAGRAM_H - PAD * 2) / 4)}
-              stroke={grid}
-              strokeWidth={1}
-            />
-          ))}
+      {imageUri ? (
+        <View style={[styles.hero, { borderColor: border }]}>
+          <Image source={{ uri: imageUri }} style={styles.heroImage} resizeMode="cover" />
+          <LinearGradient colors={["transparent", "rgba(10,22,40,0.75)"]} style={styles.heroScrim} />
 
-          {/* Ground line */}
-          <Line
-            x1={PAD}
-            y1={layout.groundY}
-            x2={DIAGRAM_W - PAD}
-            y2={layout.groundY}
-            stroke={dimStroke}
-            strokeWidth={1}
-            strokeDasharray="4 3"
-          />
-
-          {/* Car body */}
-          <Path d={layout.bodyPath} fill={fill} stroke={stroke} strokeWidth={2} />
-
-          {/* Wheels */}
-          {[0.22, 0.72].map((t) => {
-            const wx = layout.originX + layout.carL * t;
-            const r = layout.carH * 0.14;
-            return (
-              <Circle key={t} cx={wx} cy={layout.groundY} r={r} fill={isDark ? "#1E293B" : "#CBD5E1"} stroke={stroke} strokeWidth={1.5} />
-            );
-          })}
-
-          {/* Wheelbase */}
-          <Line
-            x1={layout.originX + layout.carL * 0.22}
-            y1={layout.groundY - layout.carH * 0.22}
-            x2={layout.originX + layout.carL * 0.22 + layout.wb}
-            y2={layout.groundY - layout.carH * 0.22}
-            stroke={stroke}
-            strokeWidth={1.5}
-          />
-          <Line x1={layout.originX + layout.carL * 0.22} y1={layout.groundY - layout.carH * 0.18} x2={layout.originX + layout.carL * 0.22} y2={layout.groundY - layout.carH * 0.26} stroke={stroke} strokeWidth={1} />
-          <Line x1={layout.originX + layout.carL * 0.22 + layout.wb} y1={layout.groundY - layout.carH * 0.18} x2={layout.originX + layout.carL * 0.22 + layout.wb} y2={layout.groundY - layout.carH * 0.26} stroke={stroke} strokeWidth={1} />
-          <SvgText
-            x={layout.originX + layout.carL * 0.22 + layout.wb / 2}
-            y={layout.groundY - layout.carH * 0.28}
-            fill={stroke}
-            fontSize={9}
-            fontWeight="600"
-            textAnchor="middle"
-          >
-            {wheelbase} mm WB
-          </SvgText>
-
-          {/* Length dimension */}
-          <Line x1={layout.originX} y1={layout.lenY} x2={layout.originX + layout.carL} y2={layout.lenY} stroke={dimStroke} strokeWidth={1.5} />
-          <Line x1={layout.originX} y1={layout.lenY - 4} x2={layout.originX} y2={layout.lenY + 4} stroke={dimStroke} strokeWidth={1.5} />
-          <Line x1={layout.originX + layout.carL} y1={layout.lenY - 4} x2={layout.originX + layout.carL} y2={layout.lenY + 4} stroke={dimStroke} strokeWidth={1.5} />
-          <SvgText x={layout.cx} y={layout.lenY + 12} fill={dimStroke} fontSize={10} fontWeight="700" textAnchor="middle">
-            L {length} mm
-          </SvgText>
-
-          {/* Height dimension */}
-          <Line x1={layout.hLineX} y1={layout.roofY} x2={layout.hLineX} y2={layout.groundY} stroke={dimStroke} strokeWidth={1.5} />
-          <Line x1={layout.hLineX - 4} y1={layout.roofY} x2={layout.hLineX + 4} y2={layout.roofY} stroke={dimStroke} strokeWidth={1.5} />
-          <Line x1={layout.hLineX - 4} y1={layout.groundY} x2={layout.hLineX + 4} y2={layout.groundY} stroke={dimStroke} strokeWidth={1.5} />
-          <SvgText
-            x={layout.hLineX + 8}
-            y={layout.roofY + layout.carH / 2}
-            fill={dimStroke}
-            fontSize={9}
-            fontWeight="700"
-          >
-            H {height}
-          </SvgText>
-        </Svg>
-
-        {imageUri ? (
-          <View style={[styles.photoPanel, { borderColor: isDark ? "rgba(255,255,255,0.1)" : "#D8EEF2", backgroundColor: isDark ? "#1E293B" : "#FFFFFF" }]}>
-            <Image source={{ uri: imageUri }} style={styles.photo} resizeMode="contain" />
-            <Text style={[styles.photoCaption, { color: isDark ? "#94A3B8" : "#64748B" }]}>
-              Listing photo · front 3/4 reference
-            </Text>
+          <View style={styles.heightRail}>
+            <View style={styles.railLine} />
+            <View style={styles.railBadge}>
+              <Text style={styles.railLabel}>Height</Text>
+              <Text style={styles.railValue}>{fmt(height)}</Text>
+              <Text style={styles.railUnit}>mm · {fmtM(height)}</Text>
+            </View>
+            <View style={styles.railLine} />
           </View>
-        ) : null}
-      </View>
 
-      <View style={styles.legend}>
-        {[
-          { k: "Length", v: `${length} mm` },
-          { k: "Width", v: `${width} mm` },
-          { k: "Height", v: `${height} mm` },
-          { k: "Wheelbase", v: `${wheelbase} mm` },
-        ].map((item) => (
-          <View key={item.k} style={[styles.legendChip, { backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#FFFFFF", borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0" }]}>
-            <Text style={[styles.legendKey, { color: isDark ? "#94A3B8" : "#64748B" }]}>{item.k}</Text>
-            <Text style={[styles.legendVal, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>{item.v}</Text>
+          <View style={styles.widthBar}>
+            <View style={styles.widthTick} />
+            <View style={styles.widthBadge}>
+              <Text style={styles.widthLabel}>Width</Text>
+              <Text style={styles.widthValue}>{fmt(width)} mm</Text>
+              <Text style={styles.widthSub}>{fmtM(width)}</Text>
+            </View>
+            <View style={styles.widthTick} />
           </View>
+        </View>
+      ) : null}
+
+      <View style={styles.metricsGrid}>
+        {metrics.map((m) => (
+          <DimBadge
+            key={m.label}
+            label={m.label}
+            value={`${fmt(m.value)} mm`}
+            sub={fmtM(m.value)}
+            isDark={isDark}
+            accent={accent}
+          />
         ))}
       </View>
     </View>
@@ -194,79 +128,160 @@ export function CarDimensionDiagram({
 }
 
 const styles = StyleSheet.create({
-  wrap: {
+  card: {
     marginHorizontal: 12,
     marginTop: 12,
     borderRadius: 16,
     borderWidth: 1,
     overflow: "hidden",
-    paddingBottom: 12,
+    paddingBottom: 14,
   },
   header: {
     paddingHorizontal: 14,
     paddingTop: 14,
-    paddingBottom: 6,
+    paddingBottom: 10,
     gap: 2,
   },
   headerTitle: {
-    fontSize: 13,
-    fontFamily: "Inter_700Bold",
-    letterSpacing: 0.3,
-    textTransform: "uppercase",
+    fontSize: 15,
+    fontFamily: "Manrope_800ExtraBold",
+    letterSpacing: -0.2,
   },
   headerSub: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
   },
-  diagramCol: {
-    alignItems: "stretch",
-    paddingHorizontal: 8,
-    gap: 10,
-  },
-  photoPanel: {
-    width: "100%",
-    height: 140,
-    borderRadius: 10,
-    borderWidth: 1,
+  hero: {
+    marginHorizontal: 12,
+    height: 220,
+    borderRadius: 14,
     overflow: "hidden",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 8,
+    borderWidth: 1,
   },
-  photo: {
+  heroImage: {
     width: "100%",
-    height: 108,
+    height: "100%",
   },
-  photoCaption: {
+  heroScrim: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  heightRail: {
+    position: "absolute",
+    left: 10,
+    top: 24,
+    bottom: 52,
+    width: 72,
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  railLine: {
+    width: 2,
+    flex: 1,
+    backgroundColor: "rgba(14,181,202,0.85)",
+    borderRadius: 1,
+    marginVertical: 4,
+  },
+  railBadge: {
+    backgroundColor: "rgba(10,22,40,0.88)",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(14,181,202,0.45)",
+    minWidth: 68,
+  },
+  railLabel: {
+    color: "rgba(255,255,255,0.75)",
+    fontSize: 8,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  railValue: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontFamily: "Manrope_800ExtraBold",
+    marginTop: 2,
+  },
+  railUnit: {
+    color: "#0EB5CA",
+    fontSize: 9,
+    fontFamily: "Inter_600SemiBold",
+    marginTop: 1,
+  },
+  widthBar: {
+    position: "absolute",
+    left: 88,
+    right: 12,
+    bottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  widthTick: {
+    flex: 1,
+    height: 2,
+    backgroundColor: "rgba(14,181,202,0.85)",
+    borderRadius: 1,
+  },
+  widthBadge: {
+    backgroundColor: "rgba(10,22,40,0.88)",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(14,181,202,0.45)",
+  },
+  widthLabel: {
+    color: "rgba(255,255,255,0.75)",
+    fontSize: 8,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  widthValue: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontFamily: "Manrope_800ExtraBold",
+    marginTop: 2,
+  },
+  widthSub: {
+    color: "#0EB5CA",
     fontSize: 10,
-    fontFamily: "Inter_400Regular",
-    paddingVertical: 6,
-    textAlign: "center",
+    fontFamily: "Inter_600SemiBold",
+    marginTop: 1,
   },
-  legend: {
+  metricsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
     paddingHorizontal: 12,
-    paddingTop: 10,
+    paddingTop: 12,
   },
-  legendChip: {
+  dimBadge: {
+    width: "48%",
     flexGrow: 1,
-    minWidth: "45%",
+    minWidth: 148,
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    borderRadius: 12,
+    padding: 12,
+    gap: 2,
   },
-  legendKey: {
-    fontSize: 10,
+  dimBadgeLabel: {
+    fontSize: 9,
     fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.45,
     textTransform: "uppercase",
-    letterSpacing: 0.35,
   },
-  legendVal: {
-    fontSize: 13,
-    fontFamily: "Inter_700Bold",
-    marginTop: 2,
+  dimBadgeValue: {
+    fontSize: 14,
+    fontFamily: "Manrope_800ExtraBold",
+    letterSpacing: -0.2,
+  },
+  dimBadgeSub: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
   },
 });
