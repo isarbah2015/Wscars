@@ -78,7 +78,6 @@
     "expo-av": "^16.0.8",
     "expo-crypto": "^15.0.9",
     "expo-document-picker": "^14.0.8",
-    "expo-firebase-recaptcha": "^2.3.1",
     "expo-updates": "~29.0.17",
     "firebase": "^11.0.0",
     "react-native-webview": "13.15.0"

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { ConfirmationResult } from "firebase/auth";
-import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
+import FirebaseRecaptchaVerifierModal from "@/components/firebase-recaptcha/FirebaseRecaptchaVerifierModal";
 import { confirmPhoneOtp, sendPhoneOtp, authErrorMessage } from "@/services/firebase/auth";
 import { resolveFirebaseConfig } from "@/lib/firebase-config";
 import { auth } from "@/lib/firebase-persistence";

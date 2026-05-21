@@ -11,7 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
+import FirebaseRecaptchaVerifierModal from "@/components/firebase-recaptcha/FirebaseRecaptchaVerifierModal";
 import { formatGhanaPhone, usePhoneAuth } from "@/hooks/usePhoneAuth";
 import { COUNTRY_CODE } from "@/utils/ghanaData";
 
