@@ -49,6 +49,7 @@ export default function ProfileScreen() {
           updateUserProfile, notifications, markNotificationRead,
           markAllNotificationsRead, unreadNotificationsCount } = useApp();
   const { user: firebaseUser, chineseProfile, sponsorship, logOut, saveChineseProfile } = useAuth();
+  // Prefer locally uploaded URL → Firebase Auth photoURL → Firestore avatar
   const { isDark, colors, toggleTheme } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);
@@ -118,7 +119,7 @@ export default function ProfileScreen() {
   const trustScore  = getSellerTrustScore(currentUser);
   const v = currentUser.verification;
   const joinDate = currentUser.memberSince?.slice(0, 7) || "2024";
-  const avatarUri = uploadedAvatar ?? currentUser.avatar ?? null;
+  const avatarUri = uploadedAvatar ?? firebaseUser?.photoURL ?? currentUser.avatar ?? null;
   const initials = (currentUser.name || "U")
     .split(" ").slice(0, 2).map((w: string) => w[0]?.toUpperCase() ?? "").join("");
 

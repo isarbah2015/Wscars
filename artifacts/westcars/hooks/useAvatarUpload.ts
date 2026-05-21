@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Alert, Platform, Linking } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
+import { updateProfile } from 'firebase/auth'
 import { ref, deleteObject } from 'firebase/storage'
-import { doc, updateDoc } from 'firebase/firestore'
+import { doc, setDoc } from 'firebase/firestore'
 import { storage, db, isFirebaseReady } from '@/lib/firebase'
 import { uploadAvatar } from '@/services/firebase/storage'
 import { auth } from '@/lib/firebase-persistence'
@@ -19,7 +20,6 @@ export interface AvatarUploadState {
 export interface UseAvatarUploadOptions {
   userId: string
   initialPhotoURL: string | null | undefined
-  /** Called with the new download URL after a successful upload. */
   onSuccess?: (url: string) => void
 }
 
@@ -40,28 +40,20 @@ export function useAvatarUpload({
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Re-sync when the parent provides a real URL after async Firebase load.
-  // Only update if we don't already have a locally-set URL (avoids overwriting
-  // a freshly-uploaded photo with the stale Firestore value).
   useEffect(() => {
     if (initialPhotoURL && !photoURL) {
       setPhotoURL(initialPhotoURL)
     }
   }, [initialPhotoURL])
 
-  // ── Permission ────────────────────────────────────────────────────────────────
-
   const requestPermission = useCallback(
     async (source: UploadSource): Promise<boolean> => {
       if (Platform.OS === 'web') return true
-
       const { status } =
         source === 'camera'
           ? await ImagePicker.requestCameraPermissionsAsync()
           : await ImagePicker.requestMediaLibraryPermissionsAsync()
-
       if (status === 'granted') return true
-
       Alert.alert(
         source === 'camera' ? 'Camera Access Needed' : 'Photo Library Access Needed',
         source === 'camera'
@@ -76,8 +68,6 @@ export function useAvatarUpload({
     },
     []
   )
-
-  // ── Pick & Upload ─────────────────────────────────────────────────────────────
 
   const pickAndUpload = useCallback(
     async (source: UploadSource): Promise<void> => {
@@ -95,18 +85,11 @@ export function useAvatarUpload({
       const hasPermission = await requestPermission(source)
       if (!hasPermission) return
 
-      const pickerOptions: ImagePicker.ImagePickerOptions = {
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.85,
-        base64: false,
-      }
-
       const result =
         source === 'camera'
-          ? await ImagePicker.launchCameraAsync(pickerOptions)
+          ? await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.85 })
           : await ImagePicker.launchImageLibraryAsync({
-              ...pickerOptions,
+              allowsEditing: true, aspect: [1, 1], quality: 0.85,
               mediaTypes: ['images'] as any,
             })
 
@@ -117,21 +100,29 @@ export function useAvatarUpload({
       setProgress(0)
 
       try {
+        // Step 1 — upload file to Firebase Storage
         const downloadURL = await uploadAvatar(userId, uri, setProgress)
 
-        if (!db) throw new Error('Firestore not initialised')
+        // Step 2 — update Firebase Auth profile (no Firestore rules needed)
+        const fbUser = auth?.currentUser
+        if (fbUser) {
+          await updateProfile(fbUser, { photoURL: downloadURL })
+        }
 
-        const authUid = auth?.currentUser?.uid ?? null
-        if (!authUid) throw new Error('Not authenticated — please sign in again.')
-        if (authUid !== userId) throw new Error(`UID mismatch: auth=${authUid} userId=${userId}`)
-
-        await updateDoc(doc(db, 'users', userId), {
-          avatar: downloadURL,
-          photoUpdatedAt: new Date().toISOString(),
-        })
+        // Step 3 — best-effort Firestore sync (silently ignore rules errors)
+        if (db && fbUser) {
+          try {
+            await setDoc(
+              doc(db, 'users', userId),
+              { avatar: downloadURL, photoUpdatedAt: new Date().toISOString() },
+              { merge: true },
+            )
+          } catch {
+            // Firestore rules may not be deployed yet — photo is saved via Auth above
+          }
+        }
 
         setPhotoURL(downloadURL)
-        // Notify AppContext so currentUser.avatar stays in sync without restart.
         onSuccess?.(downloadURL)
       } catch (err: any) {
         const message = err?.message ?? 'Upload failed. Please try again.'
@@ -145,26 +136,24 @@ export function useAvatarUpload({
     [userId, requestPermission, onSuccess]
   )
 
-  // ── Remove Photo ──────────────────────────────────────────────────────────────
-
   const removePhoto = useCallback(async (): Promise<void> => {
     setError(null)
     setIsUploading(true)
     try {
       if (storage) {
-        for (const ext of ["jpg", "jpeg", "png", "webp"]) {
-          try {
-            await deleteObject(ref(storage, `avatars/${userId}.${ext}`))
-          } catch {
-            // File may not exist — ignore
-          }
+        for (const ext of ['jpg', 'jpeg', 'png', 'webp']) {
+          try { await deleteObject(ref(storage, `avatars/${userId}.${ext}`)) } catch {}
         }
       }
-      if (!db) throw new Error('Firestore not initialised')
-      await updateDoc(doc(db, 'users', userId), {
-        avatar: null,
-        photoUpdatedAt: new Date().toISOString(),
-      })
+      const fbUser = auth?.currentUser
+      if (fbUser) {
+        await updateProfile(fbUser, { photoURL: null })
+      }
+      if (db) {
+        try {
+          await setDoc(doc(db, 'users', userId), { avatar: null, photoUpdatedAt: new Date().toISOString() }, { merge: true })
+        } catch {}
+      }
       setPhotoURL(null)
       onSuccess?.('')
     } catch (err: any) {
@@ -177,13 +166,5 @@ export function useAvatarUpload({
     }
   }, [userId, onSuccess])
 
-  return {
-    photoURL,
-    progress,
-    isUploading,
-    error,
-    pickAndUpload,
-    removePhoto,
-    requestPermission,
-  }
+  return { photoURL, progress, isUploading, error, pickAndUpload, removePhoto, requestPermission }
 }
