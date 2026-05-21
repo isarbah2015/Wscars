@@ -7,6 +7,7 @@ export function GoogleAuthBridge({
   promptRef,
 }: {
   onIdToken: (idToken: string, accessToken?: string) => void;
+  onAuthError?: (message: string) => void;
   promptRef: React.MutableRefObject<(() => Promise<void>) | null>;
 }) {
   useEffect(() => {

@@ -1,39 +1,86 @@
 // @ts-nocheck
 /**
- * GoogleAuthBridge — Native (Android / iOS) — REAL IMPLEMENTATION
- * Requires a full dev/production build (not Expo Go)
+ * GoogleAuthBridge — Native (Android / iOS)
+ * Uses native Google Sign-In (not browser OAuth) for Firebase compliance.
  */
 import React, { useEffect } from "react";
-import * as Google from "expo-auth-session/providers/google";
-import * as WebBrowser from "expo-web-browser";
-
-WebBrowser.maybeCompleteAuthSession();
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
+import { resolveGoogleAuthConfig } from "@/lib/google-auth-config";
 
 export function GoogleAuthBridge({
   onIdToken,
+  onAuthFinished,
+  onAuthError,
   promptRef,
 }: {
   onIdToken: (idToken: string, accessToken?: string) => void;
+  onAuthFinished?: () => void;
+  onAuthError?: (message: string) => void;
   promptRef: React.MutableRefObject<(() => Promise<void>) | null>;
 }) {
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    iosClientId:     process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-    webClientId:     process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-  });
+  const { webClientId, iosClientId } = resolveGoogleAuthConfig();
 
   useEffect(() => {
-    if (response?.type === "success") {
-      const { id_token, access_token } = response.params as Record<string, string>;
-      if (id_token) onIdToken(id_token, access_token ?? undefined);
-    }
-  }, [response, onIdToken]);
+    if (!webClientId) return;
+    GoogleSignin.configure({
+      webClientId,
+      iosClientId,
+      offlineAccess: false,
+    });
+  }, [webClientId, iosClientId]);
 
   useEffect(() => {
-    if (!promptAsync) { promptRef.current = null; return; }
-    promptRef.current = async () => { await promptAsync(); };
-    return () => { promptRef.current = null; };
-  }, [request, promptAsync, promptRef]);
+    promptRef.current = async () => {
+      try {
+        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+        const response = await GoogleSignin.signIn();
+        if (isSuccessResponse(response)) {
+          const idToken = response.data?.idToken;
+          if (idToken) {
+            onIdToken(idToken, response.data?.serverAuthCode ?? undefined);
+            return;
+          }
+          onAuthError?.("Google sign-in did not return a token. Try again.");
+          onAuthFinished?.();
+          return;
+        }
+        onAuthFinished?.();
+      } catch (error) {
+        if (isErrorWithCode(error)) {
+          if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+            onAuthFinished?.();
+            return;
+          }
+          if (error.code === statusCodes.IN_PROGRESS) {
+            onAuthFinished?.();
+            return;
+          }
+          if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+            onAuthError?.("Google Play Services is required for sign-in.");
+            onAuthFinished?.();
+            return;
+          }
+          if (error.code === "10" || error.code === 10) {
+            onAuthError?.(
+              "Google sign-in is misconfigured (SHA-1 / OAuth client). Contact support or try email sign-in.",
+            );
+            onAuthFinished?.();
+            return;
+          }
+        }
+        onAuthError?.("Google sign-in failed. Please try again.");
+        onAuthFinished?.();
+      }
+    };
+    return () => {
+      promptRef.current = null;
+    };
+  }, [onIdToken, onAuthFinished, onAuthError, promptRef]);
 
   return null;
 }

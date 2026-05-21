@@ -79,6 +79,12 @@
           "cameraPermission": "Westcars needs camera access to take profile and car photos.",
           "microphonePermission": false
         }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.778261594022-mn0nqerq73nktnl1il1878e9gk4vha9a"
+        }
       ]
     ],
     "experiments": {

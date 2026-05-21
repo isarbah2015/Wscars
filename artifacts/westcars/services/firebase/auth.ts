@@ -11,6 +11,7 @@ import {
   signInWithCredential,
   signInWithPopup,
   PhoneAuthProvider,
+  type ApplicationVerifier,
   type ConfirmationResult,
   type User as FirebaseUser,
   type Unsubscribe,
@@ -64,8 +65,11 @@ export async function signUpEmail(name: string, email: string, phone: string, pa
   return loadOrCreateUserDoc(cred.user, { name, phone });
 }
 
-export async function sendPhoneOtp(phoneNumber: string): Promise<ConfirmationResult> {
-  return (signInWithPhoneNumber as any)(auth!, phoneNumber.trim());
+export async function sendPhoneOtp(
+  phoneNumber: string,
+  appVerifier: ApplicationVerifier,
+): Promise<ConfirmationResult> {
+  return signInWithPhoneNumber(auth!, phoneNumber.trim(), appVerifier);
 }
 
 export async function confirmPhoneOtp(confirmation: ConfirmationResult, code: string, overrides: Partial<User> = {}): Promise<User> {
