@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -20,8 +19,6 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAvatarUpload } from "@/hooks/useAvatarUpload";
-import AvatarUploadSheet from "@/components/AvatarUploadSheet";
 import { CarCard } from "@/components/CarCard";
 import { ReviewCard, StarRating } from "@/components/ReviewCard";
 import { TrustScore } from "@/components/TrustScore";
@@ -49,7 +46,7 @@ export default function ProfileScreen() {
           blockUser, blockedUsers, unblockUser, verifyPhone, verifyId,
           updateUserProfile, notifications, markNotificationRead,
           markAllNotificationsRead, unreadNotificationsCount } = useApp();
-  const { user: firebaseUser, chineseProfile, sponsorship, logOut, saveChineseProfile } = useAuth();
+  const { chineseProfile, sponsorship, logOut, saveChineseProfile } = useAuth();
   const { isDark, colors, toggleTheme } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);
@@ -61,7 +58,6 @@ export default function ProfileScreen() {
   const [verifyingId, setVerifyingId] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [locLoading, setLocLoading] = useState(false);
-  const [avatarSheetOpen, setAvatarSheetOpen] = useState(false);
   const [isChineseSeller, setIsChineseSeller] = useState(false);
   const [wechatId, setWechatId] = useState("");
   const [locationInChina, setLocationInChina] = useState("");
@@ -69,14 +65,6 @@ export default function ProfileScreen() {
   const [savingChinese, setSavingChinese] = useState(false);
   const [chineseSaved, setChineseSaved] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const { photoURL: uploadedAvatar, progress: uploadProgress, isUploading: avatarUploading,
-          pickAndUpload, removePhoto } =
-    useAvatarUpload({
-      userId: firebaseUser?.uid ?? "",
-      initialPhotoURL: currentUser?.avatar,
-      onSuccess: (url) => updateUserProfile({ avatar: url || undefined }),
-    });
-
   useEffect(() => {
     if (chineseProfile) {
       setIsChineseSeller(chineseProfile.isChineseSeller);
@@ -120,11 +108,11 @@ export default function ProfileScreen() {
   const myReviews   = getUserReviews(currentUser.id);
   const trustScore  = getSellerTrustScore(currentUser);
   const v = currentUser.verification;
-  const avatarUri = uploadedAvatar ?? currentUser.avatar;
   const joinDate = currentUser.memberSince?.slice(0, 7) || "2024";
+  const initials = (currentUser.name || "U")
+    .split(" ").slice(0, 2).map((w: string) => w[0]?.toUpperCase() ?? "").join("");
 
   const completionItems = [
-    { label: "Photo",      done: !!avatarUri },
     { label: "Email",      done: !!currentUser.email },
     { label: "Location",   done: !!currentUser.location },
     { label: "Phone",      done: !!currentUser.phone },
@@ -275,39 +263,13 @@ export default function ProfileScreen() {
             </Pressable>
           </View>
 
-          <View style={styles.avatarArea}>
-            {avatarUri ? (
-              <Image source={{ uri: avatarUri }} style={styles.avatar} />
-            ) : (
-              <View style={styles.avatarPlaceholder}>
-                <Feather name="user" size={36} color="#0EB5CA" />
-              </View>
-            )}
-            {avatarUploading && (
-              <View style={styles.avatarUploadingOverlay}>
-                <ActivityIndicator color="#fff" size="small" />
-                {uploadProgress !== null && (
-                  <Text style={styles.avatarUploadPct}>{Math.round(uploadProgress * 100)}%</Text>
-                )}
-              </View>
-            )}
+          <View style={styles.initialsRing}>
+            <Text style={styles.initialsText}>{initials}</Text>
             {currentUser.isVerified && (
               <View style={styles.avatarVerifiedBadge}>
                 <Feather name="check" size={10} color="#fff" />
               </View>
             )}
-            <Pressable
-              style={styles.editAvatarBtn}
-              onPress={() => {
-                if (!currentUser?.id) { Alert.alert("Error", "You must be logged in to upload a photo"); return; }
-                setAvatarSheetOpen(true);
-              }}
-              disabled={avatarUploading}
-            >
-              {avatarUploading
-                ? <ActivityIndicator size={12} color="#FFFFFF" />
-                : <Feather name="camera" size={13} color="#FFFFFF" />}
-            </Pressable>
           </View>
 
           <Text style={styles.userName}>{currentUser.name}</Text>
@@ -498,11 +460,10 @@ export default function ProfileScreen() {
             {/* Items grid */}
             <View style={styles.completionGrid}>
               {[
-                { label: "Photo",       done: completionItems[0].done, icon: "camera",    iconBg: "#E0F7FA", iconColor: "#0EB5CA" },
-                { label: "Email",       done: completionItems[1].done, icon: "mail",      iconBg: "#EFF6FF", iconColor: "#3B82F6" },
-                { label: "Location",    done: completionItems[2].done, icon: "map-pin",   iconBg: "#FFF7ED", iconColor: "#F97316" },
-                { label: "Phone",       done: completionItems[3].done, icon: "phone",     iconBg: "#F0FDF4", iconColor: "#22C55E" },
-                { label: "ID Verified", done: completionItems[4].done, icon: "shield",    iconBg: "#F5F3FF", iconColor: "#8B5CF6" },
+                { label: "Email",       done: completionItems[0].done, icon: "mail",      iconBg: "#EFF6FF", iconColor: "#3B82F6" },
+                { label: "Location",    done: completionItems[1].done, icon: "map-pin",   iconBg: "#FFF7ED", iconColor: "#F97316" },
+                { label: "Phone",       done: completionItems[2].done, icon: "phone",     iconBg: "#F0FDF4", iconColor: "#22C55E" },
+                { label: "ID Verified", done: completionItems[3].done, icon: "shield",    iconBg: "#F5F3FF", iconColor: "#8B5CF6" },
               ].map((item) => (
                 <View
                   key={item.label}
@@ -905,15 +866,6 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
 
-      <AvatarUploadSheet
-        visible={avatarSheetOpen}
-        hasPhoto={!!(uploadedAvatar ?? currentUser.avatar)}
-        onCamera={() => { setAvatarSheetOpen(false); pickAndUpload("camera"); }}
-        onLibrary={() => { setAvatarSheetOpen(false); pickAndUpload("library"); }}
-        onRemove={() => { setAvatarSheetOpen(false); removePhoto(); }}
-        onClose={() => setAvatarSheetOpen(false)}
-      />
-
       {/* ── Notifications Modal ── */}
       <Modal
         visible={showNotifications}
@@ -1102,16 +1054,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
   },
-  avatarArea: { position: "relative", marginBottom: 12 },
-  avatar: {
+  initialsRing: {
+    position: "relative",
     width: 88, height: 88, borderRadius: 44,
-    borderWidth: 3, borderColor: "rgba(255,255,255,0.6)",
-  },
-  avatarPlaceholder: {
-    width: 88, height: 88, borderRadius: 44,
-    backgroundColor: "rgba(255,255,255,0.25)",
+    backgroundColor: "rgba(255,255,255,0.22)",
+    borderWidth: 3, borderColor: "rgba(255,255,255,0.55)",
     alignItems: "center", justifyContent: "center",
-    borderWidth: 3, borderColor: "rgba(255,255,255,0.4)",
+    marginBottom: 12,
+  },
+  initialsText: {
+    fontSize: 32, fontFamily: "Manrope_800ExtraBold",
+    color: "#FFFFFF", letterSpacing: 1,
   },
   avatarVerifiedBadge: {
     position: "absolute", top: 2, right: 2,
@@ -1120,20 +1073,6 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: "#0EB5CA",
     alignItems: "center", justifyContent: "center",
   },
-  editAvatarBtn: {
-    position: "absolute", bottom: 2, right: 2,
-    width: 28, height: 28, borderRadius: 14,
-    backgroundColor: "#0098AA",
-    borderWidth: 2, borderColor: "#fff",
-    alignItems: "center", justifyContent: "center",
-  },
-  avatarUploadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    borderRadius: 44,
-    alignItems: "center", justifyContent: "center",
-  },
-  avatarUploadPct: { color: "#fff", fontSize: 11, marginTop: 2 },
   userName: { fontSize: 24, fontFamily: "Manrope_800ExtraBold", color: "#FFFFFF", letterSpacing: -0.5, textAlign: "center" },
   locationRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
   userLocation: { fontSize: 12, color: "rgba(255,255,255,0.85)", fontFamily: "Inter_400Regular" },
