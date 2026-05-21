@@ -19,6 +19,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
+import { useAvatarUpload } from "@/hooks/useAvatarUpload";
 import { CarCard } from "@/components/CarCard";
 import { ReviewCard, StarRating } from "@/components/ReviewCard";
 import { TrustScore } from "@/components/TrustScore";
@@ -46,7 +48,7 @@ export default function ProfileScreen() {
           blockUser, blockedUsers, unblockUser, verifyPhone, verifyId,
           updateUserProfile, notifications, markNotificationRead,
           markAllNotificationsRead, unreadNotificationsCount } = useApp();
-  const { chineseProfile, sponsorship, logOut, saveChineseProfile } = useAuth();
+  const { user: firebaseUser, chineseProfile, sponsorship, logOut, saveChineseProfile } = useAuth();
   const { isDark, colors, toggleTheme } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);
@@ -59,6 +61,13 @@ export default function ProfileScreen() {
   const [reviewRating, setReviewRating] = useState(0);
   const [locLoading, setLocLoading] = useState(false);
   const [isChineseSeller, setIsChineseSeller] = useState(false);
+  const { photoURL: uploadedAvatar, progress: uploadProgress, isUploading: avatarUploading,
+          pickAndUpload } =
+    useAvatarUpload({
+      userId: firebaseUser?.uid ?? "",
+      initialPhotoURL: currentUser?.avatar,
+      onSuccess: (url) => updateUserProfile({ avatar: url || undefined }),
+    });
   const [wechatId, setWechatId] = useState("");
   const [locationInChina, setLocationInChina] = useState("");
   const [businessName, setBusinessName] = useState("");
@@ -109,6 +118,7 @@ export default function ProfileScreen() {
   const trustScore  = getSellerTrustScore(currentUser);
   const v = currentUser.verification;
   const joinDate = currentUser.memberSince?.slice(0, 7) || "2024";
+  const avatarUri = uploadedAvatar ?? currentUser.avatar ?? null;
   const initials = (currentUser.name || "U")
     .split(" ").slice(0, 2).map((w: string) => w[0]?.toUpperCase() ?? "").join("");
 
@@ -263,14 +273,33 @@ export default function ProfileScreen() {
             </Pressable>
           </View>
 
-          <View style={styles.initialsRing}>
-            <Text style={styles.initialsText}>{initials}</Text>
+          <Pressable
+            style={styles.initialsRing}
+            onPress={() => pickAndUpload("library")}
+            disabled={avatarUploading}
+          >
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={styles.avatarImg} />
+            ) : (
+              <Text style={styles.initialsText}>{initials}</Text>
+            )}
+            {avatarUploading && (
+              <View style={styles.avatarOverlay}>
+                <ActivityIndicator color="#fff" size="small" />
+                {uploadProgress !== null && (
+                  <Text style={styles.avatarPct}>{Math.round(uploadProgress * 100)}%</Text>
+                )}
+              </View>
+            )}
             {currentUser.isVerified && (
               <View style={styles.avatarVerifiedBadge}>
                 <Feather name="check" size={10} color="#fff" />
               </View>
             )}
-          </View>
+            <View style={styles.cameraBtn}>
+              <Feather name="camera" size={11} color="#fff" />
+            </View>
+          </Pressable>
 
           <Text style={styles.userName}>{currentUser.name}</Text>
           <View style={styles.locationRow}>
@@ -1060,11 +1089,25 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.22)",
     borderWidth: 3, borderColor: "rgba(255,255,255,0.55)",
     alignItems: "center", justifyContent: "center",
-    marginBottom: 12,
+    marginBottom: 12, overflow: "hidden",
   },
+  avatarImg: { width: "100%", height: "100%", borderRadius: 44 },
   initialsText: {
     fontSize: 32, fontFamily: "Manrope_800ExtraBold",
     color: "#FFFFFF", letterSpacing: 1,
+  },
+  avatarOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center", justifyContent: "center",
+  },
+  avatarPct: { color: "#fff", fontSize: 10, marginTop: 2 },
+  cameraBtn: {
+    position: "absolute", bottom: 4, right: 4,
+    width: 22, height: 22, borderRadius: 11,
+    backgroundColor: "#0098AA",
+    borderWidth: 1.5, borderColor: "#fff",
+    alignItems: "center", justifyContent: "center",
   },
   avatarVerifiedBadge: {
     position: "absolute", top: 2, right: 2,

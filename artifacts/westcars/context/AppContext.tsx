@@ -267,11 +267,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       where('userId', '==', currentUser.id),
       orderBy('createdAt', 'desc')
     );
-    const unsub = onSnapshot(q, (snap) => {
-      setNotifications(
-        snap.docs.map((d) => ({ id: d.id, ...d.data() } as AppNotification))
-      );
-    });
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setNotifications(
+          snap.docs.map((d) => ({ id: d.id, ...d.data() } as AppNotification))
+        );
+      },
+      (err) => console.warn('[notifications] subscribe error:', err),
+    );
     return unsub;
   }, [useFirebase, currentUser?.id]);
 
