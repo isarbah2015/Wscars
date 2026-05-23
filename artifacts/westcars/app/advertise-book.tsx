@@ -27,6 +27,7 @@ import {
 } from "react-native";
 import { ResizeMode, Video } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "@/context/ThemeContext";
 
 // ─── Brand ───────────────────────────────────────────────────────────────────
 const TEAL      = "#0EB5CA";
@@ -256,6 +257,10 @@ export default function AdvertiseBookScreen() {
 
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 4 : (insets.top || 0);
+  const { colors, isDark } = useTheme();
+  const sep = isDark ? colors.border : DARK_SEP;
+  const cardBg = colors.card;
+  const cellBg = colors.inputBg;
 
   const info = getSpecInfo(packageId, adType);
 
@@ -361,7 +366,7 @@ export default function AdvertiseBookScreen() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <KeyboardAvoidingView
-      style={styles.root}
+      style={[styles.root, { backgroundColor: colors.background }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       {/* ── Teal gradient header ── */}
@@ -408,23 +413,23 @@ export default function AdvertiseBookScreen() {
 
         {/* ── Upload / auto-gen hero ── */}
         {info.isAutoGen ? (
-          <View style={[styles.darkCard, { margin: 16, alignItems: "center", paddingVertical: 28, gap: 12 }]}>
+          <View style={[styles.darkCard, { backgroundColor: cardBg }, { margin: 16, alignItems: "center", paddingVertical: 28, gap: 12 }]}>
             <View style={styles.autoIconCircle}>
               <Feather name="zap" size={30} color={TEAL} />
             </View>
-            <Text style={styles.autoTitle}>No upload needed</Text>
-            <Text style={styles.autoSub}>
+            <Text style={[styles.autoTitle, { color: colors.text }]}>No upload needed</Text>
+            <Text style={[styles.autoSub, { color: colors.textSecondary }]}>
               Your ad creative is built automatically from your listing — our system
               pulls your car photos, title, and price.{"\n\n"}Just confirm your
               details below to activate.
             </Text>
           </View>
         ) : (
-          <View style={[styles.darkCard, { margin: 16, gap: 12 }]}>
+          <View style={[styles.darkCard, { backgroundColor: cardBg }, { margin: 16, gap: 12 }]}>
 
             <View style={styles.uploadHeroHeader}>
               <Feather name={info.isVideo ? "film" : "image"} size={18} color={TEAL} />
-              <Text style={styles.uploadHeroTitle}>
+              <Text style={[styles.uploadHeroTitle, { color: colors.text }]}>
                 {info.isVideo
                   ? "Upload your video file (MP4)"
                   : "Upload your flyer image (JPG or PNG)"}
@@ -564,8 +569,8 @@ export default function AdvertiseBookScreen() {
         )}
 
         {/* ── Contact form ── */}
-        <View style={[styles.darkCard, { marginHorizontal: 16, marginTop: 0, gap: 14 }]}>
-          <Text style={styles.cardTitle}>Your details</Text>
+        <View style={[styles.darkCard, { backgroundColor: cardBg }, { marginHorizontal: 16, marginTop: 0, gap: 14 }]}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Your details</Text>
           {[
             {
               key: "biz",   label: "Business / Dealership name *",
@@ -584,19 +589,19 @@ export default function AdvertiseBookScreen() {
             },
           ].map((f) => (
             <View key={f.key} style={styles.fieldWrap}>
-              <Text style={styles.fieldLabel}>{f.label}</Text>
-              <View style={[styles.field, focusedField === f.key && styles.fieldFocused]}>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{f.label}</Text>
+              <View style={[styles.field, { backgroundColor: cellBg, borderColor: sep }, focusedField === f.key && styles.fieldFocused]}>
                 <Feather
                   name={f.icon as any}
                   size={15}
-                  color={focusedField === f.key ? TEAL : "#94A3B8"}
+                  color={focusedField === f.key ? TEAL : colors.textTertiary}
                 />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   value={f.val}
                   onChangeText={f.set}
                   placeholder={f.ph}
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor={colors.textTertiary}
                   onFocus={() => setFocusedField(f.key)}
                   onBlur={() => setFocusedField(null)}
                   keyboardType={f.key === "phone" ? "phone-pad" : f.key === "email" ? "email-address" : "default"}
@@ -608,7 +613,7 @@ export default function AdvertiseBookScreen() {
 
           {/* Target region */}
           <View style={styles.fieldWrap}>
-            <Text style={styles.fieldLabel}>Target region</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Target region</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -618,10 +623,10 @@ export default function AdvertiseBookScreen() {
               {REGIONS.map((r) => (
                 <Pressable
                   key={r}
-                  style={[styles.regionChip, region === r && styles.regionChipActive]}
+                  style={[styles.regionChip, { backgroundColor: cellBg, borderColor: sep }, region === r && styles.regionChipActive]}
                   onPress={() => setRegion(r)}
                 >
-                  <Text style={[styles.regionText, region === r && styles.regionTextActive]}>
+                  <Text style={[styles.regionText, { color: colors.textSecondary }, region === r && styles.regionTextActive]}>
                     {r}
                   </Text>
                 </Pressable>
@@ -631,14 +636,14 @@ export default function AdvertiseBookScreen() {
 
           {/* Notes */}
           <View style={styles.fieldWrap}>
-            <Text style={styles.fieldLabel}>Notes for our ads team</Text>
-            <View style={[styles.fieldMulti, focusedField === "notes" && styles.fieldFocused]}>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Notes for our ads team</Text>
+            <View style={[styles.fieldMulti, { backgroundColor: cellBg, borderColor: sep }, focusedField === "notes" && styles.fieldFocused]}>
               <TextInput
-                style={styles.textArea}
+                style={[styles.textArea, { color: colors.text }]}
                 value={notes}
                 onChangeText={setNotes}
                 placeholder="Any instructions or special requirements…"
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor={colors.textTertiary}
                 multiline
                 onFocus={() => setFocusedField("notes")}
                 onBlur={() => setFocusedField(null)}
@@ -648,8 +653,8 @@ export default function AdvertiseBookScreen() {
         </View>
 
         {/* ── Payment method ── */}
-        <View style={[styles.darkCard, { marginHorizontal: 16, marginTop: 12, gap: 10 }]}>
-          <Text style={styles.cardTitle}>Payment method</Text>
+        <View style={[styles.darkCard, { backgroundColor: cardBg }, { marginHorizontal: 16, marginTop: 12, gap: 10 }]}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Payment method</Text>
           {(
             [
               { id: "mobile", label: "Mobile Money",  sub: "MTN · Vodafone · AirtelTigo", icon: "smartphone" },
@@ -689,11 +694,11 @@ export default function AdvertiseBookScreen() {
         </View>
 
         {/* ── Order summary ── */}
-        <View style={[styles.darkCard, { marginHorizontal: 16, marginTop: 12, gap: 0 }]}>
+        <View style={[styles.darkCard, { backgroundColor: cardBg }, { marginHorizontal: 16, marginTop: 12, gap: 0 }]}>
           <Text
             style={[
               styles.cardTitle,
-              { paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: DARK_SEP },
+              { color: colors.text, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: sep },
             ]}
           >
             Order summary
@@ -710,21 +715,21 @@ export default function AdvertiseBookScreen() {
               key={row.k}
               style={[
                 styles.sumRow,
-                i > 0 && { borderTopWidth: 1, borderTopColor: DARK_SEP },
+                i > 0 && { borderTopWidth: 1, borderTopColor: sep },
               ]}
             >
-              <Text style={styles.sumKey}>{row.k}</Text>
-              <Text style={styles.sumVal}>{row.v}</Text>
+              <Text style={[styles.sumKey, { color: colors.textSecondary }]}>{row.k}</Text>
+              <Text style={[styles.sumVal, { color: colors.text }]}>{row.v}</Text>
             </View>
           ))}
           <View
             style={[
               styles.sumRow,
               styles.sumTotal,
-              { borderTopWidth: 1, borderTopColor: DARK_SEP },
+              { borderTopWidth: 1, borderTopColor: sep },
             ]}
           >
-            <Text style={styles.sumTotalKey}>Total</Text>
+            <Text style={[styles.sumTotalKey, { color: colors.text }]}>Total</Text>
             <Text style={styles.sumTotalVal}>{priceDisplay}</Text>
           </View>
         </View>
@@ -736,12 +741,12 @@ export default function AdvertiseBookScreen() {
       <View
         style={[
           styles.submitBar,
-          { paddingBottom: (insets.bottom || 0) + (Platform.OS === "web" ? 16 : 12) },
+          { paddingBottom: (insets.bottom || 0) + (Platform.OS === "web" ? 16 : 12), backgroundColor: colors.card, borderTopColor: sep },
         ]}
       >
         <View style={{ flex: 1 }}>
-          <Text style={styles.submitLbl}>Total due</Text>
-          <Text style={styles.submitPrice}>{priceDisplay}</Text>
+          <Text style={[styles.submitLbl, { color: colors.textSecondary }]}>Total due</Text>
+          <Text style={[styles.submitPrice, { color: colors.text }]}>{priceDisplay}</Text>
         </View>
         <Pressable style={styles.submitBtn} onPress={handleSubmit}>
           <Feather name="check" size={18} color="#fff" />

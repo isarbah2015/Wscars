@@ -423,7 +423,7 @@ export default function HomeScreen() {
                   onPress={() => router.push({ pathname: "/(tabs)/search", params: { brand } })}
                 >
                   {(logoUrl && !logoErrors[brand]) ? (
-                    <View style={styles.brandPillLogoWrap}>
+                    <View style={[styles.brandPillLogoWrap, { backgroundColor: isDark ? colors.card : "#FFFFFF" }]}>
                       <ExpoImage
                         source={{ uri: logoUrl }}
                         style={styles.brandPillLogo}

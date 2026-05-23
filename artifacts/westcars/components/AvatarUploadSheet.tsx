@@ -1,5 +1,6 @@
 import { Modal, Pressable, View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import Svg, { Path, Circle, Rect, Polyline } from 'react-native-svg'
+import { useTheme } from '@/context/ThemeContext'
 
 // ─── Inline Feather-style icons ───────────────────────────────────────────────
 
@@ -58,6 +59,9 @@ export default function AvatarUploadSheet({
   onRemove,
   onClose,
 }: AvatarUploadSheetProps) {
+  const { colors, isDark } = useTheme()
+  const line = isDark ? colors.border : '#f0f0f0'
+
   return (
     <Modal
       visible={visible}
@@ -67,40 +71,44 @@ export default function AvatarUploadSheet({
     >
       <Pressable style={styles.backdrop} onPress={onClose} />
 
-      <View style={styles.sheet}>
-        {/* Drag handle */}
-        <View style={styles.handle} />
+      <View style={[styles.sheet, { backgroundColor: colors.card }]}>
+        <View style={[styles.handle, { backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : '#ddd' }]} />
 
-        <Text style={styles.title}>Update Profile Photo</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Update Profile Photo</Text>
 
-        {/* Camera + Library row */}
         <View style={styles.optRow}>
-          <TouchableOpacity style={styles.opt} onPress={onCamera} activeOpacity={0.75}>
+          <TouchableOpacity
+            style={[styles.opt, { backgroundColor: colors.inputBg, borderColor: isDark ? colors.border : '#e0f2f2' }]}
+            onPress={onCamera}
+            activeOpacity={0.75}
+          >
             <View style={styles.optIcon}>
               <CameraIcon color="#fff" size={22} />
             </View>
-            <Text style={styles.optLabel}>Camera</Text>
+            <Text style={[styles.optLabel, { color: colors.text }]}>Camera</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.opt} onPress={onLibrary} activeOpacity={0.75}>
+          <TouchableOpacity
+            style={[styles.opt, { backgroundColor: colors.inputBg, borderColor: isDark ? colors.border : '#e0f2f2' }]}
+            onPress={onLibrary}
+            activeOpacity={0.75}
+          >
             <View style={styles.optIcon}>
               <GalleryIcon color="#fff" size={22} />
             </View>
-            <Text style={styles.optLabel}>Library</Text>
+            <Text style={[styles.optLabel, { color: colors.text }]}>Library</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Remove — only shown when a photo exists */}
         {hasPhoto && (
-          <TouchableOpacity style={styles.removeRow} onPress={onRemove} activeOpacity={0.75}>
+          <TouchableOpacity style={[styles.removeRow, { borderTopColor: line }]} onPress={onRemove} activeOpacity={0.75}>
             <TrashIcon color="#e24b4a" size={18} />
             <Text style={styles.removeText}>Remove Photo</Text>
           </TouchableOpacity>
         )}
 
-        {/* Cancel */}
         <TouchableOpacity style={styles.cancelRow} onPress={onClose} activeOpacity={0.75}>
-          <Text style={styles.cancelText}>Cancel</Text>
+          <Text style={[styles.cancelText, { color: colors.textTertiary }]}>Cancel</Text>
         </TouchableOpacity>
       </View>
     </Modal>
@@ -115,7 +123,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.45)',
   },
   sheet: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
     padding: 20,
@@ -124,7 +131,6 @@ const styles = StyleSheet.create({
   handle: {
     width: 36,
     height: 4,
-    backgroundColor: '#ddd',
     borderRadius: 4,
     alignSelf: 'center',
     marginBottom: 18,
@@ -132,7 +138,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#111',
     marginBottom: 18,
     textAlign: 'center',
   },
@@ -143,12 +148,10 @@ const styles = StyleSheet.create({
   },
   opt: {
     flex: 1,
-    backgroundColor: '#f4fafa',
     borderRadius: 16,
     padding: 18,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e0f2f2',
   },
   optIcon: {
     width: 48,
@@ -162,7 +165,6 @@ const styles = StyleSheet.create({
   optLabel: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#111',
   },
   removeRow: {
     flexDirection: 'row',
@@ -171,7 +173,6 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
     marginTop: 4,
   },
   removeText: {
@@ -186,6 +187,5 @@ const styles = StyleSheet.create({
   cancelText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#888',
   },
 })

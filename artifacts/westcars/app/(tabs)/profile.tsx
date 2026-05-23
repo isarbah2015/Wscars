@@ -45,24 +45,34 @@ function Stars({ n }: { n: number }) {
 }
 
 function ProfileAuthWall({ topPad }: { topPad: number }) {
+  const { colors, isDark } = useTheme();
   return (
-    <View style={styles.authRoot}>
-      <View style={[styles.authCard, { marginTop: topPad + 28 }]}>
-        <View style={styles.authIconRing}>
-          <Feather name="user" size={30} color="#0EB5CA" />
+    <View style={[styles.authRoot, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.authCard,
+          {
+            marginTop: topPad + 28,
+            backgroundColor: colors.card,
+            borderColor: isDark ? colors.border : "rgba(14,181,202,0.12)",
+          },
+        ]}
+      >
+        <View style={[styles.authIconRing, { backgroundColor: colors.accentLight, borderColor: isDark ? colors.border : "rgba(14,181,202,0.24)" }]}>
+          <Feather name="user" size={30} color={colors.accent} />
         </View>
-        <Text style={styles.authTitle}>Sign in to Westcars</Text>
-        <Text style={styles.authText}>
+        <Text style={[styles.authTitle, { color: colors.text }]}>Sign in to Westcars</Text>
+        <Text style={[styles.authText, { color: colors.textSecondary }]}>
           Access your saved cars, listings, messages, and seller tools with the same premium Westcars account.
         </Text>
-        <Pressable style={styles.authCtaInner} onPress={() => router.push("/auth/login")}>
+        <Pressable style={[styles.authCtaInner, { backgroundColor: colors.accent }]} onPress={() => router.push("/auth/login")}>
           <Feather name="log-in" size={16} color="#FFFFFF" />
           <Text style={styles.authCtaText}>Sign In</Text>
         </Pressable>
         <View style={styles.authSignupRow}>
-          <Text style={styles.authSignupPrompt}>New to Westcars?</Text>
+          <Text style={[styles.authSignupPrompt, { color: colors.textSecondary }]}>New to Westcars?</Text>
           <Pressable onPress={() => router.push("/auth/signup")}>
-            <Text style={styles.authSignupLink}>Create Account</Text>
+            <Text style={[styles.authSignupLink, { color: colors.accent }]}>Create Account</Text>
           </Pressable>
         </View>
       </View>
@@ -935,9 +945,8 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
 
   // ── Auth wall ──
-  authRoot: { flex: 1, backgroundColor: "#EDF4F7", paddingHorizontal: 20 },
+  authRoot: { flex: 1, paddingHorizontal: 20 },
   authCard: {
-    backgroundColor: "#FFFFFF",
     borderRadius: 28,
     paddingHorizontal: 24,
     paddingVertical: 28,
@@ -952,30 +961,28 @@ const styles = StyleSheet.create({
   },
   authIconRing: {
     width: 76, height: 76, borderRadius: 38,
-    backgroundColor: "#E8F7FA",
     alignItems: "center", justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(14,181,202,0.24)",
     marginBottom: 14,
   },
   authTitle: {
-    fontSize: 28, color: "#0F172A", textAlign: "center",
+    fontSize: 28, textAlign: "center",
     fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.6,
   },
   authText: {
-    fontSize: 14, color: "#64748B", lineHeight: 22,
+    fontSize: 14, lineHeight: 22,
     fontFamily: "Inter_400Regular", textAlign: "center",
     marginTop: 8, marginBottom: 24,
   },
   authCtaInner: {
     width: "100%",
-    height: 53, borderRadius: 28.5, backgroundColor: "#0EB5CA",
+    height: 53, borderRadius: 28.5,
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10,
   },
   authCtaText: { fontSize: 15, color: "#FFFFFF", fontFamily: "Inter_600SemiBold", letterSpacing: 0.3 },
   authSignupRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 22 },
-  authSignupPrompt: { fontSize: 13, color: "#64748B", fontFamily: "Inter_400Regular" },
-  authSignupLink: { fontSize: 13, color: "#0EB5CA", fontFamily: "Inter_700Bold" },
+  authSignupPrompt: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  authSignupLink: { fontSize: 13, fontFamily: "Inter_700Bold" },
 
   // ── Teal header ──
   tealHeader: {

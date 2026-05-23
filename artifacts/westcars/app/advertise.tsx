@@ -11,6 +11,7 @@ import {
 import { Feather } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTheme } from '@/context/ThemeContext'
 import {
   AD_SLOT_LABELS,
   FEATURED_HERO_H,
@@ -142,6 +143,8 @@ const VIDEO_PACKAGES = [
 export default function AdvertisePage() {
   const router  = useRouter()
   const insets  = useSafeAreaInsets()
+  const { colors, isDark } = useTheme()
+  const line = isDark ? colors.border : '#D9F3F7'
 
   const [adType,   setAdType]   = useState<AdType>('flyer')
   const [selected, setSelected] = useState<string>('flyer_featured')
@@ -169,31 +172,31 @@ export default function AdvertisePage() {
   }
 
   return (
-    <View style={[s.root, { paddingTop: insets.top }]}>
+    <View style={[s.root, { paddingTop: insets.top, backgroundColor: colors.background }]}>
 
       {/* ── Header ── */}
-      <View style={s.header}>
+      <View style={[s.header, { backgroundColor: colors.card, borderBottomColor: line }]}>
         <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
-          <Feather name="arrow-left" size={22} color={NAVY} />
+          <Feather name="arrow-left" size={22} color={colors.text} />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>Advertise on WestCars</Text>
+        <Text style={[s.headerTitle, { color: colors.text }]}>Advertise on WestCars</Text>
         <View style={{ width: 36 }} />
       </View>
 
       {/* ── Ad type tabs ── */}
-      <View style={s.tabRow}>
+      <View style={[s.tabRow, { backgroundColor: colors.card, borderBottomColor: line }]}>
         {AD_TYPES.map(t => {
           const active = adType === t.id
           return (
             <TouchableOpacity
               key={t.id}
-              style={[s.tab, active && s.tabActive]}
+              style={[s.tab, { backgroundColor: colors.inputBg, borderColor: line }, active && s.tabActive]}
               onPress={() => switchType(t.id)}
               activeOpacity={0.8}
             >
-              <Feather name={t.icon as any} size={16} color={active ? '#fff' : TEAL_DARK} />
+              <Feather name={t.icon as any} size={16} color={active ? '#fff' : TEAL} />
               <View>
-                <Text style={[s.tabLabel, active && s.tabLabelActive]}>{t.label}</Text>
+                <Text style={[s.tabLabel, { color: active ? '#fff' : colors.text }, active && s.tabLabelActive]}>{t.label}</Text>
                 <Text style={[s.tabTag, active && s.tabTagActive]}>{t.tag}</Text>
               </View>
             </TouchableOpacity>
@@ -205,13 +208,13 @@ export default function AdvertisePage() {
 
         {/* ── Hero blurb ── */}
         <View style={s.hero}>
-          <View style={s.heroIcon}>
+          <View style={[s.heroIcon, { backgroundColor: isDark ? 'rgba(14,181,202,0.12)' : TEAL_LIGHT }]}>
             <Feather name={adType === 'flyer' ? 'trending-up' : 'play-circle'} size={28} color={TEAL} />
           </View>
-          <Text style={s.heroTitle}>
+          <Text style={[s.heroTitle, { color: colors.text }]}>
             {adType === 'flyer' ? 'Reach buyers with a banner' : 'Stand out with video'}
           </Text>
-          <Text style={s.heroSub}>
+          <Text style={[s.heroSub, { color: colors.textSecondary }]}>
             {adType === 'flyer'
               ? `Upload sizes match the app grid — 2×2 cards (${GRID_CARD_W}×${GRID_CARD_TOTAL_H}px) or featured heroes (${FEATURED_HERO_W}×${FEATURED_HERO_H}px). Slots only appear after you book.`
               : `Video ads use the same grid sizes — grid slot ${GRID_CARD_W}×${LISTING_GRID.imageHeight}px or featured hero ${FEATURED_HERO_W}×${FEATURED_HERO_H}px.`}
@@ -224,12 +227,17 @@ export default function AdvertisePage() {
           return (
             <TouchableOpacity
               key={pkg.id}
-              style={[s.card, pkg.highlight && s.cardHighlight, active && s.cardActive]}
+              style={[
+                s.card,
+                !pkg.highlight && { backgroundColor: colors.card },
+                pkg.highlight && s.cardHighlight,
+                active && !pkg.highlight && s.cardActive,
+              ]}
               onPress={() => setSelected(pkg.id)}
               activeOpacity={0.85}
             >
               {pkg.badge && (
-                <View style={s.badge}>
+                <View style={[s.badge, !pkg.highlight && { backgroundColor: colors.inputBg }]}>
                   <Text style={s.badgeTxt}>{pkg.badge}</Text>
                 </View>
               )}
@@ -237,16 +245,16 @@ export default function AdvertisePage() {
               {/* Name + price */}
               <View style={s.cardTop}>
                 <View style={{ flex: 1 }}>
-                  <Text style={[s.pkgName, pkg.highlight && s.textWhite]}>{pkg.name}</Text>
-                  <Text style={[s.pkgDuration, pkg.highlight && s.textWhiteDim]}>{pkg.duration}</Text>
+                  <Text style={[s.pkgName, pkg.highlight ? s.textWhite : { color: colors.text }]}>{pkg.name}</Text>
+                  <Text style={[s.pkgDuration, pkg.highlight ? s.textWhiteDim : { color: colors.textTertiary }]}>{pkg.duration}</Text>
                 </View>
                 <Text style={[s.price, pkg.highlight && s.textWhite]}>{pkg.price}</Text>
               </View>
 
               {/* ── Exact dimensions chip — always visible ── */}
-              <View style={[s.dimChip, pkg.highlight && s.dimChipHero]}>
-                <Feather name="maximize-2" size={12} color={pkg.highlight ? '#fff' : TEAL_DARK} />
-                <Text style={[s.dimTxt, pkg.highlight && s.textWhite]} numberOfLines={2}>
+              <View style={[s.dimChip, !pkg.highlight && { backgroundColor: isDark ? 'rgba(14,181,202,0.12)' : TEAL_LIGHT }, pkg.highlight && s.dimChipHero]}>
+                <Feather name="maximize-2" size={12} color={pkg.highlight ? '#fff' : TEAL} />
+                <Text style={[s.dimTxt, pkg.highlight ? s.textWhite : { color: isDark ? TEAL : TEAL_DARK }]} numberOfLines={2}>
                   {pkg.dimensions.label}
                 </Text>
               </View>
@@ -260,7 +268,7 @@ export default function AdvertisePage() {
                       size={14}
                       color={pkg.highlight ? '#fff' : TEAL}
                     />
-                    <Text style={[s.featureTxt, pkg.highlight && s.textWhiteDim]}>{f}</Text>
+                    <Text style={[s.featureTxt, pkg.highlight ? s.textWhiteDim : { color: colors.textSecondary }]}>{f}</Text>
                   </View>
                 ))}
               </View>
@@ -270,7 +278,7 @@ export default function AdvertisePage() {
                 <View style={[s.radio, active && s.radioActive, pkg.highlight && s.radioHero]}>
                   {active && <View style={[s.radioDot, pkg.highlight && s.radioDotHero]} />}
                 </View>
-                <Text style={[s.selectTxt, pkg.highlight && s.textWhiteDim]}>
+                <Text style={[s.selectTxt, pkg.highlight ? s.textWhiteDim : { color: colors.textTertiary }]}>
                   {active ? 'Selected' : 'Select this plan'}
                 </Text>
               </View>
@@ -279,7 +287,7 @@ export default function AdvertisePage() {
         })}
 
         {/* ── How it works ── */}
-        <Text style={s.howTitle}>How it works</Text>
+        <Text style={[s.howTitle, { color: colors.text }]}>How it works</Text>
         {[
           { icon: 'check-square', text: 'Choose an ad type and plan above' },
           { icon: 'edit-3',       text: 'Fill in your ad details and upload creative' },
@@ -287,10 +295,10 @@ export default function AdvertisePage() {
           { icon: 'zap',          text: 'Your ad goes live instantly' },
         ].map(({ icon, text }) => (
           <View key={text} style={s.howRow}>
-            <View style={s.howIcon}>
+            <View style={[s.howIcon, { backgroundColor: isDark ? 'rgba(14,181,202,0.12)' : TEAL_LIGHT }]}>
               <Feather name={icon as any} size={16} color={TEAL} />
             </View>
-            <Text style={s.howTxt}>{text}</Text>
+            <Text style={[s.howTxt, { color: colors.textSecondary }]}>{text}</Text>
           </View>
         ))}
 
@@ -298,11 +306,11 @@ export default function AdvertisePage() {
       </ScrollView>
 
       {/* ── Sticky book bar ── */}
-      <View style={[s.bookBar, { paddingBottom: insets.bottom + 10 }]}>
+      <View style={[s.bookBar, { paddingBottom: insets.bottom + 10, backgroundColor: colors.card, borderTopColor: line }]}>
         <View style={{ flex: 1 }}>
-          <Text style={s.bookBarPkg}>{selectedPkg.name}</Text>
+          <Text style={[s.bookBarPkg, { color: colors.text }]}>{selectedPkg.name}</Text>
           <Text style={s.bookBarPrice}>{selectedPkg.price} · {selectedPkg.duration}</Text>
-          <Text style={s.bookBarDim} numberOfLines={1}>{selectedPkg.dimensions.label}</Text>
+          <Text style={[s.bookBarDim, { color: colors.textTertiary }]} numberOfLines={1}>{selectedPkg.dimensions.label}</Text>
         </View>
         <TouchableOpacity style={s.bookBtn} onPress={handleBook} activeOpacity={0.85}>
           <Text style={s.bookBtnTxt}>Book Now</Text>

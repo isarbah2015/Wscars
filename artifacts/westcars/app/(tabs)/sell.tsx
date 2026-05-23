@@ -20,6 +20,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthGatePlaceholder } from "@/components/AuthGatePlaceholder";
 import { useApp } from "@/context/AppContext";
+import { useTheme } from "@/context/ThemeContext";
 import { isFirebaseReady } from "@/lib/firebase";
 import { updateCar, uploadCarImage } from "@/services/firebase";
 import {
@@ -47,12 +48,13 @@ const STEPS = ["Photos", "Details", "Specs", "Price"];
 
 // ── Section header ────────────────────────────────────────────────────────
 function SectionHeader({ title, right, icon = "square" }: { title: string; right?: React.ReactNode; icon?: React.ComponentProps<typeof Feather>["name"] }) {
+  const { colors } = useTheme();
   return (
     <View style={sh.row}>
       <View style={sh.icon}>
         <Feather name={icon} size={10} color={TEAL} />
       </View>
-      <Text style={sh.title}>{title}</Text>
+      <Text style={[sh.title, { color: colors.text }]}>{title}</Text>
       {right && <View style={{ marginLeft: "auto" }}>{right}</View>}
     </View>
   );
@@ -60,7 +62,7 @@ function SectionHeader({ title, right, icon = "square" }: { title: string; right
 const sh = StyleSheet.create({
   row:   { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 },
   icon:  { width: 22, height: 22, borderRadius: 5, backgroundColor: TEAL_LIGHT, alignItems: "center", justifyContent: "center" },
-  title: { fontSize: 14, fontFamily: "Inter_700Bold", color: TEXT },
+  title: { fontSize: 14, fontFamily: "Inter_700Bold" },
 });
 
 // ── Inline picker (expands in place — no absolute dropdown) ───────────────
@@ -70,32 +72,34 @@ function InlinePicker({
   label: string; value: string; options: string[];
   onSelect: (v: string) => void; required?: boolean; flex?: number;
 }) {
+  const { colors, isDark } = useTheme();
+  const borderColor = isDark ? colors.border : BORDER;
   const [open, setOpen] = useState(false);
   return (
     <View style={{ flex: flex ?? 1 }}>
-      <Text style={ip.label}>
+      <Text style={[ip.label, { color: colors.textSecondary }]}>
         {label}
         {required ? <Text style={{ color: TEAL }}> •</Text> : null}
       </Text>
       <Pressable
-        style={[ip.trigger, open && ip.triggerOpen]}
+        style={[ip.trigger, { backgroundColor: colors.inputBg, borderColor }, open && ip.triggerOpen]}
         onPress={() => setOpen(v => !v)}
       >
-        <Text style={[ip.val, !value && ip.ph]} numberOfLines={1}>
+        <Text style={[ip.val, { color: colors.text }, !value && { color: colors.textTertiary }]} numberOfLines={1}>
           {value || "Select"}
         </Text>
-        <Feather name={open ? "chevron-up" : "chevron-down"} size={13} color={MUTED} />
+        <Feather name={open ? "chevron-up" : "chevron-down"} size={13} color={colors.textSecondary} />
       </Pressable>
       {open && (
-        <View style={ip.list}>
+        <View style={[ip.list, { backgroundColor: colors.card, borderColor }]}>
           <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="always" style={{ maxHeight: 160 }}>
             {options.map(opt => (
               <Pressable
                 key={opt}
-                style={[ip.opt, value === opt && ip.optActive]}
+                style={[ip.opt, { borderBottomColor: borderColor }, value === opt && ip.optActive]}
                 onPress={() => { onSelect(opt); setOpen(false); }}
               >
-                <Text style={[ip.optText, value === opt && ip.optTextActive]}>{opt}</Text>
+                <Text style={[ip.optText, { color: colors.text }, value === opt && ip.optTextActive]}>{opt}</Text>
                 {value === opt && <Feather name="check" size={12} color={TEAL} />}
               </Pressable>
             ))}
@@ -106,23 +110,26 @@ function InlinePicker({
   );
 }
 const ip = StyleSheet.create({
-  label:        { fontSize: 10, fontFamily: "Inter_600SemiBold", color: MUTED, textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 6 },
-  trigger:      { height: 44, backgroundColor: INPUT_BG, borderRadius: 10, borderWidth: 1.5, borderColor: BORDER, flexDirection: "row", alignItems: "center", paddingHorizontal: 12, justifyContent: "space-between" },
+  label:        { fontSize: 10, fontFamily: "Inter_600SemiBold", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 6 },
+  trigger:      { height: 44, borderRadius: 10, borderWidth: 1.5, flexDirection: "row", alignItems: "center", paddingHorizontal: 12, justifyContent: "space-between" },
   triggerOpen:  { borderColor: TEAL, backgroundColor: "rgba(14,181,202,0.04)" },
-  val:          { fontSize: 14, fontFamily: "Inter_400Regular", color: TEXT, flex: 1 },
-  ph:           { color: PLACEHOLDER },
-  list:         { borderWidth: 1.5, borderColor: BORDER, borderRadius: 10, backgroundColor: CARD, marginTop: 4, overflow: "hidden" },
-  opt:          { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: "#F1F5F9" },
+  val:          { fontSize: 14, fontFamily: "Inter_400Regular", flex: 1 },
+  list:         { borderWidth: 1.5, borderRadius: 10, marginTop: 4, overflow: "hidden" },
+  opt:          { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 14, paddingVertical: 11, borderBottomWidth: 1 },
   optActive:    { backgroundColor: TEAL_LIGHT },
-  optText:      { fontSize: 14, fontFamily: "Inter_400Regular", color: TEXT },
+  optText:      { fontSize: 14, fontFamily: "Inter_400Regular" },
   optTextActive:{ color: TEAL, fontFamily: "Inter_600SemiBold" },
 });
 
 // ── Main screen ───────────────────────────────────────────────────────────
 export default function SellScreen() {
   const { addCar, currentUser, isAuthenticated } = useApp();
+  const { colors, isDark } = useTheme();
   const insets  = useSafeAreaInsets();
   const topPad  = insets.top + (Platform.OS === "web" ? 67 : 0);
+  const borderColor = isDark ? colors.border : BORDER;
+  const fieldStyle = { backgroundColor: colors.inputBg, borderColor, color: colors.text };
+  const cardStyle = { backgroundColor: colors.card };
 
   const [images,       setImages]       = useState<string[]>([]);
   const [brand,        setBrand]        = useState("");
@@ -348,7 +355,7 @@ export default function SellScreen() {
         title="Sign in to sell your car"
         subtitle="List your vehicle and reach thousands of buyers across Ghana."
         topPad={topPad}
-        backgroundColor={BG}
+        backgroundColor={colors.background}
       />
     );
   }
@@ -362,7 +369,7 @@ export default function SellScreen() {
       </View>
 
       {/* ── Progress stepper ── */}
-      <View style={styles.stepperWrap}>
+      <View style={[styles.stepperWrap, cardStyle, { borderBottomColor: borderColor }]}>
         {STEPS.map((step, i) => (
           <React.Fragment key={step}>
             <View style={styles.stepItem}>
@@ -379,14 +386,14 @@ export default function SellScreen() {
       </View>
 
       <ScrollView
-        style={styles.scroll}
+        style={[styles.scroll, { backgroundColor: colors.background }]}
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 110 }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
 
         {/* ── Photos ── */}
-        <View style={styles.card}>
+        <View style={[styles.card, cardStyle]}>
           <SectionHeader
             title="Vehicle photos"
             right={<Text style={styles.photoCount}>{images.length} / 10 photos added</Text>}
@@ -422,16 +429,16 @@ export default function SellScreen() {
               </>
             )}
           </ScrollView>
-          <Text style={styles.photoHint}>
+          <Text style={[styles.photoHint, { color: colors.textSecondary }]}>
             Tap + to select photos from your gallery. First photo will be the cover.
           </Text>
         </View>
 
         {/* ── ID Lookup ── */}
-        <View style={styles.card}>
+        <View style={[styles.card, cardStyle]}>
           <SectionHeader
             title="Product identifier"
-            right={<Text style={styles.optionalTag}>optional</Text>}
+            right={<Text style={[styles.optionalTag, { color: colors.textSecondary }]}>optional</Text>}
           />
 
           {/* Type selector pills */}
@@ -439,22 +446,23 @@ export default function SellScreen() {
             {ID_TYPES.map(t => (
               <Pressable
                 key={t.key}
-                style={[styles.idTypePill, idType === t.key && styles.idTypePillActive]}
+                style={[styles.idTypePill, { backgroundColor: colors.inputBg, borderColor }, idType === t.key && styles.idTypePillActive]}
                 onPress={() => handleIdTypeChange(t.key)}
               >
-                <Text style={[styles.idTypePillText, idType === t.key && styles.idTypePillTextActive]}>
+                <Text style={[styles.idTypePillText, { color: colors.textSecondary }, idType === t.key && styles.idTypePillTextActive]}>
                   {t.label}
                 </Text>
               </Pressable>
             ))}
           </View>
 
-          <Text style={styles.idHint}>{currentIdConfig.hint}</Text>
+          <Text style={[styles.idHint, { color: colors.textSecondary }]}>{currentIdConfig.hint}</Text>
 
           <View style={styles.vinRow}>
             <TextInput
               style={[
                 styles.vinInput,
+                fieldStyle,
                 idDecoded && { borderColor: "#22C55E" },
                 !!idError  && { borderColor: "#EF4444" },
               ]}
@@ -470,7 +478,7 @@ export default function SellScreen() {
                 setIdError("");
               }}
               placeholder={currentIdConfig.format}
-              placeholderTextColor={PLACEHOLDER}
+              placeholderTextColor={colors.textTertiary}
               maxLength={currentIdConfig.maxLen}
               autoCapitalize={idType === "VIN" ? "characters" : "none"}
               autoCorrect={false}
@@ -512,7 +520,7 @@ export default function SellScreen() {
         </View>
 
         {/* ── Vehicle Details ── */}
-        <View style={styles.card}>
+        <View style={[styles.card, cardStyle]}>
           <SectionHeader title="Vehicle details" />
 
           {/* Brand | Year */}
@@ -520,13 +528,13 @@ export default function SellScreen() {
             <InlinePicker label="Brand" value={brand} options={CAR_BRANDS} onSelect={setBrand} required />
             <View style={{ width: 12 }} />
             <View style={{ flex: 1 }}>
-              <Text style={ip.label}>Year <Text style={{ color: TEAL }}>•</Text></Text>
+              <Text style={[ip.label, { color: colors.textSecondary }]}>Year <Text style={{ color: TEAL }}>•</Text></Text>
               <TextInput
-                style={styles.fieldInput}
+                style={[styles.fieldInput, fieldStyle]}
                 value={year}
                 onChangeText={setYear}
                 placeholder="2024"
-                placeholderTextColor={PLACEHOLDER}
+                placeholderTextColor={colors.textTertiary}
                 keyboardType="numeric"
                 maxLength={4}
               />
@@ -535,13 +543,13 @@ export default function SellScreen() {
 
           {/* Model */}
           <View style={{ marginTop: 14 }}>
-            <Text style={ip.label}>Model <Text style={{ color: TEAL }}>•</Text></Text>
+            <Text style={[ip.label, { color: colors.textSecondary }]}>Model <Text style={{ color: TEAL }}>•</Text></Text>
             <TextInput
-              style={styles.fieldInput}
+              style={[styles.fieldInput, fieldStyle]}
               value={model}
               onChangeText={setModel}
               placeholder="e.g. Corolla, Hilux…"
-              placeholderTextColor={PLACEHOLDER}
+              placeholderTextColor={colors.textTertiary}
             />
           </View>
 
@@ -562,13 +570,13 @@ export default function SellScreen() {
           {/* Mileage | Location */}
           <View style={[styles.row2, { marginTop: 14 }]}>
             <View style={{ flex: 1 }}>
-              <Text style={ip.label}>Mileage (km)</Text>
+              <Text style={[ip.label, { color: colors.textSecondary }]}>Mileage (km)</Text>
               <TextInput
-                style={styles.fieldInput}
+                style={[styles.fieldInput, fieldStyle]}
                 value={mileage}
                 onChangeText={setMileage}
                 placeholder="0"
-                placeholderTextColor={PLACEHOLDER}
+                placeholderTextColor={colors.textTertiary}
                 keyboardType="numeric"
               />
             </View>
@@ -578,18 +586,18 @@ export default function SellScreen() {
         </View>
 
         {/* ── Asking Price ── */}
-        <View style={styles.card}>
+        <View style={[styles.card, cardStyle]}>
           <SectionHeader title="Asking price" right={<Text style={{ color: TEAL, fontSize: 12, fontFamily: "Inter_600SemiBold" }}>•</Text>} />
-          <View style={styles.priceRow}>
+          <View style={[styles.priceRow, { backgroundColor: colors.inputBg, borderColor }]}>
             <View style={styles.ghsBadge}>
               <Text style={styles.ghsText}>GHS</Text>
             </View>
             <TextInput
-              style={styles.priceInput}
+              style={[styles.priceInput, { color: colors.text }]}
               value={price}
               onChangeText={setPrice}
               placeholder="Enter amount"
-              placeholderTextColor={PLACEHOLDER}
+              placeholderTextColor={colors.textTertiary}
               keyboardType="numeric"
             />
           </View>
@@ -597,19 +605,19 @@ export default function SellScreen() {
             <Switch
               value={negotiable}
               onValueChange={setNegotiable}
-              trackColor={{ false: BORDER, true: TEAL }}
+              trackColor={{ false: borderColor, true: TEAL }}
               thumbColor="#fff"
-              ios_backgroundColor={BORDER}
+              ios_backgroundColor={borderColor}
             />
-            <Text style={styles.negotiableText}>Price is negotiable</Text>
+            <Text style={[styles.negotiableText, { color: colors.textSecondary }]}>Price is negotiable</Text>
           </View>
         </View>
 
         {/* ── Description ── */}
-        <View style={styles.card}>
+        <View style={[styles.card, cardStyle]}>
           <SectionHeader title="Description" icon="align-left" />
           <TextInput
-            style={styles.descInput}
+            style={[styles.descInput, fieldStyle]}
             value={description}
             onChangeText={t => t.length <= 500 && setDescription(t)}
             placeholder={"Describe your vehicle — condition, features, service history…"}
@@ -618,19 +626,19 @@ export default function SellScreen() {
             numberOfLines={5}
             textAlignVertical="top"
           />
-          <Text style={styles.charCount}>{description.length} / 500</Text>
+          <Text style={[styles.charCount, { color: colors.textTertiary }]}>{description.length} / 500</Text>
         </View>
 
         {/* ── Boost banner ── */}
-        <Pressable style={styles.boostCard} onPress={() => router.push("/advertise")}>
+        <Pressable style={[styles.boostCard, cardStyle, { borderColor }]} onPress={() => router.push("/advertise")}>
           <View style={styles.boostIcon}>
             <Feather name="trending-up" size={18} color={TEAL} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.boostTitle}>Boost your listing</Text>
-            <Text style={styles.boostSub}>Get 5× more views with a sponsored ad</Text>
+            <Text style={[styles.boostTitle, { color: colors.text }]}>Boost your listing</Text>
+            <Text style={[styles.boostSub, { color: colors.textSecondary }]}>Get 5× more views with a sponsored ad</Text>
           </View>
-          <Feather name="chevron-right" size={16} color={MUTED} />
+          <Feather name="chevron-right" size={16} color={colors.textSecondary} />
         </Pressable>
 
         {/* ── Footer note ── */}
