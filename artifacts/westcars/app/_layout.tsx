@@ -23,6 +23,8 @@ import { AppProvider } from "@/context/AppContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { isFirebaseReady } from "@/lib/firebase";
+import { PAYSTACK_PUBLIC_KEY } from "@/lib/paystack";
+import { PaystackProvider } from "react-native-paystack-webview";
 
 const FEATHER_TTF = require("../assets/fonts/Feather.ttf");
 const IONICONS_TTF = require("../assets/fonts/Ionicons.ttf");
@@ -76,6 +78,7 @@ function RootLayoutNav() {
       <Stack.Screen name="conversation/[id]" options={{ presentation: "card" }} />
       <Stack.Screen name="user/[id]"         options={{ presentation: "card" }} />
       <Stack.Screen name="advertise"         options={{ presentation: "card" }} />
+      <Stack.Screen name="boost"             options={{ presentation: "card" }} />
       <Stack.Screen name="full-specs/[id]"   options={{ presentation: "card" }} />
       <Stack.Screen name="advertise-book"    options={{ presentation: "card" }} />
     </Stack>
@@ -165,7 +168,13 @@ export default function RootLayout() {
               ) : (
                 <AuthProvider>
                   <AppProvider>
-                    <RootLayoutNav />
+                    <PaystackProvider
+                      publicKey={PAYSTACK_PUBLIC_KEY}
+                      currency="GHS"
+                      defaultChannels={["card", "mobile_money", "ussd"]}
+                    >
+                      <RootLayoutNav />
+                    </PaystackProvider>
                   </AppProvider>
                 </AuthProvider>
               )}

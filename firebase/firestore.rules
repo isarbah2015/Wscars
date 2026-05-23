@@ -18,7 +18,7 @@ service cloud.firestore {
     // `verification` to this list.
     function noProtectedFieldChange() {
       return !(request.resource.data.diff(resource.data).affectedKeys()
-        .hasAny(['isAdmin', 'isVerified', 'trustScore', 'reportCount', 'totalSales']));
+        .hasAny(['isAdmin', 'isVerified', 'trustScore', 'reportCount', 'totalSales', 'sponsorship']));
     }
 
     // ── /users/{uid} ─────────────────────────────────────────────────
@@ -44,7 +44,7 @@ service cloud.firestore {
       allow update: if isAdmin()
                     || (isSignedIn() && resource.data.sellerId == request.auth.uid
                         && !(request.resource.data.diff(resource.data).affectedKeys()
-                             .hasAny(['reportCount', 'sellerId'])));
+                             .hasAny(['reportCount', 'sellerId', 'isSponsored', 'sponsoredUntil', 'boostPlan', 'boostedAt'])));
       allow delete: if isAdmin()
                     || (isSignedIn() && resource.data.sellerId == request.auth.uid);
     }
@@ -94,6 +94,13 @@ service cloud.firestore {
         allow delete: if isAdmin()
                       || (isSignedIn() && resource.data.senderId == request.auth.uid);
       }
+    }
+
+    // ── /boostPayments/{reference} ───────────────────────────────────
+    // Created by Cloud Functions; clients may read their own payment status.
+    match /boostPayments/{reference} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create, update, delete: if false;
     }
 
     // ── /transactions/{txId} ─────────────────────────────────────────

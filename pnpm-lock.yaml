@@ -365,6 +365,9 @@ importers:
       firebase:
         specifier: ^11.0.0
         version: 11.10.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)))
+      react-native-paystack-webview:
+        specifier: ^5.0.3
+        version: 5.0.3(react-native-webview@13.15.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react-native-webview:
         specifier: 13.15.0
         version: 13.15.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -4017,6 +4020,9 @@ packages:
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
 
+  '@types/validator@13.15.10':
+    resolution: {integrity: sha512-T8L6i7wCuyoK8A/ZeLYt1+q0ty3Zb9+qbSSvrIVitzT3YjZqkTZ40IbRsPanlB4h1QB3JVL1SYCdR6ngtFYcuA==}
+
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
 
@@ -6698,6 +6704,13 @@ packages:
       react: 19.1.0
       react-native: '*'
 
+  react-native-paystack-webview@5.0.3:
+    resolution: {integrity: sha512-NkQX2YD0Jqir+VAEnpRbBi/HeqZSpCcUHOpB3OSA9Ez1PdJ7jhx7kkhl6dB0CPaqrPHUXjPG7aZoXoA7V7b81Q==}
+    peerDependencies:
+      react: 19.1.0
+      react-native: '*'
+      react-native-webview: '*'
+
   react-native-reanimated@4.1.7:
     resolution: {integrity: sha512-Q4H6xA3Tn7QL0/E/KjI86I1KK4tcf+ErRE04LH34Etka2oVQhW6oXQ+Q8ZcDCVxiWp5vgbBH6XcH8BOo4w/Rhg==}
     peerDependencies:
@@ -7457,6 +7470,10 @@ packages:
   validate-npm-package-name@5.0.1:
     resolution: {integrity: sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+
+  validator@13.15.35:
+    resolution: {integrity: sha512-TQ5pAGhd5whStmqWvYF4OjQROlmv9SMFVt37qoCBdqRffuuklWYQlCNnEs2ZaIBD1kZRNnikiZOS1eqgkar0iw==}
+    engines: {node: '>= 0.10'}
 
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
@@ -11658,6 +11675,8 @@ snapshots:
 
   '@types/unist@3.0.3': {}
 
+  '@types/validator@13.15.10': {}
+
   '@types/yargs-parser@21.0.3': {}
 
   '@types/yargs@17.0.35':
@@ -14820,6 +14839,14 @@ snapshots:
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)
 
+  react-native-paystack-webview@5.0.3(react-native-webview@13.15.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
+    dependencies:
+      '@types/validator': 13.15.10
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)
+      react-native-webview: 13.15.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      validator: 13.15.35
+
   react-native-reanimated@4.1.7(react-native-worklets@0.5.1(@babel/core@7.29.0)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
     dependencies:
       react: 19.1.0
@@ -15703,6 +15730,8 @@ snapshots:
     optional: true
 
   validate-npm-package-name@5.0.1: {}
+
+  validator@13.15.35: {}
 
   vary@1.1.2: {}
 

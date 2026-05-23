@@ -59,3 +59,13 @@ export {
   uploadAvatar,
   uploadChatMedia,
 } from "./storage";
+
+export {
+  initializeBoostPayment,
+  verifyBoostPayment,
+} from "./boostPayments";
+export type {
+  InitializeBoostPaymentInput,
+  InitializeBoostPaymentResult,
+  VerifyBoostPaymentResult,
+} from "./boostPayments";

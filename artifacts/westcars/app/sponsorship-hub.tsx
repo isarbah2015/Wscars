@@ -69,9 +69,15 @@ export default function SponsorshipHubScreen() {
               <Text style={styles.statLbl}>Sponsored</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.primaryCta} onPress={() => router.push("/advertise")}>
+          <TouchableOpacity style={styles.primaryCta} onPress={() => router.push("/boost" as "/advertise")}>
             <Feather name="trending-up" size={16} color="#004D5A" />
-            <Text style={styles.primaryCtaText}>Get more ad credits</Text>
+            <Text style={styles.primaryCtaText}>Boost a listing (Paystack)</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.secondaryCta, { borderColor: isDark ? "rgba(255,255,255,0.12)" : "#E2E8F0" }]}
+            onPress={() => router.push("/advertise")}
+          >
+            <Text style={[styles.secondaryCtaText, { color: colors.textSecondary }]}>Flyer & video ad packages</Text>
           </TouchableOpacity>
         </View>
 
@@ -115,7 +121,15 @@ export default function SponsorshipHubScreen() {
                   <Text style={styles.metric}>👁 {listing.views ?? 0} views</Text>
                   <Text style={styles.metric}>💬 {msgCount} messages</Text>
                 </View>
-                <TouchableOpacity style={styles.boostBtn} onPress={() => router.push("/advertise")}>
+                <TouchableOpacity
+                  style={styles.boostBtn}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/boost",
+                      params: { carId: listing.id },
+                    } as { pathname: "/advertise" })
+                  }
+                >
                   <Text style={styles.boostBtnText}>Boost this listing</Text>
                 </TouchableOpacity>
               </View>
@@ -168,6 +182,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   primaryCtaText: { color: "#004D5A", fontSize: 14, fontFamily: "Inter_700Bold" },
+  secondaryCta: {
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingVertical: 11,
+  },
+  secondaryCtaText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   sectionTitle: { fontSize: 16, fontFamily: "Manrope_800ExtraBold", marginTop: 4 },
   sectionSub: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18, marginBottom: 4 },
   listingCard: { borderRadius: 14, borderWidth: 0.5, padding: 14, gap: 8 },

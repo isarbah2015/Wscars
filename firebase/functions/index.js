@@ -7,6 +7,9 @@
  *  4. sendVerificationEmail   — fire welcome email when a user doc is created
  *  5. reportContent           — auto-hide listings @ 3 reports
  *  6. expireListings          — daily sweep that hides expired listings
+ *  7. initializeBoostPayment  — create pending Paystack boost payment (callable)
+ *  8. verifyBoostPayment      — verify Paystack txn + activate boost (callable)
+ *  9. paystackWebhook         — Paystack charge.success webhook (HTTP)
  *
  * Deploy:
  *   cd firebase
@@ -19,7 +22,17 @@ const admin = require("firebase-admin");
 const { onDocumentCreated, onDocumentWritten } =
   require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
+const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
+const { defineSecret } = require("firebase-functions/params");
 const { logger } = require("firebase-functions/v2");
+const {
+  verifyWebhookSignature,
+  verifyTransactionWithPaystack,
+  fulfillBoostPayment,
+  createPendingBoostPayment,
+} = require("./paystackBoost");
+
+const paystackSecret = defineSecret("PAYSTACK_SECRET_KEY");
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -202,5 +215,112 @@ exports.expireListings = onSchedule(
     expired.docs.forEach((d) => batch.update(d.ref, { isHidden: true, isExpired: true }));
     await batch.commit();
     logger.info(`expireListings: hid ${expired.size} expired listings.`);
+  },
+);
+
+/* ═════════════════════════════════════════════════════════════════
+ * 7–9. Paystack boost payments (server-verified)
+ *    Set secret: firebase functions:secrets:set PAYSTACK_SECRET_KEY
+ *    Webhook URL (after deploy):
+ *      https://<region>-westcar-5c1e6.cloudfunctions.net/paystackWebhook
+ *    Register in Paystack Dashboard → Settings → API Keys & Webhooks
+ * ═══════════════════════════════════════════════════════════════ */
+
+exports.initializeBoostPayment = onCall(
+  { secrets: [paystackSecret] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in to purchase a boost.");
+    }
+    const { planId, carId, email } = request.data || {};
+    if (!planId) {
+      throw new HttpsError("invalid-argument", "planId is required.");
+    }
+    try {
+      return await createPendingBoostPayment({
+        userId: request.auth.uid,
+        planId,
+        carId: carId || null,
+        email: email || request.auth.token?.email || null,
+      });
+    } catch (err) {
+      logger.warn("initializeBoostPayment:", err);
+      throw new HttpsError("failed-precondition", err.message || "Could not start payment.");
+    }
+  },
+);
+
+exports.verifyBoostPayment = onCall(
+  { secrets: [paystackSecret] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+    const { reference } = request.data || {};
+    if (!reference) {
+      throw new HttpsError("invalid-argument", "reference is required.");
+    }
+
+    const paymentSnap = await db.doc(`boostPayments/${reference}`).get();
+    if (!paymentSnap.exists) {
+      throw new HttpsError("not-found", "Payment not found.");
+    }
+    const payment = paymentSnap.data();
+    if (payment.userId !== request.auth.uid) {
+      throw new HttpsError("permission-denied", "Not your payment.");
+    }
+    if (payment.status === "completed") {
+      return { ok: true, status: "completed", expiresAt: payment.expiresAt };
+    }
+
+    let paystackData;
+    try {
+      paystackData = await verifyTransactionWithPaystack(paystackSecret.value(), reference);
+    } catch (err) {
+      logger.warn("verifyBoostPayment:", err);
+      throw new HttpsError(
+        "aborted",
+        "Payment not verified yet. If you were charged, wait a moment and tap Verify again.",
+      );
+    }
+
+    if (paystackData.status !== "success") {
+      throw new HttpsError("failed-precondition", "Payment was not successful.");
+    }
+
+    const result = await fulfillBoostPayment(reference, paystackData);
+    if (!result.ok) {
+      throw new HttpsError("failed-precondition", result.reason || "Could not activate boost.");
+    }
+    return { ok: true, status: "completed", expiresAt: result.expiresAt };
+  },
+);
+
+exports.paystackWebhook = onRequest(
+  { secrets: [paystackSecret], cors: false },
+  async (req, res) => {
+    if (req.method !== "POST") {
+      res.status(405).send("Method Not Allowed");
+      return;
+    }
+
+    const signature = req.get("x-paystack-signature");
+    const rawBody = req.rawBody;
+    if (!verifyWebhookSignature(paystackSecret.value(), rawBody, signature)) {
+      logger.warn("paystackWebhook: invalid signature");
+      res.status(401).send("Invalid signature");
+      return;
+    }
+
+    const event = req.body;
+    try {
+      if (event?.event === "charge.success" && event.data?.reference) {
+        await fulfillBoostPayment(event.data.reference, event.data);
+      }
+      res.status(200).json({ received: true });
+    } catch (err) {
+      logger.error("paystackWebhook:", err);
+      res.status(500).json({ received: false });
+    }
   },
 );

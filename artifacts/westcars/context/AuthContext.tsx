@@ -14,6 +14,8 @@ export interface ChineseSellerProfile {
 export interface SponsorshipInfo {
   tier?: string;
   adCredits?: number;
+  activePlan?: string;
+  expiresAt?: string;
 }
 
 interface AuthContextType {

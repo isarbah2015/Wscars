@@ -630,7 +630,7 @@ export default function SellScreen() {
         </View>
 
         {/* ── Boost banner ── */}
-        <Pressable style={[styles.boostCard, cardStyle, { borderColor }]} onPress={() => router.push("/advertise")}>
+        <Pressable style={[styles.boostCard, cardStyle, { borderColor }]} onPress={() => router.push("/boost" as "/advertise")}>
           <View style={styles.boostIcon}>
             <Feather name="trending-up" size={18} color={TEAL} />
           </View>
