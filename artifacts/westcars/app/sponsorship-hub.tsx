@@ -124,10 +124,7 @@ export default function SponsorshipHubScreen() {
                 <TouchableOpacity
                   style={styles.boostBtn}
                   onPress={() =>
-                    router.push({
-                      pathname: "/boost",
-                      params: { carId: listing.id },
-                    } as { pathname: "/advertise" })
+                    router.push(`/boost?carId=${encodeURIComponent(listing.id)}` as "/advertise")
                   }
                 >
                   <Text style={styles.boostBtnText}>Boost this listing</Text>
