@@ -10,6 +10,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  getDoc,
   serverTimestamp,
   type Unsubscribe,
 } from "firebase/firestore";
@@ -60,7 +61,19 @@ export async function createCar(carData: Omit<Car, "id">): Promise<string> {
 
 export async function updateCar(id: string, updates: Partial<Car>): Promise<void> {
   ensureReady();
-  await updateDoc(doc(db!, COLL, id), updates as any);
+  let payload = { ...updates };
+  if (updates.price !== undefined) {
+    const snap = await getDoc(doc(db!, COLL, id));
+    const current = snap.data()?.price;
+    if (typeof current === "number" && current !== updates.price) {
+      payload = {
+        ...payload,
+        previousPrice: current,
+        priceChangedAt: new Date().toISOString(),
+      };
+    }
+  }
+  await updateDoc(doc(db!, COLL, id), payload as Record<string, unknown>);
 }
 
 export async function deleteCar(id: string): Promise<void> {

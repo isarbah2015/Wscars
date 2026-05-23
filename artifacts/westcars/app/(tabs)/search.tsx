@@ -3,6 +3,8 @@ import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Animated,
   Dimensions,
   FlatList,
@@ -18,15 +20,19 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { router } from "expo-router";
 import { Slider } from "@miblanchard/react-native-slider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ListingGridLayoutRow } from "@/components/ListingGrid2x2";
 import { listingGridContainerStyle } from "@/constants/listingGrid";
 import { buildGridLayout, buildListingGridItems } from "@/utils/buildListingGridItems";
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { ThemeColors, useTheme } from "@/context/ThemeContext";
 import { Car } from "@/types";
-import { CAR_BRANDS, CONDITIONS, GHANA_CITIES, TRANSMISSIONS } from "@/utils/ghanaData";
+import { createSavedSearch } from "@/services/firebase/savedSearches";
+import { CAR_BRANDS, CONDITIONS, isChinaListingLocation, SEARCH_FILTER_LOCATIONS, TRANSMISSIONS } from "@/utils/ghanaData";
+import { buildSavedSearchLabel, filtersAreActive } from "@/utils/listingSearchFilters";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -121,7 +127,7 @@ const ALL_BRANDS = EXTENDED_BRANDS;
 const BODY_TYPES = ["SUV", "Sedan", "Pickup", "Truck", "Bus", "Heavy", "Moto"];
 
 // ─── Quick filters ─────────────────────────────────────────
-type QuickFilterKey = "All"|"SUV"|"Sedan"|"Tokunbo"|"Budget"|"Luxury"|"Pickup"|"Truck"|"Bus"|"Heavy"|"Moto"|"New";
+type QuickFilterKey = "All"|"SUV"|"Sedan"|"Tokunbo"|"China"|"Budget"|"Luxury"|"Pickup"|"Truck"|"Bus"|"Heavy"|"Moto"|"New";
 
 const QUICK_FILTERS: { key: QuickFilterKey; label: string; color: string }[] = [
   { key: "All",     label: "All",     color: "#0EB5CA" },
@@ -130,6 +136,7 @@ const QUICK_FILTERS: { key: QuickFilterKey; label: string; color: string }[] = [
   { key: "Sedan",   label: "Sedan",   color: "#EC4899" },
   { key: "Luxury",  label: "Luxury",  color: "#A855F7" },
   { key: "Tokunbo", label: "Tokunbo", color: "#22C55E" },
+  { key: "China",   label: "China",   color: "#DC2626" },
   { key: "New",     label: "New",     color: "#7C3AED" },
   { key: "Pickup",  label: "Pickup",  color: "#F97316" },
   { key: "Truck",   label: "Truck",   color: "#DC2626" },
@@ -391,6 +398,12 @@ function matchesQuickFilter(car: Car, key: QuickFilterKey): boolean {
   if (key === "SUV")     return cat.includes("suv") || cat.includes("4x4") || cat.includes("4×4");
   if (key === "Sedan")   return cat.includes("sedan");
   if (key === "Tokunbo") return car.condition === "Foreign Used";
+  if (key === "China") {
+    return (
+      isChinaListingLocation(car.location) ||
+      !!car.seller?.chineseSellerProfile?.isChineseSeller
+    );
+  }
   if (key === "Budget")  return car.price < 100000;
   if (key === "Luxury")  return car.price > 300000;
   if (key === "Pickup")  return cat.includes("pickup");
@@ -501,7 +514,7 @@ function FilterModal({
   };
 
   const visibleBrands = showAllBrands ? ALL_BRANDS : ALL_BRANDS.slice(0, 15);
-  const visibleCities = GHANA_CITIES.filter((city) =>
+  const visibleCities = SEARCH_FILTER_LOCATIONS.filter((city) =>
     city.toLowerCase().includes(citySearch.trim().toLowerCase())
   );
   const activeCount =
@@ -669,7 +682,7 @@ function FilterModal({
 
             {/* ── Location ── */}
             <View style={fS.section}>
-              <Text style={fS.secLabel}>City / Region</Text>
+              <Text style={fS.secLabel}>Location (Ghana, ports & China)</Text>
               <View style={fS.citySearchBox}>
                 <Feather name="search" size={15} color={colors.textTertiary} />
                 <TextInput
@@ -711,7 +724,8 @@ function FilterModal({
 // MAIN SEARCH SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
 export default function SearchScreen() {
-  const { cars } = useApp();
+  const { cars, isAuthenticated } = useApp();
+  const { user } = useAuth();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 10 : insets.top;
@@ -722,6 +736,7 @@ export default function SearchScreen() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [activeFilters, setActiveFilters] = useState<FilterState | null>(null);
   const [quickFilter,   setQuickFilter]   = useState<QuickFilterKey>("All");
+  const [savingAlert,   setSavingAlert]   = useState(false);
 
   const chipScrollRef = useRef<ScrollView>(null);
   const chipLayouts   = useRef<Partial<Record<QuickFilterKey, { x: number; width: number }>>>({});
@@ -914,6 +929,45 @@ export default function SearchScreen() {
     return chips;
   }, [activeFilters]);
 
+  const canSaveAlert =
+    isAuthenticated &&
+    !!user &&
+    (hasFilters || quickFilter !== "All" || query.trim().length > 0);
+
+  const handleSaveSearchAlert = React.useCallback(async () => {
+    if (!user?.uid) {
+      Alert.alert("Sign in required", "Create an account to save search alerts.", [
+        { text: "Sign in", onPress: () => router.push("/auth/login") },
+        { text: "Cancel", style: "cancel" },
+      ]);
+      return;
+    }
+    if (!canSaveAlert) {
+      Alert.alert("Add filters", "Set a keyword, quick filter, or advanced filters first.");
+      return;
+    }
+    setSavingAlert(true);
+    try {
+      const name = buildSavedSearchLabel({
+        query,
+        quickFilter,
+        filters: filtersAreActive(activeFilters) ? activeFilters : null,
+      });
+      await createSavedSearch({
+        userId: user.uid,
+        name,
+        query,
+        quickFilter,
+        filters: activeFilters,
+      });
+      Alert.alert("Alert saved", `We'll notify you when new listings match:\n${name}`);
+    } catch {
+      Alert.alert("Could not save", "Check your connection and try again.");
+    } finally {
+      setSavingAlert(false);
+    }
+  }, [user?.uid, canSaveAlert, query, quickFilter, activeFilters]);
+
   const removeFilter = React.useCallback((key: string) => {
     setActiveFilters((prev) => {
       if (!prev) return prev;
@@ -968,6 +1022,17 @@ export default function SearchScreen() {
               </Pressable>
             )}
           </View>
+          <Pressable
+            style={[S.alertBtn, !canSaveAlert && S.alertBtnMuted]}
+            onPress={handleSaveSearchAlert}
+            disabled={savingAlert}
+          >
+            {savingAlert ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Feather name="bell" size={17} color="#fff" />
+            )}
+          </Pressable>
           <Pressable style={S.filterBtn} onPress={() => setFilterVisible(true)}>
             <Feather name="sliders" size={18} color="#fff" />
             {hasFilters && <View style={S.filterDot} />}
@@ -1073,6 +1138,8 @@ const S = StyleSheet.create({
   searchInput: { flex: 1, flexDirection: "row", alignItems: "center", borderRadius: 12, borderWidth: 1, paddingHorizontal: 14, height: 46, minHeight: 46, gap: 10 },
   input:       { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular" },
 
+  alertBtn: { width: 46, height: 46, borderRadius: 12, backgroundColor: ORANGE, alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  alertBtnMuted: { opacity: 0.45 },
   filterBtn: { width: 46, height: 46, borderRadius: 12, backgroundColor: TEAL, alignItems: "center", justifyContent: "center", flexShrink: 0 },
   filterDot: { position: "absolute", top: 8, right: 8, width: 7, height: 7, borderRadius: 4, backgroundColor: "#fff", borderWidth: 1.5, borderColor: TEAL },
 

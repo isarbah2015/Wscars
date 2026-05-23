@@ -3,13 +3,9 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth } from '@/lib/firebase-persistence';
 import { db } from '@/lib/firebase';
+import type { ChineseSellerProfile } from '@/types';
 
-export interface ChineseSellerProfile {
-  isChineseSeller: boolean;
-  wechatId?: string;
-  locationInChina?: string;
-  businessName?: string;
-}
+export type { ChineseSellerProfile };
 
 export interface SponsorshipInfo {
   tier?: string;

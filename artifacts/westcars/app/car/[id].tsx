@@ -26,8 +26,11 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
+import { ChineseSellerCard } from "@/components/ChineseSellerCard";
+import { getPriceChange } from "@/utils/priceChange";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { getCarTechSpecs } from "@/utils/buildTechSpecs";
+import { isChinaListingLocation } from "@/utils/ghanaData";
 
 const { width } = Dimensions.get("window");
 const HERO_H = 280;
@@ -156,8 +159,42 @@ export default function CarDetailScreen() {
       : `${car.mileage} km`;
 
   const priceLabel = `GHS ${car.price.toLocaleString()}`;
-
+  const priceChange = getPriceChange(car);
   const techSpecs = getCarTechSpecs(car);
+
+  const listedLabel = (() => {
+    const created = new Date(car.createdAt);
+    if (Number.isNaN(created.getTime())) return null;
+    const days = Math.floor((Date.now() - created.getTime()) / 86_400_000);
+    if (days <= 0) return "Today";
+    if (days === 1) return "Yesterday";
+    if (days < 7) return `${days}d ago`;
+    if (days < 30) return `${Math.floor(days / 7)}w ago`;
+    return car.createdAt;
+  })();
+
+  const locationShort = car.location?.split(",")[0] ?? car.location;
+
+  const detailStats: {
+    icon: React.ComponentProps<typeof Feather>["name"];
+    label: string;
+    val: string;
+  }[] = [
+    { icon: "activity", label: "Mileage", val: mileageLabel },
+    { icon: "droplet", label: "Fuel", val: car.fuelType || "—" },
+    { icon: "settings", label: "Transmission", val: car.transmission || "—" },
+    { icon: "tag", label: "Condition", val: car.condition || "—" },
+    { icon: "truck", label: "Body", val: car.category || "—" },
+    { icon: "map-pin", label: "Location", val: locationShort || "—" },
+    {
+      icon: "zap",
+      label: "Power",
+      val: techSpecs.horsepower ? `${techSpecs.horsepower} hp` : "—",
+    },
+    ...(car.color?.trim()
+      ? [{ icon: "circle" as const, label: "Colour", val: car.color.trim() }]
+      : []),
+  ];
 
   const specs = [
     { icon: "box"        as const, label: "Body",     val: techSpecs.bodyType ?? car.category },
@@ -338,45 +375,103 @@ export default function CarDetailScreen() {
           </View>
         </View>
 
-        {/* ── Title ── */}
-        <Text style={[styles.carName, { color: colors.text }]}>
-          {car.brand} {car.model}
-        </Text>
-        <Text style={[styles.carSub, { color: colors.textTertiary }]}>
-          {[
-            car.techSpecs?.trim ?? car.category,
-            car.fuelType,
-            car.transmission,
-            car.techSpecs?.color,
-          ]
-            .filter(Boolean)
-            .join(" · ")}
-        </Text>
+        {/* ── Title + price (right: listing meta) ── */}
+        <View style={styles.titleRow}>
+          <View style={styles.titleLeft}>
+            <Text style={[styles.carName, { color: colors.text }]}>
+              {car.brand} {car.model}
+            </Text>
+            <Text style={[styles.carSub, { color: colors.textTertiary }]}>
+              {[
+                car.techSpecs?.trim ?? car.category,
+                car.fuelType,
+                car.transmission,
+                car.techSpecs?.color,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </Text>
+            <View style={styles.priceRow}>
+              <View style={styles.priceBadge}>
+                <Text style={styles.priceNum}>{priceLabel}</Text>
+              </View>
+            </View>
+            {priceChange ? (
+              <View
+                style={[
+                  styles.priceChangePill,
+                  priceChange.direction === "down" ? styles.priceChangeDown : styles.priceChangeUp,
+                ]}
+              >
+                <Feather
+                  name={priceChange.direction === "down" ? "trending-down" : "trending-up"}
+                  size={12}
+                  color={priceChange.direction === "down" ? "#16A34A" : "#DC2626"}
+                />
+                <Text
+                  style={{
+                    fontSize: 11,
+                    fontFamily: "Inter_600SemiBold",
+                    color: priceChange.direction === "down" ? "#16A34A" : "#DC2626",
+                  }}
+                >
+                  {priceChange.direction === "down" ? "Reduced" : "Increased"} · Was GHS{" "}
+                  {priceChange.previousPrice.toLocaleString()}
+                </Text>
+              </View>
+            ) : null}
+          </View>
 
-        {/* ── Price ── */}
-        <View style={styles.priceBadge}>
-          <Text style={styles.priceNum}>{priceLabel}</Text>
+          <View style={[styles.titleRight, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F8FAFC" }]}>
+            <Text style={[styles.metaYear, { color: colors.text }]}>{car.year}</Text>
+            {listedLabel ? (
+              <View style={styles.metaLine}>
+                <Feather name="clock" size={11} color={colors.textTertiary} />
+                <Text style={[styles.metaText, { color: colors.textSecondary }]}>{listedLabel}</Text>
+              </View>
+            ) : null}
+            {car.views != null && car.views > 0 ? (
+              <View style={styles.metaLine}>
+                <Feather name="eye" size={11} color={colors.textTertiary} />
+                <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+                  {car.views >= 1000 ? `${(car.views / 1000).toFixed(1)}k` : car.views} views
+                </Text>
+              </View>
+            ) : null}
+            {locationShort ? (
+              <View style={styles.metaLine}>
+                <Feather name="map-pin" size={11} color={colors.textTertiary} />
+                <Text style={[styles.metaText, { color: colors.textSecondary }]} numberOfLines={2}>
+                  {locationShort}
+                </Text>
+              </View>
+            ) : null}
+            {car.negotiable ? (
+              <View style={styles.metaNegotiable}>
+                <Text style={styles.metaNegotiableText}>Negotiable</Text>
+              </View>
+            ) : null}
+          </View>
         </View>
 
-        {/* ── Stats row ── */}
+        {/* ── Vehicle details (icon row under price — same style as before) ── */}
         <View style={[styles.statsRow, { backgroundColor: card }]}>
-          <View style={styles.stat}>
-            <Feather name="activity" size={22} color={colors.textSecondary} />
-            <Text style={[styles.statVal, { color: colors.text }]}>{mileageLabel}</Text>
-            <Text style={[styles.statLabel, { color: colors.textTertiary }]}>Mileage</Text>
-          </View>
-          <View style={[styles.stat, styles.statBorder, { borderLeftColor: isDark ? colors.border : "#f0f0f0" }]}>
-            <Feather name="clock" size={22} color={colors.textSecondary} />
-            <Text style={[styles.statVal, { color: colors.text }]}>{car.year}</Text>
-            <Text style={[styles.statLabel, { color: colors.textTertiary }]}>Year</Text>
-          </View>
-          <View style={[styles.stat, styles.statBorder, { borderLeftColor: isDark ? colors.border : "#f0f0f0" }]}>
-            <Feather name="zap" size={22} color={colors.textSecondary} />
-            <Text style={[styles.statVal, { color: colors.text }]}>
-              {car.techSpecs?.horsepower ? `${car.techSpecs.horsepower}hp` : "—"}
-            </Text>
-            <Text style={[styles.statLabel, { color: colors.textTertiary }]}>Power</Text>
-          </View>
+          {detailStats.map((item, i) => (
+            <View
+              key={item.label}
+              style={[
+                styles.stat,
+                i % 3 !== 0 && styles.statBorder,
+                { borderLeftColor: isDark ? colors.border : "#f0f0f0" },
+              ]}
+            >
+              <Feather name={item.icon} size={20} color={colors.textSecondary} />
+              <Text style={[styles.statVal, { color: colors.text }]} numberOfLines={1}>
+                {item.val}
+              </Text>
+              <Text style={[styles.statLabel, { color: colors.textTertiary }]}>{item.label}</Text>
+            </View>
+          ))}
         </View>
 
         {/* ── Description ── */}
@@ -387,8 +482,23 @@ export default function CarDetailScreen() {
           </>
         ) : null}
 
+        {isChinaListingLocation(car.location) && (
+          <View style={[styles.chinaOriginBanner, { backgroundColor: isDark ? "rgba(220,38,38,0.12)" : "#FEF2F2" }]}>
+            <Text style={styles.chinaOriginText}>
+              🇨🇳 Import / China-origin listing — confirm shipping and customs with the seller before payment.
+            </Text>
+          </View>
+        )}
+
+        {car.seller?.chineseSellerProfile?.isChineseSeller ? (
+          <>
+            <Text style={[styles.sectionHead, { color: colors.text }]}>Importer profile</Text>
+            <ChineseSellerCard profile={car.seller.chineseSellerProfile} />
+          </>
+        ) : null}
+
         {/* ── Quick specs grid ── */}
-        <Text style={[styles.sectionHead, { color: colors.text }]}>Specs</Text>
+        <Text style={[styles.sectionHead, { color: colors.text }]}>Technical specs</Text>
         <View style={styles.specsGrid}>
           {specs.map((s, i) => (
             <View key={i} style={[styles.specCard, { backgroundColor: card }]}>
@@ -629,33 +739,119 @@ const styles = StyleSheet.create({
   badgeGray:      { backgroundColor: "#f0f0f0" },
   badgeGrayText:  { fontSize: 11, fontWeight: "600" },
 
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    marginBottom: 12,
+  },
+  titleLeft: {
+    flex: 1,
+    minWidth: 0,
+  },
+  titleRight: {
+    width: 108,
+    borderRadius: 12,
+    padding: 10,
+    gap: 6,
+    alignItems: "flex-start",
+  },
+  metaYear: {
+    fontSize: 22,
+    fontFamily: "Inter_700Bold",
+    lineHeight: 26,
+  },
+  metaLine: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  metaText: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+    flex: 1,
+  },
+  metaNegotiable: {
+    backgroundColor: "#DCFCE7",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 20,
+    marginTop: 2,
+  },
+  metaNegotiableText: {
+    fontSize: 10,
+    fontFamily: "Inter_600SemiBold",
+    color: "#16A34A",
+  },
+
   // Car title
   carName: { fontSize: 22, fontWeight: "800", letterSpacing: 0.5, marginBottom: 4 },
-  carSub:  { fontSize: 13, marginBottom: 12 },
+  carSub:  { fontSize: 13, marginBottom: 10 },
+
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
+  },
 
   // Price
   priceBadge: {
     backgroundColor: "#0EB5CA", borderRadius: 14,
     paddingHorizontal: 18, paddingVertical: 10,
-    alignSelf: "flex-start", marginBottom: 16,
+    alignSelf: "flex-start",
   },
   priceNum: { fontSize: 20, fontWeight: "800", color: "#fff", letterSpacing: -0.5 },
+  priceChangePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginTop: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+  },
+  priceChangeDown: { backgroundColor: "rgba(22,163,74,0.1)" },
+  priceChangeUp: { backgroundColor: "rgba(220,38,38,0.1)" },
 
-  // Stats row
+  // Stats row — 3 columns, wraps with vehicle details
   statsRow: {
-    flexDirection: "row", borderRadius: 16, paddingVertical: 14, marginBottom: 16,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    borderRadius: 16,
+    paddingVertical: 6,
+    marginBottom: 16,
     ...Platform.select({
       ios:     { shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 6, shadowOffset: { width: 0, height: 1 } },
       android: { elevation: 1 },
     }),
   },
-  stat:       { flex: 1, alignItems: "center", gap: 4 },
+  stat: {
+    width: "33.333%",
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 12,
+  },
   statBorder: { borderLeftWidth: 1 },
-  statVal:    { fontSize: 16, fontWeight: "700", marginTop: 4 },
-  statLabel:  { fontSize: 11 },
+  statVal:    { fontSize: 14, fontWeight: "700", marginTop: 4, textAlign: "center", paddingHorizontal: 4 },
+  statLabel:  { fontSize: 10, textAlign: "center" },
 
   // Section headings
   sectionHead: { fontSize: 18, fontWeight: "700", marginBottom: 10, marginTop: 6 },
+  chinaOriginBanner: {
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "rgba(220,38,38,0.2)",
+  },
+  chinaOriginText: {
+    fontSize: 12,
+    fontFamily: "Inter_500Medium",
+    color: "#B91C1C",
+    lineHeight: 18,
+  },
 
   // Description
   desc: { fontSize: 14, lineHeight: 22, marginBottom: 16 },

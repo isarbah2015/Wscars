@@ -2,7 +2,7 @@ import { Car, TechSpecs } from "@/types";
 
 type CarSpecInput = Pick<
   Car,
-  "brand" | "model" | "year" | "fuelType" | "transmission" | "condition" | "category" | "mileage" | "location"
+  "brand" | "model" | "year" | "fuelType" | "transmission" | "condition" | "category" | "mileage" | "location" | "color"
 >;
 
 /** Build displayable tech specs from listing fields when VIN/dealer data isn't available. */
@@ -34,7 +34,7 @@ export function buildTechSpecs(car: CarSpecInput): TechSpecs {
   return {
     bodyType: bodyMap[cat] ?? "Passenger car",
     owners: car.condition === "New" ? 0 : 1,
-    color: "As listed",
+    color: car.color?.trim() || "As listed",
     trim: `${car.brand} ${car.model}`,
     country: car.condition === "Foreign Used" ? "Import" : "Ghana",
     carClass: cat === "suv" ? "J (SUV)" : cat === "pickup" ? "N (Pickup)" : "D (Mid-size)",

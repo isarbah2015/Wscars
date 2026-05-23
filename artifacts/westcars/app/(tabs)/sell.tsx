@@ -20,15 +20,17 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthGatePlaceholder } from "@/components/AuthGatePlaceholder";
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { isFirebaseReady } from "@/lib/firebase";
 import { updateCar, uploadCarImage } from "@/services/firebase";
 import {
   CAR_BRANDS,
+  CHINA_SELLER_LISTING_LABEL,
   CONDITIONS,
   FUEL_TYPES,
+  formatChinaLocation,
   getLocationOptions,
-  GHANA_CITIES,
   TRANSMISSIONS,
   VEHICLE_TYPES,
 } from "@/utils/ghanaData";
@@ -124,6 +126,7 @@ const ip = StyleSheet.create({
 // ── Main screen ───────────────────────────────────────────────────────────
 export default function SellScreen() {
   const { addCar, currentUser, isAuthenticated } = useApp();
+  const { chineseProfile } = useAuth();
   const { colors, isDark } = useTheme();
   const insets  = useSafeAreaInsets();
   const topPad  = insets.top + (Platform.OS === "web" ? 67 : 0);
@@ -141,6 +144,7 @@ export default function SellScreen() {
   const [transmission, setTransmission] = useState("");
   const [condition,    setCondition]    = useState("");
   const [location,     setLocation]     = useState("");
+  const [color,        setColor]        = useState("");
   const [description,  setDescription]  = useState("");
   const [vehicleType,  setVehicleType]  = useState("");
   const [negotiable,   setNegotiable]   = useState(false);
@@ -162,13 +166,32 @@ export default function SellScreen() {
 
   const currentIdConfig = ID_TYPES.find(t => t.key === idType)!;
 
-  const locationOptions = useMemo(() => getLocationOptions(condition), [condition]);
+  const isChineseSeller = !!chineseProfile?.isChineseSeller;
+
+  const locationOptions = useMemo(
+    () =>
+      getLocationOptions(condition, {
+        isChineseSeller,
+        locationInChina: chineseProfile?.locationInChina,
+      }),
+    [condition, isChineseSeller, chineseProfile?.locationInChina],
+  );
 
   useEffect(() => {
     if (location && !locationOptions.includes(location)) {
       setLocation("");
     }
   }, [location, locationOptions]);
+
+  useEffect(() => {
+    if (!isChineseSeller || location || !condition) return;
+    const suggested = chineseProfile?.locationInChina?.trim()
+      ? formatChinaLocation(chineseProfile.locationInChina)
+      : CHINA_SELLER_LISTING_LABEL;
+    if (locationOptions.includes(suggested)) {
+      setLocation(suggested);
+    }
+  }, [isChineseSeller, condition, chineseProfile?.locationInChina, locationOptions]);
 
   const resetForm = () => {
     setImages([]);
@@ -181,6 +204,7 @@ export default function SellScreen() {
     setTransmission("");
     setCondition("");
     setLocation("");
+    setColor("");
     setDescription("");
     setVehicleType("");
     setNegotiable(false);
@@ -290,8 +314,11 @@ export default function SellScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!brand || !model || !year || !price || !condition || !location) {
-      Alert.alert("Missing info", "Please fill in all required fields (marked •).");
+    if (!brand || !model || !year || !price || !condition || !location || !fuelType || !transmission || !vehicleType) {
+      Alert.alert(
+        "Missing info",
+        "Please complete all required fields: brand, model, year, type, condition, fuel, transmission, location, and price.",
+      );
       return;
     }
     setSubmitting(true);
@@ -305,22 +332,27 @@ export default function SellScreen() {
         + idLine
         + (negotiable ? (description.trim() || idLine ? "\nPrice negotiable." : "Price negotiable.") : "");
 
-      const carId = await addCar({
-        brand,
-        model,
-        year:         parseInt(year),
-        price:        parseFloat(price),
-        mileage:      parseInt(mileage || "0"),
-        fuelType:     fuelType     || "Petrol",
-        transmission: transmission || "Automatic",
-        condition,
-        location,
-        description:  finalDesc,
-        images:       initialImages,
-        sellerId:     currentUser?.id || "currentUser",
-        isFeatured:   false,
-        category:     vehicleType || "sedan",
-      });
+      const carId = await addCar(
+        {
+          brand,
+          model,
+          year:         parseInt(year),
+          price:        parseFloat(price),
+          mileage:      parseInt(mileage || "0"),
+          fuelType,
+          transmission,
+          condition,
+          location,
+          description:  finalDesc,
+          images:       initialImages,
+          sellerId:     currentUser?.id || "currentUser",
+          isFeatured:   false,
+          category:     vehicleType,
+          color:        color.trim() || undefined,
+          negotiable,
+        },
+        { chineseSellerProfile: chineseProfile ?? undefined },
+      );
 
       if (carId && isFirebaseReady() && currentUser?.id && images.length > 0) {
         try {
@@ -555,19 +587,19 @@ export default function SellScreen() {
 
           {/* Type | Condition */}
           <View style={[styles.row2, { marginTop: 14 }]}>
-            <InlinePicker label="Type" value={vehicleType} options={VEHICLE_TYPES} onSelect={setVehicleType} />
+            <InlinePicker label="Type" value={vehicleType} options={VEHICLE_TYPES} onSelect={setVehicleType} required />
             <View style={{ width: 12 }} />
             <InlinePicker label="Condition" value={condition} options={CONDITIONS} onSelect={setCondition} required />
           </View>
 
           {/* Fuel | Transmission */}
           <View style={[styles.row2, { marginTop: 14 }]}>
-            <InlinePicker label="Fuel" value={fuelType} options={FUEL_TYPES} onSelect={setFuelType} />
+            <InlinePicker label="Fuel" value={fuelType} options={FUEL_TYPES} onSelect={setFuelType} required />
             <View style={{ width: 12 }} />
-            <InlinePicker label="Transmission" value={transmission} options={TRANSMISSIONS} onSelect={setTransmission} />
+            <InlinePicker label="Transmission" value={transmission} options={TRANSMISSIONS} onSelect={setTransmission} required />
           </View>
 
-          {/* Mileage | Location */}
+          {/* Mileage | Colour */}
           <View style={[styles.row2, { marginTop: 14 }]}>
             <View style={{ flex: 1 }}>
               <Text style={[ip.label, { color: colors.textSecondary }]}>Mileage (km)</Text>
@@ -581,8 +613,51 @@ export default function SellScreen() {
               />
             </View>
             <View style={{ width: 12 }} />
-            <InlinePicker label="Location" value={location} options={locationOptions} onSelect={setLocation} required />
+            <View style={{ flex: 1 }}>
+              <Text style={[ip.label, { color: colors.textSecondary }]}>Colour</Text>
+              <TextInput
+                style={[styles.fieldInput, fieldStyle]}
+                value={color}
+                onChangeText={setColor}
+                placeholder="e.g. White, Black"
+                placeholderTextColor={colors.textTertiary}
+              />
+            </View>
           </View>
+        </View>
+
+        {/* ── Location & origin ── */}
+        <View style={[styles.card, cardStyle]}>
+          <SectionHeader title="Location & origin" icon="map-pin" />
+          {isChineseSeller ? (
+            <View style={[styles.chinaHint, { backgroundColor: isDark ? "rgba(255,140,0,0.12)" : "#FFF7ED", borderColor: isDark ? "rgba(255,140,0,0.3)" : "rgba(255,140,0,0.35)" }]}>
+              <Text style={[styles.chinaHintTitle, { color: colors.text }]}>Chinese seller listing</Text>
+              <Text style={[styles.chinaHintBody, { color: colors.textSecondary }]}>
+                Select where the vehicle is now: your city in China, “Vehicle in China”, a Ghana port if cleared, or Foreign — China if en route.
+              </Text>
+            </View>
+          ) : (
+            <Text style={[styles.locationHint, { color: colors.textSecondary }]}>
+              Ghana sellers: choose your city. Tokunbo / foreign used: pick origin country or Ghana delivery city.
+            </Text>
+          )}
+          <View style={{ marginTop: 12 }}>
+            <InlinePicker
+              label={isChineseSeller ? "Vehicle location" : "Location"}
+              value={location}
+              options={locationOptions}
+              onSelect={setLocation}
+              required
+            />
+          </View>
+          {!isChineseSeller && (
+            <Pressable style={styles.profileLink} onPress={() => router.push("/(tabs)/profile")}>
+              <Feather name="user" size={14} color={TEAL} />
+              <Text style={styles.profileLinkText}>
+                Importing from China? Enable “Chinese Seller” in Profile → Account details
+              </Text>
+            </Pressable>
+          )}
         </View>
 
         {/* ── Asking Price ── */}
@@ -722,6 +797,30 @@ const styles = StyleSheet.create({
     overflow: "visible",
   },
   row2: { flexDirection: "row", alignItems: "flex-start" },
+
+  chinaHint: {
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 12,
+    gap: 4,
+  },
+  chinaHintTitle: { fontSize: 13, fontFamily: "Inter_700Bold" },
+  chinaHintBody: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  locationHint: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  profileLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 14,
+    paddingVertical: 4,
+  },
+  profileLinkText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: "Inter_500Medium",
+    color: TEAL,
+    lineHeight: 17,
+  },
 
   // Photos
   photoCount:         { fontSize: 11, fontFamily: "Inter_500Medium", color: TEAL },

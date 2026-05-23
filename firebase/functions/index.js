@@ -10,6 +10,8 @@
  *  7. initializeBoostPayment  — create pending Paystack boost payment (callable)
  *  8. verifyBoostPayment      — verify Paystack txn + activate boost (callable)
  *  9. paystackWebhook         — Paystack charge.success webhook (HTTP)
+ * 10. savedSearchAlerts       — notify users when a new listing matches a saved search
+ * 11. notifyListingExpiry     — daily seller reminders before listings expire
  *
  * Deploy:
  *   cd firebase
@@ -31,6 +33,8 @@ const {
   fulfillBoostPayment,
   createPendingBoostPayment,
 } = require("./paystackBoost");
+const { carMatchesSavedSearch } = require("./savedSearchMatch");
+const { notifyListingExpiryReminders } = require("./listingExpiry");
 
 const paystackSecret = defineSecret("PAYSTACK_SECRET_KEY");
 
@@ -212,9 +216,71 @@ exports.expireListings = onSchedule(
     }
 
     const batch = db.batch();
-    expired.docs.forEach((d) => batch.update(d.ref, { isHidden: true, isExpired: true }));
+    for (const d of expired.docs) {
+      batch.update(d.ref, { isHidden: true, isExpired: true });
+      const car = d.data();
+      if (car.sellerId && !car.isSold) {
+        const ref = db.collection("notifications").doc();
+        batch.set(ref, {
+          userId: car.sellerId,
+          type: "listing_expiry",
+          expiryKind: "expired_auto",
+          title: "Listing expired",
+          body: `Your ${car.year} ${car.brand} ${car.model} is now hidden. Renew in Profile → Listings.`,
+          carId: d.id,
+          carName: `${car.brand} ${car.model}`,
+          read: false,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    }
     await batch.commit();
     logger.info(`expireListings: hid ${expired.size} expired listings.`);
+  },
+);
+
+/* ═════════════════════════════════════════════════════════════════
+ * 10. savedSearchAlerts
+ *    Trigger: new car listing created.
+ * ═══════════════════════════════════════════════════════════════ */
+exports.savedSearchAlerts = onDocumentCreated("cars/{carId}", async (event) => {
+  const car = event.data?.data();
+  if (!car || car.isHidden) return;
+
+  const carId = event.params.carId;
+  const searchesSnap = await db.collection("savedSearches").where("enabled", "==", true).get();
+  if (searchesSnap.empty) return;
+
+  let sent = 0;
+  for (const searchDoc of searchesSnap.docs) {
+    const search = { id: searchDoc.id, ...searchDoc.data() };
+    if (!carMatchesSavedSearch(car, search)) continue;
+
+    const carName = `${car.year} ${car.brand} ${car.model}`;
+    await db.collection("notifications").add({
+      userId: search.userId,
+      type: "saved_search_match",
+      title: "New listing matches your search",
+      body: `${carName} — ${car.condition} · GHS ${(car.price || 0).toLocaleString()}`,
+      carId,
+      carName,
+      savedSearchId: search.id,
+      read: false,
+      createdAt: new Date().toISOString(),
+    });
+    await searchDoc.ref.set({ lastNotifiedAt: new Date().toISOString() }, { merge: true });
+    sent += 1;
+  }
+  if (sent) logger.info(`savedSearchAlerts: ${sent} alerts for car ${carId}`);
+});
+
+/* ═════════════════════════════════════════════════════════════════
+ * 11. notifyListingExpiry — 09:00 Ghana time daily
+ * ═══════════════════════════════════════════════════════════════ */
+exports.notifyListingExpiry = onSchedule(
+  { schedule: "0 9 * * *", timeZone: "Africa/Accra" },
+  async () => {
+    await notifyListingExpiryReminders(db, logger);
   },
 );
 

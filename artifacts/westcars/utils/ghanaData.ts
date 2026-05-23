@@ -14,11 +14,82 @@ export const FOREIGN_IMPORT_LOCATIONS = [
   "Foreign — Other",
 ];
 
-export function getLocationOptions(condition: string): string[] {
-  if (condition === "Foreign Used" || condition === "Tokunbo") {
-    return [...FOREIGN_IMPORT_LOCATIONS, ...GHANA_CITIES];
+/** Shown in sell flow when profile is marked Chinese seller / importer */
+export const CHINA_SELLER_LISTING_LABEL = "Chinese Seller — Vehicle in China";
+
+export const CHINA_CITIES = [
+  "Guangzhou",
+  "Shenzhen",
+  "Shanghai",
+  "Beijing",
+  "Yiwu",
+  "Ningbo",
+  "Qingdao",
+  "Tianjin",
+  "Xiamen",
+  "Chongqing",
+  "Wuhan",
+  "Chengdu",
+  "Dongguan",
+  "Foshan",
+  "Hangzhou",
+  "Nanjing",
+  "Zhengzhou",
+];
+
+export const GHANA_PORT_LOCATIONS = [
+  "Accra (Tema Port)",
+  "Takoradi Port",
+  "Tema Free Zone",
+];
+
+export type LocationSellerContext = {
+  isChineseSeller?: boolean;
+  locationInChina?: string;
+};
+
+export function formatChinaLocation(city: string): string {
+  const trimmed = city.trim();
+  if (!trimmed) return CHINA_SELLER_LISTING_LABEL;
+  if (trimmed.startsWith("China —")) return trimmed;
+  return `China — ${trimmed}`;
+}
+
+export function isChinaListingLocation(location: string): boolean {
+  return (
+    location.startsWith("China —") ||
+    location === CHINA_SELLER_LISTING_LABEL ||
+    location === "Foreign — China"
+  );
+}
+
+export function getLocationOptions(
+  condition: string,
+  seller?: LocationSellerContext,
+): string[] {
+  const importish = condition === "Foreign Used" || condition === "Tokunbo";
+
+  if (!seller?.isChineseSeller) {
+    if (importish) return [...FOREIGN_IMPORT_LOCATIONS, ...GHANA_PORT_LOCATIONS, ...GHANA_CITIES];
+    return [...GHANA_CITIES];
   }
-  return GHANA_CITIES;
+
+  const profileCity = seller.locationInChina?.trim();
+  const chinaLocs = CHINA_CITIES.map(formatChinaLocation);
+  const profileLoc = profileCity ? formatChinaLocation(profileCity) : null;
+
+  const chinaSection = [
+    CHINA_SELLER_LISTING_LABEL,
+    ...(profileLoc && !chinaLocs.includes(profileLoc) ? [profileLoc] : []),
+    ...chinaLocs,
+  ];
+
+  return [...new Set([
+    ...chinaSection,
+    ...FOREIGN_IMPORT_LOCATIONS,
+    ...GHANA_PORT_LOCATIONS,
+    ...GHANA_CITIES,
+  ])];
 }
 
 export const GHANA_CITIES = [
@@ -31,6 +102,17 @@ export const GHANA_CITIES = [
   "Half Assini", "Prestea", "Bogoso", "Agona Swedru", "Mankessim",
   "Elmina", "Apam", "Mumford", "Dawhenya", "Adentan",
 ];
+
+/** All locations selectable in search filters */
+export const SEARCH_FILTER_LOCATIONS: string[] = [
+  ...new Set([
+    ...GHANA_CITIES,
+    ...GHANA_PORT_LOCATIONS,
+    ...FOREIGN_IMPORT_LOCATIONS,
+    ...CHINA_CITIES.map(formatChinaLocation),
+    CHINA_SELLER_LISTING_LABEL,
+  ]),
+].sort((a, b) => a.localeCompare(b));
 
 export const CAR_BRANDS: string[] = [
   // ── Japanese ──────────────────────────────────────────────────────────────

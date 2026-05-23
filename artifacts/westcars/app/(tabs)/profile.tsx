@@ -21,7 +21,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { useAvatarUpload } from "@/hooks/useAvatarUpload";
+import { ListingExpiryBanner } from "@/components/ListingExpiryBanner";
 import { ListingGrid2x2 } from "@/components/ListingGrid2x2";
+import { SavedSearchesPanel } from "@/components/SavedSearchesPanel";
 import { ReviewCard, StarRating } from "@/components/ReviewCard";
 import { TrustScore } from "@/components/TrustScore";
 import { VerificationBadges } from "@/components/VerificationBadges";
@@ -31,6 +33,7 @@ import { toDisplayDateTime } from "@/utils/formatFirestoreDate";
 import { useApp } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import { CHINA_CITIES } from "@/utils/ghanaData";
 
 type ProfileTab = "listings" | "saved" | "reviews" | "settings";
 
@@ -406,13 +409,33 @@ function ProfileAuthenticatedContent() {
                     value={wechatId}
                     onChangeText={setWechatId}
                   />
+                  <Text style={[styles.chineseFieldHint, { color: colors.textSecondary }]}>
+                    Your city in China — used as the default “vehicle location” when you post listings.
+                  </Text>
                   <TextInput
                     style={[styles.chineseInput, { color: colors.text, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}
-                    placeholder="Location in China (city/province)"
+                    placeholder="e.g. Guangzhou, Shenzhen"
                     placeholderTextColor={colors.textTertiary}
                     value={locationInChina}
                     onChangeText={setLocationInChina}
                   />
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chinaCityChips}>
+                    {CHINA_CITIES.slice(0, 10).map((city) => (
+                      <Pressable
+                        key={city}
+                        style={[
+                          styles.chinaCityChip,
+                          locationInChina === city && styles.chinaCityChipActive,
+                          { borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)" },
+                        ]}
+                        onPress={() => setLocationInChina(city)}
+                      >
+                        <Text style={[styles.chinaCityChipText, locationInChina === city && styles.chinaCityChipTextActive]}>
+                          {city}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
                   <TextInput
                     style={[styles.chineseInput, { color: colors.text, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}
                     placeholder="Business Name in China (optional)"
@@ -541,6 +564,7 @@ function ProfileAuthenticatedContent() {
           {/* ── Listings Tab ── */}
           {activeTab === "listings" && (
             <View style={styles.tabContent}>
+              <ListingExpiryBanner />
               <Pressable
                 style={[styles.adBoostBanner, {
                   backgroundColor: isDark ? "#1E293B" : "#FFF7ED",
@@ -621,6 +645,12 @@ function ProfileAuthenticatedContent() {
                 borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
               }]}>
                 <Text style={[styles.settingsSection, { color: colors.textTertiary }]}>Preferences</Text>
+                <View style={{ paddingHorizontal: 14, paddingBottom: 12 }}>
+                  <Text style={[styles.settingsSection, { color: colors.textTertiary, marginTop: 4, marginBottom: 8 }]}>
+                    Saved search alerts
+                  </Text>
+                  <SavedSearchesPanel />
+                </View>
 
                 <View style={[styles.settingRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" }]}>
                   <View style={[styles.settingIcon, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
@@ -863,6 +893,7 @@ function ProfileAuthenticatedContent() {
                   listing_expiry: 'alert-circle',
                   listing_approved: 'check-circle',
                   price_drop: 'trending-down',
+                  saved_search_match: 'bell',
                 };
                 const colorMap: Record<string, string> = {
                   message: '#7C3AED',
@@ -871,6 +902,7 @@ function ProfileAuthenticatedContent() {
                   listing_expiry: '#F59E0B',
                   listing_approved: '#10B981',
                   price_drop: '#0EB5CA',
+                  saved_search_match: '#0EB5CA',
                 };
                 const bgMap: Record<string, string> = {
                   message: '#F3EEFF',
@@ -879,10 +911,17 @@ function ProfileAuthenticatedContent() {
                   listing_expiry: '#FFFBEB',
                   listing_approved: '#ECFDF5',
                   price_drop: '#E8F7FA',
+                  saved_search_match: '#E8F7FA',
                 };
                 return (
                   <Pressable
-                    onPress={() => markNotificationRead(item.id)}
+                    onPress={() => {
+                      markNotificationRead(item.id);
+                      if (item.carId && (item.type === 'saved_search_match' || item.type === 'listing_expiry' || item.type === 'price_drop')) {
+                        setShowNotifications(false);
+                        router.push({ pathname: '/car/[id]', params: { id: item.carId } });
+                      }
+                    }}
                     style={{
                       flexDirection: 'row', alignItems: 'flex-start', gap: 12,
                       paddingHorizontal: 20, paddingVertical: 14,
@@ -1220,6 +1259,18 @@ const styles = StyleSheet.create({
   },
   chineseSaveText: { color: "#004D5A", fontSize: 15, fontFamily: "Inter_700Bold" },
   chineseSavedText: { color: "#16A34A", fontSize: 13, fontFamily: "Inter_600SemiBold", textAlign: "center", marginTop: 10 },
+  chineseFieldHint: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17, marginBottom: 8 },
+  chinaCityChips: { gap: 8, paddingVertical: 8 },
+  chinaCityChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    backgroundColor: "rgba(14,181,202,0.06)",
+  },
+  chinaCityChipActive: { backgroundColor: "rgba(14,181,202,0.18)", borderColor: "#0EB5CA" },
+  chinaCityChipText: { fontSize: 12, fontFamily: "Inter_500Medium", color: "#64748B" },
+  chinaCityChipTextActive: { color: "#0EB5CA", fontFamily: "Inter_700Bold" },
   premiumBadge: { backgroundColor: "#F59E0B", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   premiumBadgeText: { color: "#004D5A", fontSize: 11, fontFamily: "Inter_700Bold" },
   sponsorEmpty: { fontSize: 13, fontFamily: "Inter_400Regular", paddingVertical: 12, textAlign: "center" },

@@ -113,5 +113,19 @@ service cloud.firestore {
                     && request.resource.data.sellerId == request.auth.uid;
       allow update, delete: if isAdmin();
     }
+
+    // ── /notifications/{notifId} ─────────────────────────────────────
+    match /notifications/{notifId} {
+      allow read, update: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin()
+                    || (isSignedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    // ── /savedSearches/{searchId} ────────────────────────────────────
+    match /savedSearches/{searchId} {
+      allow read, update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+    }
   }
 }

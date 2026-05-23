@@ -43,6 +43,8 @@ firebase deploy --only firestore:rules,storage,firestore:indexes
 firebase deploy --only functions
 ```
 
+Or from repo root: `./scripts/deploy-marketplace-backend.sh`
+
 ## Seed sample data
 
 After deploying rules, run:
@@ -74,6 +76,10 @@ You'll need a Service Account key:
   7. `initializeBoostPayment` — start Paystack boost (callable, auth required)
   8. `verifyBoostPayment` — verify txn + activate boost (callable)
   9. `paystackWebhook` — Paystack `charge.success` webhook (HTTP, signed)
+  10. `savedSearchAlerts` — in-app notification when a new car matches a saved search
+  11. `notifyListingExpiry` — daily seller reminders (7 / 3 / 1 days before expiry)
+
+Collections: `notifications`, `savedSearches` (see `firestore.rules`).
 
 ## Notes on Phone Auth
 

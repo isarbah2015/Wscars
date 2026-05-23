@@ -8,7 +8,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AppState } from "react-native";
-import { Car, Conversation, Message, Report, Review, Transaction, User } from "@/types";
+import { Car, ChineseSellerProfile, Conversation, Message, Report, Review, Transaction, User } from "@/types";
 import { ADMIN_USER, MOCK_CARS, MOCK_CONVERSATIONS, MOCK_MESSAGES, MOCK_USERS } from "@/utils/mockData";
 import { buildTechSpecs } from "@/utils/buildTechSpecs";
 import { isFirebaseReady, db } from "@/lib/firebase";
@@ -22,7 +22,7 @@ import {
 export interface AppNotification {
   id: string;
   userId: string;
-  type: 'message' | 'saved' | 'listing_view' | 'listing_expiry' | 'listing_approved' | 'price_drop';
+  type: 'message' | 'saved' | 'listing_view' | 'listing_expiry' | 'listing_approved' | 'price_drop' | 'saved_search_match';
   title: string;
   body: string;
   carId?: string;
@@ -53,7 +53,10 @@ interface AppContextType {
   logout: () => void;
   toggleFavorite: (carId: string) => void;
   isFavorite: (carId: string) => boolean;
-  addCar: (car: Omit<Car, "id" | "seller" | "rating" | "createdAt" | "isSponsored">) => Promise<string | null>;
+  addCar: (
+    car: Omit<Car, "id" | "seller" | "rating" | "createdAt" | "isSponsored">,
+    options?: { chineseSellerProfile?: ChineseSellerProfile | null },
+  ) => Promise<string | null>;
   sendMessage: (conversationId: string, text: string, mediaUrl?: string, mediaType?: "image" | "video" | "audio") => void;
   startConversation: (car: Car) => Promise<string>;
   updateUserProfile: (updates: Partial<User>) => void;
@@ -437,10 +440,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const isFavorite = useCallback((carId: string) => favorites.includes(carId), [favorites]);
 
   // ── Cars ─────────────────────────────────────────────────────────────────
-  const addCar = useCallback(async (carData: Omit<Car, "id" | "seller" | "rating" | "createdAt" | "isSponsored">): Promise<string | null> => {
+  const addCar = useCallback(async (
+    carData: Omit<Car, "id" | "seller" | "rating" | "createdAt" | "isSponsored">,
+    options?: { chineseSellerProfile?: ChineseSellerProfile | null },
+  ): Promise<string | null> => {
     const now = new Date();
     const expires = new Date(now); expires.setDate(expires.getDate() + 30);
-    const seller = currentUser || MOCK_USERS[0];
+    const baseSeller = currentUser || MOCK_USERS[0];
+    const seller: User = options?.chineseSellerProfile
+      ? { ...baseSeller, chineseSellerProfile: options.chineseSellerProfile }
+      : baseSeller;
     const newCar: Omit<Car, "id"> = {
       ...carData,
       seller,

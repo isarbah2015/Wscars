@@ -34,6 +34,13 @@ export interface Transaction {
   confirmedAt: string;
 }
 
+export interface ChineseSellerProfile {
+  isChineseSeller: boolean;
+  wechatId?: string;
+  locationInChina?: string;
+  businessName?: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -57,6 +64,7 @@ export interface User {
   verifiedPhone?: boolean;
   verifiedId?: boolean;
   idVerificationPending?: boolean;
+  chineseSellerProfile?: ChineseSellerProfile;
 }
 
 export interface CarRating {
@@ -143,6 +151,11 @@ export interface Car {
   techSpecs?: TechSpecs;
   reportCount?: number;
   isHidden?: boolean;
+  color?: string;
+  negotiable?: boolean;
+  /** Previous listing price when seller changes price */
+  previousPrice?: number;
+  priceChangedAt?: string;
 }
 
 export interface Advertisement {

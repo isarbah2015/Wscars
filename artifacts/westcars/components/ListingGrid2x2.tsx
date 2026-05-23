@@ -1,5 +1,4 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useMemo, useRef } from "react";
 import {
@@ -13,6 +12,7 @@ import {
   ViewStyle,
 } from "react-native";
 import { CarCard } from "@/components/CarCard";
+import { FeaturedListingCard } from "@/components/FeaturedListingCard";
 import {
   LISTING_GRID,
   listingGridCardStyle,
@@ -21,7 +21,6 @@ import {
 } from "@/constants/listingGrid";
 import { useTheme } from "@/context/ThemeContext";
 import { Car } from "@/types";
-import { formatPrice } from "@/utils/ghanaData";
 import {
   buildGridLayout,
   buildListingGridItems,
@@ -43,15 +42,6 @@ function useCardPressScale(toValue = 0.96) {
 
 const listingCardShell = {
   borderRadius: LISTING_GRID.cardRadius,
-  overflow: "hidden" as const,
-  borderWidth: 1,
-  shadowRadius: 12,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 4,
-};
-
-const featuredWideShell = {
-  borderRadius: 18,
   overflow: "hidden" as const,
   borderWidth: 1,
   shadowRadius: 12,
@@ -151,69 +141,9 @@ interface ListingGrid2x2Props {
   style?: ViewStyle;
 }
 
-export function FeaturedWideCard({ car, isDark: isDarkProp }: { car: Car; isDark?: boolean }) {
-  const { colors, isDark: themeDark } = useTheme();
-  const isDark = isDarkProp ?? themeDark;
-  const { scale, pressIn, pressOut } = useCardPressScale(0.98);
-  const img = car.images?.[0];
-  return (
-    <Animated.View style={{ transform: [{ scale }] }}>
-      <Pressable
-        style={[styles.wideCard, featuredWideShell, {
-          backgroundColor: colors.card,
-          borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
-          shadowColor: isDark ? "#FF6B00" : "#0A1628",
-          shadowOpacity: isDark ? 0.06 : 0.12,
-        }]}
-        onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
-        onPressIn={pressIn}
-        onPressOut={pressOut}
-        android_ripple={{ color: "rgba(255,107,0,0.08)", borderless: false }}
-      >
-      <View style={styles.wideImgWrap}>
-        {img ? (
-          <Image source={{ uri: img }} style={styles.wideImg} resizeMode="cover" />
-        ) : (
-          <View style={[styles.wideImg, styles.imgPlaceholder, { backgroundColor: isDark ? "#111827" : "#F8FAFC" }]}>
-            <Feather name="camera" size={28} color="#94A3B8" />
-          </View>
-        )}
-        <LinearGradient colors={["transparent", "rgba(0,0,0,0.72)"]} style={styles.wideScrim} pointerEvents="none" />
-        {car.isSponsored ? (
-          <LinearGradient colors={["#FF8C00", "#FFB347"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.wideSponsoredBadge}>
-            <Text style={styles.wideSponsoredText}>★ SPONSORED</Text>
-          </LinearGradient>
-        ) : (
-          <View style={styles.wideFeaturedBadge}>
-            <Text style={styles.wideFeaturedText}>FEATURED</Text>
-          </View>
-        )}
-        <View style={styles.widePriceBadge}>
-          <Text style={styles.widePriceText}>{formatPrice(car.price)}</Text>
-        </View>
-      </View>
-      <View style={styles.wideInfo}>
-        <Text style={[styles.wideTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]} numberOfLines={1}>
-          {car.brand} {car.model} · {car.year}
-        </Text>
-        <View style={styles.wideMetaRow}>
-          {car.location ? (
-            <View style={styles.wideMetaChip}>
-              <Feather name="map-pin" size={10} color="#64748B" />
-              <Text style={styles.wideMetaText} numberOfLines={1}>{car.location.split(",")[0]}</Text>
-            </View>
-          ) : null}
-          {car.mileage > 0 && (
-            <View style={styles.wideMetaChip}>
-              <Feather name="activity" size={10} color="#64748B" />
-              <Text style={styles.wideMetaText}>{(car.mileage / 1000).toFixed(0)}k km</Text>
-            </View>
-          )}
-        </View>
-      </View>
-      </Pressable>
-    </Animated.View>
-  );
+/** Full-width boosted row in the 2×2 feed — same polish as home Featured section. */
+export function FeaturedWideCard({ car, isDark }: { car: Car; isDark?: boolean }) {
+  return <FeaturedListingCard car={car} isDark={isDark} showSeller={false} />;
 }
 
 function renderGridItem(
@@ -344,28 +274,4 @@ const styles = StyleSheet.create({
   listingMetaText: { fontSize: 10, color: "#94A3B8", fontFamily: "Inter_400Regular" },
 
   wideRow: { marginBottom: LISTING_GRID.rowMarginBottom },
-  wideCard: {},
-  wideImgWrap: { height: 230, position: "relative", backgroundColor: "#1A2340" },
-  wideImg: { width: "100%", height: "100%" },
-  wideScrim: { position: "absolute", left: 0, right: 0, bottom: 0, height: 90 },
-  wideSponsoredBadge: {
-    position: "absolute", top: 10, left: 10,
-    borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4,
-  },
-  wideSponsoredText: { color: "#fff", fontSize: 10, fontFamily: "Inter_700Bold", letterSpacing: 0.5 },
-  wideFeaturedBadge: {
-    position: "absolute", top: 10, left: 10,
-    backgroundColor: "#0EB5CA", borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4,
-  },
-  wideFeaturedText: { color: "#fff", fontSize: 10, fontFamily: "Inter_700Bold", letterSpacing: 0.5 },
-  widePriceBadge: {
-    position: "absolute", bottom: 10, left: 10,
-    backgroundColor: "#0EB5CA", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-  },
-  widePriceText: { color: "#fff", fontSize: 13, fontFamily: "Manrope_800ExtraBold" },
-  wideInfo: { padding: LISTING_GRID.infoPadding + 2, gap: 6 },
-  wideTitle: { fontSize: 14, fontFamily: "Inter_700Bold" },
-  wideMetaRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  wideMetaChip: { flexDirection: "row", alignItems: "center", gap: 4 },
-  wideMetaText: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#64748B" },
 });

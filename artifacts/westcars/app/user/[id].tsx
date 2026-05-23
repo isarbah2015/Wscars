@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ListingGrid2x2 } from "@/components/ListingGrid2x2";
 import { listingGridCardStyle, listingGridContainerStyle, listingGridRowStyle, LISTING_GRID } from "@/constants/listingGrid";
 import { RatingStars } from "@/components/RatingStars";
+import { ChineseSellerCard } from "@/components/ChineseSellerCard";
 import { VerificationBadges } from "@/components/VerificationBadges";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
@@ -168,6 +169,12 @@ export default function UserProfileScreen() {
         </View>
 
         <VerificationBadges user={user} size="sm" style={styles.veriBadges} />
+
+        {user.chineseSellerProfile?.isChineseSeller ? (
+          <View style={styles.chineseCardWrap}>
+            <ChineseSellerCard profile={user.chineseSellerProfile} compact />
+          </View>
+        ) : null}
 
         <View style={styles.ratingRow}>
           <RatingStars rating={user.rating} size={14} />
@@ -398,6 +405,7 @@ const styles = StyleSheet.create({
 
   // Verification badges row — centered under name/rating
   veriBadges: { justifyContent: "center", paddingHorizontal: 16 },
+  chineseCardWrap: { paddingHorizontal: 16, marginTop: 12, width: "100%" },
 
   // Listings — shared tight 2×2 grid
   listingsSection: { ...listingGridContainerStyle, paddingVertical: 12, gap: 10 },

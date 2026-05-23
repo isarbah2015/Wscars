@@ -24,10 +24,18 @@ firebase functions:secrets:set PAYSTACK_SECRET_KEY
 # Paste sk_test_... or sk_live_...
 ```
 
-### 2. Deploy functions + Firestore rules
+### 2. Deploy functions + Firestore rules + indexes
+
+From repo root (recommended):
 
 ```bash
-firebase deploy --only functions,firestore:rules
+./scripts/deploy-marketplace-backend.sh
+```
+
+Or from `firebase/`:
+
+```bash
+firebase deploy --only functions,firestore:rules,firestore:indexes
 ```
 
 Note the webhook URL from the deploy output, e.g.:
