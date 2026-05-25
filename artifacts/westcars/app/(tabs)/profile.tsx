@@ -645,11 +645,20 @@ function ProfileAuthenticatedContent() {
                 borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
               }]}>
                 <Text style={[styles.settingsSection, { color: colors.textTertiary }]}>Preferences</Text>
-                <View style={{ paddingHorizontal: 14, paddingBottom: 12 }}>
-                  <Text style={[styles.settingsSection, { color: colors.textTertiary, marginTop: 4, marginBottom: 8 }]}>
-                    Saved search alerts
-                  </Text>
-                  <SavedSearchesPanel />
+
+                <View style={[styles.settingRow, {
+                  borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
+                  alignItems: "flex-start",
+                }]}>
+                  <View style={[styles.settingIcon, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
+                    <Feather name="search" size={16} color="#0EB5CA" />
+                  </View>
+                  <View style={styles.settingMiddle}>
+                    <Text style={[styles.settingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>
+                      Saved search alerts
+                    </Text>
+                    <SavedSearchesPanel embedded />
+                  </View>
                 </View>
 
                 <View style={[styles.settingRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" }]}>

@@ -10,6 +10,7 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { db, isFirebaseReady } from "@/lib/firebase";
+import { auth } from "@/lib/firebase-persistence";
 import { ListingSearchFilters, QuickFilterKey } from "@/utils/listingSearchFilters";
 
 export interface SavedSearch {
@@ -31,30 +32,53 @@ const ensureReady = () => {
 };
 
 export function subscribeSavedSearches(
-  userId: string,
   cb: (searches: SavedSearch[], error?: Error) => void,
 ): Unsubscribe {
-  if (!isFirebaseReady() || !db) {
+  if (!isFirebaseReady() || !db || !auth) {
     cb([]);
     return () => {};
   }
-  // Single-field filter only — avoids requiring a composite index in production.
-  const q = query(collection(db, COLL), where("userId", "==", userId));
-  return onSnapshot(
-    q,
-    (snap) => {
-      const list = snap.docs.map((d) => ({
-        id: d.id,
-        ...(d.data() as Omit<SavedSearch, "id">),
-      }));
-      list.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
-      cb(list);
-    },
-    (err) => {
-      console.warn("[savedSearches] subscribe error:", err);
+
+  let innerUnsub: Unsubscribe | null = null;
+  let cancelled = false;
+
+  const attach = async () => {
+    try {
+      await auth.authStateReady();
+      if (cancelled) return;
+      const uid = auth.currentUser?.uid;
+      if (!uid) {
+        cb([]);
+        return;
+      }
+      const q = query(collection(db!, COLL), where("userId", "==", uid));
+      innerUnsub = onSnapshot(
+        q,
+        (snap) => {
+          const list = snap.docs.map((d) => ({
+            id: d.id,
+            ...(d.data() as Omit<SavedSearch, "id">),
+          }));
+          list.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+          cb(list);
+        },
+        (err) => {
+          console.warn("[savedSearches] subscribe error:", err);
+          cb([], err instanceof Error ? err : new Error(String(err)));
+        },
+      );
+    } catch (err) {
+      console.warn("[savedSearches] attach error:", err);
       cb([], err instanceof Error ? err : new Error(String(err)));
-    },
-  );
+    }
+  };
+
+  void attach();
+
+  return () => {
+    cancelled = true;
+    innerUnsub?.();
+  };
 }
 
 export async function createSavedSearch(input: {

@@ -46,7 +46,7 @@ export async function loadOrCreateUserDoc(fbUser: FirebaseUser, overrides: Parti
   try {
     const ref = doc(db, 'users', fbUser.uid);
     const snap = await getDoc(ref);
-    if (snap.exists()) return { id: fbUser.uid, ...(snap.data() as Omit<User, 'id'>) };
+    if (snap.exists()) return { ...(snap.data() as Omit<User, 'id'>), id: fbUser.uid };
     const profile = buildDefaultUserDoc(fbUser, overrides);
     try { await setDoc(ref, { ...profile, createdAt: serverTimestamp() }); } catch {}
     return profile;

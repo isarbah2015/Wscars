@@ -103,5 +103,17 @@ service cloud.firestore {
                     && request.resource.data.sellerId == request.auth.uid;
       allow update, delete: if isAdmin();
     }
+
+    // ── Saved search alerts ────────────────────────────────────────────────────
+    match /savedSearches/{searchId} {
+      allow read, update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // ── Boost payments (written by Cloud Functions; clients read own status) ─
+    match /boostPayments/{reference} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create, update, delete: if false;
+    }
   }
 }
