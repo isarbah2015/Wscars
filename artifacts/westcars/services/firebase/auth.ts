@@ -11,6 +11,7 @@ import {
   signInWithCredential,
   signInWithPopup,
   PhoneAuthProvider,
+  type UserCredential,
   type ApplicationVerifier,
   type ConfirmationResult,
   type User as FirebaseUser,
@@ -73,7 +74,16 @@ export async function sendPhoneOtp(
 }
 
 export async function confirmPhoneOtp(confirmation: ConfirmationResult, code: string, overrides: Partial<User> = {}): Promise<User> {
-  const result = await confirmation.confirm(code.trim());
+  const trimmed = code.trim();
+  let result: UserCredential;
+  if (typeof confirmation.confirm === "function") {
+    result = await confirmation.confirm(trimmed);
+  } else {
+    const verificationId = confirmation.verificationId;
+    if (!verificationId) throw new Error("Missing verification session. Request a new code.");
+    const credential = PhoneAuthProvider.credential(verificationId, trimmed);
+    result = await signInWithCredential(auth!, credential);
+  }
   return loadOrCreateUserDoc(result.user, {
     phone: result.user.phoneNumber ?? overrides.phone ?? '',
     ...overrides,

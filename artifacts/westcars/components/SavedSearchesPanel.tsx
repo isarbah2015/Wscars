@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { useApp } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import {
@@ -11,23 +12,44 @@ import {
 } from "@/services/firebase/savedSearches";
 import { isFirebaseReady } from "@/lib/firebase";
 
+function loadErrorMessage(err: Error): string {
+  const msg = err.message || "";
+  if (msg.includes("index") || msg.includes("FAILED_PRECONDITION")) {
+    return "Could not load alerts. Pull to refresh or try again in a moment.";
+  }
+  if (msg.includes("permission") || msg.includes("PERMISSION_DENIED")) {
+    return "Sign in again to view saved search alerts.";
+  }
+  return "Could not load saved search alerts. Check your connection.";
+}
+
 export function SavedSearchesPanel() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { currentUser } = useApp();
   const { colors, isDark } = useTheme();
   const [searches, setSearches] = useState<SavedSearch[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const userId = user?.uid ?? currentUser?.id;
 
   useEffect(() => {
-    if (!user?.uid || !isFirebaseReady()) {
+    if (authLoading) return;
+    if (!userId || !isFirebaseReady()) {
+      setSearches([]);
+      setLoadError(null);
       setLoading(false);
       return;
     }
-    const unsub = subscribeSavedSearches(user.uid, (list) => {
+    setLoading(true);
+    setLoadError(null);
+    const unsub = subscribeSavedSearches(userId, (list, err) => {
       setSearches(list);
+      setLoadError(err ? loadErrorMessage(err) : null);
       setLoading(false);
     });
     return unsub;
-  }, [user?.uid]);
+  }, [userId, authLoading]);
 
   if (!isFirebaseReady()) {
     return (
@@ -37,8 +59,12 @@ export function SavedSearchesPanel() {
     );
   }
 
-  if (loading) {
+  if (loading || authLoading) {
     return <ActivityIndicator color="#0EB5CA" style={{ marginVertical: 12 }} />;
+  }
+
+  if (loadError) {
+    return <Text style={[styles.hint, { color: "#f87171" }]}>{loadError}</Text>;
   }
 
   if (searches.length === 0) {

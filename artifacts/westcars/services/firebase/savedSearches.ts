@@ -4,7 +4,6 @@ import {
   deleteDoc,
   doc,
   onSnapshot,
-  orderBy,
   query,
   updateDoc,
   where,
@@ -33,27 +32,28 @@ const ensureReady = () => {
 
 export function subscribeSavedSearches(
   userId: string,
-  cb: (searches: SavedSearch[]) => void,
+  cb: (searches: SavedSearch[], error?: Error) => void,
 ): Unsubscribe {
   if (!isFirebaseReady() || !db) {
     cb([]);
     return () => {};
   }
-  const q = query(
-    collection(db, COLL),
-    where("userId", "==", userId),
-    orderBy("createdAt", "desc"),
-  );
+  // Single-field filter only — avoids requiring a composite index in production.
+  const q = query(collection(db, COLL), where("userId", "==", userId));
   return onSnapshot(
     q,
-    (snap) =>
-      cb(
-        snap.docs.map((d) => ({
-          id: d.id,
-          ...(d.data() as Omit<SavedSearch, "id">),
-        })),
-      ),
-    (err) => console.warn("[savedSearches] subscribe error:", err),
+    (snap) => {
+      const list = snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as Omit<SavedSearch, "id">),
+      }));
+      list.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+      cb(list);
+    },
+    (err) => {
+      console.warn("[savedSearches] subscribe error:", err);
+      cb([], err instanceof Error ? err : new Error(String(err)));
+    },
   );
 }
 

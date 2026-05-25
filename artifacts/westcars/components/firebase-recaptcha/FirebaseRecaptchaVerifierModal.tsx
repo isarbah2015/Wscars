@@ -69,6 +69,9 @@ export default class FirebaseRecaptchaVerifierModal
     });
   }
 
+  /** Required by Firebase Auth after phone verification; noop for custom verifier. */
+  _reset(): void {}
+
   private onVisibleLoad = () => {
     this.setState({ visibleLoaded: true });
   };
