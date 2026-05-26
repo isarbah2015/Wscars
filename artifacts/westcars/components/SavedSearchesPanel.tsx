@@ -148,7 +148,7 @@ export function SavedSearchesPanel({ embedded = false }: Props) {
 
 const styles = StyleSheet.create({
   list: { gap: 0 },
-  listEmbedded: { gap: 0, marginTop: 4 },
+  listEmbedded: { gap: 0, alignSelf: "stretch", width: "100%" },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -161,7 +161,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     paddingVertical: 10,
+    paddingRight: 0,
     borderBottomWidth: 0.5,
+    alignSelf: "stretch",
   },
   name: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
   nameEmbedded: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
@@ -170,8 +172,8 @@ const styles = StyleSheet.create({
   hintEmbedded: {
     fontSize: 11,
     fontFamily: "Inter_400Regular",
-    lineHeight: 16,
-    marginTop: 2,
+    lineHeight: 17,
+    alignSelf: "stretch",
   },
-  loaderEmbedded: { marginTop: 8, alignSelf: "flex-start" },
+  loaderEmbedded: { marginTop: 4, alignSelf: "flex-start" },
 });

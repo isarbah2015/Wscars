@@ -37,6 +37,16 @@ import { CHINA_CITIES } from "@/utils/ghanaData";
 
 type ProfileTab = "listings" | "saved" | "reviews" | "settings";
 
+const PROFILE_TABS: { key: ProfileTab; label: string; icon: React.ComponentProps<typeof Feather>["name"] }[] = [
+  { key: "listings", label: "Listings", icon: "grid" },
+  { key: "saved", label: "Saved", icon: "heart" },
+  { key: "reviews", label: "Reviews", icon: "star" },
+  { key: "settings", label: "Settings", icon: "settings" },
+];
+
+/** Matches setting row text inset: paddingH(14) + icon(36) + gap(10) */
+const SETTINGS_TEXT_INSET = 60;
+
 function Stars({ n }: { n: number }) {
   return (
     <View style={{ flexDirection: "row", gap: 2 }}>
@@ -542,23 +552,50 @@ function ProfileAuthenticatedContent() {
             </View>
           </View>
 
-          {/* Tabs */}
-          <View style={[styles.tabs, { borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "#E4E8EF" }]}>
-            {(["listings", "saved", "reviews", "settings"] as ProfileTab[]).map((tab) => (
-              <Pressable
-                key={tab}
-                style={[styles.tab, activeTab === tab && styles.tabActive]}
-                onPress={() => setActiveTab(tab)}
-              >
-                <Text style={[
-                  styles.tabText,
-                  { color: activeTab === tab ? "#0EB5CA" : "#64748B" },
-                  activeTab === tab && styles.tabTextActive,
-                ]}>
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </Text>
-              </Pressable>
-            ))}
+          {/* Profile section tabs — segmented control */}
+          <View
+            style={[
+              styles.tabSegmentWrap,
+              { backgroundColor: isDark ? "rgba(15,23,42,0.65)" : "#E8EEF4" },
+            ]}
+          >
+            {PROFILE_TABS.map(({ key, label, icon }) => {
+              const active = activeTab === key;
+              return (
+                <Pressable
+                  key={key}
+                  style={[
+                    styles.tabSegment,
+                    active && [
+                      styles.tabSegmentActive,
+                      {
+                        backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+                        borderColor: isDark ? "rgba(14,181,202,0.35)" : "rgba(14,181,202,0.22)",
+                      },
+                    ],
+                  ]}
+                  onPress={() => setActiveTab(key)}
+                >
+                  <Feather
+                    name={icon}
+                    size={15}
+                    color={active ? "#0EB5CA" : isDark ? "#94A3B8" : "#64748B"}
+                  />
+                  <Text
+                    style={[
+                      styles.tabSegmentLabel,
+                      {
+                        color: active ? "#0EB5CA" : isDark ? "#CBD5E1" : "#475569",
+                      },
+                      active && styles.tabSegmentLabelActive,
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {label}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
 
           {/* ── Listings Tab ── */}
@@ -646,17 +683,18 @@ function ProfileAuthenticatedContent() {
               }]}>
                 <Text style={[styles.settingsSection, { color: colors.textTertiary }]}>Preferences</Text>
 
-                <View style={[styles.settingRow, {
+                <View style={[styles.preferenceBlock, {
                   borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
-                  alignItems: "flex-start",
                 }]}>
-                  <View style={[styles.settingIcon, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
-                    <Feather name="search" size={16} color="#0EB5CA" />
-                  </View>
-                  <View style={styles.settingMiddle}>
-                    <Text style={[styles.settingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>
+                  <View style={styles.preferenceBlockHeader}>
+                    <View style={[styles.settingIcon, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
+                      <Feather name="bell" size={16} color="#0EB5CA" />
+                    </View>
+                    <Text style={[styles.settingTitle, { color: isDark ? "#F1F5F9" : "#0F172A", flex: 1 }]}>
                       Saved search alerts
                     </Text>
+                  </View>
+                  <View style={styles.preferenceBlockBody}>
                     <SavedSearchesPanel embedded />
                   </View>
                 </View>
@@ -1173,15 +1211,42 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
 
-  // ── Tabs ──
-  tabs: { flexDirection: "row", borderBottomWidth: 1 },
-  tab: {
-    flex: 1, paddingVertical: 13, alignItems: "center",
-    borderBottomWidth: 2, borderBottomColor: "transparent",
+  // ── Profile tabs (segmented) ──
+  tabSegmentWrap: {
+    flexDirection: "row",
+    marginHorizontal: 16,
+    marginTop: 14,
+    marginBottom: 6,
+    padding: 4,
+    borderRadius: 14,
+    gap: 4,
   },
-  tabActive: { borderBottomColor: "#0EB5CA" },
-  tabText: { fontSize: 12, fontFamily: "Inter_500Medium" },
-  tabTextActive: { fontFamily: "Inter_700Bold" },
+  tabSegment: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    borderRadius: 11,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  tabSegmentActive: {
+    shadowColor: "#0A1628",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  tabSegmentLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.2,
+  },
+  tabSegmentLabelActive: {
+    fontFamily: "Inter_700Bold",
+  },
 
   // ── Tab content ──
   tabContent: {
@@ -1236,6 +1301,23 @@ const styles = StyleSheet.create({
   settingMiddle: { flex: 1, gap: 1 },
   settingTitle: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   settingSubtitle: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  preferenceBlock: {
+    borderBottomWidth: 0.5,
+    paddingBottom: 4,
+  },
+  preferenceBlockHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 6,
+  },
+  preferenceBlockBody: {
+    paddingLeft: SETTINGS_TEXT_INSET,
+    paddingRight: 14,
+    paddingBottom: 12,
+  },
   veriBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
   veriBadgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
 
