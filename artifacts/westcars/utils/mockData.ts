@@ -886,6 +886,8 @@ export const MOCK_CARS: Car[] = [
     model: "Golf 8 GTI",
     year: 2021,
     price: 220000,
+    previousPrice: 245000,
+    priceChangedAt: "2026-05-20",
     mileage: 22000,
     fuelType: "Petrol",
     transmission: "Automatic",

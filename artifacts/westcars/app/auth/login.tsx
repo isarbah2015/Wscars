@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,15 +11,9 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
-import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { useAuth } from '@/context/AuthContext';
-import { auth } from '@/lib/firebase-persistence';
-
-WebBrowser.maybeCompleteAuthSession();
 
 const { width } = Dimensions.get('window');
 const PORSCHE = require('@/assets/images/welcome-car-porsche.png');
@@ -32,33 +26,7 @@ export default function SignInScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const [, googleResponse, googlePrompt] = Google.useAuthRequest({
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-  });
-
-  useEffect(() => {
-    if (googleResponse?.type === 'success') {
-      const idToken = googleResponse.params?.id_token;
-      if (!idToken || !auth) {
-        setError('Google sign-in failed. Please try again.');
-        setGoogleLoading(false);
-        return;
-      }
-      const credential = GoogleAuthProvider.credential(idToken);
-      signInWithCredential(auth, credential)
-        .then(() => router.replace('/(tabs)'))
-        .catch(() => {
-          setError('Google sign-in failed. Please try again.');
-          setGoogleLoading(false);
-        });
-    } else if (googleResponse?.type === 'error' || googleResponse?.type === 'dismiss') {
-      setGoogleLoading(false);
-    }
-  }, [googleResponse]);
 
   const handleSignIn = async () => {
     setError('');
@@ -152,18 +120,12 @@ export default function SignInScreen() {
         </View>
 
         <TouchableOpacity
-          style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
-          onPress={() => { setGoogleLoading(true); setError(''); googlePrompt(); }}
-          disabled={googleLoading || loading}
+          style={styles.phoneButton}
+          onPress={() => router.push('/auth/phone')}
+          disabled={loading}
         >
-          {googleLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <>
-              <Ionicons name="logo-google" size={20} color="#fff" />
-              <Text style={styles.googleText}>Continue with Google</Text>
-            </>
-          )}
+          <Feather name="smartphone" size={20} color="#fff" />
+          <Text style={styles.phoneText}>Continue with Phone</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push('/auth/signup')}>
@@ -298,16 +260,16 @@ const styles = StyleSheet.create({
     color: '#7aafb8',
     fontSize: 13,
   },
-  googleButton: {
+  phoneButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    backgroundColor: '#4285F4',
+    backgroundColor: '#0EB5CA',
     borderRadius: 12,
     paddingVertical: 15,
   },
-  googleText: {
+  phoneText: {
     color: '#fff',
     fontSize: 15,
     fontWeight: '600',

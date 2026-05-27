@@ -3,17 +3,15 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth } from '@/lib/firebase-persistence';
 import { db } from '@/lib/firebase';
+import type { ChineseSellerProfile } from '@/types';
 
-export interface ChineseSellerProfile {
-  isChineseSeller: boolean;
-  wechatId?: string;
-  locationInChina?: string;
-  businessName?: string;
-}
+export type { ChineseSellerProfile };
 
 export interface SponsorshipInfo {
   tier?: string;
   adCredits?: number;
+  activePlan?: string;
+  expiresAt?: string;
 }
 
 interface AuthContextType {
@@ -95,8 +93,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const saveChineseProfile = async (profile: ChineseSellerProfile) => {
     if (!user) throw new Error('No user logged in');
-    await updateDoc(doc(db, 'users', user.uid), { chineseSellerProfile: profile });
+    const previous = chineseProfile;
     setChineseProfile(profile);
+    try {
+      await updateDoc(doc(db, 'users', user.uid), { chineseSellerProfile: profile });
+    } catch (error) {
+      setChineseProfile(previous);
+      throw error;
+    }
   };
 
   return (

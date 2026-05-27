@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "@/context/ThemeContext";
 
 const EQUIPMENT: {
   icon: string;
@@ -190,6 +191,9 @@ const useNative = Platform.OS !== "web";
 
 export function EquipmentModal({ visible, trimName = "Standard", onClose }: Props) {
   const insets = useSafeAreaInsets();
+  const { colors, isDark } = useTheme();
+  const line = isDark ? colors.border : "#E9EEF4";
+  const rowLine = isDark ? colors.border : "#F1F5F9";
   const scrollRef = useRef<ScrollView>(null);
   const chipScrollRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({}).current;
@@ -230,7 +234,7 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={[styles.root, { paddingTop: insets.top || 0 }]}>
+      <View style={[styles.root, { paddingTop: insets.top || 0, backgroundColor: colors.background }]}>
 
         {/* ── Header ── */}
         <LinearGradient
@@ -277,7 +281,7 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
         </LinearGradient>
 
         {/* ── Category chip rail ── */}
-        <View style={styles.chipRailWrap}>
+        <View style={[styles.chipRailWrap, { backgroundColor: colors.card, borderBottomColor: line }]}>
           <ScrollView
             ref={chipScrollRef}
             horizontal
@@ -344,16 +348,19 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
                 <Animated.View
                   key={cat.category}
                   onLayout={(e) => { sectionPositions[cat.category] = e.nativeEvent.layout.y; }}
-                  style={[styles.section, { opacity: opac, transform: [{ translateY: slide }] }]}
+                  style={[
+                    styles.section,
+                    { backgroundColor: colors.card, borderColor: line, opacity: opac, transform: [{ translateY: slide }] },
+                  ]}
                 >
                   {/* Section header */}
-                  <View style={styles.sectionHead}>
+                  <View style={[styles.sectionHead, { borderBottomColor: rowLine }]}>
                     <View style={[styles.sectionAccentDot, { backgroundColor: cat.accentColor }]} />
-                    <View style={[styles.sectionIconWrap, { backgroundColor: cat.chipBg }]}>
+                    <View style={[styles.sectionIconWrap, { backgroundColor: isDark ? `${cat.accentColor}22` : cat.chipBg }]}>
                       <Feather name={cat.icon as any} size={15} color={cat.iconColor} />
                     </View>
-                    <Text style={styles.sectionTitle}>{cat.category}</Text>
-                    <View style={[styles.sectionBadge, { backgroundColor: cat.chipBg }]}>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>{cat.category}</Text>
+                    <View style={[styles.sectionBadge, { backgroundColor: isDark ? `${cat.accentColor}22` : cat.chipBg }]}>
                       <Text style={[styles.sectionBadgeText, { color: cat.accentColor }]}>
                         {cat.count}
                       </Text>
@@ -367,13 +374,13 @@ export function EquipmentModal({ visible, trimName = "Standard", onClose }: Prop
                         key={item}
                         style={[
                           styles.itemRow,
-                          idx < cat.items.length - 1 && styles.itemRowBorder,
+                          idx < cat.items.length - 1 && [styles.itemRowBorder, { borderBottomColor: rowLine }],
                         ]}
                       >
-                        <View style={[styles.itemCheckWrap, { backgroundColor: cat.chipBg }]}>
+                        <View style={[styles.itemCheckWrap, { backgroundColor: isDark ? `${cat.accentColor}22` : cat.chipBg }]}>
                           <Feather name="check" size={11} color={cat.iconColor} />
                         </View>
-                        <Text style={styles.itemText}>{item}</Text>
+                        <Text style={[styles.itemText, { color: colors.textSecondary }]}>{item}</Text>
                       </View>
                     ))}
                   </View>

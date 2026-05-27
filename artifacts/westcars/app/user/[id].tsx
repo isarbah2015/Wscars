@@ -13,8 +13,10 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { CarCard } from "@/components/CarCard";
+import { ListingGrid2x2 } from "@/components/ListingGrid2x2";
+import { listingGridCardStyle, listingGridContainerStyle, listingGridRowStyle, LISTING_GRID } from "@/constants/listingGrid";
 import { RatingStars } from "@/components/RatingStars";
+import { ChineseSellerCard } from "@/components/ChineseSellerCard";
 import { VerificationBadges } from "@/components/VerificationBadges";
 import { Colors } from "@/constants/colors";
 import { useApp } from "@/context/AppContext";
@@ -168,6 +170,12 @@ export default function UserProfileScreen() {
 
         <VerificationBadges user={user} size="sm" style={styles.veriBadges} />
 
+        {user.chineseSellerProfile?.isChineseSeller ? (
+          <View style={styles.chineseCardWrap}>
+            <ChineseSellerCard profile={user.chineseSellerProfile} compact />
+          </View>
+        ) : null}
+
         <View style={styles.ratingRow}>
           <RatingStars rating={user.rating} size={14} />
           <Text style={[styles.ratingNum, { color: colors.text }]}>{user.rating.toFixed(1)}</Text>
@@ -236,21 +244,7 @@ export default function UserProfileScreen() {
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No active listings</Text>
           </View>
         ) : (
-          <View>
-            {Array.from({ length: Math.ceil(userListings.length / 2) }, (_, i) => {
-              const left = userListings[i * 2];
-              const right = userListings[i * 2 + 1];
-              return (
-                <View key={i} style={styles.gridRow}>
-                  <CarCard car={left} style={styles.halfCard} />
-                  {right
-                    ? <CarCard car={right} style={styles.halfCard} />
-                    : <View style={styles.halfCard} />
-                  }
-                </View>
-              );
-            })}
-          </View>
+          <ListingGrid2x2 cars={userListings} isDark={isDark} variant="carcard" />
         )}
       </View>
 
@@ -261,21 +255,13 @@ export default function UserProfileScreen() {
             <View style={[styles.sectionAccent, { backgroundColor: colors.accent }]} />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Similar Cars</Text>
           </View>
-          <View>
-            {Array.from({ length: Math.ceil(similarCars.length / 2) }, (_, i) => {
-              const left = similarCars[i * 2];
-              const right = similarCars[i * 2 + 1];
-              return (
-                <View key={i} style={styles.gridRow}>
-                  <CarCard car={left} style={styles.halfCard} />
-                  {right
-                    ? <CarCard car={right} style={styles.halfCard} />
-                    : <View style={styles.halfCard} />
-                  }
-                </View>
-              );
-            })}
-          </View>
+          <ListingGrid2x2
+            cars={similarCars}
+            isDark={isDark}
+            variant="carcard"
+            injectPromotions
+            promotionPool={cars}
+          />
         </View>
       )}
 
@@ -419,14 +405,15 @@ const styles = StyleSheet.create({
 
   // Verification badges row — centered under name/rating
   veriBadges: { justifyContent: "center", paddingHorizontal: 16 },
+  chineseCardWrap: { paddingHorizontal: 16, marginTop: 12, width: "100%" },
 
-  // Listings — tighter 2x2 grid matching "you may also like" card size
-  listingsSection: { paddingHorizontal: 8, paddingVertical: 16, gap: 12 },
-  sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 8 },
+  // Listings — shared tight 2×2 grid
+  listingsSection: { ...listingGridContainerStyle, paddingVertical: 12, gap: 10 },
+  sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: LISTING_GRID.paddingHorizontal },
   sectionAccent: { width: 4, height: 18, borderRadius: 2 },
-  sectionTitle: { fontSize: 17, fontFamily: "Inter_700Bold", paddingHorizontal: 8 },
-  gridRow: { flexDirection: "row", paddingHorizontal: 8, gap: 8 },
-  halfCard: { flex: 1, marginBottom: 10 },
+  sectionTitle: { fontSize: 17, fontFamily: "Inter_700Bold", paddingHorizontal: LISTING_GRID.paddingHorizontal },
+  gridRow: listingGridRowStyle,
+  halfCard: listingGridCardStyle,
   empty: { alignItems: "center", paddingVertical: 40, gap: 10 },
   emptyText: { fontSize: 15, fontFamily: "Inter_400Regular" },
 

@@ -10,11 +10,13 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  getDoc,
   serverTimestamp,
   type Unsubscribe,
 } from "firebase/firestore";
 import { db, isFirebaseReady } from "@/lib/firebase";
 import { Car } from "@/types";
+import { toDateString } from "@/utils/formatFirestoreDate";
 
 const COLL = "cars";
 
@@ -32,7 +34,15 @@ export function subscribeCars(cb: (cars: Car[]) => void): Unsubscribe {
   return onSnapshot(
     q,
     (snap) => {
-      const cars = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Car, "id">) }));
+      const today = new Date().toISOString().split("T")[0];
+      const cars = snap.docs.map((d) => {
+        const raw = { id: d.id, ...(d.data() as Omit<Car, "id">) };
+        return {
+          ...raw,
+          createdAt: toDateString(raw.createdAt, today),
+          expiresAt: raw.expiresAt ? toDateString(raw.expiresAt) : raw.expiresAt,
+        } as Car;
+      });
       cb(cars);
     },
     (err) => console.warn("[cars] subscribe error:", err),
@@ -51,7 +61,19 @@ export async function createCar(carData: Omit<Car, "id">): Promise<string> {
 
 export async function updateCar(id: string, updates: Partial<Car>): Promise<void> {
   ensureReady();
-  await updateDoc(doc(db!, COLL, id), updates as any);
+  let payload = { ...updates };
+  if (updates.price !== undefined) {
+    const snap = await getDoc(doc(db!, COLL, id));
+    const current = snap.data()?.price;
+    if (typeof current === "number" && current !== updates.price) {
+      payload = {
+        ...payload,
+        previousPrice: current,
+        priceChangedAt: new Date().toISOString(),
+      };
+    }
+  }
+  await updateDoc(doc(db!, COLL, id), payload as Record<string, unknown>);
 }
 
 export async function deleteCar(id: string): Promise<void> {

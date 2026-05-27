@@ -11,6 +11,8 @@ import {
   signInWithCredential,
   signInWithPopup,
   PhoneAuthProvider,
+  type UserCredential,
+  type ApplicationVerifier,
   type ConfirmationResult,
   type User as FirebaseUser,
   type Unsubscribe,
@@ -44,7 +46,7 @@ export async function loadOrCreateUserDoc(fbUser: FirebaseUser, overrides: Parti
   try {
     const ref = doc(db, 'users', fbUser.uid);
     const snap = await getDoc(ref);
-    if (snap.exists()) return { id: fbUser.uid, ...(snap.data() as Omit<User, 'id'>) };
+    if (snap.exists()) return { ...(snap.data() as Omit<User, 'id'>), id: fbUser.uid };
     const profile = buildDefaultUserDoc(fbUser, overrides);
     try { await setDoc(ref, { ...profile, createdAt: serverTimestamp() }); } catch {}
     return profile;
@@ -64,12 +66,24 @@ export async function signUpEmail(name: string, email: string, phone: string, pa
   return loadOrCreateUserDoc(cred.user, { name, phone });
 }
 
-export async function sendPhoneOtp(phoneNumber: string): Promise<ConfirmationResult> {
-  return (signInWithPhoneNumber as any)(auth!, phoneNumber.trim());
+export async function sendPhoneOtp(
+  phoneNumber: string,
+  appVerifier: ApplicationVerifier,
+): Promise<ConfirmationResult> {
+  return signInWithPhoneNumber(auth!, phoneNumber.trim(), appVerifier);
 }
 
 export async function confirmPhoneOtp(confirmation: ConfirmationResult, code: string, overrides: Partial<User> = {}): Promise<User> {
-  const result = await confirmation.confirm(code.trim());
+  const trimmed = code.trim();
+  let result: UserCredential;
+  if (typeof confirmation.confirm === "function") {
+    result = await confirmation.confirm(trimmed);
+  } else {
+    const verificationId = confirmation.verificationId;
+    if (!verificationId) throw new Error("Missing verification session. Request a new code.");
+    const credential = PhoneAuthProvider.credential(verificationId, trimmed);
+    result = await signInWithCredential(auth!, credential);
+  }
   return loadOrCreateUserDoc(result.user, {
     phone: result.user.phoneNumber ?? overrides.phone ?? '',
     ...overrides,

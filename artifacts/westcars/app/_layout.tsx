@@ -21,8 +21,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import { ThemeProvider } from "@/context/ThemeContext";
+import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { isFirebaseReady } from "@/lib/firebase";
+import { PAYSTACK_PUBLIC_KEY } from "@/lib/paystack";
+import { PaystackProvider } from "react-native-paystack-webview";
 
 const FEATHER_TTF = require("../assets/fonts/Feather.ttf");
 const IONICONS_TTF = require("../assets/fonts/Ionicons.ttf");
@@ -76,6 +78,7 @@ function RootLayoutNav() {
       <Stack.Screen name="conversation/[id]" options={{ presentation: "card" }} />
       <Stack.Screen name="user/[id]"         options={{ presentation: "card" }} />
       <Stack.Screen name="advertise"         options={{ presentation: "card" }} />
+      <Stack.Screen name="boost"             options={{ presentation: "card" }} />
       <Stack.Screen name="full-specs/[id]"   options={{ presentation: "card" }} />
       <Stack.Screen name="advertise-book"    options={{ presentation: "card" }} />
     </Stack>
@@ -83,6 +86,7 @@ function RootLayoutNav() {
 }
 
 function FirebaseUnavailableScreen() {
+  const { colors } = useTheme();
   const [retrying, setRetrying] = useState(false);
   const retry = async () => {
     setRetrying(true);
@@ -94,11 +98,11 @@ function FirebaseUnavailableScreen() {
   };
 
   return (
-    <View style={styles.unavailableRoot}>
-      <View style={styles.unavailableCard}>
+    <View style={[styles.unavailableRoot, { backgroundColor: colors.background }]}>
+      <View style={[styles.unavailableCard, { backgroundColor: colors.card, borderColor: "rgba(14,181,202,0.14)" }]}>
         <Feather name="wifi-off" size={34} color="#0EB5CA" />
-        <Text style={styles.unavailableTitle}>We could not connect securely</Text>
-        <Text style={styles.unavailableText}>
+        <Text style={[styles.unavailableTitle, { color: colors.text }]}>We could not connect securely</Text>
+        <Text style={[styles.unavailableText, { color: colors.textSecondary }]}>
           Westcars could not start Firebase services. Check your connection and try again.
         </Text>
         <Pressable style={styles.unavailableButton} onPress={retry} disabled={retrying}>
@@ -164,7 +168,13 @@ export default function RootLayout() {
               ) : (
                 <AuthProvider>
                   <AppProvider>
-                    <RootLayoutNav />
+                    <PaystackProvider
+                      publicKey={PAYSTACK_PUBLIC_KEY}
+                      currency="GHS"
+                      defaultChannels={["card", "mobile_money", "ussd"]}
+                    >
+                      <RootLayoutNav />
+                    </PaystackProvider>
                   </AppProvider>
                 </AuthProvider>
               )}

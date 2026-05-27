@@ -21,16 +21,31 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { useAvatarUpload } from "@/hooks/useAvatarUpload";
-import { CarCard } from "@/components/CarCard";
+import { ListingExpiryBanner } from "@/components/ListingExpiryBanner";
+import { ListingGrid2x2 } from "@/components/ListingGrid2x2";
+import { SavedSearchesPanel } from "@/components/SavedSearchesPanel";
 import { ReviewCard, StarRating } from "@/components/ReviewCard";
 import { TrustScore } from "@/components/TrustScore";
 import { VerificationBadges } from "@/components/VerificationBadges";
 import { Colors } from "@/constants/colors";
+import { LISTING_GRID } from "@/constants/listingGrid";
+import { toDisplayDateTime } from "@/utils/formatFirestoreDate";
 import { useApp } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import { CHINA_CITIES } from "@/utils/ghanaData";
 
 type ProfileTab = "listings" | "saved" | "reviews" | "settings";
+
+const PROFILE_TABS: { key: ProfileTab; label: string; icon: React.ComponentProps<typeof Feather>["name"] }[] = [
+  { key: "listings", label: "Listings", icon: "grid" },
+  { key: "saved", label: "Saved", icon: "heart" },
+  { key: "reviews", label: "Reviews", icon: "star" },
+  { key: "settings", label: "Settings", icon: "settings" },
+];
+
+/** Matches setting row text inset: paddingH(14) + icon(36) + gap(10) */
+const SETTINGS_TEXT_INSET = 60;
 
 function Stars({ n }: { n: number }) {
   return (
@@ -42,7 +57,43 @@ function Stars({ n }: { n: number }) {
   );
 }
 
-export default function ProfileScreen() {
+function ProfileAuthWall({ topPad }: { topPad: number }) {
+  const { colors, isDark } = useTheme();
+  return (
+    <View style={[styles.authRoot, { backgroundColor: colors.background }]}>
+      <View
+        style={[
+          styles.authCard,
+          {
+            marginTop: topPad + 28,
+            backgroundColor: colors.card,
+            borderColor: isDark ? colors.border : "rgba(14,181,202,0.12)",
+          },
+        ]}
+      >
+        <View style={[styles.authIconRing, { backgroundColor: colors.accentLight, borderColor: isDark ? colors.border : "rgba(14,181,202,0.24)" }]}>
+          <Feather name="user" size={30} color={colors.accent} />
+        </View>
+        <Text style={[styles.authTitle, { color: colors.text }]}>Sign in to Westcars</Text>
+        <Text style={[styles.authText, { color: colors.textSecondary }]}>
+          Access your saved cars, listings, messages, and seller tools with the same premium Westcars account.
+        </Text>
+        <Pressable style={[styles.authCtaInner, { backgroundColor: colors.accent }]} onPress={() => router.push("/auth/login")}>
+          <Feather name="log-in" size={16} color="#FFFFFF" />
+          <Text style={styles.authCtaText}>Sign In</Text>
+        </Pressable>
+        <View style={styles.authSignupRow}>
+          <Text style={[styles.authSignupPrompt, { color: colors.textSecondary }]}>New to Westcars?</Text>
+          <Pressable onPress={() => router.push("/auth/signup")}>
+            <Text style={[styles.authSignupLink, { color: colors.accent }]}>Create Account</Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function ProfileAuthenticatedContent() {
   const { currentUser, isAuthenticated, logout, cars, favorites, conversations,
           getUserReviews, getSellerTrustScore, toggleAnonymous,
           blockUser, blockedUsers, unblockUser, verifyPhone, verifyId,
@@ -84,31 +135,7 @@ export default function ProfileScreen() {
     }
   }, [chineseProfile]);
 
-  if (!isAuthenticated || !currentUser) {
-    return (
-      <View style={styles.authRoot}>
-        <View style={[styles.authCard, { marginTop: topPad + 28 }]}>
-          <View style={styles.authIconRing}>
-            <Feather name="user" size={30} color="#0EB5CA" />
-          </View>
-          <Text style={styles.authTitle}>Sign in to Westcars</Text>
-          <Text style={styles.authText}>
-            Access your saved cars, listings, messages, and seller tools with the same premium Westcars account.
-          </Text>
-          <Pressable style={styles.authCtaInner} onPress={() => router.push("/auth/login")}>
-            <Feather name="log-in" size={16} color="#FFFFFF" />
-            <Text style={styles.authCtaText}>Sign In</Text>
-          </Pressable>
-          <View style={styles.authSignupRow}>
-            <Text style={styles.authSignupPrompt}>New to Westcars?</Text>
-            <Pressable onPress={() => router.push("/auth/signup")}>
-              <Text style={styles.authSignupLink}>Create Account</Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-    );
-  }
+  if (!currentUser) return null;
 
   const myListings = cars.filter((c) => c.sellerId === currentUser.id);
   const activeListings = myListings.filter((c) => !c.isSold);
@@ -117,6 +144,7 @@ export default function ProfileScreen() {
   const savedCars   = cars.filter((c) => favorites.includes(c.id));
   const myReviews   = getUserReviews(currentUser.id);
   const trustScore  = getSellerTrustScore(currentUser);
+  const userRating  = typeof currentUser.rating === "number" ? currentUser.rating : 0;
   const v = currentUser.verification;
   const joinDate = currentUser.memberSince?.slice(0, 7) || "2024";
   const avatarUri = uploadedAvatar ?? firebaseUser?.photoURL ?? currentUser.avatar ?? null;
@@ -210,13 +238,16 @@ export default function ProfileScreen() {
 
   const handleChineseToggle = async (value: boolean) => {
     setIsChineseSeller(value);
+    setChineseSaved(false);
     if (!value) {
+      setWechatId("");
+      setLocationInChina("");
+      setBusinessName("");
       try {
         setSavingChinese(true);
         await saveChineseProfile({ isChineseSeller: false });
       } catch {
-        Alert.alert("Error", "Failed to update profile.");
-        setIsChineseSeller(true);
+        // Keep toggle off locally; user turned off without filling the form.
       } finally {
         setSavingChinese(false);
       }
@@ -324,7 +355,7 @@ export default function ProfileScreen() {
           <View style={styles.statsRow}>
             {[
               { label: "Listings",    value: String(myListings.length) },
-              { label: "Trust Score", value: `${trustScore}%` },
+              { label: "Trust Score", value: `${Math.round(trustScore)}%` },
               { label: "Saved",       value: String(savedCars.length) },
             ].map((stat, i) => (
               <View
@@ -370,10 +401,18 @@ export default function ProfileScreen() {
 
           <View style={styles.profileSection}>
             <Text style={[styles.profileSectionTitle, { color: colors.text }]}>Chinese Seller / Importer</Text>
-            <View style={[styles.detailCard, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA", borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }]}>
-              <View style={[styles.detailRow, { borderBottomWidth: isChineseSeller ? 0.5 : 0, borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }]}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.detailValue, { color: colors.text }]}>I am a Chinese Seller / Importer</Text>
+            <View style={[styles.chineseSellerCard, {
+              backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
+              borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+            }]}>
+              <View style={styles.chineseSellerToggleRow}>
+                <View style={styles.chineseSellerToggleCopy}>
+                  <Text style={[styles.chineseSellerTitle, { color: colors.text }]}>
+                    I am a Chinese Seller / Importer
+                  </Text>
+                  <Text style={[styles.chineseSellerSubtitle, { color: colors.textSecondary }]}>
+                    List vehicles from China with importer badges and location options.
+                  </Text>
                 </View>
                 <Switch
                   value={isChineseSeller}
@@ -383,24 +422,61 @@ export default function ProfileScreen() {
                 />
               </View>
               {isChineseSeller && (
-                <>
+                <View style={[styles.chineseSellerForm, {
+                  borderTopColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                }]}>
+                  <Text style={[styles.chineseFieldLabel, { color: colors.textSecondary }]}>WeChat ID</Text>
                   <TextInput
-                    style={[styles.chineseInput, { color: colors.text, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}
-                    placeholder="WeChat ID"
+                    style={[styles.chineseInput, {
+                      color: colors.text,
+                      borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)",
+                      backgroundColor: isDark ? "#111827" : "#FFFFFF",
+                    }]}
+                    placeholder="Your WeChat ID"
                     placeholderTextColor={colors.textTertiary}
                     value={wechatId}
                     onChangeText={setWechatId}
                   />
+                  <Text style={[styles.chineseFieldLabel, { color: colors.textSecondary }]}>City in China</Text>
+                  <Text style={[styles.chineseFieldHint, { color: colors.textSecondary }]}>
+                    Default location when you post listings (e.g. Guangzhou, Shenzhen).
+                  </Text>
                   <TextInput
-                    style={[styles.chineseInput, { color: colors.text, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}
-                    placeholder="Location in China (city/province)"
+                    style={[styles.chineseInput, {
+                      color: colors.text,
+                      borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)",
+                      backgroundColor: isDark ? "#111827" : "#FFFFFF",
+                    }]}
+                    placeholder="e.g. Guangzhou, Shenzhen"
                     placeholderTextColor={colors.textTertiary}
                     value={locationInChina}
                     onChangeText={setLocationInChina}
                   />
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chinaCityChips}>
+                    {CHINA_CITIES.slice(0, 10).map((city) => (
+                      <Pressable
+                        key={city}
+                        style={[
+                          styles.chinaCityChip,
+                          locationInChina === city && styles.chinaCityChipActive,
+                          { borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)" },
+                        ]}
+                        onPress={() => setLocationInChina(city)}
+                      >
+                        <Text style={[styles.chinaCityChipText, locationInChina === city && styles.chinaCityChipTextActive]}>
+                          {city}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                  <Text style={[styles.chineseFieldLabel, { color: colors.textSecondary }]}>Business name (optional)</Text>
                   <TextInput
-                    style={[styles.chineseInput, { color: colors.text, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}
-                    placeholder="Business Name in China (optional)"
+                    style={[styles.chineseInput, {
+                      color: colors.text,
+                      borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)",
+                      backgroundColor: isDark ? "#111827" : "#FFFFFF",
+                    }]}
+                    placeholder="Company name in China"
                     placeholderTextColor={colors.textTertiary}
                     value={businessName}
                     onChangeText={setBusinessName}
@@ -408,60 +484,39 @@ export default function ProfileScreen() {
                   <TouchableOpacity style={styles.chineseSaveBtn} onPress={handleSaveChineseProfile} disabled={savingChinese}>
                     {savingChinese
                       ? <ActivityIndicator color="#004D5A" />
-                      : <Text style={styles.chineseSaveText}>Save</Text>}
+                      : <Text style={styles.chineseSaveText}>Save importer profile</Text>}
                   </TouchableOpacity>
                   {chineseSaved && <Text style={styles.chineseSavedText}>Profile saved!</Text>}
-                </>
+                </View>
               )}
             </View>
           </View>
 
           <View style={styles.profileSection}>
             <Text style={[styles.profileSectionTitle, { color: colors.text }]}>Sponsorship & Ads</Text>
-            <View style={[styles.detailCard, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA", borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }]}>
-              <View style={[styles.detailRow, { borderBottomWidth: activeListings.length > 0 ? 0.5 : 0, borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }]}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.detailValue, { color: colors.text }]}>Status: {sponsorshipTier}</Text>
-                  <Text style={[styles.detailLabel, { marginTop: 4 }]}>{adCredits} sponsored post credits remaining</Text>
+            <Pressable
+              style={[styles.detailCard, styles.sponsorSummaryCard, {
+                backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
+                borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+              }]}
+              onPress={() => router.push("/sponsorship-hub")}
+            >
+              <View style={styles.sponsorSummaryTop}>
+                <View style={styles.adBoostIconBox}>
+                  <Feather name="trending-up" size={18} color="#E65100" />
                 </View>
-                {sponsorshipTier === 'Premium Seller' && (
-                  <View style={styles.premiumBadge}>
-                    <Text style={styles.premiumBadgeText}>Premium</Text>
-                  </View>
-                )}
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.detailValue, { color: colors.text }]}>{sponsorshipTier}</Text>
+                  <Text style={[styles.detailLabel, { marginTop: 4 }]}>
+                    {adCredits} credits · {activeListings.length} active listing{activeListings.length === 1 ? "" : "s"}
+                  </Text>
+                </View>
+                <Feather name="chevron-right" size={18} color={colors.textTertiary} />
               </View>
-              {activeListings.length === 0 ? (
-                <Text style={[styles.sponsorEmpty, { color: colors.textSecondary }]}>No active listings yet. Post a car to promote it.</Text>
-              ) : (
-                activeListings.map((listing, idx) => {
-                  const msgCount = conversations.filter((c) => c.carId === listing.id).length;
-                  const startDate = listing.createdAt?.slice(0, 10) ?? '—';
-                  const endDate = listing.expiresAt?.slice(0, 10) ?? 'Active';
-                  return (
-                    <View
-                      key={listing.id}
-                      style={[
-                        styles.sponsorListing,
-                        idx < activeListings.length - 1 && { borderBottomWidth: 0.5, borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" },
-                      ]}
-                    >
-                      <Text style={[styles.sponsorTitle, { color: colors.text }]} numberOfLines={1}>
-                        {listing.brand} {listing.model}
-                      </Text>
-                      <Text style={[styles.detailLabel]}>GHS {listing.price.toLocaleString()} · {startDate} → {endDate}</Text>
-                      <View style={styles.sponsorMetrics}>
-                        <Text style={styles.sponsorMetric}>👁 {listing.views ?? 0} views</Text>
-                        <Text style={styles.sponsorMetric}>💬 {msgCount} messages</Text>
-                        {listing.isSponsored && <Text style={styles.sponsorMetric}>★ Sponsored</Text>}
-                      </View>
-                      <TouchableOpacity style={styles.boostBtn} onPress={() => router.push('/advertise')}>
-                        <Text style={styles.boostBtnText}>Boost this ad</Text>
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })
-              )}
-            </View>
+              <Text style={[styles.sponsorSummaryHint, { color: colors.textSecondary }]}>
+                Manage promotions, boost listings, and track ad performance
+              </Text>
+            </Pressable>
           </View>
 
           {/* Profile Completion */}
@@ -525,28 +580,56 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {/* Tabs */}
-          <View style={[styles.tabs, { borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "#E4E8EF" }]}>
-            {(["listings", "saved", "reviews", "settings"] as ProfileTab[]).map((tab) => (
-              <Pressable
-                key={tab}
-                style={[styles.tab, activeTab === tab && styles.tabActive]}
-                onPress={() => setActiveTab(tab)}
-              >
-                <Text style={[
-                  styles.tabText,
-                  { color: activeTab === tab ? "#0EB5CA" : "#64748B" },
-                  activeTab === tab && styles.tabTextActive,
-                ]}>
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </Text>
-              </Pressable>
-            ))}
+          {/* Profile section tabs — segmented control */}
+          <View
+            style={[
+              styles.tabSegmentWrap,
+              { backgroundColor: isDark ? "rgba(15,23,42,0.65)" : "#E8EEF4" },
+            ]}
+          >
+            {PROFILE_TABS.map(({ key, label, icon }) => {
+              const active = activeTab === key;
+              return (
+                <Pressable
+                  key={key}
+                  style={[
+                    styles.tabSegment,
+                    active && [
+                      styles.tabSegmentActive,
+                      {
+                        backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+                        borderColor: isDark ? "rgba(14,181,202,0.35)" : "rgba(14,181,202,0.22)",
+                      },
+                    ],
+                  ]}
+                  onPress={() => setActiveTab(key)}
+                >
+                  <Feather
+                    name={icon}
+                    size={15}
+                    color={active ? "#0EB5CA" : isDark ? "#94A3B8" : "#64748B"}
+                  />
+                  <Text
+                    style={[
+                      styles.tabSegmentLabel,
+                      {
+                        color: active ? "#0EB5CA" : isDark ? "#CBD5E1" : "#475569",
+                      },
+                      active && styles.tabSegmentLabelActive,
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {label}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
 
           {/* ── Listings Tab ── */}
           {activeTab === "listings" && (
             <View style={styles.tabContent}>
+              <ListingExpiryBanner />
               <Pressable
                 style={[styles.adBoostBanner, {
                   backgroundColor: isDark ? "#1E293B" : "#FFF7ED",
@@ -573,56 +656,7 @@ export default function ProfileScreen() {
                   </Pressable>
                 </View>
               ) : (
-                <View style={styles.listingsGrid}>
-                  {myListings.map((car) => {
-                    const img = (car as any).images?.[0];
-                    const title = [(car as any).year, (car as any).make, (car as any).model]
-                      .filter(Boolean).join(" ") || (car as any).title || "Car";
-                    const price = (car as any).price;
-                    return (
-                      <Pressable
-                        key={car.id}
-                        style={[styles.listingCard, {
-                          backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
-                          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
-                        }]}
-                        onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
-                      >
-                        {/* Badge overlay */}
-                        <View style={styles.listingBadgeOverlay}>
-                          <View style={[styles.listingBadge,
-                            car.isSold ? { backgroundColor: "rgba(0,0,0,0.55)" } : { backgroundColor: "rgba(10,122,74,0.85)" },
-                          ]}>
-                            <Text style={[styles.listingBadgeText, { color: "#fff" }]}>
-                              {car.isSold ? "Sold" : "Active"}
-                            </Text>
-                          </View>
-                        </View>
-                        {img ? (
-                          <Image source={{ uri: img }} style={styles.listingImg} resizeMode="cover" />
-                        ) : (
-                          <View style={[styles.listingImgPlaceholder, { backgroundColor: "rgba(14,181,202,0.12)" }]}>
-                            <Feather name="truck" size={26} color="#0EB5CA" />
-                          </View>
-                        )}
-                        <View style={styles.listingInfo}>
-                          <Text style={[styles.listingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]} numberOfLines={2}>
-                            {title}
-                          </Text>
-                          {price !== undefined && (
-                            <Text style={styles.listingPrice}>GHS {Number(price).toLocaleString()}</Text>
-                          )}
-                          <View style={styles.listingMeta}>
-                            <Feather name="eye" size={10} color="#94A3B8" />
-                            <Text style={styles.listingMetaText}>{(car as any).views ?? 0}</Text>
-                            <Feather name="message-circle" size={10} color="#94A3B8" />
-                            <Text style={styles.listingMetaText}>{(car as any).chats ?? 0}</Text>
-                          </View>
-                        </View>
-                      </Pressable>
-                    );
-                  })}
-                </View>
+                <ListingGrid2x2 cars={myListings} isDark={isDark} showBadge variant="profile" />
               )}
             </View>
           )}
@@ -639,40 +673,7 @@ export default function ProfileScreen() {
                   </Text>
                 </View>
               ) : (
-                <View style={styles.listingsGrid}>
-                  {savedCars.map((car) => {
-                    const img = (car as any).images?.[0];
-                    const title = [(car as any).year, (car as any).make, (car as any).model]
-                      .filter(Boolean).join(" ") || (car as any).title || "Car";
-                    const price = (car as any).price;
-                    return (
-                      <Pressable
-                        key={car.id}
-                        style={[styles.listingCard, {
-                          backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
-                          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
-                        }]}
-                        onPress={() => router.push({ pathname: "/car/[id]", params: { id: car.id } })}
-                      >
-                        {img ? (
-                          <Image source={{ uri: img }} style={styles.listingImg} resizeMode="cover" />
-                        ) : (
-                          <View style={[styles.listingImgPlaceholder, { backgroundColor: "rgba(14,181,202,0.12)" }]}>
-                            <Feather name="truck" size={26} color="#0EB5CA" />
-                          </View>
-                        )}
-                        <View style={styles.listingInfo}>
-                          <Text style={[styles.listingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]} numberOfLines={2}>
-                            {title}
-                          </Text>
-                          {price !== undefined && (
-                            <Text style={styles.listingPrice}>GHS {Number(price).toLocaleString()}</Text>
-                          )}
-                        </View>
-                      </Pressable>
-                    );
-                  })}
-                </View>
+                <ListingGrid2x2 cars={savedCars} isDark={isDark} variant="carcard" />
               )}
             </View>
           )}
@@ -690,7 +691,7 @@ export default function ProfileScreen() {
                 </View>
               ) : (
                 <>
-                  <StarRating rating={currentUser.rating} totalReviews={myReviews.length} />
+                  <StarRating rating={userRating} totalReviews={myReviews.length} />
                   {myReviews.map((r) => (
                     <ReviewCard key={r.id} review={r} />
                   ))}
@@ -709,6 +710,22 @@ export default function ProfileScreen() {
                 borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
               }]}>
                 <Text style={[styles.settingsSection, { color: colors.textTertiary }]}>Preferences</Text>
+
+                <View style={[styles.preferenceBlock, {
+                  borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
+                }]}>
+                  <View style={styles.preferenceBlockHeader}>
+                    <View style={[styles.settingIcon, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
+                      <Feather name="bell" size={16} color="#0EB5CA" />
+                    </View>
+                    <Text style={[styles.settingTitle, { color: isDark ? "#F1F5F9" : "#0F172A", flex: 1 }]}>
+                      Saved search alerts
+                    </Text>
+                  </View>
+                  <View style={styles.preferenceBlockBody}>
+                    <SavedSearchesPanel embedded />
+                  </View>
+                </View>
 
                 <View style={[styles.settingRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" }]}>
                   <View style={[styles.settingIcon, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
@@ -951,6 +968,7 @@ export default function ProfileScreen() {
                   listing_expiry: 'alert-circle',
                   listing_approved: 'check-circle',
                   price_drop: 'trending-down',
+                  saved_search_match: 'bell',
                 };
                 const colorMap: Record<string, string> = {
                   message: '#7C3AED',
@@ -959,6 +977,7 @@ export default function ProfileScreen() {
                   listing_expiry: '#F59E0B',
                   listing_approved: '#10B981',
                   price_drop: '#0EB5CA',
+                  saved_search_match: '#0EB5CA',
                 };
                 const bgMap: Record<string, string> = {
                   message: '#F3EEFF',
@@ -967,10 +986,17 @@ export default function ProfileScreen() {
                   listing_expiry: '#FFFBEB',
                   listing_approved: '#ECFDF5',
                   price_drop: '#E8F7FA',
+                  saved_search_match: '#E8F7FA',
                 };
                 return (
                   <Pressable
-                    onPress={() => markNotificationRead(item.id)}
+                    onPress={() => {
+                      markNotificationRead(item.id);
+                      if (item.carId && (item.type === 'saved_search_match' || item.type === 'listing_expiry' || item.type === 'price_drop')) {
+                        setShowNotifications(false);
+                        router.push({ pathname: '/car/[id]', params: { id: item.carId } });
+                      }
+                    }}
                     style={{
                       flexDirection: 'row', alignItems: 'flex-start', gap: 12,
                       paddingHorizontal: 20, paddingVertical: 14,
@@ -1014,10 +1040,7 @@ export default function ProfileScreen() {
                         fontSize: 11, fontFamily: 'Inter_400Regular',
                         color: '#94A3B8', marginTop: 4,
                       }}>
-                        {new Date(item.createdAt).toLocaleDateString('en-GB', {
-                          day: 'numeric', month: 'short',
-                          hour: '2-digit', minute: '2-digit',
-                        })}
+                        {toDisplayDateTime(item.createdAt)}
                       </Text>
                     </View>
                   </Pressable>
@@ -1036,9 +1059,8 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
 
   // ── Auth wall ──
-  authRoot: { flex: 1, backgroundColor: "#EDF4F7", paddingHorizontal: 20 },
+  authRoot: { flex: 1, paddingHorizontal: 20 },
   authCard: {
-    backgroundColor: "#FFFFFF",
     borderRadius: 28,
     paddingHorizontal: 24,
     paddingVertical: 28,
@@ -1053,30 +1075,28 @@ const styles = StyleSheet.create({
   },
   authIconRing: {
     width: 76, height: 76, borderRadius: 38,
-    backgroundColor: "#E8F7FA",
     alignItems: "center", justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(14,181,202,0.24)",
     marginBottom: 14,
   },
   authTitle: {
-    fontSize: 28, color: "#0F172A", textAlign: "center",
+    fontSize: 28, textAlign: "center",
     fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.6,
   },
   authText: {
-    fontSize: 14, color: "#64748B", lineHeight: 22,
+    fontSize: 14, lineHeight: 22,
     fontFamily: "Inter_400Regular", textAlign: "center",
     marginTop: 8, marginBottom: 24,
   },
   authCtaInner: {
     width: "100%",
-    height: 53, borderRadius: 28.5, backgroundColor: "#0EB5CA",
+    height: 53, borderRadius: 28.5,
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10,
   },
   authCtaText: { fontSize: 15, color: "#FFFFFF", fontFamily: "Inter_600SemiBold", letterSpacing: 0.3 },
   authSignupRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 22 },
-  authSignupPrompt: { fontSize: 13, color: "#64748B", fontFamily: "Inter_400Regular" },
-  authSignupLink: { fontSize: 13, color: "#0EB5CA", fontFamily: "Inter_700Bold" },
+  authSignupPrompt: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  authSignupLink: { fontSize: 13, fontFamily: "Inter_700Bold" },
 
   // ── Teal header ──
   tealHeader: {
@@ -1219,42 +1239,49 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
 
-  // ── Tabs ──
-  tabs: { flexDirection: "row", borderBottomWidth: 1 },
-  tab: {
-    flex: 1, paddingVertical: 13, alignItems: "center",
-    borderBottomWidth: 2, borderBottomColor: "transparent",
+  // ── Profile tabs (segmented) ──
+  tabSegmentWrap: {
+    flexDirection: "row",
+    marginHorizontal: 16,
+    marginTop: 14,
+    marginBottom: 6,
+    padding: 4,
+    borderRadius: 14,
+    gap: 4,
   },
-  tabActive: { borderBottomColor: "#0EB5CA" },
-  tabText: { fontSize: 12, fontFamily: "Inter_500Medium" },
-  tabTextActive: { fontFamily: "Inter_700Bold" },
+  tabSegment: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    borderRadius: 11,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  tabSegmentActive: {
+    shadowColor: "#0A1628",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  tabSegmentLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.2,
+  },
+  tabSegmentLabelActive: {
+    fontFamily: "Inter_700Bold",
+  },
 
   // ── Tab content ──
-  tabContent: { padding: 14, gap: 10 },
-
-  // ── Listings 2×2 grid ──
-  listingsGrid: {
-    flexDirection: "row", flexWrap: "wrap", gap: 10,
+  tabContent: {
+    paddingHorizontal: LISTING_GRID.paddingHorizontal,
+    paddingVertical: 10,
+    gap: LISTING_GRID.gap,
   },
-  listingCard: {
-    width: "47%", borderRadius: 12,
-    borderWidth: 0.5, overflow: "hidden",
-  },
-  listingBadgeOverlay: {
-    position: "absolute", top: 6, left: 6, zIndex: 1,
-  },
-  listingImg: { width: "100%", height: 100 },
-  listingImgPlaceholder: {
-    width: "100%", height: 100,
-    alignItems: "center", justifyContent: "center",
-  },
-  listingInfo: { padding: 8, gap: 3 },
-  listingBadge: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: 20 },
-  listingBadgeText: { fontSize: 9, fontFamily: "Inter_600SemiBold" },
-  listingTitle: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
-  listingPrice: { fontSize: 13, fontFamily: "Manrope_800ExtraBold", color: "#0EB5CA" },
-  listingMeta: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
-  listingMetaText: { fontSize: 10, color: "#94A3B8", fontFamily: "Inter_400Regular" },
 
   // ── Ad boost ──
   adBoostBanner: {
@@ -1269,6 +1296,10 @@ const styles = StyleSheet.create({
   },
   adBoostTitle: { fontSize: 13, fontFamily: "Inter_700Bold" },
   adBoostSub: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 1 },
+
+  sponsorSummaryCard: { padding: 14, gap: 8 },
+  sponsorSummaryTop: { flexDirection: "row", alignItems: "center", gap: 10 },
+  sponsorSummaryHint: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
 
   // ── Empty state ──
   emptyState: { alignItems: "center", paddingVertical: 48, gap: 12 },
@@ -1298,6 +1329,23 @@ const styles = StyleSheet.create({
   settingMiddle: { flex: 1, gap: 1 },
   settingTitle: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   settingSubtitle: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  preferenceBlock: {
+    borderBottomWidth: 0.5,
+    paddingBottom: 4,
+  },
+  preferenceBlockHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 6,
+  },
+  preferenceBlockBody: {
+    paddingLeft: SETTINGS_TEXT_INSET,
+    paddingRight: 14,
+    paddingBottom: 12,
+  },
   veriBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
   veriBadgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
 
@@ -1312,14 +1360,44 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   authSignOutText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#0EB5CA" },
+  chineseSellerCard: {
+    borderRadius: 16,
+    borderWidth: 0.5,
+    overflow: "hidden",
+  },
+  chineseSellerToggleRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  chineseSellerToggleCopy: { flex: 1, gap: 6, paddingRight: 4 },
+  chineseSellerTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
+  chineseSellerSubtitle: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  chineseSellerForm: {
+    borderTopWidth: 0.5,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 18,
+    gap: 4,
+  },
+  chineseFieldLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginTop: 10,
+    marginBottom: 6,
+  },
   chineseInput: {
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 13,
     fontSize: 14,
     fontFamily: "Inter_400Regular",
-    marginBottom: 12,
+    marginBottom: 4,
   },
   chineseSaveBtn: {
     backgroundColor: "#0EB5CA",
@@ -1330,6 +1408,18 @@ const styles = StyleSheet.create({
   },
   chineseSaveText: { color: "#004D5A", fontSize: 15, fontFamily: "Inter_700Bold" },
   chineseSavedText: { color: "#16A34A", fontSize: 13, fontFamily: "Inter_600SemiBold", textAlign: "center", marginTop: 10 },
+  chineseFieldHint: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17, marginBottom: 8, marginTop: -2 },
+  chinaCityChips: { gap: 8, paddingVertical: 8 },
+  chinaCityChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    backgroundColor: "rgba(14,181,202,0.06)",
+  },
+  chinaCityChipActive: { backgroundColor: "rgba(14,181,202,0.18)", borderColor: "#0EB5CA" },
+  chinaCityChipText: { fontSize: 12, fontFamily: "Inter_500Medium", color: "#64748B" },
+  chinaCityChipTextActive: { color: "#0EB5CA", fontFamily: "Inter_700Bold" },
   premiumBadge: { backgroundColor: "#F59E0B", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   premiumBadgeText: { color: "#004D5A", fontSize: 11, fontFamily: "Inter_700Bold" },
   sponsorEmpty: { fontSize: 13, fontFamily: "Inter_400Regular", paddingVertical: 12, textAlign: "center" },
@@ -1349,3 +1439,14 @@ const styles = StyleSheet.create({
   },
   logoutText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#dc2626" },
 });
+
+export default function ProfileScreen() {
+  const { isAuthenticated, currentUser } = useApp();
+  const insets = useSafeAreaInsets();
+  const topPad = insets.top + (Platform.OS === "web" ? 67 : 0);
+
+  if (!isAuthenticated || !currentUser) {
+    return <ProfileAuthWall topPad={topPad} />;
+  }
+  return <ProfileAuthenticatedContent />;
+}

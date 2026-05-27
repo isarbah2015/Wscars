@@ -43,6 +43,8 @@ firebase deploy --only firestore:rules,storage,firestore:indexes
 firebase deploy --only functions
 ```
 
+Or from repo root: `./scripts/deploy-marketplace-backend.sh`
+
 ## Seed sample data
 
 After deploying rules, run:
@@ -64,13 +66,20 @@ You'll need a Service Account key:
   client-side `isAdmin` spoofing
 - `storage.rules` — owner-only uploads, ID docs are private
 - `firestore.indexes.json` — composite indexes for the queries the apps run
-- `functions/index.js` — 6 Cloud Functions:
+- `functions/index.js` — Cloud Functions (see also [PAYSTACK.md](./PAYSTACK.md)):
   1. `sendMessageNotification` — FCM push on new chat messages
   2. `processCarImages` — sanitises image URLs on car create/update
   3. `calculateCarRating` — recomputes aggregate ratings on review create
   4. `sendVerificationEmail` — generates a verification link on user create
   5. `reportContent` — bumps report count + auto-hides @ 3 reports
   6. `expireListings` — daily sweep that hides expired listings
+  7. `initializeBoostPayment` — start Paystack boost (callable, auth required)
+  8. `verifyBoostPayment` — verify txn + activate boost (callable)
+  9. `paystackWebhook` — Paystack `charge.success` webhook (HTTP, signed)
+  10. `savedSearchAlerts` — in-app notification when a new car matches a saved search
+  11. `notifyListingExpiry` — daily seller reminders (7 / 3 / 1 days before expiry)
+
+Collections: `notifications`, `savedSearches` (see `firestore.rules`).
 
 ## Notes on Phone Auth
 

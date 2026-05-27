@@ -3,6 +3,8 @@ import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Animated,
   Dimensions,
   FlatList,
@@ -18,13 +20,19 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { router } from "expo-router";
 import { Slider } from "@miblanchard/react-native-slider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { CarCard } from "@/components/CarCard";
+import { ListingGridLayoutRow } from "@/components/ListingGrid2x2";
+import { listingGridContainerStyle } from "@/constants/listingGrid";
+import { buildGridLayout, buildListingGridItems } from "@/utils/buildListingGridItems";
 import { useApp } from "@/context/AppContext";
-import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
+import { ThemeColors, useTheme } from "@/context/ThemeContext";
 import { Car } from "@/types";
-import { CAR_BRANDS, CONDITIONS, GHANA_CITIES, TRANSMISSIONS } from "@/utils/ghanaData";
+import { createSavedSearch } from "@/services/firebase/savedSearches";
+import { CAR_BRANDS, CONDITIONS, isChinaListingLocation, SEARCH_FILTER_LOCATIONS, TRANSMISSIONS } from "@/utils/ghanaData";
+import { buildSavedSearchLabel, filtersAreActive } from "@/utils/listingSearchFilters";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -119,7 +127,7 @@ const ALL_BRANDS = EXTENDED_BRANDS;
 const BODY_TYPES = ["SUV", "Sedan", "Pickup", "Truck", "Bus", "Heavy", "Moto"];
 
 // ─── Quick filters ─────────────────────────────────────────
-type QuickFilterKey = "All"|"SUV"|"Sedan"|"Tokunbo"|"Budget"|"Luxury"|"Pickup"|"Truck"|"Bus"|"Heavy"|"Moto"|"New";
+type QuickFilterKey = "All"|"SUV"|"Sedan"|"Tokunbo"|"China"|"Budget"|"Luxury"|"Pickup"|"Truck"|"Bus"|"Heavy"|"Moto"|"New";
 
 const QUICK_FILTERS: { key: QuickFilterKey; label: string; color: string }[] = [
   { key: "All",     label: "All",     color: "#0EB5CA" },
@@ -128,6 +136,7 @@ const QUICK_FILTERS: { key: QuickFilterKey; label: string; color: string }[] = [
   { key: "Sedan",   label: "Sedan",   color: "#EC4899" },
   { key: "Luxury",  label: "Luxury",  color: "#A855F7" },
   { key: "Tokunbo", label: "Tokunbo", color: "#22C55E" },
+  { key: "China",   label: "China",   color: "#DC2626" },
   { key: "New",     label: "New",     color: "#7C3AED" },
   { key: "Pickup",  label: "Pickup",  color: "#F97316" },
   { key: "Truck",   label: "Truck",   color: "#DC2626" },
@@ -173,19 +182,99 @@ function AnimatedCount({
   return <Animated.Text style={[style, { opacity }]}>{shown}</Animated.Text>;
 }
 
+function makeFilterStyles(colors: ThemeColors, isDark: boolean) {
+  const line = isDark ? "rgba(255,255,255,0.10)" : "#E2E8F0";
+  return StyleSheet.create({
+    overlay:  { flex: 1, justifyContent: "flex-end" },
+    backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(15,23,42,0.36)" },
+    sheet:    { backgroundColor: colors.background, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "92%", overflow: "hidden" },
+    handle:   { width: 36, height: 4, borderRadius: 2, backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "#CBD5E1", alignSelf: "center", marginTop: 12 },
+    header:   { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingVertical: 16 },
+    headerSpacer: { width: 48 },
+    title:    { flex: 1, textAlign: "center", fontSize: 18, fontFamily: "Manrope_800ExtraBold", color: colors.text },
+    resetTxt: { width: 48, textAlign: "right", fontSize: 14, color: TEAL, fontFamily: "Inter_600SemiBold" },
+    scroll:   { paddingBottom: 8 },
+    section:  { paddingHorizontal: 20, paddingVertical: 16, overflow: "visible" },
+    secLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: colors.textTertiary, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 12 },
+    divider:  { height: 1, backgroundColor: line, marginHorizontal: 20 },
+    priceSummary:      { marginBottom: 12, padding: 12, borderRadius: 12, backgroundColor: colors.inputBg, borderWidth: 1, borderColor: line },
+    priceSummaryLabel: { fontSize: 11, fontFamily: "Inter_500Medium", color: colors.textTertiary, marginBottom: 4 },
+    priceSummaryValue: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: TEAL },
+    rangeWrap: {
+      padding: 14, borderRadius: 18, backgroundColor: colors.inputBg,
+      borderWidth: 1, borderColor: isDark ? "rgba(14,181,202,0.22)" : "rgba(14,181,202,0.16)", marginBottom: 12,
+    },
+    rangeLabels: { flexDirection: "row", gap: 10, marginBottom: 18 },
+    rangeValuePill: {
+      flex: 1, borderRadius: 14, backgroundColor: colors.card,
+      borderWidth: 1, borderColor: isDark ? "rgba(14,181,202,0.28)" : "rgba(14,181,202,0.18)",
+      paddingHorizontal: 12, paddingVertical: 9,
+    },
+    rangeValueLabel: { fontSize: 10, fontFamily: "Inter_700Bold", color: colors.textTertiary, textTransform: "uppercase", letterSpacing: 0.5 },
+    rangeValueText: { fontSize: 15, fontFamily: "Manrope_800ExtraBold", color: isDark ? TEAL : "#004D5A", marginTop: 2 },
+    rangeSlider: { height: 44, marginHorizontal: 2 },
+    sliderTrack: { height: 7, borderRadius: 99 },
+    sliderThumb: {
+      width: 24, height: 24, borderRadius: 12, backgroundColor: TEAL, borderWidth: 3,
+      borderColor: isDark ? colors.card : "#FFFFFF",
+      shadowColor: "#0EB5CA", shadowOpacity: 0.32, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 4,
+    },
+    rangeEnds: { flexDirection: "row", justifyContent: "space-between", marginTop: 2 },
+    rangeEndText: { fontSize: 11, fontFamily: "Inter_500Medium", color: colors.textTertiary },
+    presetsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    presetChip: { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, borderColor: line, backgroundColor: colors.card },
+    brandGrid:      { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    brandItem:      { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, borderColor: line, backgroundColor: colors.card },
+    brandActive:    { backgroundColor: TEAL, borderColor: TEAL },
+    brandTxt:       { fontSize: 12, fontFamily: "Inter_500Medium", color: colors.textSecondary },
+    brandTxtActive: { color: "#fff" },
+    showMore:    { marginTop: 10, alignItems: "center", paddingVertical: 6 },
+    showMoreTxt: { fontSize: 13, color: TEAL, fontFamily: "Inter_600SemiBold" },
+    chipsRow:     { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    horizontalScroll: { overflow: "visible" },
+    horizontalChipsRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingRight: 40 },
+    chip:         { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20, borderWidth: 1, borderColor: line, backgroundColor: colors.card },
+    chipActive:   { backgroundColor: TEAL, borderColor: TEAL },
+    chipTxt:      { fontSize: 13, fontFamily: "Inter_500Medium", color: colors.textSecondary },
+    chipTxtActive:{ color: "#fff" },
+    citySearchBox: {
+      height: 46, borderRadius: 14, borderWidth: 1, borderColor: line, backgroundColor: colors.card,
+      flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 12, marginBottom: 10,
+    },
+    citySearchInput: { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular", color: colors.text },
+    cityList: { borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: line, backgroundColor: colors.card },
+    cityItem: {
+      minHeight: 44, paddingHorizontal: 14, flexDirection: "row", alignItems: "center",
+      justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: line,
+    },
+    cityItemActive: { backgroundColor: isDark ? "rgba(14,181,202,0.12)" : "#F0FCFE" },
+    cityTxt: { fontSize: 14, fontFamily: "Inter_500Medium", color: colors.textSecondary },
+    cityTxtActive: { color: isDark ? TEAL : "#004D5A", fontFamily: "Inter_700Bold" },
+    bottom:   { flexDirection: "row", gap: 10, padding: 16, paddingBottom: 32, borderTopWidth: 1, borderTopColor: line, backgroundColor: colors.card },
+    closeBtn: { flex: 1, height: 54, borderRadius: 14, backgroundColor: colors.inputBg, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: line },
+    closeTxt: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: colors.textSecondary },
+    applyBtn: { flex: 2, height: 54, borderRadius: 14, backgroundColor: TEAL, alignItems: "center", justifyContent: "center", shadowColor: TEAL, shadowOpacity: 0.25, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 5 },
+    applyTxt: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" },
+  });
+}
+
 function PriceRangeSelector({
   min,
   max,
   onMinChange,
   onMaxChange,
   format,
+  fs,
 }: {
   min: number;
   max: number;
   onMinChange: (value: number) => void;
   onMaxChange: (value: number) => void;
   format: (value: number) => string;
+  fs: ReturnType<typeof makeFilterStyles>;
 }) {
+  const { colors, isDark } = useTheme();
+  const trackIdle = isDark ? colors.border : "#E2E8F0";
   const handleChange = (nextValue: number | number[]) => {
     const [rawMin, rawMax] = Array.isArray(nextValue) ? nextValue : [min, max];
     const nextMin = Math.max(PRICE_MIN, Math.min(rawMin, rawMax - PRICE_STEP));
@@ -195,18 +284,18 @@ function PriceRangeSelector({
   };
 
   return (
-    <View style={fS.rangeWrap}>
-      <View style={fS.rangeLabels}>
-        <View style={fS.rangeValuePill}>
-          <Text style={fS.rangeValueLabel}>Min</Text>
-          <Text style={fS.rangeValueText}>{format(min)}</Text>
+    <View style={fs.rangeWrap}>
+      <View style={fs.rangeLabels}>
+        <View style={fs.rangeValuePill}>
+          <Text style={fs.rangeValueLabel}>Min</Text>
+          <Text style={fs.rangeValueText}>{format(min)}</Text>
         </View>
-        <View style={fS.rangeValuePill}>
-          <Text style={fS.rangeValueLabel}>Max</Text>
-          <Text style={fS.rangeValueText}>{max >= PRICE_MAX ? "Any" : format(max)}</Text>
+        <View style={fs.rangeValuePill}>
+          <Text style={fs.rangeValueLabel}>Max</Text>
+          <Text style={fs.rangeValueText}>{max >= PRICE_MAX ? "Any" : format(max)}</Text>
         </View>
       </View>
-      <View style={fS.rangeSlider}>
+      <View style={fs.rangeSlider}>
         <Slider
           value={[min, max]}
           minimumValue={PRICE_MIN}
@@ -214,15 +303,15 @@ function PriceRangeSelector({
           step={PRICE_STEP}
           onValueChange={handleChange}
           minimumTrackTintColor={TEAL}
-          maximumTrackTintColor="#E2E8F0"
+          maximumTrackTintColor={trackIdle}
           thumbTintColor={TEAL}
-          trackStyle={fS.sliderTrack}
-          thumbStyle={fS.sliderThumb}
+          trackStyle={fs.sliderTrack}
+          thumbStyle={fs.sliderThumb}
         />
       </View>
-      <View style={fS.rangeEnds}>
-        <Text style={fS.rangeEndText}>{format(PRICE_MIN)}</Text>
-        <Text style={fS.rangeEndText}>{format(PRICE_MAX)}</Text>
+      <View style={fs.rangeEnds}>
+        <Text style={fs.rangeEndText}>{format(PRICE_MIN)}</Text>
+        <Text style={fs.rangeEndText}>{format(PRICE_MAX)}</Text>
       </View>
     </View>
   );
@@ -233,12 +322,16 @@ function YearRangeSelector({
   max,
   onMinChange,
   onMaxChange,
+  fs,
 }: {
   min: number;
   max: number;
   onMinChange: (value: number) => void;
   onMaxChange: (value: number) => void;
+  fs: ReturnType<typeof makeFilterStyles>;
 }) {
+  const { colors, isDark } = useTheme();
+  const trackIdle = isDark ? colors.border : "#E2E8F0";
   const handleChange = (nextValue: number | number[]) => {
     const [rawMin, rawMax] = Array.isArray(nextValue) ? nextValue : [min, max];
     const nextMin = Math.max(YEAR_MIN, Math.min(Math.round(rawMin), Math.round(rawMax) - YEAR_STEP));
@@ -248,18 +341,18 @@ function YearRangeSelector({
   };
 
   return (
-    <View style={fS.rangeWrap}>
-      <View style={fS.rangeLabels}>
-        <View style={fS.rangeValuePill}>
-          <Text style={fS.rangeValueLabel}>From</Text>
-          <Text style={fS.rangeValueText}>{min}</Text>
+    <View style={fs.rangeWrap}>
+      <View style={fs.rangeLabels}>
+        <View style={fs.rangeValuePill}>
+          <Text style={fs.rangeValueLabel}>From</Text>
+          <Text style={fs.rangeValueText}>{min}</Text>
         </View>
-        <View style={fS.rangeValuePill}>
-          <Text style={fS.rangeValueLabel}>To</Text>
-          <Text style={fS.rangeValueText}>{max >= YEAR_MAX ? "Any" : max}</Text>
+        <View style={fs.rangeValuePill}>
+          <Text style={fs.rangeValueLabel}>To</Text>
+          <Text style={fs.rangeValueText}>{max >= YEAR_MAX ? "Any" : max}</Text>
         </View>
       </View>
-      <View style={fS.rangeSlider}>
+      <View style={fs.rangeSlider}>
         <Slider
           value={[min, max]}
           minimumValue={YEAR_MIN}
@@ -267,15 +360,15 @@ function YearRangeSelector({
           step={YEAR_STEP}
           onValueChange={handleChange}
           minimumTrackTintColor={TEAL}
-          maximumTrackTintColor="#E2E8F0"
+          maximumTrackTintColor={trackIdle}
           thumbTintColor={TEAL}
-          trackStyle={fS.sliderTrack}
-          thumbStyle={fS.sliderThumb}
+          trackStyle={fs.sliderTrack}
+          thumbStyle={fs.sliderThumb}
         />
       </View>
-      <View style={fS.rangeEnds}>
-        <Text style={fS.rangeEndText}>{YEAR_MIN}</Text>
-        <Text style={fS.rangeEndText}>{YEAR_MAX}</Text>
+      <View style={fs.rangeEnds}>
+        <Text style={fs.rangeEndText}>{YEAR_MIN}</Text>
+        <Text style={fs.rangeEndText}>{YEAR_MAX}</Text>
       </View>
     </View>
   );
@@ -305,6 +398,12 @@ function matchesQuickFilter(car: Car, key: QuickFilterKey): boolean {
   if (key === "SUV")     return cat.includes("suv") || cat.includes("4x4") || cat.includes("4×4");
   if (key === "Sedan")   return cat.includes("sedan");
   if (key === "Tokunbo") return car.condition === "Foreign Used";
+  if (key === "China") {
+    return (
+      isChinaListingLocation(car.location) ||
+      !!car.seller?.chineseSellerProfile?.isChineseSeller
+    );
+  }
   if (key === "Budget")  return car.price < 100000;
   if (key === "Luxury")  return car.price > 300000;
   if (key === "Pickup")  return cat.includes("pickup");
@@ -375,6 +474,8 @@ function FilterModal({
 }: {
   visible: boolean; onClose: () => void; onApply: (f: FilterState) => void; initial: FilterState;
 }) {
+  const { colors, isDark } = useTheme();
+  const fS = React.useMemo(() => makeFilterStyles(colors, isDark), [colors, isDark]);
   const [priceMin,      setPriceMin]      = React.useState(initial.priceMin);
   const [priceMax,      setPriceMax]      = React.useState(initial.priceMax);
   const [yearMin,       setYearMin]       = React.useState(initial.yearMin);
@@ -413,7 +514,7 @@ function FilterModal({
   };
 
   const visibleBrands = showAllBrands ? ALL_BRANDS : ALL_BRANDS.slice(0, 15);
-  const visibleCities = GHANA_CITIES.filter((city) =>
+  const visibleCities = SEARCH_FILTER_LOCATIONS.filter((city) =>
     city.toLowerCase().includes(citySearch.trim().toLowerCase())
   );
   const activeCount =
@@ -462,6 +563,7 @@ function FilterModal({
                 onMinChange={setPriceMin}
                 onMaxChange={setPriceMax}
                 format={fmt}
+                fs={fS}
               />
 
               <View style={fS.presetsRow}>
@@ -485,6 +587,7 @@ function FilterModal({
                 max={yearMax}
                 onMinChange={setYearMin}
                 onMaxChange={setYearMax}
+                fs={fS}
               />
             </View>
             <View style={fS.divider} />
@@ -579,13 +682,13 @@ function FilterModal({
 
             {/* ── Location ── */}
             <View style={fS.section}>
-              <Text style={fS.secLabel}>City / Region</Text>
+              <Text style={fS.secLabel}>Location (Ghana, ports & China)</Text>
               <View style={fS.citySearchBox}>
-                <Feather name="search" size={15} color="#94A3B8" />
+                <Feather name="search" size={15} color={colors.textTertiary} />
                 <TextInput
                   style={fS.citySearchInput}
                   placeholder="Search all regions"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor={colors.textTertiary}
                   value={citySearch}
                   onChangeText={setCitySearch}
                 />
@@ -621,8 +724,9 @@ function FilterModal({
 // MAIN SEARCH SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
 export default function SearchScreen() {
-  const { cars } = useApp();
-  const { colors } = useTheme();
+  const { cars, isAuthenticated } = useApp();
+  const { user } = useAuth();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 10 : insets.top;
 
@@ -632,6 +736,7 @@ export default function SearchScreen() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [activeFilters, setActiveFilters] = useState<FilterState | null>(null);
   const [quickFilter,   setQuickFilter]   = useState<QuickFilterKey>("All");
+  const [savingAlert,   setSavingAlert]   = useState(false);
 
   const chipScrollRef = useRef<ScrollView>(null);
   const chipLayouts   = useRef<Partial<Record<QuickFilterKey, { x: number; width: number }>>>({});
@@ -780,6 +885,14 @@ export default function SearchScreen() {
     return seeded.map((x) => ({ type: "car" as const, item: x.car }));
   }, [filtered]);
 
+  const gridRows = React.useMemo(() => {
+    const items = buildListingGridItems(
+      listData.map((entry) => entry.item),
+      { injectPromotions: true, promotionPool: cars },
+    );
+    return buildGridLayout(items);
+  }, [listData, cars]);
+
   const hasFilters = !!activeFilters && (
     activeFilters.brands.length > 0 || activeFilters.models.length > 0 ||
     activeFilters.bodyTypes.length > 0 ||
@@ -816,6 +929,45 @@ export default function SearchScreen() {
     return chips;
   }, [activeFilters]);
 
+  const canSaveAlert =
+    isAuthenticated &&
+    !!user &&
+    (hasFilters || quickFilter !== "All" || query.trim().length > 0);
+
+  const handleSaveSearchAlert = React.useCallback(async () => {
+    if (!user?.uid) {
+      Alert.alert("Sign in required", "Create an account to save search alerts.", [
+        { text: "Sign in", onPress: () => router.push("/auth/login") },
+        { text: "Cancel", style: "cancel" },
+      ]);
+      return;
+    }
+    if (!canSaveAlert) {
+      Alert.alert("Add filters", "Set a keyword, quick filter, or advanced filters first.");
+      return;
+    }
+    setSavingAlert(true);
+    try {
+      const name = buildSavedSearchLabel({
+        query,
+        quickFilter,
+        filters: filtersAreActive(activeFilters) ? activeFilters : null,
+      });
+      await createSavedSearch({
+        userId: user.uid,
+        name,
+        query,
+        quickFilter,
+        filters: activeFilters,
+      });
+      Alert.alert("Alert saved", `We'll notify you when new listings match:\n${name}`);
+    } catch {
+      Alert.alert("Could not save", "Check your connection and try again.");
+    } finally {
+      setSavingAlert(false);
+    }
+  }, [user?.uid, canSaveAlert, query, quickFilter, activeFilters]);
+
   const removeFilter = React.useCallback((key: string) => {
     setActiveFilters((prev) => {
       if (!prev) return prev;
@@ -838,10 +990,10 @@ export default function SearchScreen() {
   }, []);
 
   return (
-    <View style={[S.root, { backgroundColor: "#EDF4F7" }]}>
+    <View style={[S.root, { backgroundColor: colors.background }]}>
 
       {/* ── Header ── */}
-      <View style={[S.header, { paddingTop: topPad + 10, backgroundColor: "#FFFFFF", borderBottomColor: "#E2E8F0" }]}>
+      <View style={[S.header, { paddingTop: topPad + 10, backgroundColor: colors.card, borderBottomColor: isDark ? colors.border : "#E2E8F0" }]}>
         <View style={S.titleRow}>
           <View>
             <Text style={S.eyebrow}>WESTCARS</Text>
@@ -854,7 +1006,7 @@ export default function SearchScreen() {
         </View>
 
         <View style={S.searchRow}>
-          <View style={[S.searchInput, { backgroundColor: "#F5FBFC", borderColor: "#E2E8F0" }]}>
+          <View style={[S.searchInput, { backgroundColor: colors.inputBg, borderColor: isDark ? colors.border : "#E2E8F0" }]}>
             <Feather name="search" size={17} color={colors.textTertiary} />
             <TextInput
               style={[S.input, { color: colors.text }]}
@@ -870,6 +1022,17 @@ export default function SearchScreen() {
               </Pressable>
             )}
           </View>
+          <Pressable
+            style={[S.alertBtn, !canSaveAlert && S.alertBtnMuted]}
+            onPress={handleSaveSearchAlert}
+            disabled={savingAlert}
+          >
+            {savingAlert ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Feather name="bell" size={17} color="#fff" />
+            )}
+          </Pressable>
           <Pressable style={S.filterBtn} onPress={() => setFilterVisible(true)}>
             <Feather name="sliders" size={18} color="#fff" />
             {hasFilters && <View style={S.filterDot} />}
@@ -905,7 +1068,7 @@ export default function SearchScreen() {
                     S.chip,
                     active
                       ? { backgroundColor: color }
-                      : { backgroundColor: "#FFFFFF", borderColor: "#E2E8F0", borderWidth: 1 },
+                      : { backgroundColor: colors.card, borderColor: isDark ? colors.border : "#E2E8F0", borderWidth: 1 },
                     isEmpty && !active && S.chipDimmed,
                   ]}
                   onPress={() => setQuickFilter(key)}
@@ -926,8 +1089,8 @@ export default function SearchScreen() {
 
       {/* ── Results ── */}
       <FlatList
-        data={listData}
-        keyExtractor={(item) => item.item.id}
+        data={gridRows}
+        keyExtractor={(_, index) => `grid-row-${index}`}
         style={S.list}
         contentContainerStyle={S.listContent}
         showsVerticalScrollIndicator={false}
@@ -943,16 +1106,9 @@ export default function SearchScreen() {
             )}
           </View>
         }
-        renderItem={({ item, index }) => {
-          if (index % 2 === 1) return null;
-          const next = listData[index + 1];
-          return (
-            <View style={S.row}>
-              <CarCard car={item.item} style={S.cardStyle} />
-              {next ? <CarCard car={next.item} style={S.cardStyle} /> : <View style={S.cardStyle} />}
-            </View>
-          );
-        }}
+        renderItem={({ item: row }) => (
+          <ListingGridLayoutRow row={row} variant="carcard" isDark={isDark} />
+        )}
       />
 
       <FilterModal
@@ -982,6 +1138,8 @@ const S = StyleSheet.create({
   searchInput: { flex: 1, flexDirection: "row", alignItems: "center", borderRadius: 12, borderWidth: 1, paddingHorizontal: 14, height: 46, minHeight: 46, gap: 10 },
   input:       { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular" },
 
+  alertBtn: { width: 46, height: 46, borderRadius: 12, backgroundColor: ORANGE, alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  alertBtnMuted: { opacity: 0.45 },
   filterBtn: { width: 46, height: 46, borderRadius: 12, backgroundColor: TEAL, alignItems: "center", justifyContent: "center", flexShrink: 0 },
   filterDot: { position: "absolute", top: 8, right: 8, width: 7, height: 7, borderRadius: 4, backgroundColor: "#fff", borderWidth: 1.5, borderColor: TEAL },
 
@@ -1001,136 +1159,11 @@ const S = StyleSheet.create({
   chipBadgeText:     { fontSize: 10, fontFamily: "Inter_700Bold" },
 
   list:        { flex: 1 },
-  listContent: { padding: 12, paddingBottom: 100 },
-  row:         { flexDirection: "row", paddingHorizontal: 8, gap: 8, marginBottom: 8 },
-  cardStyle:   { flex: 1 },
+  listContent: { ...listingGridContainerStyle, paddingTop: 8, paddingBottom: 100 },
 
   empty:      { flex: 1, alignItems: "center", justifyContent: "center", paddingTop: 80, gap: 10 },
   emptyTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
   emptySub:   { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", paddingHorizontal: 40 },
   clearBtn:   { marginTop: 8, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 20, borderWidth: 1.5, borderColor: TEAL },
   clearBtnText:{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: TEAL },
-});
-
-// ─── Filter modal styles ──────────────────────────────────────────────────────
-const fS = StyleSheet.create({
-  overlay:  { flex: 1, justifyContent: "flex-end" },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(15,23,42,0.36)" },
-  sheet:    { backgroundColor: "#EDF4F7", borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "92%", overflow: "hidden" },
-  handle:   { width: 36, height: 4, borderRadius: 2, backgroundColor: "#CBD5E1", alignSelf: "center", marginTop: 12 },
-  header:   { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingVertical: 16 },
-  headerSpacer: { width: 48 },
-  title:    { flex: 1, textAlign: "center", fontSize: 18, fontFamily: "Manrope_800ExtraBold", color: "#0F172A" },
-  resetTxt: { width: 48, textAlign: "right", fontSize: 14, color: TEAL, fontFamily: "Inter_600SemiBold" },
-  scroll:   { paddingBottom: 8 },
-  section:  { paddingHorizontal: 20, paddingVertical: 16, overflow: "visible" },
-  secLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 12 },
-  divider:  { height: 1, backgroundColor: "#E2E8F0", marginHorizontal: 20 },
-
-  priceInputRow:  { flexDirection: "row", alignItems: "flex-end", gap: 10, marginBottom: 12 },
-  priceInputBox:  { flex: 1 },
-  priceCaption:   { fontSize: 11, color: "#8E8E93", fontFamily: "Inter_400Regular", marginBottom: 4 },
-  priceDash:      { fontSize: 18, color: "#8E8E93", marginBottom: 10, alignSelf: "flex-end" },
-  priceInput:     { height: 44, borderWidth: 1, borderColor: "#E5E5EA", borderRadius: 10, paddingHorizontal: 12, fontSize: 15, fontFamily: "Inter_500Medium", color: "#1C1C1E", backgroundColor: "#F9F9F9" },
-
-  priceSummary:      { marginBottom: 12, padding: 12, borderRadius: 12, backgroundColor: "#F5FBFC", borderWidth: 1, borderColor: "#E2E8F0" },
-  priceSummaryLabel: { fontSize: 11, fontFamily: "Inter_500Medium", color: "#8E8E93", marginBottom: 4 },
-  priceSummaryValue: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#0EB5CA" },
-
-  rangeWrap: {
-    padding: 14,
-    borderRadius: 18,
-    backgroundColor: "#F8FDFF",
-    borderWidth: 1,
-    borderColor: "rgba(14,181,202,0.16)",
-    marginBottom: 12,
-  },
-  rangeLabels: { flexDirection: "row", gap: 10, marginBottom: 18 },
-  rangeValuePill: {
-    flex: 1,
-    borderRadius: 14,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "rgba(14,181,202,0.18)",
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-  },
-  rangeValueLabel: { fontSize: 10, fontFamily: "Inter_700Bold", color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.5 },
-  rangeValueText: { fontSize: 15, fontFamily: "Manrope_800ExtraBold", color: "#004D5A", marginTop: 2 },
-  rangeSlider: {
-    height: 44,
-    marginHorizontal: 2,
-  },
-  sliderTrack: {
-    height: 7,
-    borderRadius: 99,
-  },
-  sliderThumb: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: TEAL,
-    borderWidth: 3,
-    borderColor: "#FFFFFF",
-    shadowColor: "#0EB5CA",
-    shadowOpacity: 0.32,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 4,
-  },
-  rangeEnds: { flexDirection: "row", justifyContent: "space-between", marginTop: 2 },
-  rangeEndText: { fontSize: 11, fontFamily: "Inter_500Medium", color: "#94A3B8" },
-
-  presetsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  presetChip: { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#FFFFFF" },
-
-  brandGrid:      { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  brandItem:      { paddingVertical: 7, paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#FFFFFF" },
-  brandActive:    { backgroundColor: TEAL, borderColor: TEAL },
-  brandTxt:       { fontSize: 12, fontFamily: "Inter_500Medium", color: "#334155" },
-  brandTxtActive: { color: "#fff" },
-
-  showMore:    { marginTop: 10, alignItems: "center", paddingVertical: 6 },
-  showMoreTxt: { fontSize: 13, color: TEAL, fontFamily: "Inter_600SemiBold" },
-
-  chipsRow:     { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  horizontalScroll: { overflow: "visible" },
-  horizontalChipsRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingRight: 40 },
-  chip:         { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 20, borderWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#FFFFFF" },
-  chipActive:   { backgroundColor: TEAL, borderColor: TEAL },
-  chipTxt:      { fontSize: 13, fontFamily: "Inter_500Medium", color: "#334155" },
-  chipTxtActive:{ color: "#fff" },
-
-  citySearchBox: {
-    height: 46,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#FFFFFF",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 12,
-    marginBottom: 10,
-  },
-  citySearchInput: { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular", color: "#0F172A" },
-  cityList: { borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#FFFFFF" },
-  cityItem: {
-    minHeight: 44,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderBottomWidth: 1,
-    borderBottomColor: "#EEF2F7",
-  },
-  cityItemActive: { backgroundColor: "#F0FCFE" },
-  cityTxt: { fontSize: 14, fontFamily: "Inter_500Medium", color: "#334155" },
-  cityTxtActive: { color: "#004D5A", fontFamily: "Inter_700Bold" },
-
-  bottom:   { flexDirection: "row", gap: 10, padding: 16, paddingBottom: 32, borderTopWidth: 1, borderTopColor: "#E2E8F0", backgroundColor: "#FFFFFF" },
-  closeBtn: { flex: 1, height: 54, borderRadius: 14, backgroundColor: "#F8FAFC", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E2E8F0" },
-  closeTxt: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#334155" },
-  applyBtn: { flex: 2, height: 54, borderRadius: 14, backgroundColor: TEAL, alignItems: "center", justifyContent: "center", shadowColor: TEAL, shadowOpacity: 0.25, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 5 },
-  applyTxt: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" },
 });

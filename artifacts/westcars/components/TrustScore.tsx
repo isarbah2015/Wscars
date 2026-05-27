@@ -17,7 +17,7 @@ function getLevel(score: number): { label: string; color: string; bg: string } {
 
 export function TrustScore({ score, size = "md", showLabel = true, style }: Props) {
   const { label, color, bg } = getLevel(score);
-  const clamp = Math.max(0, Math.min(100, score));
+  const clamp = Math.max(0, Math.min(100, Number.isFinite(score) ? score : 0));
 
   if (size === "sm") {
     return (

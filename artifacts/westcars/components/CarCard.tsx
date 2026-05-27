@@ -16,6 +16,7 @@ import {
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { LISTING_GRID } from "@/constants/listingGrid";
 import { Car } from "@/types";
 import { formatPrice } from "@/utils/ghanaData";
 
@@ -311,18 +312,17 @@ const styles = StyleSheet.create({
   wrapper: {
   },
   card: {
-    borderRadius: 16,
+    borderRadius: LISTING_GRID.cardRadius,
     overflow: "hidden",
     borderWidth: 1,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
-    marginBottom: 2,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
 
   imageWrap: {
     position: "relative",
-    height: 148,
+    height: LISTING_GRID.imageHeight,
     backgroundColor: "#1A2340",
   },
   image: { width: "100%", height: "100%" },
@@ -488,7 +488,7 @@ const sponsoredStyles = StyleSheet.create({
   },
   imageWrap: {
     position: "relative",
-    height: 148,
+    height: LISTING_GRID.imageHeight,
     backgroundColor: "#2A1800",
   },
   image: { width: "100%", height: "100%" },
@@ -683,7 +683,7 @@ const videoAdStyles = StyleSheet.create({
     elevation: 5,
   },
   mediaWrap: {
-    height: 200,
+    height: 230,
     position: "relative",
   },
   video: {

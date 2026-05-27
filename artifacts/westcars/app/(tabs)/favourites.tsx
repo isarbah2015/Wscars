@@ -11,7 +11,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthGatePlaceholder } from "@/components/AuthGatePlaceholder";
-import { CarCard } from "@/components/CarCard";
+import { ListingGrid2x2 } from "@/components/ListingGrid2x2";
+import { listingGridContainerStyle } from "@/constants/listingGrid";
 import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -84,19 +85,11 @@ export default function FavouritesScreen() {
           </Text>
 
           {/* 2-column CarCard grid */}
-          {Array.from({ length: Math.ceil(favCars.length / 2) }, (_, i) => {
-            const left = favCars[i * 2];
-            const right = favCars[i * 2 + 1];
-            return (
-              <View key={i} style={styles.gridRow}>
-                <CarCard car={left} style={styles.gridCard} />
-                {right
-                  ? <CarCard car={right} style={styles.gridCard} />
-                  : <View style={styles.gridCard} />
-                }
-              </View>
-            );
-          })}
+          <ListingGrid2x2
+            cars={favCars}
+            isDark={isDark}
+            variant="carcard"
+          />
         </ScrollView>
       )}
     </View>
@@ -136,20 +129,13 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
 
-  list: { paddingHorizontal: 8, paddingTop: 12, gap: 0 },
+  list: { ...listingGridContainerStyle, paddingTop: 8 },
   countLabel: {
     fontSize: 13,
     fontFamily: "Inter_400Regular",
-    marginBottom: 10,
+    marginBottom: 8,
     paddingHorizontal: 2,
   },
-
-  gridRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 10,
-  },
-  gridCard: { flex: 1 },
 
   /* ── Empty state ── */
   empty: {

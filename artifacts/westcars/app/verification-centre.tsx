@@ -21,6 +21,7 @@ import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { auth } from '@/lib/firebase-persistence'
 import { db } from '@/lib/firebase'
 import { useApp } from '@/context/AppContext'
+import { useTheme } from '@/context/ThemeContext'
 import { uploadIdImage } from '@/services/firebase/storage'
 
 const TEAL       = '#008080'
@@ -53,9 +54,10 @@ function StepCard({
   step: number; title: string; description: string
   done: boolean; pending?: boolean; onPress: () => void; disabled?: boolean
 }) {
+  const { colors } = useTheme()
   return (
     <TouchableOpacity
-      style={[s.stepCard, done && s.stepDone, disabled && s.stepDisabled]}
+      style={[s.stepCard, { backgroundColor: colors.card }, done && s.stepDone, disabled && s.stepDisabled]}
       onPress={onPress}
       disabled={disabled || done}
       activeOpacity={0.8}
@@ -66,8 +68,8 @@ function StepCard({
           : <Text style={[s.stepNumTxt, { color: TEAL_DARK }]}>{step}</Text>}
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={s.stepTitle}>{title}</Text>
-        <Text style={s.stepDesc}>{description}</Text>
+        <Text style={[s.stepTitle, { color: colors.text }]}>{title}</Text>
+        <Text style={[s.stepDesc, { color: colors.textSecondary }]}>{description}</Text>
         {pending && (
           <View style={s.pendingRow}>
             <Feather name="clock" size={12} color="#856404" />
@@ -87,6 +89,8 @@ function StepCard({
 export default function VerificationCentreScreen() {
   const router = useRouter()
   const { currentUser } = useApp()
+  const { colors, isDark } = useTheme()
+  const line = isDark ? colors.border : '#eaf4f4'
 
   const verifiedPhone = !!currentUser?.verifiedPhone
   const verifiedId    = !!currentUser?.verifiedId
@@ -197,22 +201,22 @@ export default function VerificationCentreScreen() {
   const trustScore = (verifiedPhone ? 40 : 0) + (verifiedId ? 60 : idPending ? 20 : 0)
 
   return (
-    <SafeAreaView style={s.safe}>
-      <View style={s.header}>
+    <SafeAreaView style={[s.safe, { backgroundColor: colors.background }]}>
+      <View style={[s.header, { backgroundColor: colors.card, borderBottomColor: line }]}>
         <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
-          <Feather name="arrow-left" size={22} color={TEAL_DARK} />
+          <Feather name="arrow-left" size={22} color={TEAL} />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>Verification Centre</Text>
+        <Text style={[s.headerTitle, { color: colors.text }]}>Verification Centre</Text>
         <View style={{ width: 36 }} />
       </View>
 
       <ScrollView contentContainerStyle={s.scroll}>
 
         {/* Trust score card */}
-        <View style={s.scoreCard}>
-          <Text style={s.scoreLabel}>Trust Score</Text>
+        <View style={[s.scoreCard, { backgroundColor: colors.card }]}>
+          <Text style={[s.scoreLabel, { color: colors.textTertiary }]}>Trust Score</Text>
           <Text style={s.scoreNum}>{trustScore}%</Text>
-          <View style={s.scoreTrack}>
+          <View style={[s.scoreTrack, { backgroundColor: isDark ? 'rgba(14,181,202,0.15)' : TEAL_LIGHT }]}>
             <View style={[s.scoreFill, { width: `${trustScore}%` as any }]} />
           </View>
           <View style={s.badgeRow}>
@@ -244,7 +248,7 @@ export default function VerificationCentreScreen() {
           onPress={() => setIdModal(true)}
         />
         {!verifiedPhone && (
-          <Text style={s.lockedNote}>Complete phone verification first to unlock this step.</Text>
+          <Text style={[s.lockedNote, { color: colors.textTertiary }]}>Complete phone verification first to unlock this step.</Text>
         )}
 
       </ScrollView>
@@ -252,18 +256,19 @@ export default function VerificationCentreScreen() {
       {/* ── Phone OTP Modal ─────────────────────────────────────────────────── */}
       <Modal visible={phoneModal} transparent animationType="slide" onRequestClose={() => setPhoneModal(false)}>
         <Pressable style={s.backdrop} onPress={() => setPhoneModal(false)} />
-        <View style={s.sheet}>
-          <View style={s.handle} />
-          <Text style={s.sheetTitle}>Verify Phone Number</Text>
+        <View style={[s.sheet, { backgroundColor: colors.card }]}>
+          <View style={[s.handle, { backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : '#ddd' }]} />
+          <Text style={[s.sheetTitle, { color: colors.text }]}>Verify Phone Number</Text>
 
           {!verificationId ? (
             <>
-              <Text style={s.sheetDesc}>Enter your Ghana mobile number. We'll send a 6-digit code.</Text>
-              <View style={s.inputRow}>
-                <Text style={s.flag}>🇬🇭 +233</Text>
+              <Text style={[s.sheetDesc, { color: colors.textSecondary }]}>Enter your Ghana mobile number. We'll send a 6-digit code.</Text>
+              <View style={[s.inputRow, { backgroundColor: colors.inputBg, borderColor: line }]}>
+                <Text style={[s.flag, { color: colors.text }]}>🇬🇭 +233</Text>
                 <TextInput
-                  style={s.input}
+                  style={[s.input, { color: colors.text }]}
                   placeholder="24 000 0000"
+                  placeholderTextColor={colors.textTertiary}
                   keyboardType="phone-pad"
                   value={phoneNum}
                   onChangeText={setPhoneNum}
@@ -282,10 +287,11 @@ export default function VerificationCentreScreen() {
             </>
           ) : (
             <>
-              <Text style={s.sheetDesc}>Enter the 6-digit code sent to {phoneNum}.</Text>
+              <Text style={[s.sheetDesc, { color: colors.textSecondary }]}>Enter the 6-digit code sent to {phoneNum}.</Text>
               <TextInput
-                style={[s.input, { textAlign: 'center', fontSize: 24, letterSpacing: 8 }]}
+                style={[s.input, { color: colors.text, textAlign: 'center', fontSize: 24, letterSpacing: 8 }]}
                 placeholder="000000"
+                placeholderTextColor={colors.textTertiary}
                 keyboardType="number-pad"
                 value={otpCode}
                 onChangeText={setOtpCode}
@@ -311,25 +317,25 @@ export default function VerificationCentreScreen() {
       {/* ── ID / Passport Modal ──────────────────────────────────────────────── */}
       <Modal visible={idModal} transparent animationType="slide" onRequestClose={() => setIdModal(false)}>
         <Pressable style={s.backdrop} onPress={() => setIdModal(false)} />
-        <View style={s.sheet}>
-          <View style={s.handle} />
-          <Text style={s.sheetTitle}>Upload Identity Document</Text>
-          <Text style={s.sheetDesc}>Choose your document type and upload a clear photo. All documents are encrypted and used only for verification.</Text>
+        <View style={[s.sheet, { backgroundColor: colors.card }]}>
+          <View style={[s.handle, { backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : '#ddd' }]} />
+          <Text style={[s.sheetTitle, { color: colors.text }]}>Upload Identity Document</Text>
+          <Text style={[s.sheetDesc, { color: colors.textSecondary }]}>Choose your document type and upload a clear photo. All documents are encrypted and used only for verification.</Text>
 
           {/* Document type toggle */}
           <View style={s.typeRow}>
             {(['national_id', 'passport'] as const).map(type => (
               <TouchableOpacity
                 key={type}
-                style={[s.typeBtn, idType === type && s.typeBtnActive]}
+                style={[s.typeBtn, { backgroundColor: isDark ? colors.inputBg : TEAL_LIGHT, borderColor: isDark ? colors.border : '#b2e0e0' }, idType === type && s.typeBtnActive]}
                 onPress={() => setIdType(type)}
               >
                 <Feather
                   name={type === 'passport' ? 'book-open' : 'credit-card'}
                   size={16}
-                  color={idType === type ? '#fff' : TEAL_DARK}
+                  color={idType === type ? '#fff' : TEAL}
                 />
-                <Text style={[s.typeTxt, idType === type && s.typeTxtActive]}>
+                <Text style={[s.typeTxt, { color: idType === type ? '#fff' : TEAL }, idType === type && s.typeTxtActive]}>
                   {type === 'national_id' ? 'National ID' : 'Passport'}
                 </Text>
               </TouchableOpacity>
@@ -337,14 +343,14 @@ export default function VerificationCentreScreen() {
           </View>
 
           {/* Image preview / picker */}
-          <TouchableOpacity style={s.idUploadBox} onPress={pickIdImage} activeOpacity={0.8}>
+          <TouchableOpacity style={[s.idUploadBox, { backgroundColor: colors.inputBg, borderColor: line }]} onPress={pickIdImage} activeOpacity={0.8}>
             {idImageUri ? (
               <Image source={{ uri: idImageUri }} style={s.idPreview} resizeMode="cover" />
             ) : (
               <>
                 <Feather name="upload" size={28} color={TEAL} />
                 <Text style={s.idUploadTxt}>Tap to select photo</Text>
-                <Text style={s.idUploadSub}>
+                <Text style={[s.idUploadSub, { color: colors.textSecondary }]}>
                   Front side of your {idType === 'passport' ? 'passport bio page' : 'Ghana Card'}
                 </Text>
               </>
@@ -367,7 +373,7 @@ export default function VerificationCentreScreen() {
               : <Text style={s.actionBtnTxt}>Submit for Review</Text>}
           </TouchableOpacity>
 
-          <Text style={s.privacyNote}>
+          <Text style={[s.privacyNote, { color: colors.textTertiary }]}>
             🔒 Your document is encrypted and only used to verify your identity on WestCars.
           </Text>
         </View>
