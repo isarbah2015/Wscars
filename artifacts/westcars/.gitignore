@@ -39,6 +39,7 @@ yarn-error.*
 .vercel
 
 .env
+.env.production
 
 # Play Store service account key (DO NOT COMMIT)
 play-store-service-account.json

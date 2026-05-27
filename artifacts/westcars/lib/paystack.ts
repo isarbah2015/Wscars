@@ -1,5 +1,10 @@
 export const PAYSTACK_PUBLIC_KEY = process.env.EXPO_PUBLIC_PAYSTACK_PUBLIC_KEY ?? "";
 
+/** True when the bundled key is Paystack live mode (charges real GHS). */
+export function isPaystackLiveMode(): boolean {
+  return PAYSTACK_PUBLIC_KEY.startsWith("pk_live_");
+}
+
 export interface BoostPlan {
   id: string;
   name: string;

@@ -68,7 +68,8 @@ Clients can **read** their own payment docs; only Cloud Functions **write** boos
 
 ## Going live
 
-- Switch to `pk_live_` in the app `.env`
-- Set `PAYSTACK_SECRET_KEY` to `sk_live_` in Firebase secrets
-- Re-deploy functions
-- Update Paystack webhook URL if the region/project changes
+1. Paystack Dashboard → **Live** tab → copy `pk_live_` and `sk_live_`.
+2. EAS: `artifacts/westcars/scripts/sync-paystack-production-eas.sh` (see `docs/android-production-paystack.md`).
+3. Firebase: `firebase functions:secrets:set PAYSTACK_SECRET_KEY` with `sk_live_...`, then `firebase deploy --only functions`.
+4. Paystack **Live** webhooks → same `paystackWebhook` URL, event `charge.success`.
+5. EAS Android production build (`--clear-cache` after key change).
