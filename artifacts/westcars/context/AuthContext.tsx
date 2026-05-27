@@ -93,8 +93,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const saveChineseProfile = async (profile: ChineseSellerProfile) => {
     if (!user) throw new Error('No user logged in');
-    await updateDoc(doc(db, 'users', user.uid), { chineseSellerProfile: profile });
+    const previous = chineseProfile;
     setChineseProfile(profile);
+    try {
+      await updateDoc(doc(db, 'users', user.uid), { chineseSellerProfile: profile });
+    } catch (error) {
+      setChineseProfile(previous);
+      throw error;
+    }
   };
 
   return (

@@ -238,13 +238,16 @@ function ProfileAuthenticatedContent() {
 
   const handleChineseToggle = async (value: boolean) => {
     setIsChineseSeller(value);
+    setChineseSaved(false);
     if (!value) {
+      setWechatId("");
+      setLocationInChina("");
+      setBusinessName("");
       try {
         setSavingChinese(true);
         await saveChineseProfile({ isChineseSeller: false });
       } catch {
-        Alert.alert("Error", "Failed to update profile.");
-        setIsChineseSeller(true);
+        // Keep toggle off locally; user turned off without filling the form.
       } finally {
         setSavingChinese(false);
       }
@@ -398,10 +401,18 @@ function ProfileAuthenticatedContent() {
 
           <View style={styles.profileSection}>
             <Text style={[styles.profileSectionTitle, { color: colors.text }]}>Chinese Seller / Importer</Text>
-            <View style={[styles.detailCard, { backgroundColor: isDark ? "#1E293B" : "#F7F8FA", borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }]}>
-              <View style={[styles.detailRow, { borderBottomWidth: isChineseSeller ? 0.5 : 0, borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }]}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.detailValue, { color: colors.text }]}>I am a Chinese Seller / Importer</Text>
+            <View style={[styles.chineseSellerCard, {
+              backgroundColor: isDark ? "#1E293B" : "#F7F8FA",
+              borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+            }]}>
+              <View style={styles.chineseSellerToggleRow}>
+                <View style={styles.chineseSellerToggleCopy}>
+                  <Text style={[styles.chineseSellerTitle, { color: colors.text }]}>
+                    I am a Chinese Seller / Importer
+                  </Text>
+                  <Text style={[styles.chineseSellerSubtitle, { color: colors.textSecondary }]}>
+                    List vehicles from China with importer badges and location options.
+                  </Text>
                 </View>
                 <Switch
                   value={isChineseSeller}
@@ -411,19 +422,31 @@ function ProfileAuthenticatedContent() {
                 />
               </View>
               {isChineseSeller && (
-                <>
+                <View style={[styles.chineseSellerForm, {
+                  borderTopColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                }]}>
+                  <Text style={[styles.chineseFieldLabel, { color: colors.textSecondary }]}>WeChat ID</Text>
                   <TextInput
-                    style={[styles.chineseInput, { color: colors.text, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}
-                    placeholder="WeChat ID"
+                    style={[styles.chineseInput, {
+                      color: colors.text,
+                      borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)",
+                      backgroundColor: isDark ? "#111827" : "#FFFFFF",
+                    }]}
+                    placeholder="Your WeChat ID"
                     placeholderTextColor={colors.textTertiary}
                     value={wechatId}
                     onChangeText={setWechatId}
                   />
+                  <Text style={[styles.chineseFieldLabel, { color: colors.textSecondary }]}>City in China</Text>
                   <Text style={[styles.chineseFieldHint, { color: colors.textSecondary }]}>
-                    Your city in China — used as the default “vehicle location” when you post listings.
+                    Default location when you post listings (e.g. Guangzhou, Shenzhen).
                   </Text>
                   <TextInput
-                    style={[styles.chineseInput, { color: colors.text, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}
+                    style={[styles.chineseInput, {
+                      color: colors.text,
+                      borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)",
+                      backgroundColor: isDark ? "#111827" : "#FFFFFF",
+                    }]}
                     placeholder="e.g. Guangzhou, Shenzhen"
                     placeholderTextColor={colors.textTertiary}
                     value={locationInChina}
@@ -446,9 +469,14 @@ function ProfileAuthenticatedContent() {
                       </Pressable>
                     ))}
                   </ScrollView>
+                  <Text style={[styles.chineseFieldLabel, { color: colors.textSecondary }]}>Business name (optional)</Text>
                   <TextInput
-                    style={[styles.chineseInput, { color: colors.text, borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)", backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}
-                    placeholder="Business Name in China (optional)"
+                    style={[styles.chineseInput, {
+                      color: colors.text,
+                      borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)",
+                      backgroundColor: isDark ? "#111827" : "#FFFFFF",
+                    }]}
+                    placeholder="Company name in China"
                     placeholderTextColor={colors.textTertiary}
                     value={businessName}
                     onChangeText={setBusinessName}
@@ -456,10 +484,10 @@ function ProfileAuthenticatedContent() {
                   <TouchableOpacity style={styles.chineseSaveBtn} onPress={handleSaveChineseProfile} disabled={savingChinese}>
                     {savingChinese
                       ? <ActivityIndicator color="#004D5A" />
-                      : <Text style={styles.chineseSaveText}>Save</Text>}
+                      : <Text style={styles.chineseSaveText}>Save importer profile</Text>}
                   </TouchableOpacity>
                   {chineseSaved && <Text style={styles.chineseSavedText}>Profile saved!</Text>}
-                </>
+                </View>
               )}
             </View>
           </View>
@@ -1332,14 +1360,44 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   authSignOutText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#0EB5CA" },
+  chineseSellerCard: {
+    borderRadius: 16,
+    borderWidth: 0.5,
+    overflow: "hidden",
+  },
+  chineseSellerToggleRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  chineseSellerToggleCopy: { flex: 1, gap: 6, paddingRight: 4 },
+  chineseSellerTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
+  chineseSellerSubtitle: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  chineseSellerForm: {
+    borderTopWidth: 0.5,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 18,
+    gap: 4,
+  },
+  chineseFieldLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginTop: 10,
+    marginBottom: 6,
+  },
   chineseInput: {
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 13,
     fontSize: 14,
     fontFamily: "Inter_400Regular",
-    marginBottom: 12,
+    marginBottom: 4,
   },
   chineseSaveBtn: {
     backgroundColor: "#0EB5CA",
@@ -1350,7 +1408,7 @@ const styles = StyleSheet.create({
   },
   chineseSaveText: { color: "#004D5A", fontSize: 15, fontFamily: "Inter_700Bold" },
   chineseSavedText: { color: "#16A34A", fontSize: 13, fontFamily: "Inter_600SemiBold", textAlign: "center", marginTop: 10 },
-  chineseFieldHint: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17, marginBottom: 8 },
+  chineseFieldHint: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17, marginBottom: 8, marginTop: -2 },
   chinaCityChips: { gap: 8, paddingVertical: 8 },
   chinaCityChip: {
     paddingHorizontal: 12,

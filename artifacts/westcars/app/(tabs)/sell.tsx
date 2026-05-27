@@ -49,22 +49,59 @@ const PLACEHOLDER = "#94A3B8";
 const STEPS = ["Photos", "Details", "Specs", "Price"];
 
 // ── Section header ────────────────────────────────────────────────────────
-function SectionHeader({ title, right, icon = "square" }: { title: string; right?: React.ReactNode; icon?: React.ComponentProps<typeof Feather>["name"] }) {
+function SectionHeader({
+  title,
+  right,
+  icon,
+  subtitle,
+  required,
+}: {
+  title: string;
+  right?: React.ReactNode;
+  icon: React.ComponentProps<typeof Feather>["name"];
+  subtitle?: string;
+  required?: boolean;
+}) {
   const { colors } = useTheme();
   return (
-    <View style={sh.row}>
-      <View style={sh.icon}>
-        <Feather name={icon} size={10} color={TEAL} />
+    <View style={sh.wrap}>
+      <View style={sh.row}>
+        <View style={sh.icon}>
+          <Feather name={icon} size={13} color={TEAL} />
+        </View>
+        <View style={sh.titleCol}>
+          <View style={sh.titleRow}>
+            <Text style={[sh.title, { color: colors.text }]} numberOfLines={2}>
+              {title}
+              {required ? <Text style={{ color: TEAL }}> •</Text> : null}
+            </Text>
+            {right ? <View style={sh.right}>{right}</View> : null}
+          </View>
+          {subtitle ? (
+            <Text style={[sh.subtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
+          ) : null}
+        </View>
       </View>
-      <Text style={[sh.title, { color: colors.text }]}>{title}</Text>
-      {right && <View style={{ marginLeft: "auto" }}>{right}</View>}
     </View>
   );
 }
 const sh = StyleSheet.create({
-  row:   { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 },
-  icon:  { width: 22, height: 22, borderRadius: 5, backgroundColor: TEAL_LIGHT, alignItems: "center", justifyContent: "center" },
-  title: { fontSize: 14, fontFamily: "Inter_700Bold" },
+  wrap:     { marginBottom: 14 },
+  row:      { flexDirection: "row", alignItems: "flex-start", gap: 10 },
+  icon:     {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: TEAL_LIGHT,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 1,
+  },
+  titleCol: { flex: 1, minWidth: 0, gap: 4 },
+  titleRow: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
+  title:    { flex: 1, fontSize: 15, fontFamily: "Inter_700Bold", lineHeight: 20 },
+  right:    { flexShrink: 0, alignSelf: "flex-start" },
+  subtitle: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
 });
 
 // ── Inline picker (expands in place — no absolute dropdown) ───────────────
@@ -425,52 +462,65 @@ export default function SellScreen() {
       >
 
         {/* ── Photos ── */}
-        <View style={[styles.card, cardStyle]}>
+        <View style={[styles.card, cardStyle, styles.photosCard]}>
           <SectionHeader
+            icon="camera"
             title="Vehicle photos"
-            right={<Text style={styles.photoCount}>{images.length} / 10 photos added</Text>}
-          />
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.photoScroll}
-            contentContainerStyle={styles.photoScrollContent}
-          >
-            {images.length < 10 && (
-              <Pressable style={styles.addPhoto} onPress={pickImages}>
-                <Feather name="plus" size={22} color={TEAL} />
-                <Text style={styles.addPhotoText}>Add</Text>
-              </Pressable>
-            )}
-            {images.map((uri, i) => (
-              <View key={i} style={styles.photoThumb}>
-                <Image source={{ uri }} style={styles.thumbImg} />
-                {i === 0 && (
-                  <View style={styles.coverBadge}><Text style={styles.coverText}>Cover</Text></View>
-                )}
-                <Pressable style={styles.removePhoto} onPress={() => setImages(prev => prev.filter((_,j) => j !== i))}>
-                  <Feather name="x" size={10} color="#fff" />
-                </Pressable>
+            required
+            right={
+              <View style={[styles.photoCountBadge, { backgroundColor: isDark ? "rgba(14,181,202,0.15)" : TEAL_LIGHT }]}>
+                <Text style={styles.photoCount}>{images.length}/10</Text>
               </View>
-            ))}
-            {images.length === 0 && (
-              <>
-                {[0,1,2].map(i => (
-                  <View key={i} style={styles.photoEmpty} />
-                ))}
-              </>
-            )}
-          </ScrollView>
-          <Text style={[styles.photoHint, { color: colors.textSecondary }]}>
-            Tap + to select photos from your gallery. First photo will be the cover.
-          </Text>
+            }
+            subtitle="Add up to 10 photos. The first image is your listing cover."
+          />
+          {images.length === 0 ? (
+            <Pressable
+              style={[styles.photoUploadHero, { borderColor: isDark ? "rgba(14,181,202,0.35)" : "rgba(14,181,202,0.45)" }]}
+              onPress={pickImages}
+            >
+              <View style={styles.photoUploadIconRing}>
+                <Feather name="image" size={26} color={TEAL} />
+              </View>
+              <Text style={[styles.photoUploadTitle, { color: colors.text }]}>Tap to add photos</Text>
+              <Text style={[styles.photoUploadSub, { color: colors.textSecondary }]}>
+                Gallery · JPG or PNG · first photo becomes cover
+              </Text>
+            </Pressable>
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.photoScroll}
+              contentContainerStyle={styles.photoScrollContent}
+            >
+              {images.length < 10 && (
+                <Pressable style={[styles.addPhoto, { borderColor: TEAL }]} onPress={pickImages}>
+                  <Feather name="plus" size={24} color={TEAL} />
+                  <Text style={styles.addPhotoText}>Add</Text>
+                </Pressable>
+              )}
+              {images.map((uri, i) => (
+                <View key={i} style={styles.photoThumb}>
+                  <Image source={{ uri }} style={styles.thumbImg} />
+                  {i === 0 && (
+                    <View style={styles.coverBadge}><Text style={styles.coverText}>Cover</Text></View>
+                  )}
+                  <Pressable style={styles.removePhoto} onPress={() => setImages(prev => prev.filter((_, j) => j !== i))}>
+                    <Feather name="x" size={10} color="#fff" />
+                  </Pressable>
+                </View>
+              ))}
+            </ScrollView>
+          )}
         </View>
 
         {/* ── ID Lookup ── */}
         <View style={[styles.card, cardStyle]}>
           <SectionHeader
+            icon="hash"
             title="Product identifier"
-            right={<Text style={[styles.optionalTag, { color: colors.textSecondary }]}>optional</Text>}
+            subtitle="Optional — VIN, IMEI, or serial number to auto-fill vehicle details."
           />
 
           {/* Type selector pills */}
@@ -553,7 +603,7 @@ export default function SellScreen() {
 
         {/* ── Vehicle Details ── */}
         <View style={[styles.card, cardStyle]}>
-          <SectionHeader title="Vehicle details" />
+          <SectionHeader icon="truck" title="Vehicle details" required />
 
           {/* Brand | Year */}
           <View style={styles.row2}>
@@ -662,7 +712,7 @@ export default function SellScreen() {
 
         {/* ── Asking Price ── */}
         <View style={[styles.card, cardStyle]}>
-          <SectionHeader title="Asking price" right={<Text style={{ color: TEAL, fontSize: 12, fontFamily: "Inter_600SemiBold" }}>•</Text>} />
+          <SectionHeader icon="tag" title="Asking price" required />
           <View style={[styles.priceRow, { backgroundColor: colors.inputBg, borderColor }]}>
             <View style={styles.ghsBadge}>
               <Text style={styles.ghsText}>GHS</Text>
@@ -823,33 +873,79 @@ const styles = StyleSheet.create({
   },
 
   // Photos
-  photoCount:         { fontSize: 11, fontFamily: "Inter_500Medium", color: TEAL },
-  photoScroll:        { marginHorizontal: -16 },
-  photoScrollContent: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingVertical: 4 },
-  photoRow:           { flexDirection: "row", gap: 8, paddingVertical: 4 },
+  photosCard: { paddingBottom: 18 },
+  photoCountBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  photoCount: { fontSize: 11, fontFamily: "Inter_700Bold", color: TEAL },
+  photoUploadHero: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 28,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    backgroundColor: TEAL_LIGHT,
+    gap: 8,
+  },
+  photoUploadIconRing: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+    shadowColor: "#0A1628",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  photoUploadTitle: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  photoUploadSub: { fontSize: 12, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 18 },
+  photoScroll: { marginHorizontal: -4 },
+  photoScrollContent: { flexDirection: "row", gap: 10, paddingVertical: 4, paddingHorizontal: 2 },
   addPhoto: {
-    width: 76, height: 76, borderRadius: 10,
-    borderWidth: 2, borderColor: TEAL, borderStyle: "dashed",
-    backgroundColor: TEAL_LIGHT, alignItems: "center", justifyContent: "center", gap: 2,
+    width: 88,
+    height: 88,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    backgroundColor: TEAL_LIGHT,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
   },
-  addPhotoText: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: TEAL },
-  photoThumb: { width: 76, height: 76, borderRadius: 10, overflow: "hidden", position: "relative" },
-  thumbImg:   { width: "100%", height: "100%" },
+  addPhotoText: { fontSize: 12, fontFamily: "Inter_700Bold", color: TEAL },
+  photoThumb: { width: 88, height: 88, borderRadius: 12, overflow: "hidden", position: "relative" },
+  thumbImg: { width: "100%", height: "100%" },
   coverBadge: {
-    position: "absolute", bottom: 0, left: 0, right: 0,
-    backgroundColor: "rgba(14,181,202,0.85)", paddingVertical: 3, alignItems: "center",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "rgba(14,181,202,0.9)",
+    paddingVertical: 4,
+    alignItems: "center",
   },
-  coverText:  { fontSize: 9, fontFamily: "Inter_700Bold", color: "#fff" },
+  coverText: { fontSize: 10, fontFamily: "Inter_700Bold", color: "#fff" },
   removePhoto: {
-    position: "absolute", top: 4, right: 4,
-    width: 18, height: 18, borderRadius: 9,
-    backgroundColor: "rgba(0,0,0,0.55)", alignItems: "center", justifyContent: "center",
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  photoEmpty: { width: 76, height: 76, borderRadius: 10, backgroundColor: INPUT_BG, borderWidth: 1.5, borderColor: BORDER },
-  photoHint:  { fontSize: 11, fontFamily: "Inter_400Regular", color: MUTED, lineHeight: 16, marginTop: 4 },
 
   // Identifier
-  optionalTag: { fontSize: 11, fontFamily: "Inter_400Regular", color: MUTED, fontStyle: "italic" },
   idTypePills: { flexDirection: "row", gap: 8, marginBottom: 10 },
   idTypePill: {
     paddingHorizontal: 14, paddingVertical: 7,
