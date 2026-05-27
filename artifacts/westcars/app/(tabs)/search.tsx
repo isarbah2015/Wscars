@@ -248,7 +248,7 @@ function makeFilterStyles(colors: ThemeColors, isDark: boolean) {
       justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: line,
     },
     cityItemActive: { backgroundColor: isDark ? "rgba(14,181,202,0.12)" : "#F0FCFE" },
-    cityTxt: { fontSize: 14, fontFamily: "Inter_500Medium", color: colors.textSecondary },
+    cityTxt: { flex: 1, flexShrink: 1, fontSize: 14, fontFamily: "Inter_500Medium", color: colors.textSecondary, paddingRight: 8 },
     cityTxtActive: { color: isDark ? TEAL : "#004D5A", fontFamily: "Inter_700Bold" },
     bottom:   { flexDirection: "row", gap: 10, padding: 16, paddingBottom: 32, borderTopWidth: 1, borderTopColor: line, backgroundColor: colors.card },
     closeBtn: { flex: 1, height: 54, borderRadius: 14, backgroundColor: colors.inputBg, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: line },
@@ -500,7 +500,8 @@ function FilterModal({
     }
   }, [visible]);
 
-  const fmt = (v: number) => v >= 1000 ? `GHS ${(v / 1000).toFixed(0)}k` : `GHS ${v}`;
+  const fmt = (v: number) =>
+    v >= 1000 ? `₵${(v / 1000).toFixed(0)}k` : `₵${v.toLocaleString("en-GH")}`;
   const toggle = (arr: string[], set: (a: string[]) => void, val: string) =>
     set(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
   const reset = () => {
@@ -524,10 +525,10 @@ function FilterModal({
     (yearMin !== YEAR_MIN || yearMax !== YEAR_MAX ? 1 : 0);
 
   const PRESETS = [
-    { label: "GHS 0–30k",     min: 0,       max: 30_000  },
-    { label: "GHS 30k–100k",  min: 30_000,  max: 100_000 },
-    { label: "GHS 100k–300k", min: 100_000, max: 300_000 },
-    { label: "GHS 300k+",     min: 300_000, max: 500_000 },
+    { label: "₵0–30k",     min: 0,       max: 30_000  },
+    { label: "₵30k–100k",  min: 30_000,  max: 100_000 },
+    { label: "₵100k–300k", min: 100_000, max: 300_000 },
+    { label: "₵300k+",     min: 300_000, max: 500_000 },
   ];
 
   return (
@@ -548,7 +549,7 @@ function FilterModal({
 
             {/* ── Price range ── */}
             <View style={fS.section}>
-              <Text style={fS.secLabel}>Price range (GHS)</Text>
+              <Text style={fS.secLabel}>Price range (₵)</Text>
 
               <View style={fS.priceSummary}>
                 <Text style={fS.priceSummaryLabel}>Selected range</Text>
@@ -594,17 +595,17 @@ function FilterModal({
 
             <View style={fS.section}>
               <Text style={fS.secLabel}>Body Type</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={fS.horizontalChipsRow} style={fS.horizontalScroll}>
+              <View style={fS.chipsRow}>
                 {BODY_TYPES.map(type => {
                   const active = bodyTypes.includes(type);
                   return (
                     <TouchableOpacity key={type} style={[fS.chip, active && fS.chipActive]}
                       onPress={() => toggle(bodyTypes, setBodyTypes, type)}>
-                      <Text style={[fS.chipTxt, active && fS.chipTxtActive]}>{type}</Text>
+                      <Text style={[fS.chipTxt, active && fS.chipTxtActive]} numberOfLines={1}>{type}</Text>
                     </TouchableOpacity>
                   );
                 })}
-              </ScrollView>
+              </View>
             </View>
             <View style={fS.divider} />
 
@@ -655,28 +656,28 @@ function FilterModal({
             {/* ── Transmission ── */}
             <View style={fS.section}>
               <Text style={fS.secLabel}>Transmission</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={fS.horizontalChipsRow} style={fS.horizontalScroll}>
+              <View style={fS.chipsRow}>
                 {TRANSMISSIONS.map(t => (
                   <TouchableOpacity key={t} style={[fS.chip, transmissions.includes(t) && fS.chipActive]}
                     onPress={() => toggle(transmissions, setTransmissions, t)}>
-                    <Text style={[fS.chipTxt, transmissions.includes(t) && fS.chipTxtActive]}>{t}</Text>
+                    <Text style={[fS.chipTxt, transmissions.includes(t) && fS.chipTxtActive]} numberOfLines={1}>{t}</Text>
                   </TouchableOpacity>
                 ))}
-              </ScrollView>
+              </View>
             </View>
             <View style={fS.divider} />
 
             {/* ── Condition ── */}
             <View style={fS.section}>
               <Text style={fS.secLabel}>Condition</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={fS.horizontalChipsRow} style={fS.horizontalScroll}>
+              <View style={fS.chipsRow}>
                 {CONDITIONS.map(c => (
                   <TouchableOpacity key={c} style={[fS.chip, conditions.includes(c) && fS.chipActive]}
                     onPress={() => toggle(conditions, setConditions, c)}>
-                    <Text style={[fS.chipTxt, conditions.includes(c) && fS.chipTxtActive]}>{c}</Text>
+                    <Text style={[fS.chipTxt, conditions.includes(c) && fS.chipTxtActive]} numberOfLines={1}>{c}</Text>
                   </TouchableOpacity>
                 ))}
-              </ScrollView>
+              </View>
             </View>
             <View style={fS.divider} />
 
@@ -697,7 +698,12 @@ function FilterModal({
                 {visibleCities.map(city => (
                   <TouchableOpacity key={city} style={[fS.cityItem, cities.includes(city) && fS.cityItemActive]}
                     onPress={() => toggle(cities, setCities, city)}>
-                    <Text style={[fS.cityTxt, cities.includes(city) && fS.cityTxtActive]}>{city}</Text>
+                    <Text
+                      style={[fS.cityTxt, cities.includes(city) && fS.cityTxtActive]}
+                      numberOfLines={2}
+                    >
+                      {city}
+                    </Text>
                     {cities.includes(city) && <Feather name="check" size={15} color={TEAL} />}
                   </TouchableOpacity>
                 ))}
@@ -919,8 +925,8 @@ export default function SearchScreen() {
     if (cities.length === 1)             chips.push({ key: "cities",        label: cities[0] });
     else if (cities.length > 1)          chips.push({ key: "cities",        label: `${cities.length} cities` });
     if (priceMin !== PRICE_MIN || priceMax !== PRICE_MAX) {
-      const lo = `GHS ${priceMin.toLocaleString()}`;
-      const hi = priceMax >= PRICE_MAX ? "Any" : `GHS ${priceMax.toLocaleString()}`;
+      const lo = `₵${priceMin.toLocaleString("en-GH")}`;
+      const hi = priceMax >= PRICE_MAX ? "Any" : `₵${priceMax.toLocaleString("en-GH")}`;
       chips.push({ key: "price", label: `${lo} – ${hi}` });
     }
     if (yearMin !== YEAR_MIN || yearMax !== YEAR_MAX) {

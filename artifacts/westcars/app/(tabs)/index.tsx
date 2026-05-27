@@ -543,7 +543,7 @@ export default function HomeScreen() {
               </View>
               <View>
                 <Text style={styles.adBannerTitle}>Advertise on Westcars</Text>
-                <Text style={styles.adBannerSub}>Reach 50,000+ buyers · From GHS 29</Text>
+                <Text style={styles.adBannerSub}>Reach 50,000+ buyers · From ₵29</Text>
               </View>
             </View>
             <View style={styles.adBannerArrow}>

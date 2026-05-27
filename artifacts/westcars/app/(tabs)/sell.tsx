@@ -683,7 +683,7 @@ export default function SellScreen() {
             <View style={[styles.chinaHint, { backgroundColor: isDark ? "rgba(255,140,0,0.12)" : "#FFF7ED", borderColor: isDark ? "rgba(255,140,0,0.3)" : "rgba(255,140,0,0.35)" }]}>
               <Text style={[styles.chinaHintTitle, { color: colors.text }]}>Chinese seller listing</Text>
               <Text style={[styles.chinaHintBody, { color: colors.textSecondary }]}>
-                Select where the vehicle is now: your city in China, “Vehicle in China”, a Ghana port if cleared, or Foreign — China if en route.
+                Select where the vehicle is now: your city in China, “Vehicle in China”, or a Ghana port if cleared.
               </Text>
             </View>
           ) : (
@@ -715,7 +715,7 @@ export default function SellScreen() {
           <SectionHeader icon="tag" title="Asking price" required />
           <View style={[styles.priceRow, { backgroundColor: colors.inputBg, borderColor }]}>
             <View style={styles.ghsBadge}>
-              <Text style={styles.ghsText}>GHS</Text>
+              <Text style={styles.ghsText}>₵</Text>
             </View>
             <TextInput
               style={[styles.priceInput, { color: colors.text }]}

@@ -90,6 +90,6 @@ const styles = StyleSheet.create({
   sub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2, lineHeight: 17 },
   meta: { gap: 6, paddingLeft: 46 },
   metaRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  metaText: { fontSize: 13, fontFamily: "Inter_500Medium", flex: 1 },
+  metaText: { fontSize: 13, fontFamily: "Inter_500Medium", flex: 1, flexShrink: 1 },
   wechat: { fontFamily: "Inter_700Bold", color: "#E8640A" },
 });

@@ -159,9 +159,9 @@ export function buildSavedSearchLabel(opts: {
     if (f.conditions.length === 1) parts.push(f.conditions[0]);
     if (f.cities.length === 1) parts.push(f.cities[0]);
     if (f.priceMax < SEARCH_PRICE_MAX && f.priceMin === SEARCH_PRICE_MIN) {
-      parts.push(`under GHS ${(f.priceMax / 1000).toFixed(0)}k`);
+      parts.push(`under ₵${(f.priceMax / 1000).toFixed(0)}k`);
     } else if (f.priceMin !== SEARCH_PRICE_MIN || f.priceMax !== SEARCH_PRICE_MAX) {
-      parts.push(`GHS ${f.priceMin.toLocaleString()}–${f.priceMax >= SEARCH_PRICE_MAX ? "any" : f.priceMax.toLocaleString()}`);
+      parts.push(`₵${f.priceMin.toLocaleString("en-GH")}–${f.priceMax >= SEARCH_PRICE_MAX ? "any" : f.priceMax.toLocaleString("en-GH")}`);
     }
   }
   return parts.length ? parts.join(" · ") : "Custom search";

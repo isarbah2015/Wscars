@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -28,6 +27,7 @@ import { getUser } from "@/services/firebase";
 import { useAvatarUpload } from "@/hooks/useAvatarUpload";
 import AvatarUploadSheet from "@/components/AvatarUploadSheet";
 import { User } from "@/types";
+import { openPhoneCall, openWhatsApp } from "@/utils/phoneContact";
 
 export default function UserProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -90,16 +90,14 @@ export default function UserProfileScreen() {
     .slice(0, 6);
 
   const handleCall = () => {
-    requireAuth(() => {
-      if (user.phone) Linking.openURL(`tel:${user.phone}`);
-    }, 'Please sign in to contact this seller.');
+    requireAuth(() => openPhoneCall(user.phone), "Please sign in to contact this seller.");
   };
 
   const handleWhatsApp = () => {
     requireAuth(() => {
-      const msg = encodeURIComponent(`Hi ${user.name.split(" ")[0]}, I found your profile on Westcars and I'm interested in your listings.`);
-      Linking.openURL(`https://wa.me/${(user.phone || "").replace(/\D/g, "")}?text=${msg}`);
-    }, 'Please sign in to contact this seller.');
+      const msg = `Hi ${user.name.split(" ")[0]}, I found your profile on Westcars and I'm interested in your listings.`;
+      openWhatsApp(user.phone, msg);
+    }, "Please sign in to contact this seller.");
   };
 
   const handleChat = () => {

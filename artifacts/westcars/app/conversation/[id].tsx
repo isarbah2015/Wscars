@@ -15,6 +15,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { formatPrice } from "@/utils/ghanaData";
 
 // expo-audio hooks — real on native, harmless stubs on web so hooks are
 // always called the same number of times (no React rules-of-hooks violation).
@@ -623,7 +624,7 @@ export default function ConversationScreen() {
                         )}
                         <Text style={styles.profileMiniTitle} numberOfLines={1}>{title}</Text>
                         {price !== undefined && (
-                          <Text style={styles.profileMiniPrice}>GHS {Number(price).toLocaleString()}</Text>
+                          <Text style={styles.profileMiniPrice}>{formatPrice(Number(price))}</Text>
                         )}
                       </Pressable>
                     );
@@ -666,7 +667,7 @@ export default function ConversationScreen() {
               {conv.car.brand} {conv.car.model}
             </Text>
             <Text style={[styles.carBannerPrice, { color: BRAND }]}>
-              GHS {conv.car.price.toLocaleString()}
+              {formatPrice(conv.car.price)}
               {conv.car.isSold && <Text style={styles.soldTag}> · SOLD</Text>}
             </Text>
           </View>

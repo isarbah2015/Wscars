@@ -46,7 +46,8 @@ export const BOOST_PLANS: BoostPlan[] = [
 ];
 
 export function formatGHS(pesewas: number) {
-  return `GHS ${(pesewas / 100).toFixed(2)}`;
+  const cedis = pesewas / 100;
+  return `₵${cedis.toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 /** Paystack checkout expects amount in major currency units (cedis), not pesewas. */

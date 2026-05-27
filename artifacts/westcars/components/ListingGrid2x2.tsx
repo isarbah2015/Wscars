@@ -21,6 +21,7 @@ import {
 } from "@/constants/listingGrid";
 import { useTheme } from "@/context/ThemeContext";
 import { Car } from "@/types";
+import { formatPrice } from "@/utils/ghanaData";
 import {
   buildGridLayout,
   buildListingGridItems,
@@ -113,7 +114,7 @@ export function ProfileListingCard({
           {title}
         </Text>
         {car.price !== undefined && (
-          <Text style={styles.listingPrice}>GHS {Number(car.price).toLocaleString()}</Text>
+          <Text style={styles.listingPrice}>{formatPrice(Number(car.price))}</Text>
         )}
         {showBadge && (
           <View style={styles.listingMeta}>

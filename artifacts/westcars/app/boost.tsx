@@ -185,20 +185,24 @@ export default function BoostScreen() {
                 >
                   <Feather name="trending-up" size={18} color={selected ? "#fff" : "#0EB5CA"} />
                 </View>
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                    <Text style={[styles.planName, { color: colors.text }]}>{plan.name}</Text>
-                    {plan.isSubscription && (
-                      <View style={styles.subBadge}>
-                        <Text style={styles.subBadgeText}>Monthly</Text>
-                      </View>
-                    )}
-                  </View>
-                  <Text style={[styles.planDesc, { color: colors.textTertiary }]}>{plan.description}</Text>
+                <View style={styles.planContent}>
+                  <Text style={[styles.planName, { color: colors.text }]} numberOfLines={2}>
+                    {plan.name}
+                  </Text>
+                  {plan.isSubscription ? (
+                    <Text style={styles.planMonthlyTag}>Monthly plan</Text>
+                  ) : null}
+                  <Text style={[styles.planDesc, { color: colors.textTertiary }]} numberOfLines={2}>
+                    {plan.description}
+                  </Text>
                 </View>
-                <View style={{ alignItems: "flex-end" }}>
-                  <Text style={styles.planPrice}>{formatGHS(plan.amount)}</Text>
-                  <Text style={[styles.planDays, { color: colors.textTertiary }]}>{plan.days} days</Text>
+                <View style={styles.planPriceCol}>
+                  <Text style={styles.planPrice} numberOfLines={1}>
+                    {formatGHS(plan.amount)}
+                  </Text>
+                  <Text style={[styles.planDays, { color: colors.textTertiary }]} numberOfLines={1}>
+                    {plan.days} days
+                  </Text>
                 </View>
                 <View style={{ width: 26, alignItems: "flex-end", justifyContent: "center" }}>
                   {selected ? <Feather name="check-circle" size={18} color="#0EB5CA" /> : null}
@@ -279,12 +283,20 @@ const styles = StyleSheet.create({
   planCard: { borderRadius: 16, padding: 16, marginBottom: 12 },
   planRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   planIcon: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
-  planName: { fontSize: 15, fontFamily: "Inter_700Bold" },
-  planDesc: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
-  planPrice: { fontSize: 16, fontFamily: "Manrope_800ExtraBold", color: "#0EB5CA" },
-  planDays: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 2 },
-  subBadge: { backgroundColor: "#FEF3C7", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20 },
-  subBadgeText: { fontSize: 10, fontFamily: "Inter_600SemiBold", color: "#D97706" },
+  planContent: { flex: 1, minWidth: 0, paddingRight: 6 },
+  planName: { fontSize: 15, fontFamily: "Inter_700Bold", lineHeight: 20 },
+  planMonthlyTag: {
+    fontSize: 10,
+    fontFamily: "Inter_700Bold",
+    color: "#D97706",
+    marginTop: 3,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  planDesc: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 4, lineHeight: 17 },
+  planPriceCol: { alignItems: "flex-end", flexShrink: 0, minWidth: 72, paddingLeft: 4 },
+  planPrice: { fontSize: 15, fontFamily: "Manrope_800ExtraBold", color: "#0EB5CA", textAlign: "right" },
+  planDays: { fontSize: 10, fontFamily: "Inter_400Regular", marginTop: 2, textAlign: "right" },
   benefitRow: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10 },
   benefitIcon: {
     width: 30,

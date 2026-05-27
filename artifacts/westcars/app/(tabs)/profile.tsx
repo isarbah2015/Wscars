@@ -507,8 +507,8 @@ function ProfileAuthenticatedContent() {
                     value={locationInChina}
                     onChangeText={setLocationInChina}
                   />
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chinaCityChips}>
-                    {CHINA_CITIES.slice(0, 10).map((city) => (
+                  <View style={styles.chinaCityChips}>
+                    {CHINA_CITIES.map((city) => (
                       <Pressable
                         key={city}
                         style={[
@@ -518,12 +518,15 @@ function ProfileAuthenticatedContent() {
                         ]}
                         onPress={() => setLocationInChina(city)}
                       >
-                        <Text style={[styles.chinaCityChipText, locationInChina === city && styles.chinaCityChipTextActive]}>
+                        <Text
+                          style={[styles.chinaCityChipText, locationInChina === city && styles.chinaCityChipTextActive]}
+                          numberOfLines={1}
+                        >
                           {city}
                         </Text>
                       </Pressable>
                     ))}
-                  </ScrollView>
+                  </View>
                   <Text style={[styles.chineseFieldLabel, { color: colors.textSecondary }]}>Business name (optional)</Text>
                   <TextInput
                     style={[styles.chineseInput, {
@@ -1639,10 +1642,10 @@ const styles = StyleSheet.create({
   chineseSaveText: { color: "#004D5A", fontSize: 15, fontFamily: "Inter_700Bold" },
   chineseSavedText: { color: "#16A34A", fontSize: 13, fontFamily: "Inter_600SemiBold", textAlign: "center", marginTop: 10 },
   chineseFieldHint: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17, marginBottom: 8, marginTop: -2 },
-  chinaCityChips: { gap: 8, paddingVertical: 8 },
+  chinaCityChips: { flexDirection: "row", flexWrap: "wrap", gap: 8, paddingVertical: 8 },
   chinaCityChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
     backgroundColor: "rgba(14,181,202,0.06)",

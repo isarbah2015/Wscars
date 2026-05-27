@@ -55,7 +55,7 @@ export const brandLogos: Record<string, string> = {
   SAIC: carlogos("saic"),
   SEAT: carlogos("seat"),
   Shacman: carlogos("shacman"),
-  Sinotruck: carlogos("sinotruck"),
+  Sinotruck: carlogos("sinotruk"),
   Skoda: carlogos("skoda"),
   Subaru: carlogos("subaru"),
   Suzuki: carlogos("suzuki"),
@@ -69,9 +69,16 @@ export const brandLogos: Record<string, string> = {
 
 export const BRAND_LOGOS = brandLogos;
 
+const BRAND_LOGO_ALIASES: Record<string, string> = {
+  Sinotruck: "sinotruk",
+};
+
 export function getBrandLogo(brand: string): string | null {
   const explicit = brandLogos[brand] ?? brandLogos[brand.replace("-Benz", "")];
   if (explicit) return explicit;
+
+  const aliasSlug = BRAND_LOGO_ALIASES[brand];
+  if (aliasSlug) return carlogos(aliasSlug);
 
   const slug = brand
     .trim()

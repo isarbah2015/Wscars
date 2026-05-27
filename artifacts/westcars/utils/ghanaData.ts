@@ -48,6 +48,16 @@ export type LocationSellerContext = {
   locationInChina?: string;
 };
 
+/** Short label for listing cards (avoids clipping long "China — City" strings). */
+export function formatLocationShort(location: string): string {
+  const loc = location.trim();
+  if (!loc) return "";
+  if (loc.startsWith("China — ")) return loc.slice("China — ".length);
+  if (loc === CHINA_SELLER_LISTING_LABEL) return "China";
+  if (loc.includes(",")) return loc.split(",")[0].trim();
+  return loc;
+}
+
 export function formatChinaLocation(city: string): string {
   const trimmed = city.trim();
   if (!trimmed) return CHINA_SELLER_LISTING_LABEL;
@@ -70,7 +80,7 @@ export function getLocationOptions(
   const importish = condition === "Foreign Used" || condition === "Tokunbo";
 
   if (!seller?.isChineseSeller) {
-    if (importish) return [...FOREIGN_IMPORT_LOCATIONS, ...GHANA_PORT_LOCATIONS, ...GHANA_CITIES];
+    if (importish) return [...GHANA_PORT_LOCATIONS, ...GHANA_CITIES];
     return [...GHANA_CITIES];
   }
 
@@ -84,12 +94,7 @@ export function getLocationOptions(
     ...chinaLocs,
   ];
 
-  return [...new Set([
-    ...chinaSection,
-    ...FOREIGN_IMPORT_LOCATIONS,
-    ...GHANA_PORT_LOCATIONS,
-    ...GHANA_CITIES,
-  ])];
+  return [...new Set([...chinaSection, ...GHANA_PORT_LOCATIONS, ...GHANA_CITIES])];
 }
 
 export const GHANA_CITIES = [
@@ -103,12 +108,11 @@ export const GHANA_CITIES = [
   "Elmina", "Apam", "Mumford", "Dawhenya", "Adentan",
 ];
 
-/** All locations selectable in search filters */
+/** Ghana + ports + China only (no overseas import countries for now). */
 export const SEARCH_FILTER_LOCATIONS: string[] = [
   ...new Set([
     ...GHANA_CITIES,
     ...GHANA_PORT_LOCATIONS,
-    ...FOREIGN_IMPORT_LOCATIONS,
     ...CHINA_CITIES.map(formatChinaLocation),
     CHINA_SELLER_LISTING_LABEL,
   ]),

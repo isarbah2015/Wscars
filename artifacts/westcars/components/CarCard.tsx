@@ -18,7 +18,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { LISTING_GRID } from "@/constants/listingGrid";
 import { Car } from "@/types";
-import { formatPrice } from "@/utils/ghanaData";
+import { formatLocationShort, formatPrice } from "@/utils/ghanaData";
 
 interface CarCardProps {
   car: Car;
@@ -168,7 +168,7 @@ export function CarCard({ car, style }: CarCardProps) {
                   <View style={[styles.metaChip, styles.metaChipLoc, { backgroundColor: "rgba(255,140,0,0.10)" }]}>
                     <Feather name="map-pin" size={9} color={colors.textTertiary} />
                     <Text style={[styles.metaChipText, { color: colors.textSecondary }]} numberOfLines={1}>
-                      {car.location.split(",")[0]}
+                      {formatLocationShort(car.location)}
                     </Text>
                   </View>
                 )}
@@ -286,7 +286,7 @@ export function CarCard({ car, style }: CarCardProps) {
               <View style={[styles.metaChip, styles.metaChipLoc]}>
                 <Feather name="map-pin" size={9} color={colors.textTertiary} />
                 <Text style={[styles.metaChipText, { color: colors.textSecondary }]} numberOfLines={1}>
-                  {car.location.split(",")[0]}
+                  {formatLocationShort(car.location)}
                 </Text>
               </View>
             )}

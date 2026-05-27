@@ -27,7 +27,7 @@ export function getPriceChange(car: Car): PriceChangeInfo | null {
 }
 
 export function formatPriceChangeLabel(info: PriceChangeInfo): string {
-  const ghs = `GHS ${info.amount.toLocaleString()}`;
+  const ghs = `₵${info.amount.toLocaleString("en-GH")}`;
   if (info.direction === "down") {
     return `${ghs} price drop · ${info.percent}% less`;
   }

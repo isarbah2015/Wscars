@@ -17,7 +17,6 @@ import {
   StyleSheet,
   Dimensions,
   FlatList,
-  Linking,
   Platform,
   Alert,
 } from "react-native";
@@ -30,7 +29,8 @@ import { ChineseSellerCard } from "@/components/ChineseSellerCard";
 import { getPriceChange } from "@/utils/priceChange";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { getCarTechSpecs } from "@/utils/buildTechSpecs";
-import { isChinaListingLocation } from "@/utils/ghanaData";
+import { formatPrice, isChinaListingLocation } from "@/utils/ghanaData";
+import { openPhoneCall, openWhatsApp } from "@/utils/phoneContact";
 
 const { width } = Dimensions.get("window");
 const HERO_H = 280;
@@ -121,23 +121,12 @@ export default function CarDetailScreen() {
   };
 
   const handleCall = () =>
-    requireAuthAction(() => {
-      const phone = car.seller?.phone || "+233000000000";
-      Linking.openURL(`tel:${phone.replace(/\s/g, "")}`).catch(() =>
-        Alert.alert("Cannot open phone dialler.")
-      );
-    });
+    requireAuthAction(() => openPhoneCall(car.seller?.phone));
 
   const handleWhatsApp = () =>
     requireAuthAction(() => {
-      const raw   = car.seller?.phone?.replace(/[\s+\-()]/g, "") || "233000000000";
-      const phone = raw.startsWith("0") ? "233" + raw.slice(1) : raw;
-      const msg   = encodeURIComponent(
-        `Hi, I'm interested in your ${car.year} ${car.brand} ${car.model} on Westcars. Still available?`
-      );
-      Linking.openURL(`whatsapp://send?phone=${phone}&text=${msg}`).catch(() =>
-        Linking.openURL(`https://wa.me/${phone}?text=${msg}`)
-      );
+      const msg = `Hi, I'm interested in your ${car.year} ${car.brand} ${car.model} on Westcars. Still available?`;
+      openWhatsApp(car.seller?.phone, msg);
     });
 
   const handleChat = () =>
@@ -158,7 +147,7 @@ export default function CarDetailScreen() {
       ? `${(car.mileage / 1000).toFixed(0)}k km`
       : `${car.mileage} km`;
 
-  const priceLabel = `GHS ${car.price.toLocaleString()}`;
+  const priceLabel = formatPrice(car.price);
   const priceChange = getPriceChange(car);
   const techSpecs = getCarTechSpecs(car);
 
@@ -415,8 +404,7 @@ export default function CarDetailScreen() {
                     color: priceChange.direction === "down" ? "#16A34A" : "#DC2626",
                   }}
                 >
-                  {priceChange.direction === "down" ? "Reduced" : "Increased"} · Was GHS{" "}
-                  {priceChange.previousPrice.toLocaleString()}
+                  {priceChange.direction === "down" ? "Reduced" : "Increased"} · Was {formatPrice(priceChange.previousPrice)}
                 </Text>
               </View>
             ) : null}
