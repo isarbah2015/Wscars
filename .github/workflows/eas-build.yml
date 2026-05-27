@@ -1,4 +1,4 @@
-name: EAS Build (Android Production)
+name: EAS Build (Android / iOS)
 
 on:
   workflow_dispatch:
@@ -42,6 +42,7 @@ jobs:
       - name: Check required secrets
         working-directory: ${{ github.workspace }}
         env:
+          PLATFORM: ${{ github.event.inputs.platform || 'android' }}
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -55,9 +56,11 @@ jobs:
         run: |
           MISSING=""
           [ -z "$EXPO_TOKEN" ]                          && MISSING="$MISSING EXPO_TOKEN"
-          [ -z "$KEYSTORE_B64" ]                        && MISSING="$MISSING KEYSTORE_B64"
-          [ -z "$KEYSTORE_PASSWORD" ]                   && MISSING="$MISSING KEYSTORE_PASSWORD"
-          [ -z "$KEY_PASSWORD" ]                        && MISSING="$MISSING KEY_PASSWORD"
+          if [ "$PLATFORM" = "android" ] || [ "$PLATFORM" = "all" ]; then
+            [ -z "$KEYSTORE_B64" ]                        && MISSING="$MISSING KEYSTORE_B64"
+            [ -z "$KEYSTORE_PASSWORD" ]                   && MISSING="$MISSING KEYSTORE_PASSWORD"
+            [ -z "$KEY_PASSWORD" ]                        && MISSING="$MISSING KEY_PASSWORD"
+          fi
           [ -z "$EXPO_PUBLIC_FIREBASE_API_KEY" ]        && MISSING="$MISSING EXPO_PUBLIC_FIREBASE_API_KEY"
           [ -z "$EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN" ]    && MISSING="$MISSING EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN"
           [ -z "$EXPO_PUBLIC_FIREBASE_PROJECT_ID" ]     && MISSING="$MISSING EXPO_PUBLIC_FIREBASE_PROJECT_ID"
@@ -68,7 +71,7 @@ jobs:
             echo "::error::Missing required GitHub secrets:$MISSING"
             exit 1
           fi
-          echo "All required secrets present."
+          echo "All required secrets present for platform=$PLATFORM."
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -83,6 +86,7 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Generate credentials.json and keystore
+        if: ${{ github.event.inputs.platform != 'ios' }}
         env:
           KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}

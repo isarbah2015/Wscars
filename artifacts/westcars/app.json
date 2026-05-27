@@ -24,8 +24,10 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Westcars needs access to your photos to upload car images.",
+        "NSCameraUsageDescription": "Westcars needs camera access to take profile and car photos.",
         "NSLocationWhenInUseUsageDescription": "Westcars uses your location to show cars near you and to attach a location to your listings.",
-        "NSMicrophoneUsageDescription": "Westcars needs microphone access to send voice messages."
+        "NSMicrophoneUsageDescription": "Westcars needs microphone access to send voice messages.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {

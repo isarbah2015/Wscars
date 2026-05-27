@@ -73,19 +73,22 @@ artifacts/westcars-admin/src/
 | How | Where |
 |-----|-------|
 | **Auto** — push to `main` touching `artifacts/westcars/**` | `.github/workflows/eas-build.yml` triggers automatically |
-| **Manual** — go to GitHub → Actions → "EAS Build (Android Production)" → Run workflow | Choose platform (`android`/`ios`/`all`) and profile (`production`/`preview`) |
+| **Manual** — go to GitHub → Actions → "EAS Build (Android / iOS)" → Run workflow | Choose platform (`android`/`ios`/`all`) and profile (`production`/`preview`) |
 
 **Required GitHub secrets** (Settings → Secrets and variables → Actions):
 
 | Secret | Description |
 |--------|-------------|
 | `EXPO_TOKEN` | Personal access token from expo.dev/accounts/davidsarb/settings/access-tokens |
-| `KEYSTORE_B64` | `base64 -i artifacts/westcars/upload-keystore.jks` |
-| `KEYSTORE_PASSWORD` | Keystore password |
-| `KEY_PASSWORD` | Key password for alias `2409d8e96f55c9e2557b4ebe6786a888` |
+| `EXPO_PUBLIC_FIREBASE_*` | Six Firebase web config vars (same as EAS production) |
+| `KEYSTORE_B64` | `base64 -i artifacts/westcars/upload-keystore.jks` — **Android / all only** |
+| `KEYSTORE_PASSWORD` | Keystore password — **Android / all only** |
+| `KEY_PASSWORD` | Key password for alias `2409d8e96f55c9e2557b4ebe6786a888` — **Android / all only** |
+
+**iOS first-time setup:** run interactive `eas credentials:configure-build -p ios -e production` once on a Mac (see `artifacts/westcars/docs/ios-build.md`). EAS production env also needs `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`, Paystack, and Firebase vars.
 
 Monitor builds at: https://expo.dev/accounts/davidsarb/projects/westcars/builds  
-Full runbook: `.local/notes/eas-build-workflow.md`
+iOS runbook: `artifacts/westcars/docs/ios-build.md`
 
 ## Gotchas
 
