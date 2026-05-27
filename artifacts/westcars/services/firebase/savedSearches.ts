@@ -44,9 +44,9 @@ export function subscribeSavedSearches(
 
   const attach = async () => {
     try {
-      await auth.authStateReady();
+      await auth!.authStateReady();
       if (cancelled) return;
-      const uid = auth.currentUser?.uid;
+      const uid = auth!.currentUser?.uid;
       if (!uid) {
         cb([]);
         return;

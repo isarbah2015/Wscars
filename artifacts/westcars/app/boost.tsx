@@ -52,11 +52,20 @@ export default function BoostScreen() {
       }
       Alert.alert("Pending", "Payment is still processing. Try again in a few seconds.");
     } catch (err: unknown) {
-      const message =
-        err && typeof err === "object" && "message" in err
-          ? String((err as { message?: string }).message)
-          : "Could not verify payment.";
-      Alert.alert("Verification failed", message);
+      const code =
+        err && typeof err === "object" && "code" in err ? String((err as any).code) : "";
+      if (code.includes("unauthenticated")) {
+        Alert.alert("Sign in required", "Your session expired. Please sign in again.", [
+          { text: "Sign in", onPress: () => router.push("/auth/login") },
+          { text: "Cancel", style: "cancel" },
+        ]);
+      } else {
+        const message =
+          err && typeof err === "object" && "message" in err
+            ? String((err as { message?: string }).message)
+            : "Could not verify payment.";
+        Alert.alert("Verification failed", message);
+      }
     } finally {
       setPaying(false);
       setCheckoutReference(null);
@@ -117,11 +126,20 @@ export default function BoostScreen() {
         },
       });
     } catch (err: unknown) {
-      const message =
-        err && typeof err === "object" && "message" in err
-          ? String((err as { message?: string }).message)
-          : "Could not start payment.";
-      Alert.alert("Error", message);
+      const code =
+        err && typeof err === "object" && "code" in err ? String((err as any).code) : "";
+      if (code.includes("unauthenticated")) {
+        Alert.alert("Sign in required", "Your session expired. Please sign in again.", [
+          { text: "Sign in", onPress: () => router.push("/auth/login") },
+          { text: "Cancel", style: "cancel" },
+        ]);
+      } else {
+        const message =
+          err && typeof err === "object" && "message" in err
+            ? String((err as { message?: string }).message)
+            : "Could not start payment.";
+        Alert.alert("Error", message);
+      }
     } finally {
       setPaying(false);
     }
@@ -182,12 +200,10 @@ export default function BoostScreen() {
                   <Text style={styles.planPrice}>{formatGHS(plan.amount)}</Text>
                   <Text style={[styles.planDays, { color: colors.textTertiary }]}>{plan.days} days</Text>
                 </View>
-              </View>
-              {selected && (
-                <View style={styles.selectedCheck}>
-                  <Feather name="check-circle" size={18} color="#0EB5CA" />
+                <View style={{ width: 26, alignItems: "flex-end", justifyContent: "center" }}>
+                  {selected ? <Feather name="check-circle" size={18} color="#0EB5CA" /> : null}
                 </View>
-              )}
+              </View>
             </Pressable>
           );
         })}
@@ -260,7 +276,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 18, fontFamily: "Manrope_800ExtraBold", color: "#fff" },
   sectionTitle: { fontSize: 16, fontFamily: "Manrope_800ExtraBold", marginBottom: 4 },
   sectionSub: { fontSize: 13, fontFamily: "Inter_400Regular", marginBottom: 16, lineHeight: 20 },
-  planCard: { borderRadius: 16, padding: 16, marginBottom: 12, position: "relative" },
+  planCard: { borderRadius: 16, padding: 16, marginBottom: 12 },
   planRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   planIcon: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   planName: { fontSize: 15, fontFamily: "Inter_700Bold" },
@@ -269,7 +285,6 @@ const styles = StyleSheet.create({
   planDays: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 2 },
   subBadge: { backgroundColor: "#FEF3C7", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20 },
   subBadgeText: { fontSize: 10, fontFamily: "Inter_600SemiBold", color: "#D97706" },
-  selectedCheck: { position: "absolute", top: 12, right: 12 },
   benefitRow: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 10 },
   benefitIcon: {
     width: 30,
