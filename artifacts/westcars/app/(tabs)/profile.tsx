@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -281,15 +282,24 @@ function ProfileAuthenticatedContent() {
         bounces={false}
         overScrollMode="never"
       >
-        {/* ── Teal Header ── */}
-        <View style={[styles.tealHeader, { paddingTop: topPad + 16 }]}>
-          {/* Bell icon top-right */}
-          <View style={{ alignSelf: 'stretch', alignItems: 'flex-end', paddingHorizontal: 16, marginBottom: 4 }}>
+        {/* ── Premium header ── */}
+        <LinearGradient
+          colors={["#0EB5CA", "#0A9BB0", "#087A8F"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.tealHeader, { paddingTop: topPad + 12 }]}
+        >
+          <View style={styles.headerDecorA} />
+          <View style={styles.headerDecorB} />
+
+          <View style={styles.headerTopBar}>
+            <Text style={styles.headerEyebrow}>My profile</Text>
             <Pressable
               onPress={() => setShowNotifications(true)}
-              style={{ padding: 4, position: 'relative' }}
+              style={styles.bellBtn}
+              hitSlop={8}
             >
-              <Feather name="bell" size={22} color="#fff" />
+              <Feather name="bell" size={20} color="#fff" />
               {unreadNotificationsCount > 0 && (
                 <View style={{
                   position: 'absolute', top: 0, right: 0,
@@ -333,10 +343,14 @@ function ProfileAuthenticatedContent() {
             </View>
           </Pressable>
 
-          <Text style={styles.userName}>{currentUser.name}</Text>
+          <Text style={styles.userName} numberOfLines={2}>
+            {currentUser.name}
+          </Text>
           <View style={styles.locationRow}>
-            <Feather name="map-pin" size={11} color="rgba(255,255,255,0.85)" />
-            <Text style={styles.userLocation}>{currentUser.location || "Ghana"}</Text>
+            <Feather name="map-pin" size={11} color="rgba(255,255,255,0.9)" />
+            <Text style={styles.userLocation} numberOfLines={1}>
+              {currentUser.location || "Ghana"}
+            </Text>
           </View>
           <Text style={styles.memberSince}>Member since {joinDate}</Text>
           {currentUser.isVerified && (
@@ -345,29 +359,59 @@ function ProfileAuthenticatedContent() {
               <Text style={styles.verifiedPillText}>Verified Seller</Text>
             </View>
           )}
-          <View style={{ height: 32 }} />
-        </View>
+          <View style={styles.headerBottomSpacer} />
+        </LinearGradient>
 
-        {/* ── White Content Sheet ── */}
-        <View style={[styles.contentSheet, { backgroundColor: isDark ? "#111827" : "#FFFFFF" }]}>
+        {/* ── Content sheet ── */}
+        <View style={[styles.contentSheet, { backgroundColor: isDark ? "#0F172A" : "#F8FAFC" }]}>
 
-          {/* Stats Row */}
+          {/* Stats row — no overlap with header */}
           <View style={styles.statsRow}>
             {[
-              { label: "Listings",    value: String(myListings.length) },
-              { label: "Trust Score", value: `${Math.round(trustScore)}%` },
-              { label: "Saved",       value: String(savedCars.length) },
-            ].map((stat, i) => (
+              { label: "Listings", value: String(myListings.length), icon: "grid" as const },
+              { label: "Trust", value: `${Math.round(trustScore)}%`, icon: "award" as const, highlight: true },
+              { label: "Saved", value: String(savedCars.length), icon: "heart" as const },
+              {
+                label: "Rating",
+                value: userRating > 0 ? userRating.toFixed(1) : "New",
+                sub: `${myReviews.length} reviews`,
+                icon: "star" as const,
+              },
+            ].map((stat) => (
               <View
                 key={stat.label}
                 style={[
                   styles.statCard,
-                  { backgroundColor: isDark ? "#1E293B" : "#F7F8FA" },
-                  i === 1 && { borderColor: "#0EB5CA", borderWidth: 1 },
+                  {
+                    backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+                    borderColor: stat.highlight
+                      ? "rgba(14,181,202,0.45)"
+                      : isDark
+                        ? "rgba(255,255,255,0.08)"
+                        : "rgba(15,23,42,0.06)",
+                  },
+                  stat.highlight && styles.statCardHighlight,
                 ]}
               >
-                <Text style={[styles.statValue, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
+                <View style={[styles.statIconWrap, stat.highlight && styles.statIconWrapHighlight]}>
+                  <Feather name={stat.icon} size={14} color={stat.highlight ? "#0EB5CA" : "#64748B"} />
+                </View>
+                <Text
+                  style={[styles.statValue, { color: isDark ? "#F8FAFC" : "#0F172A" }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.85}
+                >
+                  {stat.value}
+                </Text>
+                <Text style={styles.statLabel} numberOfLines={1}>
+                  {stat.label}
+                </Text>
+                {"sub" in stat && stat.sub ? (
+                  <Text style={styles.statSub} numberOfLines={1}>
+                    {stat.sub}
+                  </Text>
+                ) : null}
               </View>
             ))}
           </View>
@@ -390,9 +434,15 @@ function ProfileAuthenticatedContent() {
                   <View style={styles.detailIcon}>
                     <Feather name={item.icon as any} size={15} color="#0EB5CA" />
                   </View>
-                  <View style={{ flex: 1 }}>
+                  <View style={styles.detailTextCol}>
                     <Text style={styles.detailLabel}>{item.label}</Text>
-                    <Text style={[styles.detailValue, { color: colors.text }]}>{item.value}</Text>
+                    <Text
+                      style={[styles.detailValue, { color: colors.text }]}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                    >
+                      {item.value}
+                    </Text>
                   </View>
                 </View>
               ))}
@@ -407,19 +457,24 @@ function ProfileAuthenticatedContent() {
             }]}>
               <View style={styles.chineseSellerToggleRow}>
                 <View style={styles.chineseSellerToggleCopy}>
-                  <Text style={[styles.chineseSellerTitle, { color: colors.text }]}>
+                  <Text style={[styles.chineseSellerTitle, { color: colors.text }]} numberOfLines={2}>
                     I am a Chinese Seller / Importer
                   </Text>
-                  <Text style={[styles.chineseSellerSubtitle, { color: colors.textSecondary }]}>
+                  <Text
+                    style={[styles.chineseSellerSubtitle, { color: colors.textSecondary }]}
+                    numberOfLines={3}
+                  >
                     List vehicles from China with importer badges and location options.
                   </Text>
                 </View>
-                <Switch
-                  value={isChineseSeller}
-                  onValueChange={handleChineseToggle}
-                  trackColor={{ false: "#CBD5E1", true: "#0EB5CA" }}
-                  thumbColor="#FFFFFF"
-                />
+                <View style={styles.chineseSwitchWrap}>
+                  <Switch
+                    value={isChineseSeller}
+                    onValueChange={handleChineseToggle}
+                    trackColor={{ false: "#CBD5E1", true: "#0EB5CA" }}
+                    thumbColor="#FFFFFF"
+                  />
+                </View>
               </View>
               {isChineseSeller && (
                 <View style={[styles.chineseSellerForm, {
@@ -505,15 +560,20 @@ function ProfileAuthenticatedContent() {
                 <View style={styles.adBoostIconBox}>
                   <Feather name="trending-up" size={18} color="#E65100" />
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.detailValue, { color: colors.text }]}>{sponsorshipTier}</Text>
-                  <Text style={[styles.detailLabel, { marginTop: 4 }]}>
+                <View style={styles.detailTextCol}>
+                  <Text style={[styles.detailValue, { color: colors.text }]} numberOfLines={1}>
+                    {sponsorshipTier}
+                  </Text>
+                  <Text style={[styles.detailLabel, { marginTop: 4 }]} numberOfLines={2}>
                     {adCredits} credits · {activeListings.length} active listing{activeListings.length === 1 ? "" : "s"}
                   </Text>
                 </View>
                 <Feather name="chevron-right" size={18} color={colors.textTertiary} />
               </View>
-              <Text style={[styles.sponsorSummaryHint, { color: colors.textSecondary }]}>
+              <Text
+                style={[styles.sponsorSummaryHint, { color: colors.textSecondary }]}
+                numberOfLines={2}
+              >
                 Manage promotions, boost listings, and track ad performance
               </Text>
             </Pressable>
@@ -567,7 +627,10 @@ function ProfileAuthenticatedContent() {
                   <View style={[styles.completionItemIcon, { backgroundColor: item.done ? item.iconBg : (isDark ? "rgba(255,255,255,0.08)" : "#F1F5F9") }]}>
                     <Feather name={item.icon as any} size={13} color={item.done ? item.iconColor : "#94A3B8"} />
                   </View>
-                  <Text style={[styles.completionItemLabel, { color: isDark ? (item.done ? "#F1F5F9" : "#64748B") : (item.done ? "#0F172A" : "#94A3B8") }]}>
+                  <Text
+                    style={[styles.completionItemLabel, { color: isDark ? (item.done ? "#F1F5F9" : "#64748B") : (item.done ? "#0F172A" : "#94A3B8") }]}
+                    numberOfLines={2}
+                  >
                     {item.label}
                   </Text>
                   <View style={[styles.completionItemStatus, {
@@ -580,11 +643,11 @@ function ProfileAuthenticatedContent() {
             </View>
           </View>
 
-          {/* Profile section tabs — segmented control */}
+          {/* Profile tabs — all fit in one row */}
           <View
             style={[
               styles.tabSegmentWrap,
-              { backgroundColor: isDark ? "rgba(15,23,42,0.65)" : "#E8EEF4" },
+              { backgroundColor: isDark ? "rgba(15,23,42,0.65)" : "#E2E8F0" },
             ]}
           >
             {PROFILE_TABS.map(({ key, label, icon }) => {
@@ -598,7 +661,7 @@ function ProfileAuthenticatedContent() {
                       styles.tabSegmentActive,
                       {
                         backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
-                        borderColor: isDark ? "rgba(14,181,202,0.35)" : "rgba(14,181,202,0.22)",
+                        borderColor: isDark ? "rgba(14,181,202,0.4)" : "rgba(14,181,202,0.25)",
                       },
                     ],
                   ]}
@@ -606,18 +669,18 @@ function ProfileAuthenticatedContent() {
                 >
                   <Feather
                     name={icon}
-                    size={15}
+                    size={14}
                     color={active ? "#0EB5CA" : isDark ? "#94A3B8" : "#64748B"}
                   />
                   <Text
                     style={[
                       styles.tabSegmentLabel,
-                      {
-                        color: active ? "#0EB5CA" : isDark ? "#CBD5E1" : "#475569",
-                      },
+                      { color: active ? "#0EB5CA" : isDark ? "#CBD5E1" : "#475569" },
                       active && styles.tabSegmentLabelActive,
                     ]}
                     numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
                   >
                     {label}
                   </Text>
@@ -640,9 +703,16 @@ function ProfileAuthenticatedContent() {
                 <View style={styles.adBoostIconBox}>
                   <Feather name="trending-up" size={18} color="#E65100" />
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.adBoostTitle, { color: isDark ? "#FED7AA" : "#C2410C" }]}>Boost Your Listings</Text>
-                  <Text style={[styles.adBoostSub, { color: isDark ? "#94A3B8" : "#78350F" }]}>Reach 10× more buyers with sponsored placement</Text>
+                <View style={styles.detailTextCol}>
+                  <Text style={[styles.adBoostTitle, { color: isDark ? "#FED7AA" : "#C2410C" }]} numberOfLines={1}>
+                    Boost Your Listings
+                  </Text>
+                  <Text
+                    style={[styles.adBoostSub, { color: isDark ? "#94A3B8" : "#78350F" }]}
+                    numberOfLines={2}
+                  >
+                    Reach 10× more buyers with sponsored placement
+                  </Text>
                 </View>
                 <Feather name="arrow-right" size={14} color="#E65100" />
               </Pressable>
@@ -732,8 +802,12 @@ function ProfileAuthenticatedContent() {
                     <Feather name="bell" size={16} color="#0EB5CA" />
                   </View>
                   <View style={styles.settingMiddle}>
-                    <Text style={[styles.settingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>Notifications</Text>
-                    <Text style={[styles.settingSubtitle, { color: colors.textTertiary }]}>Push alerts for messages & offers</Text>
+                    <Text style={[styles.settingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]} numberOfLines={1}>
+                      Notifications
+                    </Text>
+                    <Text style={[styles.settingSubtitle, { color: colors.textTertiary }]} numberOfLines={2}>
+                      Push alerts for messages & offers
+                    </Text>
                   </View>
                   <Switch value={pushNotifEnabled} onValueChange={setPushNotifEnabled}
                     trackColor={{ false: colors.border, true: "#0EB5CA" }} thumbColor="#fff" />
@@ -805,13 +879,20 @@ function ProfileAuthenticatedContent() {
                     <View style={[styles.settingIcon, { backgroundColor: item.bg }]}>
                       <Feather name={item.icon as any} size={16} color={item.ic} />
                     </View>
-                    <View style={styles.settingMiddle}>
-                      <Text style={[styles.settingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]}>{item.label}</Text>
-                      <Text style={[styles.settingSubtitle, { color: colors.textTertiary }]}>{item.sub}</Text>
-                    </View>
+                  <View style={styles.settingMiddle}>
+                    <Text style={[styles.settingTitle, { color: isDark ? "#F1F5F9" : "#0F172A" }]} numberOfLines={1}>
+                      {item.label}
+                    </Text>
+                    <Text style={[styles.settingSubtitle, { color: colors.textTertiary }]} numberOfLines={2}>
+                      {item.sub}
+                    </Text>
+                  </View>
                     <View style={[styles.veriBadge, { backgroundColor: item.done ? "#DCFCE7" : "#FEF3C7" }]}>
-                      <Text style={[styles.veriBadgeText, { color: item.done ? "#16A34A" : "#D97706" }]}>
-                        {item.done ? "Verified ✓" : "Verify"}
+                      <Text
+                        style={[styles.veriBadgeText, { color: item.done ? "#16A34A" : "#D97706" }]}
+                        numberOfLines={1}
+                      >
+                        {item.done ? "Verified" : "Verify"}
                       </Text>
                     </View>
                   </View>
@@ -1098,11 +1179,49 @@ const styles = StyleSheet.create({
   authSignupPrompt: { fontSize: 13, fontFamily: "Inter_400Regular" },
   authSignupLink: { fontSize: 13, fontFamily: "Inter_700Bold" },
 
-  // ── Teal header ──
+  // ── Premium header ──
   tealHeader: {
-    backgroundColor: "#0EB5CA",
     alignItems: "center",
     paddingHorizontal: 20,
+    overflow: "hidden",
+  },
+  headerDecorA: {
+    position: "absolute",
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    top: -60,
+    right: -40,
+  },
+  headerDecorB: {
+    position: "absolute",
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    bottom: 20,
+    left: -50,
+  },
+  headerTopBar: {
+    alignSelf: "stretch",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  headerEyebrow: {
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+    color: "rgba(255,255,255,0.75)",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  bellBtn: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    position: "relative",
   },
   initialsRing: {
     position: "relative",
@@ -1142,52 +1261,111 @@ const styles = StyleSheet.create({
   userLocation: { fontSize: 12, color: "rgba(255,255,255,0.85)", fontFamily: "Inter_400Regular" },
   memberSince: { fontSize: 11, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_400Regular", marginTop: 3 },
   verifiedPill: {
-    flexDirection: "row", alignItems: "center", gap: 5,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
     backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 12, paddingVertical: 5,
-    borderRadius: 20, marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginTop: 8,
   },
-  verifiedPillText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#FFFFFF" },
+  verifiedPillText: { fontSize: 11, fontFamily: "Inter_700Bold", color: "#FFFFFF" },
+  headerBottomSpacer: { height: 20 },
 
   // ── Content sheet ──
   contentSheet: {
-    marginTop: -20,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: 18,
+    marginTop: -16,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingTop: 12,
     minHeight: 600,
+    shadowColor: "#0A1628",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 8,
   },
 
   // ── Stats ──
   statsRow: {
-    flexDirection: "row", gap: 10,
-    paddingHorizontal: 16, marginBottom: 12,
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 16,
+    marginTop: 0,
+    marginBottom: 14,
   },
   statCard: {
-    flex: 1, borderRadius: 12, padding: 12,
+    flex: 1,
+    minWidth: 0,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
     alignItems: "center",
+    borderWidth: 1,
+    shadowColor: "#0A1628",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  statValue: { fontSize: 20, fontFamily: "Manrope_800ExtraBold" },
-  statLabel: { fontSize: 10, color: "#64748B", marginTop: 2, fontFamily: "Inter_400Regular", textAlign: "center" },
+  statCardHighlight: {
+    borderWidth: 1.5,
+  },
+  statIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6,
+  },
+  statIconWrapHighlight: {
+    backgroundColor: "rgba(14,181,202,0.12)",
+  },
+  statValue: { fontSize: 16, fontFamily: "Manrope_800ExtraBold", textAlign: "center" },
+  statLabel: {
+    fontSize: 9,
+    color: "#64748B",
+    marginTop: 2,
+    fontFamily: "Inter_600SemiBold",
+    textAlign: "center",
+    letterSpacing: 0.1,
+  },
+  statSub: {
+    fontSize: 8,
+    color: "#94A3B8",
+    fontFamily: "Inter_500Medium",
+    textAlign: "center",
+    marginTop: 1,
+  },
 
-  profileSection: { paddingHorizontal: 16, marginBottom: 12 },
+  profileSection: { paddingHorizontal: 16, marginBottom: 14 },
   profileSectionTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Manrope_800ExtraBold",
-    letterSpacing: -0.2,
-    marginBottom: 8,
+    letterSpacing: -0.3,
+    marginBottom: 10,
   },
   detailCard: {
-    borderRadius: 16,
-    borderWidth: 0.5,
+    borderRadius: 18,
+    borderWidth: 1,
     overflow: "hidden",
+    shadowColor: "#0A1628",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
+  detailTextCol: { flex: 1, minWidth: 0, paddingRight: 4 },
   detailRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    minHeight: 56,
   },
   detailIcon: {
     width: 34,
@@ -1198,14 +1376,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   detailLabel: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: "#94A3B8", textTransform: "uppercase", letterSpacing: 0.4 },
-  detailValue: { fontSize: 14, fontFamily: "Inter_600SemiBold", marginTop: 2 },
+  detailValue: { fontSize: 14, fontFamily: "Inter_600SemiBold", marginTop: 3, lineHeight: 20 },
 
   // ── Completion card ──
   completionCard: {
-    marginHorizontal: 16, marginBottom: 12,
-    borderRadius: 16, padding: 16, borderWidth: 0.5,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+    marginHorizontal: 16,
+    marginBottom: 14,
+    borderRadius: 18,
+    padding: 18,
+    borderWidth: 1,
+    shadowColor: "#0A1628",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
   completionHeader: {
     flexDirection: "row", alignItems: "center",
@@ -1223,40 +1407,57 @@ const styles = StyleSheet.create({
   progressTrack: { height: 5, borderRadius: 99, marginBottom: 14, overflow: "hidden" },
   progressFill: { height: "100%", borderRadius: 99, backgroundColor: "#0EB5CA" },
   completionGrid: {
-    flexDirection: "row", flexWrap: "wrap", gap: 8,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    justifyContent: "space-between",
   },
   completionItem: {
-    width: "47%", flexDirection: "row", alignItems: "center",
-    gap: 8, padding: 10, borderRadius: 10, borderWidth: 0.5,
+    width: "48%",
+    minWidth: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    borderWidth: 1,
   },
   completionItemIcon: {
     width: 30, height: 30, borderRadius: 8,
     alignItems: "center", justifyContent: "center",
   },
-  completionItemLabel: { flex: 1, fontSize: 11, fontFamily: "Inter_500Medium" },
+  completionItemLabel: {
+    flex: 1,
+    minWidth: 0,
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    lineHeight: 15,
+  },
   completionItemStatus: {
     width: 18, height: 18, borderRadius: 9,
     alignItems: "center", justifyContent: "center",
   },
 
-  // ── Profile tabs (segmented) ──
+  // ── Profile tabs ──
   tabSegmentWrap: {
     flexDirection: "row",
     marginHorizontal: 16,
-    marginTop: 14,
-    marginBottom: 6,
+    marginTop: 10,
+    marginBottom: 8,
     padding: 4,
     borderRadius: 14,
     gap: 4,
   },
   tabSegment: {
     flex: 1,
+    minWidth: 0,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 4,
+    paddingVertical: 9,
+    paddingHorizontal: 2,
     borderRadius: 11,
-    gap: 4,
+    gap: 3,
     borderWidth: 1,
     borderColor: "transparent",
   },
@@ -1268,9 +1469,11 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   tabSegmentLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: "Inter_600SemiBold",
-    letterSpacing: 0.2,
+    letterSpacing: 0,
+    textAlign: "center",
+    width: "100%",
   },
   tabSegmentLabelActive: {
     fontFamily: "Inter_700Bold",
@@ -1310,8 +1513,16 @@ const styles = StyleSheet.create({
 
   // ── Settings ──
   settingsCard: {
-    marginHorizontal: 16, marginBottom: 10,
-    borderRadius: 12, borderWidth: 0.5, overflow: "hidden",
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 18,
+    borderWidth: 1,
+    overflow: "hidden",
+    shadowColor: "#0A1628",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
   },
   settingsSection: {
     fontSize: 10, fontFamily: "Inter_600SemiBold",
@@ -1319,16 +1530,21 @@ const styles = StyleSheet.create({
     textTransform: "uppercase", letterSpacing: 0.5,
   },
   settingRow: {
-    flexDirection: "row", alignItems: "center", gap: 10,
-    paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 0.5,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 0.5,
+    minHeight: 58,
   },
   settingIcon: {
     width: 36, height: 36, borderRadius: 10,
     alignItems: "center", justifyContent: "center",
   },
-  settingMiddle: { flex: 1, gap: 1 },
-  settingTitle: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  settingSubtitle: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  settingMiddle: { flex: 1, minWidth: 0, gap: 2, paddingRight: 6 },
+  settingTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold", lineHeight: 19 },
+  settingSubtitle: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
   preferenceBlock: {
     borderBottomWidth: 0.5,
     paddingBottom: 4,
@@ -1346,33 +1562,47 @@ const styles = StyleSheet.create({
     paddingRight: 14,
     paddingBottom: 12,
   },
-  veriBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  veriBadgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  veriBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    flexShrink: 0,
+    maxWidth: 88,
+  },
+  veriBadgeText: { fontSize: 10, fontFamily: "Inter_700Bold" },
 
   // ── Logout ──
   authSignOutBtn: {
     marginHorizontal: 16,
     marginBottom: 16,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "#004D5A",
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: "#0F172A",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(14,181,202,0.35)",
   },
-  authSignOutText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#0EB5CA" },
+  authSignOutText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#FFFFFF" },
   chineseSellerCard: {
-    borderRadius: 16,
-    borderWidth: 0.5,
+    borderRadius: 18,
+    borderWidth: 1,
     overflow: "hidden",
+    shadowColor: "#0A1628",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   chineseSellerToggleRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 14,
+    gap: 12,
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
-  chineseSellerToggleCopy: { flex: 1, gap: 6, paddingRight: 4 },
+  chineseSellerToggleCopy: { flex: 1, minWidth: 0, gap: 6, paddingRight: 8 },
+  chineseSwitchWrap: { flexShrink: 0, paddingTop: 2 },
   chineseSellerTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
   chineseSellerSubtitle: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
   chineseSellerForm: {
