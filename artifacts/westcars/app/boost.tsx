@@ -38,13 +38,25 @@ export default function BoostScreen() {
 
   const email = firebaseUser?.email ?? currentUser?.email ?? "user@westcars.com";
 
+  const getFreshToken = async (): Promise<boolean> => {
+    if (!firebaseUser) return false;
+    try {
+      await firebaseUser.getIdToken(true);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const completePaymentOnServer = async (reference: string) => {
     setPaying(true);
     try {
+      await getFreshToken();
+
       const result = await verifyBoostPayment(reference);
       if (result.ok && result.status === "completed") {
         Alert.alert(
-          "Boost active",
+          "Boost active 🚀",
           `Your listing is boosted for ${selectedPlan.days} days.`,
           [{ text: "Done", onPress: () => router.back() }],
         );
@@ -55,10 +67,14 @@ export default function BoostScreen() {
       const code =
         err && typeof err === "object" && "code" in err ? String((err as any).code) : "";
       if (code.includes("unauthenticated")) {
-        Alert.alert("Sign in required", "Your session expired. Please sign in again.", [
-          { text: "Sign in", onPress: () => router.push("/auth/login") },
-          { text: "Cancel", style: "cancel" },
-        ]);
+        Alert.alert(
+          "Session expired",
+          "Your session expired. Please sign in again and the payment will still be valid.",
+          [
+            { text: "Sign in", onPress: () => router.push("/auth/login") },
+            { text: "Cancel", style: "cancel" },
+          ],
+        );
       } else {
         const message =
           err && typeof err === "object" && "message" in err
@@ -74,10 +90,14 @@ export default function BoostScreen() {
 
   const startPayment = async () => {
     if (!isAuthenticated || !firebaseUser) {
-      Alert.alert("Sign in required", "Please sign in to boost a listing.", [
-        { text: "Sign in", onPress: () => router.push("/auth/login") },
-        { text: "Cancel", style: "cancel" },
-      ]);
+      Alert.alert(
+        "Sign in required",
+        "Please sign in to boost a listing.",
+        [
+          { text: "Sign in", onPress: () => router.push("/auth/login") },
+          { text: "Cancel", style: "cancel" },
+        ],
+      );
       return;
     }
 
@@ -91,6 +111,20 @@ export default function BoostScreen() {
 
     setPaying(true);
     try {
+      const tokenOk = await getFreshToken();
+      if (!tokenOk) {
+        setPaying(false);
+        Alert.alert(
+          "Session expired",
+          "Please sign in again to continue.",
+          [
+            { text: "Sign in", onPress: () => router.push("/auth/login") },
+            { text: "Cancel", style: "cancel" },
+          ],
+        );
+        return;
+      }
+
       const init = await initializeBoostPayment({
         planId: selectedPlan.id,
         carId: carId || undefined,
@@ -126,13 +160,19 @@ export default function BoostScreen() {
         },
       });
     } catch (err: unknown) {
+      setPaying(false);
+      setCheckoutReference(null);
       const code =
         err && typeof err === "object" && "code" in err ? String((err as any).code) : "";
       if (code.includes("unauthenticated")) {
-        Alert.alert("Sign in required", "Your session expired. Please sign in again.", [
-          { text: "Sign in", onPress: () => router.push("/auth/login") },
-          { text: "Cancel", style: "cancel" },
-        ]);
+        Alert.alert(
+          "Session expired",
+          "Your session expired. Please sign in again.",
+          [
+            { text: "Sign in", onPress: () => router.push("/auth/login") },
+            { text: "Cancel", style: "cancel" },
+          ],
+        );
       } else {
         const message =
           err && typeof err === "object" && "message" in err
@@ -140,8 +180,6 @@ export default function BoostScreen() {
             : "Could not start payment.";
         Alert.alert("Error", message);
       }
-    } finally {
-      setPaying(false);
     }
   };
 
