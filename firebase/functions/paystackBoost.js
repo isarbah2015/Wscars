@@ -198,6 +198,7 @@ async function createPendingBoostPayment({
 
   const customerEmail = (email || "").trim() || `buyer_${userId.slice(0, 8)}@westcars.app`;
   const reference = `westcars_${userId.slice(0, 8)}_${Date.now()}`;
+  const verificationSecret = crypto.randomBytes(24).toString("hex");
 
   const metadata = {
     userId,
@@ -228,6 +229,7 @@ async function createPendingBoostPayment({
     days: plan.days,
     email: customerEmail,
     status: "pending",
+    verificationSecret,
     authorizationUrl: paystack.authorization_url,
     accessCode: paystack.access_code || null,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -236,6 +238,7 @@ async function createPendingBoostPayment({
 
   return {
     reference,
+    verificationSecret,
     authorizationUrl: paystack.authorization_url,
     accessCode: paystack.access_code || null,
     amountPesewas: plan.amount,

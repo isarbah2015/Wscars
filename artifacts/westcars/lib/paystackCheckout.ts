@@ -1,6 +1,8 @@
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 
+WebBrowser.maybeCompleteAuthSession();
+
 /** Must match Paystack initialize callback_url and app scheme (app.json → scheme: westcars). */
 export const PAYSTACK_CALLBACK_URL =
   process.env.EXPO_PUBLIC_PAYSTACK_CALLBACK_URL ?? "westcars://paystack/callback";

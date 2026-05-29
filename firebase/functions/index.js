@@ -325,10 +325,7 @@ exports.initializeBoostPayment = onCall(
 exports.verifyBoostPayment = onCall(
   { secrets: [paystackSecret] },
   async (request) => {
-    if (!request.auth) {
-      throw new HttpsError("unauthenticated", "Sign in required.");
-    }
-    const { reference } = request.data || {};
+    const { reference, verificationSecret } = request.data || {};
     if (!reference) {
       throw new HttpsError("invalid-argument", "reference is required.");
     }
@@ -338,7 +335,19 @@ exports.verifyBoostPayment = onCall(
       throw new HttpsError("not-found", "Payment not found.");
     }
     const payment = paymentSnap.data();
-    if (payment.userId !== request.auth.uid) {
+
+    let ownerId = request.auth?.uid || null;
+    if (!ownerId && verificationSecret) {
+      if (payment.verificationSecret && payment.verificationSecret === verificationSecret) {
+        ownerId = payment.userId;
+      } else {
+        throw new HttpsError("permission-denied", "Invalid payment verification.");
+      }
+    }
+    if (!ownerId) {
+      throw new HttpsError("unauthenticated", "Could not verify this payment.");
+    }
+    if (payment.userId !== ownerId) {
       throw new HttpsError("permission-denied", "Not your payment.");
     }
     if (payment.status === "completed") {

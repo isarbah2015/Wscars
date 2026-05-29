@@ -1,6 +1,4 @@
-import { httpsCallable } from "firebase/functions";
-import { ensurePaymentAuth } from "@/lib/callableAuth";
-import { getFirebaseFunctions } from "@/lib/firebaseFunctions";
+import { callFirebaseCallable } from "@/lib/firebaseCallable";
 import { PAYSTACK_CALLBACK_URL } from "@/lib/paystackCheckout";
 
 export interface InitializeBoostPaymentInput {
@@ -13,6 +11,7 @@ export interface InitializeBoostPaymentInput {
 export interface InitializeBoostPaymentResult {
   reference: string;
   authorizationUrl: string;
+  verificationSecret: string;
   accessCode?: string | null;
   amountPesewas: number;
   amountGHS: number;
@@ -26,40 +25,30 @@ export interface VerifyBoostPaymentResult {
   expiresAt?: string;
 }
 
-async function callWithFreshAuth<TInput extends object, TResult>(
-  name: string,
-  data: TInput,
-): Promise<TResult> {
-  const authResult = await ensurePaymentAuth(
-    "email" in data && typeof (data as { email?: string }).email === "string"
-      ? (data as { email?: string }).email
-      : undefined,
-  );
-  if (!authResult.ok) {
-    const err = new Error(authResult.message) as Error & { code?: string };
-    err.code = authResult.reason === "no_auth" ? "functions/unauthenticated" : "auth/token-refresh-failed";
-    throw err;
-  }
-
-  const fn = httpsCallable<TInput, TResult>(getFirebaseFunctions(), name);
-  const { data: result } = await fn(data);
-  return result;
-}
-
 export async function initializeBoostPayment(
   input: InitializeBoostPaymentInput,
 ): Promise<InitializeBoostPaymentResult> {
-  return callWithFreshAuth<InitializeBoostPaymentInput, InitializeBoostPaymentResult>(
+  return callFirebaseCallable<InitializeBoostPaymentInput, InitializeBoostPaymentResult>(
     "initializeBoostPayment",
     {
       ...input,
       callbackUrl: input.callbackUrl ?? PAYSTACK_CALLBACK_URL,
     },
+    { requireAuth: true },
   );
 }
 
-export async function verifyBoostPayment(reference: string): Promise<VerifyBoostPaymentResult> {
-  return callWithFreshAuth<{ reference: string }, VerifyBoostPaymentResult>("verifyBoostPayment", {
-    reference,
-  });
+/** Uses payment secret from initialize — no re-sign-in after Paystack browser. */
+export async function verifyBoostPayment(
+  reference: string,
+  verificationSecret: string,
+): Promise<VerifyBoostPaymentResult> {
+  return callFirebaseCallable<
+    { reference: string; verificationSecret: string },
+    VerifyBoostPaymentResult
+  >(
+    "verifyBoostPayment",
+    { reference, verificationSecret },
+    { requireAuth: false },
+  );
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -13,15 +13,10 @@ import { Feather } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/context/AppContext";
-import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { BOOST_PLANS, formatGHS } from "@/lib/paystack";
 import type { BoostPlan } from "@/lib/paystack";
-import {
-  callableErrorMessage,
-  ensurePaymentAuth,
-  isCallableUnauthenticated,
-} from "@/lib/callableAuth";
+import { callableUserMessage, waitForAuthReady } from "@/lib/firebaseCallable";
 import { openPaystackHostedCheckout } from "@/lib/paystackCheckout";
 import { initializeBoostPayment, verifyBoostPayment } from "@/services/firebase/boostPayments";
 
@@ -44,7 +39,6 @@ function waitForAppActive(timeoutMs = 8000): Promise<void> {
 
 export default function BoostScreen() {
   const { currentUser, isAuthenticated } = useApp();
-  const { user: firebaseUser, loading: authLoading } = useAuth();
   const { isDark, colors } = useTheme();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ carId?: string }>();
@@ -52,33 +46,24 @@ export default function BoostScreen() {
 
   const [selectedPlan, setSelectedPlan] = useState<BoostPlan>(BOOST_PLANS[0]);
   const [paying, setPaying] = useState(false);
-  const [checkoutReference, setCheckoutReference] = useState<string | null>(null);
+  const [pendingVerify, setPendingVerify] = useState<{
+    reference: string;
+    verificationSecret: string;
+  } | null>(null);
 
-  const emailFallback = firebaseUser?.email ?? currentUser?.email ?? undefined;
+  const email =
+    currentUser?.email?.trim() || `buyer_${(currentUser?.id ?? "guest").slice(0, 8)}@westcars.app`;
 
-  const goToReauth = useCallback(() => {
-    const returnTo = carId ? `/boost?carId=${encodeURIComponent(carId)}` : "/boost";
-    router.push({
-      pathname: "/auth/login",
-      params: { returnTo, reauth: "1" },
-    });
-  }, [carId]);
-
-  const completePaymentOnServer = async (reference: string) => {
+  const completePaymentOnServer = async (
+    reference: string,
+    verificationSecret: string,
+  ) => {
     setPaying(true);
     try {
       await waitForAppActive();
-      const authResult = await ensurePaymentAuth(emailFallback);
-      if (!authResult.ok) {
-        Alert.alert("Sign in required", authResult.message, [
-          { text: "Sign in", onPress: goToReauth },
-          { text: "Cancel", style: "cancel" },
-        ]);
-        return;
-      }
-
-      const result = await verifyBoostPayment(reference);
+      const result = await verifyBoostPayment(reference, verificationSecret);
       if (result.ok && result.status === "completed") {
+        setPendingVerify(null);
         Alert.alert(
           "Boost active 🚀",
           `Your listing is boosted for ${selectedPlan.days} days.`,
@@ -86,35 +71,27 @@ export default function BoostScreen() {
         );
         return;
       }
-      Alert.alert("Pending", "Payment is still processing. Try again in a few seconds.");
+      Alert.alert(
+        "Almost there",
+        "Paystack is still confirming your payment. Wait a few seconds and tap Verify again.",
+      );
     } catch (err: unknown) {
-      if (isCallableUnauthenticated(err)) {
-        Alert.alert(
-          "Sign in required",
-          "Please sign in again to finish activating your boost. Your payment is still valid.",
-          [
-            { text: "Sign in", onPress: goToReauth },
-            { text: "Cancel", style: "cancel" },
-          ],
-        );
-      } else {
-        Alert.alert("Verification failed", callableErrorMessage(err, "Could not verify payment."));
-      }
+      Alert.alert(
+        "Could not verify yet",
+        callableUserMessage(
+          err,
+          "If you were charged, wait a moment and tap “Verify payment” again.",
+        ),
+      );
     } finally {
       setPaying(false);
-      setCheckoutReference(null);
     }
   };
 
   const startPayment = async () => {
-    if (authLoading) {
-      Alert.alert("Please wait", "Restoring your session…");
-      return;
-    }
-
-    if (!isAuthenticated && !firebaseUser) {
-      Alert.alert("Sign in required", "Please sign in to boost a listing.", [
-        { text: "Sign in", onPress: goToReauth },
+    if (!isAuthenticated || !currentUser?.id) {
+      Alert.alert("Account required", "Create an account or sign in once to boost listings.", [
+        { text: "Continue", onPress: () => router.push("/auth/login") },
         { text: "Cancel", style: "cancel" },
       ]);
       return;
@@ -122,56 +99,50 @@ export default function BoostScreen() {
 
     setPaying(true);
     try {
-      const authResult = await ensurePaymentAuth(emailFallback);
-      if (!authResult.ok) {
-        Alert.alert("Sign in required", authResult.message, [
-          { text: "Sign in", onPress: goToReauth },
-          { text: "Cancel", style: "cancel" },
-        ]);
-        return;
-      }
+      await waitForAuthReady();
 
       const init = await initializeBoostPayment({
         planId: selectedPlan.id,
         carId: carId || undefined,
-        email: authResult.email,
+        email,
       });
 
-      if (!init.authorizationUrl) {
-        throw new Error("Paystack checkout URL was not returned.");
+      if (!init.authorizationUrl || !init.verificationSecret) {
+        throw new Error("Paystack checkout could not be started.");
       }
 
-      setCheckoutReference(init.reference);
+      const verifyPayload = {
+        reference: init.reference,
+        verificationSecret: init.verificationSecret,
+      };
+      setPendingVerify(verifyPayload);
 
       const checkout = await openPaystackHostedCheckout(init.authorizationUrl);
 
       if (checkout.status === "success") {
-        await completePaymentOnServer(checkout.reference);
+        await completePaymentOnServer(
+          checkout.reference || init.reference,
+          init.verificationSecret,
+        );
         return;
       }
-
-      setPaying(false);
 
       if (checkout.status === "cancelled") {
         Alert.alert("Cancelled", "Payment was cancelled.");
-        return;
-      }
-
-      Alert.alert(
-        "Checkout closed",
-        "If you completed payment, tap “Verify payment” below.",
-      );
-    } catch (err: unknown) {
-      setPaying(false);
-      setCheckoutReference(null);
-      if (isCallableUnauthenticated(err)) {
-        Alert.alert("Sign in required", callableErrorMessage(err, "Please sign in to continue."), [
-          { text: "Sign in", onPress: goToReauth },
-          { text: "Cancel", style: "cancel" },
-        ]);
       } else {
-        Alert.alert("Error", callableErrorMessage(err, "Could not start payment."));
+        Alert.alert(
+          "Checkout closed",
+          "If you completed payment on Paystack, tap “Verify payment” below.",
+        );
       }
+    } catch (err: unknown) {
+      setPendingVerify(null);
+      Alert.alert(
+        "Payment could not start",
+        callableUserMessage(err, "Check your internet connection and try again."),
+      );
+    } finally {
+      setPaying(false);
     }
   };
 
@@ -188,7 +159,7 @@ export default function BoostScreen() {
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 40 }}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Choose a Plan</Text>
         <Text style={[styles.sectionSub, { color: colors.textTertiary }]}>
-          Pay securely on Paystack (hosted checkout). We verify payment on our server before your boost goes live.
+          Pay on Paystack (card, Mobile Money, or bank). Your boost activates automatically after payment.
         </Text>
 
         {BOOST_PLANS.map((plan) => {
@@ -258,9 +229,9 @@ export default function BoostScreen() {
         ))}
 
         <Pressable
-          style={[styles.payBtn, { opacity: paying || authLoading ? 0.7 : 1 }]}
+          style={[styles.payBtn, { opacity: paying ? 0.7 : 1 }]}
           onPress={() => void startPayment()}
-          disabled={paying || authLoading}
+          disabled={paying}
         >
           {paying ? (
             <ActivityIndicator color="#fff" />
@@ -272,10 +243,15 @@ export default function BoostScreen() {
           )}
         </Pressable>
 
-        {checkoutReference ? (
+        {pendingVerify ? (
           <Pressable
             style={styles.verifyBtn}
-            onPress={() => void completePaymentOnServer(checkoutReference)}
+            onPress={() =>
+              void completePaymentOnServer(
+                pendingVerify.reference,
+                pendingVerify.verificationSecret,
+              )
+            }
             disabled={paying}
           >
             <Text style={styles.verifyBtnText}>Already paid? Verify payment</Text>
@@ -283,7 +259,7 @@ export default function BoostScreen() {
         ) : null}
 
         <Text style={[styles.secureNote, { color: colors.textTertiary }]}>
-          Secured by Paystack · Card, Mobile Money & bank · Server-verified
+          Secured by Paystack · Card, Mobile Money & bank
         </Text>
 
         <Pressable onPress={() => router.push("/advertise")} style={{ marginTop: 20, alignItems: "center" }}>
