@@ -16,6 +16,7 @@ import { useApp } from "@/context/AppContext";
 import { useTheme } from "@/context/ThemeContext";
 import { BOOST_PLANS, formatGHS } from "@/lib/paystack";
 import type { BoostPlan } from "@/lib/paystack";
+import { auth } from "@/lib/firebase-persistence";
 import { callableUserMessage, waitForAuthReady } from "@/lib/firebaseCallable";
 import { openPaystackHostedCheckout } from "@/lib/paystackCheckout";
 import { initializeBoostPayment, verifyBoostPayment } from "@/services/firebase/boostPayments";
@@ -100,6 +101,17 @@ export default function BoostScreen() {
     setPaying(true);
     try {
       await waitForAuthReady();
+      if (!auth?.currentUser) {
+        Alert.alert(
+          "Sign in required",
+          "Boost needs your Westcars account. Sign in once from Profile, then return here.",
+          [
+            { text: "Sign in", onPress: () => router.push("/auth/login") },
+            { text: "Cancel", style: "cancel" },
+          ],
+        );
+        return;
+      }
 
       const init = await initializeBoostPayment({
         planId: selectedPlan.id,

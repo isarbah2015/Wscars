@@ -23,21 +23,23 @@ export async function waitForAuthReady(): Promise<void> {
   });
 }
 
-async function refreshTokenIfNeeded(requireAuth: boolean, forceRefresh: boolean): Promise<void> {
-  if (!requireAuth) return;
+/** Fresh Firebase ID token for Cloud Functions (Gen 2 RN may not populate request.auth). */
+export async function getFirebaseIdToken(forceRefresh = false): Promise<string> {
   await waitForAuthReady();
   const user = auth?.currentUser;
-  if (!user) return;
+  if (!user) {
+    throw new Error("NOT_SIGNED_IN");
+  }
   try {
-    await user.getIdToken(forceRefresh);
+    return await user.getIdToken(forceRefresh);
   } catch {
-    await user.getIdToken(false).catch(() => {});
+    return await user.getIdToken(false);
   }
 }
 
 /**
- * Calls a Firebase callable via the official SDK (correct URL for Gen 2 functions).
- * Do not use manual fetch to cloudfunctions.net — Gen 2 returns HTML and breaks JSON parsing.
+ * Calls a Firebase Gen 2 callable via the official SDK.
+ * When requireAuth is true, sends idToken in the payload for server-side verification.
  */
 export async function callFirebaseCallable<TInput extends object, TResult>(
   name: string,
@@ -48,23 +50,23 @@ export async function callFirebaseCallable<TInput extends object, TResult>(
   let lastError: unknown;
 
   for (let attempt = 0; attempt < 4; attempt++) {
-    await refreshTokenIfNeeded(requireAuth, attempt >= 2);
-
-    if (requireAuth) {
-      await waitForAuthReady();
-      if (!auth?.currentUser) {
-        lastError = new Error("Not signed in");
-        await sleep(400 * (attempt + 1));
-        continue;
-      }
-    }
-
     try {
-      const fn = httpsCallable<TInput, TResult>(getFirebaseFunctions(), name);
-      const { data: result } = await fn(data);
+      let payload: TInput & { idToken?: string } = { ...data };
+      if (requireAuth) {
+        payload = {
+          ...data,
+          idToken: await getFirebaseIdToken(attempt >= 2),
+        };
+      }
+
+      const fn = httpsCallable<typeof payload, TResult>(getFirebaseFunctions(), name);
+      const { data: result } = await fn(payload);
       return result;
     } catch (err) {
       lastError = err;
+      if (err instanceof Error && err.message === "NOT_SIGNED_IN") {
+        throw new Error("You must be signed in to boost a listing.");
+      }
       await sleep(450 * (attempt + 1));
     }
   }
@@ -75,13 +77,21 @@ export async function callFirebaseCallable<TInput extends object, TResult>(
 }
 
 export function callableUserMessage(err: unknown, fallback: string): string {
+  const code =
+    err && typeof err === "object" && "code" in err ? String((err as { code?: string }).code) : "";
   const msg =
     err && typeof err === "object" && "message" in err
       ? String((err as { message?: string }).message)
       : "";
 
+  if (code.includes("unauthenticated") || msg.toLowerCase().includes("unauthenticated")) {
+    return "Could not confirm your account. Open Profile, sign out, sign in once, then try Boost again.";
+  }
   if (msg.includes("JSON Parse error") || msg.includes("Unexpected character")) {
     return "Server connection error. Update the app or try again in a moment.";
+  }
+  if (msg.includes("NOT_SIGNED_IN") || msg.includes("must be signed in")) {
+    return "Sign in to your Westcars account first, then open Boost again.";
   }
   if (msg && !msg.toLowerCase().includes("sign in")) return msg;
   return fallback;

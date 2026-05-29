@@ -296,10 +296,27 @@ exports.notifyListingExpiry = onSchedule(
  *    Register in Paystack Dashboard → Settings → API Keys & Webhooks
  * ═══════════════════════════════════════════════════════════════ */
 
+/** Gen 2 callables: invoker public + optional idToken in body (RN SDK may omit request.auth). */
+async function resolveCallableUser(request) {
+  if (request.auth?.uid) {
+    return { uid: request.auth.uid, email: request.auth.token?.email || null };
+  }
+  const idToken = request.data?.idToken;
+  if (!idToken || typeof idToken !== "string") return null;
+  try {
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    return { uid: decoded.uid, email: decoded.email || null };
+  } catch (err) {
+    logger.warn("resolveCallableUser: invalid idToken", err?.message || err);
+    return null;
+  }
+}
+
 exports.initializeBoostPayment = onCall(
-  { secrets: [paystackSecret] },
+  { secrets: [paystackSecret], invoker: "public" },
   async (request) => {
-    if (!request.auth) {
+    const caller = await resolveCallableUser(request);
+    if (!caller) {
       throw new HttpsError("unauthenticated", "Sign in to purchase a boost.");
     }
     const { planId, carId, email, callbackUrl } = request.data || {};
@@ -308,10 +325,10 @@ exports.initializeBoostPayment = onCall(
     }
     try {
       return await createPendingBoostPayment({
-        userId: request.auth.uid,
+        userId: caller.uid,
         planId,
         carId: carId || null,
-        email: email || request.auth.token?.email || null,
+        email: email || caller.email || null,
         callbackUrl: callbackUrl || null,
         paystackSecret: paystackSecret.value(),
       });
@@ -323,7 +340,7 @@ exports.initializeBoostPayment = onCall(
 );
 
 exports.verifyBoostPayment = onCall(
-  { secrets: [paystackSecret] },
+  { secrets: [paystackSecret], invoker: "public" },
   async (request) => {
     const { reference, verificationSecret } = request.data || {};
     if (!reference) {
