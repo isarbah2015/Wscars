@@ -1,5 +1,16 @@
 # Android production + Paystack (live)
 
+## Checkout flow (hosted)
+
+Boost payments use **Paystack hosted checkout** (not an in-app WebView SDK):
+
+1. App calls `initializeBoostPayment` (Firebase Auth) → server POSTs to Paystack `/transaction/initialize` with `sk_live_` / `sk_test_` (secret never in the app).
+2. App opens `authorization_url` via `expo-web-browser` (`westcars://paystack/callback`).
+3. App calls `verifyBoostPayment` → server GETs `/transaction/verify/:reference`.
+4. Webhook `paystackWebhook` handles `charge.success` as backup (HMAC `x-paystack-signature`).
+
+Set Paystack Dashboard → **Settings → Profile/Business** business name to **Westcars** (shown on checkout).
+
 ## Live keys (required for real charges)
 
 | Where | Variable | Value |

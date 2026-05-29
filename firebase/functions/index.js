@@ -21,6 +21,7 @@
  */
 
 const admin = require("firebase-admin");
+const { getFirestore } = require("firebase-admin/firestore");
 const { onDocumentCreated, onDocumentWritten } =
   require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
@@ -39,7 +40,10 @@ const { notifyListingExpiryReminders } = require("./listingExpiry");
 const paystackSecret = defineSecret("PAYSTACK_SECRET_KEY");
 
 admin.initializeApp();
+/** Default Firestore (legacy triggers). Boost payments use named DB below. */
 const db = admin.firestore();
+const WESTCAR_DB_ID = "westcar-5c1e6";
+const westcarDb = () => getFirestore(WESTCAR_DB_ID);
 
 /* ═════════════════════════════════════════════════════════════════
  * 1. sendMessageNotification
@@ -298,7 +302,7 @@ exports.initializeBoostPayment = onCall(
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in to purchase a boost.");
     }
-    const { planId, carId, email } = request.data || {};
+    const { planId, carId, email, callbackUrl } = request.data || {};
     if (!planId) {
       throw new HttpsError("invalid-argument", "planId is required.");
     }
@@ -308,6 +312,8 @@ exports.initializeBoostPayment = onCall(
         planId,
         carId: carId || null,
         email: email || request.auth.token?.email || null,
+        callbackUrl: callbackUrl || null,
+        paystackSecret: paystackSecret.value(),
       });
     } catch (err) {
       logger.warn("initializeBoostPayment:", err);
@@ -327,7 +333,7 @@ exports.verifyBoostPayment = onCall(
       throw new HttpsError("invalid-argument", "reference is required.");
     }
 
-    const paymentSnap = await db.doc(`boostPayments/${reference}`).get();
+    const paymentSnap = await westcarDb().doc(`boostPayments/${reference}`).get();
     if (!paymentSnap.exists) {
       throw new HttpsError("not-found", "Payment not found.");
     }

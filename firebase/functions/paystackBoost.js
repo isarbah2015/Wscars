@@ -16,6 +16,40 @@ function verifyWebhookSignature(secret, rawBody, signatureHeader) {
   return hash === signatureHeader;
 }
 
+const PAYSTACK_MERCHANT_NAME = "Westcars";
+const DEFAULT_CALLBACK_URL = "westcars://paystack/callback";
+
+/**
+ * Initialize hosted checkout — secret stays on server only.
+ * https://paystack.com/docs/api/transaction/#initialize
+ */
+async function initializePaystackTransaction(
+  secret,
+  { email, amount, reference, callbackUrl, metadata },
+) {
+  const res = await fetch("https://api.paystack.co/transaction/initialize", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${secret}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      amount,
+      currency: "GHS",
+      reference,
+      callback_url: callbackUrl || DEFAULT_CALLBACK_URL,
+      metadata,
+      channels: ["card", "mobile_money", "bank"],
+    }),
+  });
+  const json = await res.json();
+  if (!res.ok || !json.status) {
+    throw new Error(json.message || "Paystack initialize failed");
+  }
+  return json.data;
+}
+
 /**
  * Verify transaction with Paystack REST API (server-side).
  */
@@ -137,12 +171,23 @@ async function fulfillBoostPayment(reference, paystackData = {}) {
 }
 
 /**
- * Create a pending payment record before opening Paystack checkout.
+ * Create pending payment + Paystack hosted checkout URL (authorization_url).
  */
-async function createPendingBoostPayment({ userId, planId, carId, email }) {
+async function createPendingBoostPayment({
+  userId,
+  planId,
+  carId,
+  email,
+  callbackUrl,
+  paystackSecret,
+}) {
   const plan = getBoostPlan(planId);
   if (!plan) {
     throw new Error("Invalid boost plan");
+  }
+
+  if (!paystackSecret) {
+    throw new Error("Paystack is not configured on the server");
   }
 
   if (carId) {
@@ -151,7 +196,28 @@ async function createPendingBoostPayment({ userId, planId, carId, email }) {
     if (carSnap.data().sellerId !== userId) throw new Error("You can only boost your own listing");
   }
 
-  const reference = `westcars_${Date.now()}_${userId.slice(0, 8)}`;
+  const customerEmail = (email || "").trim() || `buyer_${userId.slice(0, 8)}@westcars.app`;
+  const reference = `westcars_${userId.slice(0, 8)}_${Date.now()}`;
+
+  const metadata = {
+    userId,
+    planId: plan.id,
+    carId: carId || null,
+    custom_fields: [
+      { display_name: "Merchant", variable_name: "merchant", value: PAYSTACK_MERCHANT_NAME },
+      { display_name: "Plan", variable_name: "plan", value: plan.name },
+      ...(carId ? [{ display_name: "Listing", variable_name: "car_id", value: carId }] : []),
+    ],
+  };
+
+  const paystack = await initializePaystackTransaction(paystackSecret, {
+    email: customerEmail,
+    amount: plan.amount,
+    reference,
+    callbackUrl: callbackUrl || DEFAULT_CALLBACK_URL,
+    metadata,
+  });
+
   await db().doc(`boostPayments/${reference}`).set({
     reference,
     userId,
@@ -160,14 +226,18 @@ async function createPendingBoostPayment({ userId, planId, carId, email }) {
     planName: plan.name,
     amount: plan.amount,
     days: plan.days,
-    email: email || null,
+    email: customerEmail,
     status: "pending",
+    authorizationUrl: paystack.authorization_url,
+    accessCode: paystack.access_code || null,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 
   return {
     reference,
+    authorizationUrl: paystack.authorization_url,
+    accessCode: paystack.access_code || null,
     amountPesewas: plan.amount,
     amountGHS: plan.amount / 100,
     planName: plan.name,
@@ -177,6 +247,7 @@ async function createPendingBoostPayment({ userId, planId, carId, email }) {
 
 module.exports = {
   verifyWebhookSignature,
+  initializePaystackTransaction,
   verifyTransactionWithPaystack,
   fulfillBoostPayment,
   createPendingBoostPayment,

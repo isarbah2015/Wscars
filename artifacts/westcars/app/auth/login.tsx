@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 
 const { width } = Dimensions.get('window');
@@ -20,13 +20,26 @@ const PORSCHE = require('@/assets/images/welcome-car-porsche.png');
 
 export default function SignInScreen() {
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { signIn, logOut } = useAuth();
+  const { returnTo, reauth } = useLocalSearchParams<{ returnTo?: string; reauth?: string }>();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Clear stale Firebase session when returning from boost/payment (avoids instant redirect home).
+  useEffect(() => {
+    if (reauth === '1') {
+      void logOut().catch(() => {});
+    }
+  }, [reauth, logOut]);
+
+  const afterSignInNavigate = () => {
+    const dest = typeof returnTo === 'string' && returnTo.startsWith('/') ? returnTo : '/(tabs)';
+    router.replace(dest as '/(tabs)');
+  };
 
   const handleSignIn = async () => {
     setError('');
@@ -37,7 +50,7 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       await signIn(email, password);
-      router.replace('/(tabs)');
+      afterSignInNavigate();
     } catch (e: any) {
       console.error('[SignIn] error:', e);
       if (
@@ -48,6 +61,13 @@ export default function SignInScreen() {
         setError('Invalid email or password. Please try again.');
       } else if (e.code === 'auth/too-many-requests') {
         setError('Too many attempts. Please wait a moment and try again.');
+      } else if (
+        String(e.code ?? e.message ?? '').includes('requests-from-this-android-client') ||
+        String(e.message ?? '').includes('requests-from-this-android-client')
+      ) {
+        setError(
+          'Expo Go cannot use the production Android Firebase key. Restart with: npx expo start --clear',
+        );
       } else {
         setError('Sign in failed. Please check your connection and try again.');
       }

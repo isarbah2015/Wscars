@@ -1,3 +1,4 @@
+import "@/lib/firebase-persistence"; // must be first — initialises Auth with AsyncStorage persistence
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -11,7 +12,7 @@ import {
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack, useGlobalSearchParams, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as Updates from "expo-updates";
 import React, { useEffect, useRef, useState } from "react";
@@ -23,8 +24,6 @@ import { AppProvider } from "@/context/AppContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { isFirebaseReady } from "@/lib/firebase";
-import { PAYSTACK_PUBLIC_KEY } from "@/lib/paystack";
-import { PaystackProvider } from "react-native-paystack-webview";
 
 const FEATHER_TTF = require("../assets/fonts/Feather.ttf");
 const IONICONS_TTF = require("../assets/fonts/Ionicons.ttf");
@@ -41,6 +40,7 @@ function useAuthRedirect() {
   const router = useRouter();
   const segments = useSegments() as string[];
   const { user, loading } = useAuth();
+  const params = useGlobalSearchParams<{ reauth?: string; returnTo?: string }>();
 
   useEffect(() => {
     if (loading) return;
@@ -51,15 +51,22 @@ function useAuthRedirect() {
       segments[0] === 'welcome' ||
       segments[0] === 'auth';
 
-    if (isAuthed && onAuthScreen) {
-      router.replace('/(tabs)');
+    // Allow explicit re-auth (e.g. boost payment) — login screen signs out stale sessions first.
+    const isReauth = params.reauth === '1' || params.reauth === 'true';
+
+    if (isAuthed && onAuthScreen && !isReauth) {
+      const returnTo =
+        typeof params.returnTo === 'string' && params.returnTo.startsWith('/')
+          ? params.returnTo
+          : '/(tabs)';
+      router.replace(returnTo as '/(tabs)');
       return;
     }
 
     if (!isAuthed && segments[0] === 'conversation') {
       router.replace('/welcome');
     }
-  }, [segments, user, loading]);
+  }, [segments, user, loading, params.reauth, params.returnTo]);
 }
 
 function RootLayoutNav() {
@@ -168,13 +175,7 @@ export default function RootLayout() {
               ) : (
                 <AuthProvider>
                   <AppProvider>
-                    <PaystackProvider
-                      publicKey={PAYSTACK_PUBLIC_KEY}
-                      currency="GHS"
-                      defaultChannels={["card", "mobile_money", "ussd"]}
-                    >
-                      <RootLayoutNav />
-                    </PaystackProvider>
+                    <RootLayoutNav />
                   </AppProvider>
                 </AuthProvider>
               )}
