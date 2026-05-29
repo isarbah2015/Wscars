@@ -36,6 +36,10 @@ const {
 } = require("./paystackBoost");
 const { carMatchesSavedSearch } = require("./savedSearchMatch");
 const { notifyListingExpiryReminders } = require("./listingExpiry");
+const {
+  createBoostInitializeHandler,
+  createBoostVerifyHandler,
+} = require("./boostPaymentHttp");
 
 const paystackSecret = defineSecret("PAYSTACK_SECRET_KEY");
 
@@ -296,18 +300,28 @@ exports.notifyListingExpiry = onSchedule(
  *    Register in Paystack Dashboard → Settings → API Keys & Webhooks
  * ═══════════════════════════════════════════════════════════════ */
 
-/** Gen 2 callables: invoker public + optional idToken in body (RN SDK may omit request.auth). */
+/** Gen 2 callables: invoker public + Bearer header / authToken in body (RN SDK may omit request.auth). */
 async function resolveCallableUser(request) {
   if (request.auth?.uid) {
     return { uid: request.auth.uid, email: request.auth.token?.email || null };
   }
-  const idToken = request.data?.idToken;
-  if (!idToken || typeof idToken !== "string") return null;
+  const rawAuth =
+    request.rawRequest?.get?.("authorization") ||
+    request.rawRequest?.headers?.authorization ||
+    "";
+  let token = null;
+  if (typeof rawAuth === "string" && rawAuth.startsWith("Bearer ")) {
+    token = rawAuth.slice(7).trim();
+  }
+  if (!token) {
+    token = request.data?.authToken || request.data?.idToken || null;
+  }
+  if (!token || typeof token !== "string") return null;
   try {
-    const decoded = await admin.auth().verifyIdToken(idToken);
+    const decoded = await admin.auth().verifyIdToken(token);
     return { uid: decoded.uid, email: decoded.email || null };
   } catch (err) {
-    logger.warn("resolveCallableUser: invalid idToken", err?.message || err);
+    logger.warn("resolveCallableUser: invalid token", err?.message || err);
     return null;
   }
 }
@@ -392,6 +406,17 @@ exports.verifyBoostPayment = onCall(
     }
     return { ok: true, status: "completed", expiresAt: result.expiresAt };
   },
+);
+
+/** HTTP boost APIs — reliable auth via Authorization Bearer on React Native. */
+exports.boostPaymentInitialize = onRequest(
+  { secrets: [paystackSecret], cors: false, invoker: "public" },
+  createBoostInitializeHandler(paystackSecret),
+);
+
+exports.boostPaymentVerify = onRequest(
+  { secrets: [paystackSecret], cors: false, invoker: "public" },
+  createBoostVerifyHandler(paystackSecret),
 );
 
 exports.paystackWebhook = onRequest(
